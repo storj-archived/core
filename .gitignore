@@ -31,3 +31,11 @@ node_modules
 
 # Optional REPL history
 .node_repl_history
+
+# Ignore compiled docs, but leave the directory
+doc/**
+!doc/.gitkeep
+
+# Ignore browser build, but leave the directory
+dist/**
+!dist/.gitkeep

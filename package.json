@@ -33,7 +33,9 @@
   },
   "dependencies": {
     "jsen": "^0.6.0",
-    "kad": "^1.3.6"
+    "kad": "^1.3.6",
+    "merge": "^1.2.0",
+    "ms": "^0.7.1"
   },
   "devDependencies": {
     "browserify": "^11.1.0",

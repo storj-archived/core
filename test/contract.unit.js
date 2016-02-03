@@ -1,8 +1,12 @@
 'use strict';
 
+var crypto = require('crypto');
 var expect = require('chai').expect;
 var Contract = require('../lib/contract');
 var KeyPair = require('../lib/keypair');
+
+var kp1 = new KeyPair();
+var kp2 = new KeyPair();
 
 describe('Contract#fromObject', function() {
 
@@ -29,9 +33,6 @@ describe('Contract#fromBuffer', function() {
 });
 
 describe('Contract', function() {
-
-  var kp1 = new KeyPair();
-  var kp2 = new KeyPair();
 
   describe('#_clean', function() {
 
@@ -67,6 +68,37 @@ describe('Contract', function() {
       expect(function() {
         Contract({ type: -1 });
       }).to.throw(Error);
+    });
+
+  });
+
+  describe('#_complete', function() {
+
+    it('should return false if fields are null', function() {
+      expect(Contract()._complete()).to.equal(false);
+    });
+
+    it('should return true if fields are not null', function() {
+      var kp1 = KeyPair();
+      var kp2 = KeyPair();
+      var contract = new Contract({
+        renter_id: kp1.getNodeID(),
+        farmer_id: kp2.getNodeID(),
+        payment_source: kp1.getNodeID(),
+        payment_destination: kp2.getNodeID(),
+        data_hash: crypto.createHash('sha256').update('test').digest('hex')
+      });
+      contract.sign('renter', kp1.getPrivateKey());
+      contract.sign('farmer', kp2.getPrivateKey());
+      expect(contract._complete()).to.equal(true);
+    });
+
+  });
+
+  describe('#getHash', function() {
+
+    it('should return the SHA-256 hash of the serialized contract', function() {
+      expect(Contract().getHash().length).to.equal(32);
     });
 
   });

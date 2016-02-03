@@ -32,6 +32,7 @@
     "node": "4.x.x"
   },
   "dependencies": {
+    "bs58": "^3.0.0",
     "elliptic": "^6.2.3",
     "jsen": "^0.6.0",
     "json-stable-stringify": "^1.0.1",

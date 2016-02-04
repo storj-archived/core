@@ -84,8 +84,8 @@ describe('Contract', function() {
       var contract = new Contract({
         renter_id: kp1.getNodeID(),
         farmer_id: kp2.getNodeID(),
-        payment_source: kp1.getNodeID(),
-        payment_destination: kp2.getNodeID(),
+        payment_source: kp1.getAddress(),
+        payment_destination: kp2.getAddress(),
         data_hash: crypto.createHash('sha256').update('test').digest('hex')
       });
       contract.sign('renter', kp1.getPrivateKey());
@@ -150,13 +150,13 @@ describe('Contract', function() {
     it('should verify farmer signature', function() {
       var contract = new Contract();
       contract.sign('farmer', kp2.getPrivateKey());
-      expect(contract.verify('farmer', kp2.getPublicKey())).to.equal(true);
+      expect(contract.verify('farmer', kp2.getNodeID())).to.equal(true);
     });
 
     it('should invalidate renter signature', function() {
       var contract = new Contract();
       contract.sign('renter', kp2.getPrivateKey());
-      expect(contract.verify('renter', kp1.getPublicKey())).to.equal(false);
+      expect(contract.verify('renter', kp1.getNodeID())).to.equal(false);
     });
 
   });

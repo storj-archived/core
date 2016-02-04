@@ -6,6 +6,9 @@
 
 module.exports = {};
 
+/** {@link Network} */
+module.exports.Network = require('./lib/network');
+
 /** {@link Contract} */
 module.exports.Contract = require('./lib/contract');
 
@@ -14,6 +17,3 @@ module.exports.KeyPair = require('./lib/keypair');
 
 /** {@link constants} */
 module.exports.constants = require('./lib/constants');
-
-/** {@link utils} */
-module.exports.utils = require('./lib/utils');

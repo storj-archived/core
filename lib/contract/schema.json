@@ -6,7 +6,7 @@
     },
     "renter_id": {
       "type": ["string", "null"],
-      "pattern": "^[13][a-km-zA-HJ-NP-Z0-9]{26,33}$"
+      "pattern": "[A-Fa-f0-9]{40}$"
     },
     "renter_address": {
       "type": ["string", "null"],
@@ -14,15 +14,15 @@
     },
     "renter_port": {
       "type": ["integer", "null"],
-      "minimum": 1, 
-      "maximum": 65535 
+      "minimum": 1,
+      "maximum": 65535
     },
     "renter_signature": {
       "type": ["string", "null"]
     },
     "farmer_id": {
       "type": ["string", "null"],
-      "pattern": "^[13][a-km-zA-HJ-NP-Z0-9]{26,33}$"
+      "pattern": "[A-Fa-f0-9]{40}$"
     },
     "farmer_address": {
       "type": ["string", "null"],

@@ -23,7 +23,7 @@
 <label for="nav-trigger" class="overlay"></label>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Contract.html">Contract</a><ul class='methods'><li data-type='method'><a href="Contract.html#.createValidator">createValidator</a></li><li data-type='method'><a href="Contract.html#.fromBuffer">fromBuffer</a></li><li data-type='method'><a href="Contract.html#.fromJSON">fromJSON</a></li><li data-type='method'><a href="Contract.html#.fromObject">fromObject</a></li><li data-type='method'><a href="Contract.html#_clean">_clean</a></li><li data-type='method'><a href="Contract.html#_complete">_complete</a></li><li data-type='method'><a href="Contract.html#_getSigningData">_getSigningData</a></li><li data-type='method'><a href="Contract.html#_validate">_validate</a></li><li data-type='method'><a href="Contract.html#get">get</a></li><li data-type='method'><a href="Contract.html#getHash">getHash</a></li><li data-type='method'><a href="Contract.html#set">set</a></li><li data-type='method'><a href="Contract.html#sign">sign</a></li><li data-type='method'><a href="Contract.html#toBuffer">toBuffer</a></li><li data-type='method'><a href="Contract.html#toJSON">toJSON</a></li><li data-type='method'><a href="Contract.html#toObject">toObject</a></li><li data-type='method'><a href="Contract.html#update">update</a></li><li data-type='method'><a href="Contract.html#verify">verify</a></li></ul></li><li><a href="KeyPair.html">KeyPair</a><ul class='methods'><li data-type='method'><a href="KeyPair.html#getNodeID">getNodeID</a></li><li data-type='method'><a href="KeyPair.html#getPrivateKey">getPrivateKey</a></li><li data-type='method'><a href="KeyPair.html#getPublicKey">getPublicKey</a></li></ul></li></ul><h3>Modules</h3><ul><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_utils.html">storj/utils</a><ul class='methods'><li data-type='method'><a href="module-storj_utils.html#.getNodeIDFromPublicKey">getNodeIDFromPublicKey</a></li></ul></li><li><a href="module-storjnode.html">storjnode</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Contract.html">Contract</a><ul class='methods'><li data-type='method'><a href="Contract.html#.createValidator">createValidator</a></li><li data-type='method'><a href="Contract.html#.fromBuffer">fromBuffer</a></li><li data-type='method'><a href="Contract.html#.fromJSON">fromJSON</a></li><li data-type='method'><a href="Contract.html#.fromObject">fromObject</a></li><li data-type='method'><a href="Contract.html#_clean">_clean</a></li><li data-type='method'><a href="Contract.html#_complete">_complete</a></li><li data-type='method'><a href="Contract.html#_getSigningData">_getSigningData</a></li><li data-type='method'><a href="Contract.html#_validate">_validate</a></li><li data-type='method'><a href="Contract.html#get">get</a></li><li data-type='method'><a href="Contract.html#getHash">getHash</a></li><li data-type='method'><a href="Contract.html#set">set</a></li><li data-type='method'><a href="Contract.html#sign">sign</a></li><li data-type='method'><a href="Contract.html#toBuffer">toBuffer</a></li><li data-type='method'><a href="Contract.html#toJSON">toJSON</a></li><li data-type='method'><a href="Contract.html#toObject">toObject</a></li><li data-type='method'><a href="Contract.html#update">update</a></li><li data-type='method'><a href="Contract.html#verify">verify</a></li></ul></li><li><a href="KeyPair.html">KeyPair</a><ul class='methods'><li data-type='method'><a href="KeyPair.html#getAddress">getAddress</a></li><li data-type='method'><a href="KeyPair.html#getNodeID">getNodeID</a></li><li data-type='method'><a href="KeyPair.html#getPrivateKey">getPrivateKey</a></li><li data-type='method'><a href="KeyPair.html#getPublicKey">getPublicKey</a></li></ul></li><li><a href="module-storj_network_protocol-Protocol.html">Protocol</a></li><li><a href="Network.html">Network</a><ul class='methods'><li data-type='method'><a href="Network.html#_createContact">_createContact</a></li><li data-type='method'><a href="Network.html#_handleTransportError">_handleTransportError</a></li><li data-type='method'><a href="Network.html#_signMessage">_signMessage</a></li><li data-type='method'><a href="Network.html#_verifyMessage">_verifyMessage</a></li><li data-type='method'><a href="Network.html#connect">connect</a></li><li data-type='method'><a href="Network.html#fetch">fetch</a></li><li data-type='method'><a href="Network.html#open">open</a></li><li data-type='method'><a href="Network.html#publish">publish</a></li><li data-type='method'><a href="Network.html#store">store</a></li><li data-type='method'><a href="Network.html#subscribe">subscribe</a></li></ul></li></ul><h3>Modules</h3><ul><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_network_protocol.html">storj/network/protocol</a></li><li><a href="module-storjnode.html">storjnode</a></li></ul>
 </nav>
 
 <div id="main">
@@ -44,9 +44,9 @@ var assert = require('assert');
 var crypto = require('crypto');
 var merge = require('merge');
 var JSONSchema = require('jsen');
-var elliptic = require('elliptic');
 var stringify = require('json-stable-stringify');
-var ecdsa = new elliptic.ec(elliptic.curves.secp256k1);
+var bitcore = require('bitcore-lib');
+var Message = require('bitcore-message');
 
 /**
  * Represents a storage contract
@@ -168,25 +168,24 @@ Contract.prototype._getSigningData = function() {
  */
 Contract.prototype.sign = function(actor, secret) {
   var property = actor + '_signature';
-  var signature = ecdsa.sign(this._getSigningData(), secret).toDER('hex');
+  var message = Message(this._getSigningData());
+  var signature = message.sign(bitcore.PrivateKey.fromString(secret));
 
-  return this.set(property, Buffer(signature, 'hex').toString('base64'));
+  return this.set(property, signature);
 };
 
 /**
  * Verify the contract signature for the given actor
  * @param {String} actor - One of 'farmer' or 'renter'
- * @param {Buffer} pubkey - ECDSA public key
+ * @param {Buffer} pubkeyhash - ECDSA nodeID
  * @returns {Boolean} validity
  */
-Contract.prototype.verify = function(actor, pubkey) {
+Contract.prototype.verify = function(actor, pubkeyhash) {
   var property = actor + '_signature';
+  var message = Message(this._getSigningData());
+  var address = bitcore.Address.fromPublicKeyHash(Buffer(pubkeyhash, 'hex'));
 
-  return ecdsa.verify(
-    this._getSigningData(),
-    new Buffer(this.get(property), 'base64'),
-    pubkey
-  );
+  return message.verify(address, this.get(property));
 };
 
 /**
@@ -305,7 +304,7 @@ module.exports = Contract;
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Wed Feb 03 2016 16:46:07 GMT-0500 (EST) using the Minami theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Thu Feb 04 2016 16:29:46 GMT-0500 (EST) using the Minami theme.
 </footer>
 
 <script>prettyPrint();</script>

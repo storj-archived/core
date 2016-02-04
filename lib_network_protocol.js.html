@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Home - Documentation</title>
+    <title>lib/network/protocol.js - Documentation</title>
 
     <script src="scripts/prettify/prettify.js"></script>
     <script src="scripts/prettify/lang-css.js"></script>
@@ -28,36 +28,37 @@
 
 <div id="main">
     
+    <h1 class="page-title">lib/network/protocol.js</h1>
+    
 
     
 
 
 
     
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @module storj/network/protocol
+ */
 
+'use strict';
 
+/**
+ * Defines the Storj protocol methods
+ * @constructor
+ * @param {Network} network
+ */
+function Protocol(network) {
+  if (!(this instanceof Protocol)) {
+    return new Protocol(network);
+  }
+}
 
-
-
-
-
-
-
-    
-
-
-    <section class="readme">
-        <article><h1>Storj JS</h1><p><a href="https://travis-ci.org/Storj/storjnode-js"><img src="https://img.shields.io/travis/Storj/storjnode-js.svg?style=flat-square" alt="Build Status"></a>
-<a href="https://coveralls.io/r/Storj/storjnode-js"><img src="https://img.shields.io/coveralls/Storj/storjnode-js.svg?style=flat-square" alt="Coverage Status"></a>
-<a href="https://www.npmjs.com/package/storj"><img src="https://img.shields.io/npm/v/storj.svg?style=flat-square" alt="NPM"></a></p>
-<p>JavaScript implementation of the Storj protocol for Node.js and the browser.</p>
-<h2>Quick Start</h2><p>Install with NPM:</p>
-<pre class="prettyprint source"><code>npm install storj --save</code></pre><blockquote>
-<p><em>TODO...</em></p>
-</blockquote></article>
+module.exports = Protocol;
+</code></pre>
+        </article>
     </section>
-
-
 
 
 

@@ -23,7 +23,7 @@
 <label for="nav-trigger" class="overlay"></label>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Contract.html">Contract</a><ul class='methods'><li data-type='method'><a href="Contract.html#.createValidator">createValidator</a></li><li data-type='method'><a href="Contract.html#.fromBuffer">fromBuffer</a></li><li data-type='method'><a href="Contract.html#.fromJSON">fromJSON</a></li><li data-type='method'><a href="Contract.html#.fromObject">fromObject</a></li><li data-type='method'><a href="Contract.html#_clean">_clean</a></li><li data-type='method'><a href="Contract.html#_complete">_complete</a></li><li data-type='method'><a href="Contract.html#_getSigningData">_getSigningData</a></li><li data-type='method'><a href="Contract.html#_validate">_validate</a></li><li data-type='method'><a href="Contract.html#get">get</a></li><li data-type='method'><a href="Contract.html#getHash">getHash</a></li><li data-type='method'><a href="Contract.html#set">set</a></li><li data-type='method'><a href="Contract.html#sign">sign</a></li><li data-type='method'><a href="Contract.html#toBuffer">toBuffer</a></li><li data-type='method'><a href="Contract.html#toJSON">toJSON</a></li><li data-type='method'><a href="Contract.html#toObject">toObject</a></li><li data-type='method'><a href="Contract.html#update">update</a></li><li data-type='method'><a href="Contract.html#verify">verify</a></li></ul></li><li><a href="KeyPair.html">KeyPair</a><ul class='methods'><li data-type='method'><a href="KeyPair.html#getNodeID">getNodeID</a></li><li data-type='method'><a href="KeyPair.html#getPrivateKey">getPrivateKey</a></li><li data-type='method'><a href="KeyPair.html#getPublicKey">getPublicKey</a></li></ul></li></ul><h3>Modules</h3><ul><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_utils.html">storj/utils</a><ul class='methods'><li data-type='method'><a href="module-storj_utils.html#.getNodeIDFromPublicKey">getNodeIDFromPublicKey</a></li></ul></li><li><a href="module-storjnode.html">storjnode</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Contract.html">Contract</a><ul class='methods'><li data-type='method'><a href="Contract.html#.createValidator">createValidator</a></li><li data-type='method'><a href="Contract.html#.fromBuffer">fromBuffer</a></li><li data-type='method'><a href="Contract.html#.fromJSON">fromJSON</a></li><li data-type='method'><a href="Contract.html#.fromObject">fromObject</a></li><li data-type='method'><a href="Contract.html#_clean">_clean</a></li><li data-type='method'><a href="Contract.html#_complete">_complete</a></li><li data-type='method'><a href="Contract.html#_getSigningData">_getSigningData</a></li><li data-type='method'><a href="Contract.html#_validate">_validate</a></li><li data-type='method'><a href="Contract.html#get">get</a></li><li data-type='method'><a href="Contract.html#getHash">getHash</a></li><li data-type='method'><a href="Contract.html#set">set</a></li><li data-type='method'><a href="Contract.html#sign">sign</a></li><li data-type='method'><a href="Contract.html#toBuffer">toBuffer</a></li><li data-type='method'><a href="Contract.html#toJSON">toJSON</a></li><li data-type='method'><a href="Contract.html#toObject">toObject</a></li><li data-type='method'><a href="Contract.html#update">update</a></li><li data-type='method'><a href="Contract.html#verify">verify</a></li></ul></li><li><a href="KeyPair.html">KeyPair</a><ul class='methods'><li data-type='method'><a href="KeyPair.html#getAddress">getAddress</a></li><li data-type='method'><a href="KeyPair.html#getNodeID">getNodeID</a></li><li data-type='method'><a href="KeyPair.html#getPrivateKey">getPrivateKey</a></li><li data-type='method'><a href="KeyPair.html#getPublicKey">getPublicKey</a></li></ul></li><li><a href="module-storj_network_protocol-Protocol.html">Protocol</a></li><li><a href="Network.html">Network</a><ul class='methods'><li data-type='method'><a href="Network.html#_createContact">_createContact</a></li><li data-type='method'><a href="Network.html#_handleTransportError">_handleTransportError</a></li><li data-type='method'><a href="Network.html#_signMessage">_signMessage</a></li><li data-type='method'><a href="Network.html#_verifyMessage">_verifyMessage</a></li><li data-type='method'><a href="Network.html#connect">connect</a></li><li data-type='method'><a href="Network.html#fetch">fetch</a></li><li data-type='method'><a href="Network.html#open">open</a></li><li data-type='method'><a href="Network.html#publish">publish</a></li><li data-type='method'><a href="Network.html#store">store</a></li><li data-type='method'><a href="Network.html#subscribe">subscribe</a></li></ul></li></ul><h3>Modules</h3><ul><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_network_protocol.html">storj/network/protocol</a></li><li><a href="module-storjnode.html">storjnode</a></li></ul>
 </nav>
 
 <div id="main">
@@ -40,14 +40,12 @@
         <article>
             <pre class="prettyprint source linenums"><code>'use strict';
 
-var utils = require('./utils');
-var elliptic = require('elliptic');
-var ecdsa = new elliptic.ec(elliptic.curves.secp256k1);
+var bitcore = require('bitcore-lib');
 
 /**
  * Represents a ECDSA key pair
  * @constructor
- * @param {String|Buffer} privkey
+ * @param {String|Buffer} privkey - WIF encoded ECDSA private key
  */
 function KeyPair(privkey) {
   if (!(this instanceof KeyPair)) {
@@ -55,10 +53,12 @@ function KeyPair(privkey) {
   }
 
   if (privkey) {
-    this._keypair = ecdsa.keyFromPrivate(privkey);
+    this._privkey = bitcore.PrivateKey.fromString(privkey);
   } else {
-    this._keypair = ecdsa.genKeyPair();
+    this._privkey = bitcore.PrivateKey.fromRandom();
   }
+
+  this._pubkey = this._privkey.toPublicKey();
 }
 
 /**
@@ -66,7 +66,7 @@ function KeyPair(privkey) {
  * @returns {Buffer}
  */
 KeyPair.prototype.getPrivateKey = function() {
-  return this._keypair.getPrivate();
+  return this._privkey.toString();
 };
 
 /**
@@ -74,25 +74,27 @@ KeyPair.prototype.getPrivateKey = function() {
  * @returns {Buffer}
  */
 KeyPair.prototype.getPublicKey = function() {
-  var pubkey, pubkeyobj = this._keypair.getPublic();
-  var xbuf = new Buffer(pubkeyobj.x.toString('hex', 64), 'hex');
-  var ybuf = new Buffer(pubkeyobj.y.toString('hex', 64), 'hex');
-
-  if (ybuf[ybuf.length - 1] % 2) {
-    pubkey = Buffer.concat([new Buffer([3]), xbuf]);
-  } else {
-    pubkey = Buffer.concat([new Buffer([2]), xbuf]);
-  }
-
-  return pubkey;
+  return this._pubkey.toString();
 };
 
 /**
  * Returns the NodeID derived from the public key
- * @returns {String} nodeID - Base58 encoded Node ID
+ * @returns {String} nodeID - RIPEMD160 hash of public key
  */
 KeyPair.prototype.getNodeID = function() {
-  return utils.getNodeIDFromPublicKey(this.getPublicKey().toString('hex'));
+  return bitcore.crypto.Hash.sha256ripemd160(
+    this._pubkey.toBuffer()
+  ).toString('hex');
+};
+
+/**
+ * Returns the bitcoin address version of the nodeID
+ * @returns {String} address - Base58 encoded address
+ */
+KeyPair.prototype.getAddress = function() {
+  return bitcore.Address.fromPublicKeyHash(
+    new Buffer(this.getNodeID(), 'hex')
+  ).toString();
 };
 
 module.exports = KeyPair;
@@ -108,7 +110,7 @@ module.exports = KeyPair;
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Wed Feb 03 2016 16:46:07 GMT-0500 (EST) using the Minami theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Thu Feb 04 2016 16:29:46 GMT-0500 (EST) using the Minami theme.
 </footer>
 
 <script>prettyPrint();</script>

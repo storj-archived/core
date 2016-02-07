@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>storjnode - Documentation</title>
+    <title>lib/audit/proof.js - Documentation</title>
 
     <script src="scripts/prettify/prettify.js"></script>
     <script src="scripts/prettify/lang-css.js"></script>
@@ -28,427 +28,78 @@
 
 <div id="main">
     
-    <h1 class="page-title">storjnode</h1>
+    <h1 class="page-title">lib/audit/proof.js</h1>
     
 
     
 
 
 
-
-<section>
-
-<header>
-    
-        
-    
-</header>
-
-<article>
-    <div class="container-overview">
-    
-        
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-
-     
-
-    
-
-    
-        <h3 class="subsection-title">Members</h3>
-
-        
-            
-<h4 class="name" id=".Audit"><span class="type-signature">(static) </span>Audit<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <a href="Audit.html">Audit</a>
-</div>
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line16">line 16</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id=".constants"><span class="type-signature">(static) </span>constants<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    constants
-</div>
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line22">line 22</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id=".Contract"><span class="type-signature">(static) </span>Contract<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <a href="Contract.html">Contract</a>
-</div>
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line13">line 13</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id=".KeyPair"><span class="type-signature">(static) </span>KeyPair<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <a href="KeyPair.html">KeyPair</a>
-</div>
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line19">line 19</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id=".Network"><span class="type-signature">(static) </span>Network<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <a href="Network.html">Network</a>
-</div>
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line10">line 10</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id=".utils"><span class="type-signature">(static) </span>utils<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    utils
-</div>
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
     
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use strict';
 
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line25">line 25</a>
-    </li></ul></dd>
-    
+var assert = require('assert');
+var merkle = require('merkle');
+var utils = require('../utils');
 
-    
-
-    
-
-    
-</dl>
+/**
+ * Provides interface for proving possession of a file for an {@link Audit}
+ * @constructor
+ * @param {Array} leaves - List of SHA-256 bottom leaves of the merkle tree
+ */
+function Proof(leaves) {
+  if (!(this instanceof Proof)) {
+    return new Proof(leaves);
+  }
 
+  assert(Array.isArray(leaves), 'Merkle leaves must be an array');
 
+  this._tree = merkle('sha256').sync(leaves.map(function(leaf) {
+    return leaf.toLowerCase();
+  }));
+}
 
+/**
+ * Calculate audit response
+ * @param {String} challenge
+ * @param {Buffer} shard
+ * @returns {Array} result
+ */
+Proof.prototype.prove = function(challenge, shard) {
+  var input = challenge + shard.toString('hex');
+  var resp = utils.sha256(input);
+  var hash = utils.sha256(resp);
+  var leaves = this._tree.level(this._tree.levels() - 1);
+  var index = leaves.indexOf(hash.toUpperCase());
+  var branches = [resp];
 
+  if (index === -1) {
+    return [];
+  }
 
+  for (var i = (this._tree.levels() - 1); i > 0; i--) {
+    var level = this._tree.level(i).map(function(leaf) {
+      return leaf.toLowerCase();
+    });
 
-        
-    
-
-    
+    if (index % 2 === 0) {
+      branches = [branches, level[index + 1]];
+    } else {
+      branches = [level[index - 1], branches];
+    }
 
-    
+    index = Math.floor(index / 2);
+  }
 
-    
-</article>
+  return branches;
+};
 
-</section>
+module.exports = Proof;
+</code></pre>
+        </article>
+    </section>
 
 
 

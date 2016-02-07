@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>storjnode - Documentation</title>
+    <title>EncryptedTransport - Documentation</title>
 
     <script src="scripts/prettify/prettify.js"></script>
     <script src="scripts/prettify/lang-css.js"></script>
@@ -28,7 +28,7 @@
 
 <div id="main">
     
-    <h1 class="page-title">storjnode</h1>
+    <h1 class="page-title">EncryptedTransport</h1>
     
 
     
@@ -40,6 +40,9 @@
 
 <header>
     
+        <h2>
+        EncryptedTransport
+        </h2>
         
     
 </header>
@@ -49,7 +52,157 @@
     
         
 
+    
+
+    <h4 class="name" id="EncryptedTransport"><span class="type-signature"></span>new EncryptedTransport<span class="signature">(contact, options)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Defines the end-to-end encrypted RPC interface
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
         
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>contact</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">kad.Contact</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_network_transport.js.html">lib/network/transport.js</a>, <a href="lib_network_transport.js.html#line17">line 17</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
     </div>
 
@@ -64,18 +217,30 @@
     
 
     
-        <h3 class="subsection-title">Members</h3>
+
+    
+        <h3 class="subsection-title">Methods</h3>
 
         
             
-<h4 class="name" id=".Audit"><span class="type-signature">(static) </span>Audit<span class="type-signature"></span></h4>
 
+    
+
+    <h4 class="name" id="_close"><span class="type-signature"></span>_close<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
 
 
 
 <div class="description">
-    <a href="Audit.html">Audit</a>
+    Closes the underlying TCP socket
 </div>
+
+
+
+
+
+
 
 
 
@@ -112,7 +277,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line16">line 16</a>
+        <a href="lib_network_transport.js.html">lib/network/transport.js</a>, <a href="lib_network_transport.js.html#line121">line 121</a>
     </li></ul></dd>
     
 
@@ -128,17 +293,86 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
         
             
-<h4 class="name" id=".constants"><span class="type-signature">(static) </span>constants<span class="type-signature"></span></h4>
 
+    
+
+    <h4 class="name" id="_handleConnection"><span class="type-signature">(private) </span>_handleConnection<span class="signature">(connection)</span><span class="type-signature"></span></h4>
+
+    
 
 
 
 <div class="description">
-    constants
+    Handle incoming connection stream
 </div>
 
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>connection</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">net.Socket</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -174,7 +408,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line22">line 22</a>
+        <a href="lib_network_transport.js.html">lib/network/transport.js</a>, <a href="lib_network_transport.js.html#line91">line 91</a>
     </li></ul></dd>
     
 
@@ -190,17 +424,86 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
         
             
-<h4 class="name" id=".Contract"><span class="type-signature">(static) </span>Contract<span class="type-signature"></span></h4>
 
+    
+
+    <h4 class="name" id="_open"><span class="type-signature"></span>_open<span class="signature">(ready)</span><span class="type-signature"></span></h4>
+
+    
 
 
 
 <div class="description">
-    <a href="Contract.html">Contract</a>
+    Opens a TCP socket and sets up event listeners
 </div>
 
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>ready</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -236,7 +539,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line13">line 13</a>
+        <a href="lib_network_transport.js.html">lib/network/transport.js</a>, <a href="lib_network_transport.js.html#line36">line 36</a>
     </li></ul></dd>
     
 
@@ -252,17 +555,109 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
         
             
-<h4 class="name" id=".KeyPair"><span class="type-signature">(static) </span>KeyPair<span class="type-signature"></span></h4>
 
+    
+
+    <h4 class="name" id="_send"><span class="type-signature"></span>_send<span class="signature">(data, contact)</span><span class="type-signature"></span></h4>
+
+    
 
 
 
 <div class="description">
-    <a href="KeyPair.html">KeyPair</a>
+    Send a RPC to the given contact
 </div>
 
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Buffer</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>contact</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">kad.Contact</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -298,7 +693,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line19">line 19</a>
+        <a href="lib_network_transport.js.html">lib/network/transport.js</a>, <a href="lib_network_transport.js.html#line56">line 56</a>
     </li></ul></dd>
     
 
@@ -314,62 +709,10 @@
 
 
 
-        
-            
-<h4 class="name" id=".Network"><span class="type-signature">(static) </span>Network<span class="type-signature"></span></h4>
 
 
 
 
-<div class="description">
-    <a href="Network.html">Network</a>
-</div>
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line10">line 10</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
 
 
 
@@ -377,70 +720,6 @@
 
 
         
-            
-<h4 class="name" id=".utils"><span class="type-signature">(static) </span>utils<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    utils
-</div>
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line25">line 25</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-    
-
     
 
     

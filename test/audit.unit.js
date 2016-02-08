@@ -45,7 +45,9 @@ describe('Audit', function() {
       var audit = new Audit({ shard: SHARD });
       var data = new Buffer('test').toString('hex');
       var response = audit._createResponseInput(data);
-      var expected = utils.sha256(utils.sha256(data + SHARD.toString('hex')));
+      var expected = utils.rmd160sha256(utils.rmd160sha256(
+        data + SHARD.toString('hex')
+      ));
       expect(response).to.equal(expected);
     });
 

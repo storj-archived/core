@@ -31,7 +31,7 @@ describe('Verification', function() {
       var challengeResp = verification._getChallengeResponse(
         ['beep', ['boop', [['bar'], 'foo']]]
       );
-      expect(challengeResp).to.equal(utils.sha256('bar'));
+      expect(challengeResp).to.equal(utils.rmd160sha256('bar'));
     });
 
   });

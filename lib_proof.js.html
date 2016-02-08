@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Verification - Documentation</title>
+    <title>lib/proof.js - Documentation</title>
 
     <script src="scripts/prettify/prettify.js"></script>
     <script src="scripts/prettify/lang-css.js"></script>
@@ -28,510 +28,92 @@
 
 <div id="main">
     
-    <h1 class="page-title">Verification</h1>
+    <h1 class="page-title">lib/proof.js</h1>
     
 
     
 
 
 
-
-<section>
-
-<header>
-    
-        <h2>
-        Verification
-        </h2>
-        
-    
-</header>
-
-<article>
-    <div class="container-overview">
-    
-        
-
-    
-
-    <h4 class="name" id="Verification"><span class="type-signature"></span>new Verification<span class="signature">(proof)</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-<div class="description">
-    Interface for verifying the result of an audit proof
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>proof</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The result of <a href="Proof.html#prove">Proof#prove</a></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_verification.js.html">lib/verification.js</a>, <a href="lib_verification.js.html#line11">line 11</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-    </div>
-
-    
-
-    
-
-    
-
-     
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        
-            
-
-    
-
-    <h4 class="name" id="_getChallengeResponse"><span class="type-signature">(private) </span>_getChallengeResponse<span class="signature">(tuple)</span><span class="type-signature"> &rarr; {String}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Extracts the challenge response from the proof
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>tuple</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
     
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use strict';
 
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_verification.js.html">lib/verification.js</a>, <a href="lib_verification.js.html#line27">line 27</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<dl class="param-type">
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">String</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="verify"><span class="type-signature"></span>verify<span class="signature">(root, totaldepth)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Verifies the proof given the merkle root and tree depth
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
+var assert = require('assert');
+var merkle = require('merkle');
+var utils = require('./utils');
 
-        <th class="last">Description</th>
-    </tr>
-    </thead>
+/**
+ * Provides interface for proving possession of a file for an {@link Audit}
+ * @constructor
+ * @param {Object} options
+ * @param {Array} options.leaves
+ * @param {Buffer} options.shard
+ */
+function Proof(options) {
+  if (!(this instanceof Proof)) {
+    return new Proof(options);
+  }
 
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>root</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>totaldepth</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_verification.js.html">lib/verification.js</a>, <a href="lib_verification.js.html#line47">line 47</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
+  assert(Array.isArray(options.leaves), 'Merkle leaves must be an array');
+  assert(Buffer.isBuffer(options.shard), 'Invalid shard supplied');
 
+  this._shard = options.shard;
+  this._tree = merkle('ripemd160', utils.rmd160sha256).sync(
+    this._generateLeaves(options.leaves)
+  );
 
+}
 
+/**
+ * Calculate audit response
+ * @param {String} challenge
+ * @returns {Array} result
+ */
+Proof.prototype.prove = function(challenge) {
+  var response = utils.rmd160sha256(challenge + this._shard.toString('hex'));
+  var leaf = utils.rmd160sha256(response);
+  var leaves = this._tree.level(this._tree.levels() - 1);
+  var challengenum = leaves.indexOf(leaf);
 
+  assert(challengenum !== -1, 'Failed to generate proof');
 
-<h5>Returns:</h5>
+  var branches = [response];
 
-        
-<div class="param-desc">
-    verified
-</div>
+  for (var i = (this._tree.levels() - 1); i > 0; i--) {
+    var level = this._tree.level(i);
 
+    if (challengenum % 2 === 0) {
+      branches = [branches, level[challengenum + 1]];
+    } else {
+      branches = [level[challengenum - 1], branches];
+    }
 
+    challengenum = Math.floor(challengenum / 2);
+  }
 
-<dl class="param-type">
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Boolean</span>
+  return branches;
+};
 
+/**
+ * Generates the bottom leaves of the tree to the next power of two
+ * @private
+ * @param {Array} leaves
+ */
+Proof.prototype._generateLeaves = function(leaves) {
+  var numEmpty = utils.getNextPowerOfTwo(leaves.length) - leaves.length;
+  var emptyLeaves = Array(numEmpty).map(function() {
+    return '';
+  });
 
-    </dd>
-</dl>
-
-    
-
-
-
-        
-    
-
-    
-
-    
-</article>
+  return leaves.concat(emptyLeaves);
+};
 
-</section>
+module.exports = Proof;
+</code></pre>
+        </article>
+    </section>
 
 
 

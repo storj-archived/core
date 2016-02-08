@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Verification - Documentation</title>
+    <title>lib/audit.js - Documentation</title>
 
     <script src="scripts/prettify/prettify.js"></script>
     <script src="scripts/prettify/lang-css.js"></script>
@@ -28,510 +28,126 @@
 
 <div id="main">
     
-    <h1 class="page-title">Verification</h1>
-    
-
-    
-
-
-
-
-<section>
-
-<header>
-    
-        <h2>
-        Verification
-        </h2>
-        
-    
-</header>
-
-<article>
-    <div class="container-overview">
-    
-        
-
-    
-
-    <h4 class="name" id="Verification"><span class="type-signature"></span>new Verification<span class="signature">(proof)</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-<div class="description">
-    Interface for verifying the result of an audit proof
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>proof</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The result of <a href="Proof.html#prove">Proof#prove</a></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_verification.js.html">lib/verification.js</a>, <a href="lib_verification.js.html#line11">line 11</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-    </div>
-
-    
-
-    
-
-    
-
-     
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        
-            
-
-    
-
-    <h4 class="name" id="_getChallengeResponse"><span class="type-signature">(private) </span>_getChallengeResponse<span class="signature">(tuple)</span><span class="type-signature"> &rarr; {String}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Extracts the challenge response from the proof
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>tuple</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_verification.js.html">lib/verification.js</a>, <a href="lib_verification.js.html#line27">line 27</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<dl class="param-type">
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">String</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="verify"><span class="type-signature"></span>verify<span class="signature">(root, totaldepth)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Verifies the proof given the merkle root and tree depth
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>root</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>totaldepth</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_verification.js.html">lib/verification.js</a>, <a href="lib_verification.js.html#line47">line 47</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    verified
-</div>
-
-
-
-<dl class="param-type">
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Boolean</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-    
-
-    
-
-    
-</article>
-
-</section>
+    <h1 class="page-title">lib/audit.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use strict';
+
+var assert = require('assert');
+var crypto = require('crypto');
+var constants = require('./constants');
+var merkle = require('merkle');
+var merge = require('merge');
+var utils = require('./utils');
+
+/**
+ * Represents an auditing interface using a precomputed merkle tree
+ * @constructor
+ * @param {Object} options
+ * @param {Number} options.audits
+ * @param {Buffer} options.shard
+ */
+function Audit(options) {
+  if (!(this instanceof Audit)) {
+    return new Audit(options);
+  }
+
+  options = merge(Object.create(Audit.DEFAULTS), options);
+
+  assert(Buffer.isBuffer(options.shard), 'Invalid shard supplied');
+  assert(
+    options.audits > 0 &amp;&amp; (options.audits % 2 === 0),
+    'Must supply an even audits value greater than 0'
+  );
+
+  this._shard = options.shard;
+  this._audits = options.audits;
+  this._challenges = [];
+  this._tree = this._generateTree();
+}
+
+Audit.DEFAULTS = {
+  audits: 12,
+  shard: new Buffer([]),
+};
+
+/**
+ * Returns the bottom leaves of the merkle tree for sending to farmer
+ */
+Audit.prototype.getPublicRecord = function() {
+  return this._tree.level(this._tree.levels() - 1);
+};
+
+/**
+ * Returns the challenges, the tree depth, and merkle root
+ */
+Audit.prototype.getPrivateRecord = function() {
+  return {
+    root: this._tree.root(),
+    depth: this._tree.levels(),
+    challenges: this._challenges
+  };
+};
+
+/**
+ * Generate the audit merkle tree from a series of challenges
+ * @private
+ * @returns {Audit} self
+ */
+Audit.prototype._generateTree = function() {
+  var iterations = 0;
+  var inputs = [];
+
+  while (iterations &lt; this._audits) {
+    var challenge = this._generateChallenge();
+    var input = this._createResponseInput(challenge);
+
+    this._challenges.push(challenge);
+    inputs.push(input);
+
+    iterations++;
+  }
+
+  while (iterations &lt; utils.getNextPowerOfTwo(this._audits)) {
+    inputs.push('');
+    iterations++;
+  }
+
+  return merkle('ripemd160', utils.rmd160sha256).sync(inputs);
+};
+
+/**
+ * Generate a random challenge buffer
+ * @private
+ * @returns {String} Hex encoded random bytes
+ */
+Audit.prototype._generateChallenge = function() {
+  return crypto.randomBytes(constants.AUDIT_BYTES).toString('hex');
+};
+
+/**
+ * Create a challenge response input to merkle tree
+ * @private
+ * @param {Array} response
+ * @returns {Buffer} input - Concatenated challenge+shard_hash
+ */
+Audit.prototype._createResponseInput = function(challenge) {
+  return utils.rmd160sha256(utils.rmd160sha256(
+    challenge + this._shard.toString('hex')
+  ));
+};
+
+module.exports = Audit;
+</code></pre>
+        </article>
+    </section>
 
 
 

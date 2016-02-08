@@ -15,6 +15,12 @@ module.exports.Contract = require('./lib/contract');
 /** {@link Audit} */
 module.exports.Audit = require('./lib/audit');
 
+/** {@link Proof} */
+module.exports.Proof = require('./lib/proof');
+
+/** {@link Verification} */
+module.exports.Verification = require('./lib/verification');
+
 /** {@link KeyPair} */
 module.exports.KeyPair = require('./lib/keypair');
 

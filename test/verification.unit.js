@@ -1,0 +1,54 @@
+'use strict';
+
+var expect = require('chai').expect;
+var Audit = require('../lib/audit');
+var Proof = require('../lib/proof');
+var Verification = require('../lib/verification');
+var utils = require('../lib/utils');
+
+describe('Verification', function() {
+
+  var SHARD = new Buffer('testshard');
+
+  describe('@constructor', function() {
+
+    it('should create instance without the new keyword', function() {
+      expect(Verification([])).to.be.instanceOf(Verification);
+    });
+
+    it('should throw without a proof response', function() {
+      expect(function() {
+        Verification(null);}
+      ).to.throw(Error, 'Proof must be an array');
+    });
+
+  });
+
+  describe('#_getChallengeResponse', function() {
+
+    it('should return the hash of the innermost leaf', function() {
+      var verification = new Verification([]);
+      var challengeResp = verification._getChallengeResponse(
+        ['beep', ['boop', [['bar'], 'foo']]]
+      );
+      expect(challengeResp).to.equal(utils.sha256('bar'));
+    });
+
+  });
+
+  describe('#verify', function() {
+
+    it('should verify the proof response', function() {
+      var audit = new Audit({ shard: SHARD, audits: 12 });
+      var secret = audit.getPrivateRecord();
+      var request = audit.getPublicRecord();
+      var proof = new Proof({ shard: SHARD, leaves: request });
+      var response = proof.prove(secret.challenges[0]);
+      var verification = new Verification(response);
+      var result = verification.verify(secret.root, secret.depth);
+      expect(result[0]).to.equal(result[1]);
+    });
+
+  });
+
+});

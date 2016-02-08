@@ -43,7 +43,7 @@
     "kad": "^1.3.6",
     "kad-quasar": "0.0.2",
     "merge": "^1.2.0",
-    "merkle": "^0.4.0",
+    "merkle": "gordonwritescode/merkle",
     "ms": "^0.7.1"
   },
   "devDependencies": {

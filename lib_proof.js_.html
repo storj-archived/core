@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>KeyPair - Documentation</title>
+    <title>lib/proof.js - Documentation</title>
 
     <script src="scripts/prettify/prettify.js"></script>
     <script src="scripts/prettify/lang-css.js"></script>
@@ -28,596 +28,93 @@
 
 <div id="main">
     
-    <h1 class="page-title">KeyPair</h1>
+    <h1 class="page-title">lib/proof.js</h1>
     
 
     
 
 
 
-
-<section>
-
-<header>
-    
-        <h2>
-        KeyPair
-        </h2>
-        
-    
-</header>
-
-<article>
-    <div class="container-overview">
-    
-        
-
-    
-
-    <h4 class="name" id="KeyPair"><span class="type-signature"></span>new KeyPair<span class="signature">(privkey)</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-<div class="description">
-    Represents a ECDSA key pair
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>privkey</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-|
-
-<span class="param-type">Buffer</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">WIF encoded ECDSA private key</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_keypair.js_.html">lib/keypair.js</a>, <a href="lib_keypair.js_.html#line10">line 10</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-    </div>
-
-    
-
-    
-
-    
-
-     
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        
-            
-
-    
-
-    <h4 class="name" id="getAddress"><span class="type-signature"></span>getAddress<span class="signature">()</span><span class="type-signature"> &rarr; {String}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Returns the bitcoin address version of the nodeID
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_keypair.js_.html">lib/keypair.js</a>, <a href="lib_keypair.js_.html#line54">line 54</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    address - Base58 encoded address
-</div>
-
-
-
-<dl class="param-type">
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">String</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="getNodeID"><span class="type-signature"></span>getNodeID<span class="signature">()</span><span class="type-signature"> &rarr; {String}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Returns the NodeID derived from the public key
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_keypair.js_.html">lib/keypair.js</a>, <a href="lib_keypair.js_.html#line44">line 44</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    nodeID - RIPEMD160 hash of public key
-</div>
-
-
-
-<dl class="param-type">
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">String</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="getPrivateKey"><span class="type-signature"></span>getPrivateKey<span class="signature">()</span><span class="type-signature"> &rarr; {Buffer}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Returns the private key
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_keypair.js_.html">lib/keypair.js</a>, <a href="lib_keypair.js_.html#line28">line 28</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<dl class="param-type">
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Buffer</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="getPublicKey"><span class="type-signature"></span>getPublicKey<span class="signature">()</span><span class="type-signature"> &rarr; {Buffer}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Returns the public key
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_keypair.js_.html">lib/keypair.js</a>, <a href="lib_keypair.js_.html#line36">line 36</a>
-    </li></ul></dd>
     
-
-    
-
-    
-
-    
-</dl>
-
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use strict';
 
+var assert = require('assert');
+var MerkleTree = require('mtree');
+var utils = require('./utils');
 
+/**
+ * Provides interface for proving possession of a file for an {@link Audit}
+ * @constructor
+ * @param {Object} options
+ * @param {Array} options.leaves
+ * @param {Buffer} options.shard
+ */
+function Proof(options) {
+  if (!(this instanceof Proof)) {
+    return new Proof(options);
+  }
 
+  assert(Array.isArray(options.leaves), 'Merkle leaves must be an array');
+  assert(Buffer.isBuffer(options.shard), 'Invalid shard supplied');
 
+  this._shard = options.shard;
+  this._tree = new MerkleTree(
+    this._generateLeaves(options.leaves),
+    utils.rmd160sha256
+  );
 
+}
 
+/**
+ * Calculate audit response
+ * @param {String} challenge
+ * @returns {Array} result
+ */
+Proof.prototype.prove = function(challenge) {
+  var response = utils.rmd160sha256(challenge + this._shard.toString('hex'));
+  var leaf = utils.rmd160sha256(response);
+  var leaves = this._tree.level(this._tree.levels() - 1);
+  var challengenum = leaves.indexOf(leaf);
 
+  assert(challengenum !== -1, 'Failed to generate proof');
 
+  var branches = [response];
 
+  for (var i = (this._tree.levels() - 1); i > 0; i--) {
+    var level = this._tree.level(i);
 
+    if (challengenum % 2 === 0) {
+      branches = [branches, level[challengenum + 1]];
+    } else {
+      branches = [level[challengenum - 1], branches];
+    }
 
+    challengenum = Math.floor(challengenum / 2);
+  }
 
-<h5>Returns:</h5>
+  return branches;
+};
 
-        
+/**
+ * Generates the bottom leaves of the tree to the next power of two
+ * @private
+ * @param {Array} leaves
+ */
+Proof.prototype._generateLeaves = function(leaves) {
+  var numEmpty = utils.getNextPowerOfTwo(leaves.length) - leaves.length;
+  var emptyLeaves = Array(numEmpty).map(function() {
+    return '';
+  });
 
-
-<dl class="param-type">
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Buffer</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-    
-
-    
-
-    
-</article>
+  return leaves.concat(emptyLeaves);
+};
 
-</section>
+module.exports = Proof;
+</code></pre>
+        </article>
+    </section>
 
 
 

@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Tutorial: Protocol Specification - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Audit.html">Audit</a><ul class='methods'><li data-type='method'><a href="Audit.html#_createResponseInput">_createResponseInput</a></li><li data-type='method'><a href="Audit.html#_generateChallenge">_generateChallenge</a></li><li data-type='method'><a href="Audit.html#_generateTree">_generateTree</a></li><li data-type='method'><a href="Audit.html#getPrivateRecord">getPrivateRecord</a></li><li data-type='method'><a href="Audit.html#getPublicRecord">getPublicRecord</a></li></ul></li><li><a href="Contract.html">Contract</a><ul class='methods'><li data-type='method'><a href="Contract.html#.createValidator">createValidator</a></li><li data-type='method'><a href="Contract.html#.fromBuffer">fromBuffer</a></li><li data-type='method'><a href="Contract.html#.fromJSON">fromJSON</a></li><li data-type='method'><a href="Contract.html#.fromObject">fromObject</a></li><li data-type='method'><a href="Contract.html#_clean">_clean</a></li><li data-type='method'><a href="Contract.html#_complete">_complete</a></li><li data-type='method'><a href="Contract.html#_getSigningData">_getSigningData</a></li><li data-type='method'><a href="Contract.html#_validate">_validate</a></li><li data-type='method'><a href="Contract.html#get">get</a></li><li data-type='method'><a href="Contract.html#getHash">getHash</a></li><li data-type='method'><a href="Contract.html#set">set</a></li><li data-type='method'><a href="Contract.html#sign">sign</a></li><li data-type='method'><a href="Contract.html#toBuffer">toBuffer</a></li><li data-type='method'><a href="Contract.html#toJSON">toJSON</a></li><li data-type='method'><a href="Contract.html#toObject">toObject</a></li><li data-type='method'><a href="Contract.html#update">update</a></li><li data-type='method'><a href="Contract.html#verify">verify</a></li></ul></li><li><a href="EncryptedTransport.html">EncryptedTransport</a><ul class='methods'><li data-type='method'><a href="EncryptedTransport.html#_close">_close</a></li><li data-type='method'><a href="EncryptedTransport.html#_handleConnection">_handleConnection</a></li><li data-type='method'><a href="EncryptedTransport.html#_open">_open</a></li><li data-type='method'><a href="EncryptedTransport.html#_send">_send</a></li></ul></li><li><a href="KeyPair.html">KeyPair</a><ul class='methods'><li data-type='method'><a href="KeyPair.html#getAddress">getAddress</a></li><li data-type='method'><a href="KeyPair.html#getNodeID">getNodeID</a></li><li data-type='method'><a href="KeyPair.html#getPrivateKey">getPrivateKey</a></li><li data-type='method'><a href="KeyPair.html#getPublicKey">getPublicKey</a></li></ul></li><li><a href="module-storj_network_protocol-Protocol.html">Protocol</a></li><li><a href="Network.html">Network</a><ul class='methods'><li data-type='method'><a href="Network.html#_createContact">_createContact</a></li><li data-type='method'><a href="Network.html#_handleTransportError">_handleTransportError</a></li><li data-type='method'><a href="Network.html#_signMessage">_signMessage</a></li><li data-type='method'><a href="Network.html#_verifyMessage">_verifyMessage</a></li><li data-type='method'><a href="Network.html#connect">connect</a></li><li data-type='method'><a href="Network.html#fetch">fetch</a></li><li data-type='method'><a href="Network.html#open">open</a></li><li data-type='method'><a href="Network.html#publish">publish</a></li><li data-type='method'><a href="Network.html#store">store</a></li><li data-type='method'><a href="Network.html#subscribe">subscribe</a></li></ul></li><li><a href="Proof.html">Proof</a><ul class='methods'><li data-type='method'><a href="Proof.html#_generateLeaves">_generateLeaves</a></li><li data-type='method'><a href="Proof.html#prove">prove</a></li></ul></li><li><a href="Verification.html">Verification</a><ul class='methods'><li data-type='method'><a href="Verification.html#_getChallengeResponse">_getChallengeResponse</a></li><li data-type='method'><a href="Verification.html#verify">verify</a></li></ul></li></ul><h3>Modules</h3><ul><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_network_protocol.html">storj/network/protocol</a></li><li><a href="module-storj_utils.html">storj/utils</a><ul class='methods'><li data-type='method'><a href="module-storj_utils.html#.getNextPowerOfTwo">getNextPowerOfTwo</a></li><li data-type='method'><a href="module-storj_utils.html#.rmd160">rmd160</a></li><li data-type='method'><a href="module-storj_utils.html#.rmd160sha256">rmd160sha256</a></li><li data-type='method'><a href="module-storj_utils.html#.sha256">sha256</a></li></ul></li><li><a href="module-storjnode.html">storjnode</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-Audit_.html">Audit</a><ul class='methods'><li data-type='method'><a href="Audit.html#_createResponseInput">_createResponseInput</a></li><li data-type='method'><a href="Audit.html#_generateChallenge">_generateChallenge</a></li><li data-type='method'><a href="Audit.html#_generateTree">_generateTree</a></li><li data-type='method'><a href="Audit.html#getPrivateRecord">getPrivateRecord</a></li><li data-type='method'><a href="Audit.html#getPublicRecord">getPublicRecord</a></li></ul></li><li><a href="tutorial-Contract_.html">Contract</a><ul class='methods'><li data-type='method'><a href="Contract.html#.createValidator">createValidator</a></li><li data-type='method'><a href="Contract.html#.fromBuffer">fromBuffer</a></li><li data-type='method'><a href="Contract.html#.fromJSON">fromJSON</a></li><li data-type='method'><a href="Contract.html#.fromObject">fromObject</a></li><li data-type='method'><a href="Contract.html#_clean">_clean</a></li><li data-type='method'><a href="Contract.html#_complete">_complete</a></li><li data-type='method'><a href="Contract.html#_getSigningData">_getSigningData</a></li><li data-type='method'><a href="Contract.html#_validate">_validate</a></li><li data-type='method'><a href="Contract.html#get">get</a></li><li data-type='method'><a href="Contract.html#getHash">getHash</a></li><li data-type='method'><a href="Contract.html#set">set</a></li><li data-type='method'><a href="Contract.html#sign">sign</a></li><li data-type='method'><a href="Contract.html#toBuffer">toBuffer</a></li><li data-type='method'><a href="Contract.html#toJSON">toJSON</a></li><li data-type='method'><a href="Contract.html#toObject">toObject</a></li><li data-type='method'><a href="Contract.html#update">update</a></li><li data-type='method'><a href="Contract.html#verify">verify</a></li></ul></li><li><a href="tutorial-EncryptedTransport_.html">EncryptedTransport</a><ul class='methods'><li data-type='method'><a href="EncryptedTransport.html#_close">_close</a></li><li data-type='method'><a href="EncryptedTransport.html#_handleConnection">_handleConnection</a></li><li data-type='method'><a href="EncryptedTransport.html#_open">_open</a></li><li data-type='method'><a href="EncryptedTransport.html#_send">_send</a></li></ul></li><li><a href="tutorial-KeyPair_.html">KeyPair</a><ul class='methods'><li data-type='method'><a href="KeyPair.html#getAddress">getAddress</a></li><li data-type='method'><a href="KeyPair.html#getNodeID">getNodeID</a></li><li data-type='method'><a href="KeyPair.html#getPrivateKey">getPrivateKey</a></li><li data-type='method'><a href="KeyPair.html#getPublicKey">getPublicKey</a></li></ul></li><li><a href="tutorial-Network_.html">Network</a><ul class='methods'><li data-type='method'><a href="Network.html#_createContact">_createContact</a></li><li data-type='method'><a href="Network.html#_handleTransportError">_handleTransportError</a></li><li data-type='method'><a href="Network.html#_signMessage">_signMessage</a></li><li data-type='method'><a href="Network.html#_verifyMessage">_verifyMessage</a></li><li data-type='method'><a href="Network.html#connect">connect</a></li><li data-type='method'><a href="Network.html#fetch">fetch</a></li><li data-type='method'><a href="Network.html#open">open</a></li><li data-type='method'><a href="Network.html#publish">publish</a></li><li data-type='method'><a href="Network.html#store">store</a></li><li data-type='method'><a href="Network.html#subscribe">subscribe</a></li></ul></li><li><a href="tutorial-Proof_.html">Proof</a><ul class='methods'><li data-type='method'><a href="Proof.html#_generateLeaves">_generateLeaves</a></li><li data-type='method'><a href="Proof.html#prove">prove</a></li></ul></li><li><a href="tutorial-Verification_.html">Verification</a><ul class='methods'><li data-type='method'><a href="Verification.html#_getChallengeResponse">_getChallengeResponse</a></li><li data-type='method'><a href="Verification.html#verify">verify</a></li></ul></li><li><a href="tutorial-index_.html">index</a></li><li><a href="tutorial-index.js.html">index.js</a></li><li><a href="tutorial-lib_audit.js.html">lib_audit.js</a></li><li><a href="tutorial-lib_constants.js.html">lib_constants.js</a></li><li><a href="tutorial-lib_contract_index.js.html">lib_contract_index.js</a></li><li><a href="tutorial-lib_keypair.js.html">lib_keypair.js</a></li><li><a href="tutorial-lib_network_index.js.html">lib_network_index.js</a></li><li><a href="tutorial-lib_network_protocol.js.html">lib_network_protocol.js</a></li><li><a href="tutorial-lib_network_transport.js.html">lib_network_transport.js</a></li><li><a href="tutorial-lib_proof.js.html">lib_proof.js</a></li><li><a href="tutorial-lib_utils.js.html">lib_utils.js</a></li><li><a href="tutorial-lib_verification.js.html">lib_verification.js</a></li><li><a href="tutorial-module-storj_constants_.html">module-storj_constants</a></li><li><a href="tutorial-module-storj_network_protocol-Protocol_.html">module-storj_network_protocol-Protocol</a></li><li><a href="tutorial-module-storj_network_protocol_.html">module-storj_network_protocol</a></li><li><a href="tutorial-module-storj_utils_.html">module-storj_utils</a></li><li><a href="tutorial-module-storjnode_.html">module-storjnode</a></li><li><a href="tutorial-tutorial-protocol-spec.html">tutorial-protocol-spec</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">Tutorial: Protocol Specification</h1>
+    
+
+    <section>
+
+<header>
+    
+
+    <h2>Protocol Specification</h2>
+</header>
+
+<article>
+    <p>Nodes communicate with each other using
+<a href="http://www.jsonrpc.org/specification">JSON-RPC 2.0</a> over HTTPS. This requires
+farmers (nodes who are contracted by renter to store data) to be publicly
+addressable and enables access to content from web browsers, mobile phones, and
+any other devices that speak HTTP (hint: everything).</p>
+<p>This document outlines the specification for the RPC interface by defining the
+message structure, required methods, and expected response formats that are
+needed for a Storj protocol compliant implementation.</p>
+<h3>Request Format</h3><p>Requests are formed according to the JSON-RPC 2.0 specification and are issued
+via HTTP POST. The Storj protocol requires the use of <em>named parameters</em> -
+positional parameters are not supported. Example:</p>
+<pre class="prettyprint source lang-json"><code>{
+  &quot;method&quot;: &quot;PING&quot;,
+  &quot;params&quot;: {
+    &quot;contact&quot;: {
+      &quot;address&quot;: &quot;10.0.0.2&quot;,
+      &quot;port&quot;: 1337,
+      &quot;nodeID&quot;: &quot;89cc3ddb4209c6e7e301c10c0257adf4fd85f253&quot;
+    },
+    &quot;__nonce&quot;: 1455216323786,
+    &quot;__signature&quot;: &quot;3045022100de2e162d017a1e9d0ebfe2a94df3fc847b68281a9882...&quot;
+  },
+  &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
+}</code></pre><p>The receiving node for this request would then respond with the result, which
+in the case of a <code>PING</code> message, is simply an acknowledgement that includes
+the recipient's contact information and required <code>__signature</code> and <code>__nonce</code>:</p>
+<pre class="prettyprint source lang-json"><code>{
+  &quot;result&quot;: {
+    &quot;contact&quot;: {
+      &quot;address&quot;: &quot;10.0.0.3&quot;,
+      &quot;port&quot;: 1337,
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+    },
+    &quot;__nonce&quot;: 1455216323786,
+    &quot;__signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+  },
+  &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
+}</code></pre><p>In the event that an error occurs, an <code>error</code> property must be <em>added</em> to the
+response. You <em>still</em> need to include your <code>contact</code> data in the <code>result</code>
+property of the response:</p>
+<pre class="prettyprint source lang-json"><code>{
+  &quot;result&quot;: {
+    &quot;contact&quot;: {
+      &quot;address&quot;: &quot;10.0.0.3&quot;,
+      &quot;port&quot;: 1337,
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+    },
+    &quot;__nonce&quot;: 1455216323786,
+    &quot;__signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+  },
+  &quot;error&quot;: {
+    &quot;code&quot;: -32603,
+    &quot;message&quot;: &quot;OH GOD THERE'S SO MUCH BLOOD&quot;
+  },
+  &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
+}</code></pre><h3>Joining the Network</h3><p>To join the Storj network, one must only know the contact information for a
+single &quot;seed&quot; node. A node's contact information is defined as the following
+three properties:</p>
+<ul>
+<li><code>address</code> - hostname, domain, or IP</li>
+<li><code>port</code> - port number on which the node is listening</li>
+<li><code>nodeID</code> - hash of the node's public key (see below)</li>
+</ul>
+<p>This information can be expressed as a URI in the following format:</p>
+<pre class="prettyprint source"><code>storj://10.0.0.2:1337/89cc3ddb4209c6e7e301c10c0257adf4fd85f253</code></pre><p>In addition to knowing this information about the seed, you also will need to
+know this information about yourself, so that it can be provided to the nodes
+with which you are communicating. Your &quot;contact card&quot; must be provided as the
+<code>contact</code> parameter in every message sent (both requests and responses). This
+is because messages must be signed with your private key and your <code>nodeID</code> is
+used by recipients to verify two things:</p>
+<ol>
+<li>That you own the private key corresponding to your claimed <code>nodeID</code></li>
+<li>That the message was in fact sent by you and not an attacker</li>
+</ol>
+<p>In the Storj network, nodes are identified by the hash of the public portion of
+an ECDSA key pair. Key pairs are generated using curve SECP256K1 and a node's
+<code>nodeID</code> is the &quot;pubkeyhash&quot;, defined as:</p>
+<pre class="prettyprint source"><code>RIPEMD160(SHA256(public_key))</code></pre><p>This pubkeyhash, combined with a message and signature is enough data to
+reconstruct the complete public key and is used in the Storj network to sign
+and verify messages. This ensures that nodes are unable to assume the identity
+of another node by claiming it has the same <code>nodeID</code>.</p>
+<p>Joining the network begins with a <code>FIND_NODE</code> request sent to one or more
+known seeds. The request must include a <code>key</code>, <code>contact</code> (you), along with a
+<code>__signature</code> and <code>__nonce</code>.</p>
+<h4>FIND_NODE</h4><p>When issuing a <code>FIND_NODE</code> request, you provide a <code>key</code> that represents the
+<code>nodeID</code> of the contact of which you would like to their neighbors. When
+joining the network, this value is <em>your own <code>nodeID</code></em>.</p>
+<pre class="prettyprint source lang-json"><code>{
+  &quot;method&quot;: &quot;FIND_NODE&quot;,
+  &quot;params&quot;: {
+    &quot;key&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+    &quot;contact&quot;: {
+      &quot;address&quot;: &quot;10.0.0.3&quot;,
+      &quot;port&quot;: 1337,
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+    },
+    &quot;__nonce&quot;: 1455216323786,
+    &quot;__signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+  },
+  &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
+}</code></pre><p>When a node receives a <code>FIND_NODE</code> RPC message, it must perform a lookup in
+it's routing table and respond with a <code>nodes</code> array containing the known
+contacts that are &quot;closest&quot; to the provided key. This is based on the XOR
+metric as the Storj network uses a
+<a href="https://en.wikipedia.org/wiki/Kademlia">Kademlia</a>-based overlay. In addition,
+if the receiving node is not already aware of the requesting node, it may add
+the requester to it's own routing table to later inform other requesters.</p>
+<pre class="prettyprint source lang-json"><code>{
+  &quot;result&quot;: {
+    &quot;nodes&quot;: [
+      {
+        &quot;address&quot;: &quot;10.0.0.4&quot;,
+        &quot;port&quot;: 1337,
+        &quot;nodeID&quot;: &quot;58dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+      },
+      {
+        &quot;address&quot;: &quot;10.0.0.5&quot;,
+        &quot;port&quot;: 1337,
+        &quot;nodeID&quot;: &quot;68dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+      },
+      {
+        &quot;address&quot;: &quot;10.0.0.6&quot;,
+        &quot;port&quot;: 1337,
+        &quot;nodeID&quot;: &quot;78dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+      }
+    ],
+    &quot;contact&quot;: {
+      &quot;address&quot;: &quot;10.0.0.3&quot;,
+      &quot;port&quot;: 1337,
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+    },
+    &quot;__nonce&quot;: 1455216323786,
+    &quot;__signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+  },
+  &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
+}</code></pre><p>Upon receipt of the <code>FIND_NODE</code> response, the node attempting to join the
+network may iteratively send the same <code>FIND_NODE</code> request to contacts that have
+been newly added to the routing table to build out a wider view of the network.
+Once the joining node is satisfied with the size of the routing table (or there
+are no more nodes to discover), this is considered a successful join.</p>
+<h3>Soliciting Storage</h3><p>Once a node has a sufficiently complete routing table and view of the network,
+it's time to buddy up with it's neighbors to cooperate in the sharing and relay
+of publications. A &quot;publication&quot; is essentially a <strong>request for storage</strong>. When
+a node in the network wishes to store some data, it notifies it's closest
+neighbors who, if interested, will respond to negotiate a storage contract.</p>
+<p>If the neighbors are not offering storage or do not wish to fulfill the terms of
+the storage contract, they must check to see if any of their neighbors are and
+forward the publication to them. If no known neighbors are interested, then the
+publication is sent to a random node in that neighbor's routing table and the
+process repeats until an interested node fulfills the contract.</p>
+<h4>SUBSCRIBE</h4><p>In order to know what publications in which your neighbors are interested, we
+select the 3 nodes in our routing table that are identified by a <code>nodeID</code> that
+is closest to ours and we issue a <code>SUBSCRIBE</code> message to each of them:</p>
+<pre class="prettyprint source lang-json"><code>{
+  &quot;method&quot;: &quot;SUBSCRIBE&quot;,
+  &quot;params&quot;: {
+    &quot;contact&quot;: {
+      &quot;address&quot;: &quot;10.0.0.2&quot;,
+      &quot;port&quot;: 1337,
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+    },
+    &quot;__nonce&quot;: 1455216323786,
+    &quot;__signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+  },
+  &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
+}</code></pre><p>To properly handle a <code>SUBSCRIBE</code> message, the recipient must respond with an
+<em>attenuated bloom filter</em>, with a size 160 bits and a depth of 3. This data
+structure represents 3 sets of topics to which the recipient's neighbors are
+subscribed 3 &quot;hops&quot; away.</p>
+<pre class="prettyprint source lang-json"><code>{
+  &quot;result&quot;: {
+    &quot;bloom&quot;: {
+      &quot;filters&quot;: [{
+        &quot;bitfield&quot;: {
+          &quot;buffer&quot;: {
+            &quot;type&quot;: &quot;Buffer&quot;,
+            &quot;data&quot;: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+          }
+        }
+      }, {
+        &quot;bitfield&quot;: {
+          &quot;buffer&quot;: {
+            &quot;type&quot;: &quot;Buffer&quot;,
+            &quot;data&quot;: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+          }
+        }
+      }, {
+        &quot;bitfield&quot;: {
+          &quot;buffer&quot;: {
+            &quot;type&quot;: &quot;Buffer&quot;,
+            &quot;data&quot;: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+          }
+        }
+      }]
+    },
+    &quot;contact&quot;: {
+      &quot;address&quot;: &quot;10.0.0.3&quot;,
+      &quot;port&quot;: 1337,
+      &quot;nodeID&quot;: &quot;58dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+    },
+    &quot;__nonce&quot;: 1455216323786,
+    &quot;__signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+  },
+  &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
+}</code></pre><p>When the original requesting node receives this response, it must update it's
+local attenuated bloom filter to reflect this response, starting at it's filter
+at index <code>1</code> (since index <code>0</code> is reserved for topic to which the node itself is
+interested).</p>
+<h4>UPDATE</h4><p>After the requester updates it's local view of it's neighbor's publication
+subscriptions, it must in turn update it's neighbors with it's own publication
+subscriptions by providing it's own attenuated bloom filter:</p>
+<pre class="prettyprint source lang-json"><code>{
+  &quot;method&quot;: &quot;UPDATE&quot;,
+  &quot;params&quot;: {
+    &quot;bloom&quot;: {
+      &quot;filters&quot;: [{
+        &quot;bitfield&quot;: {
+          &quot;buffer&quot;: {
+            &quot;type&quot;: &quot;Buffer&quot;,
+            &quot;data&quot;: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+          }
+        }
+      }, {
+        &quot;bitfield&quot;: {
+          &quot;buffer&quot;: {
+            &quot;type&quot;: &quot;Buffer&quot;,
+            &quot;data&quot;: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+          }
+        }
+      }, {
+        &quot;bitfield&quot;: {
+          &quot;buffer&quot;: {
+            &quot;type&quot;: &quot;Buffer&quot;,
+            &quot;data&quot;: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+          }
+        }
+      }]
+    },
+    &quot;contact&quot;: {
+      &quot;address&quot;: &quot;10.0.0.2&quot;,
+      &quot;port&quot;: 1337,
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+    },
+    &quot;__nonce&quot;: 1455216323786,
+    &quot;__signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+  },
+  &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
+}</code></pre><p>This method is essentially the &quot;push&quot; version of the <code>SUBSCRIBE</code> message, where
+instead of providing subscription information as a response, we provide it as a
+request. Whenever a node subscribes to a new publication topic, it should
+initiate another <code>SUBSCRIBE</code>/<code>UPDATE</code> loop with it's neighbors to ensure that
+it may cooperate in publication relay effectively.</p>
+<h4>PUBLISH</h4><p>Once a node has a view of the publications to which it's neighbors are
+subscribed, it is capable of issuing a <code>PUBLISH</code> message containing a <code>topic</code>
+and some <code>content</code>. This message is sent to the node's nearest neighbors, who
+then relay it to their neighbors based upon their own view of nearby
+subscriptions.</p>
+<p>The <code>topic</code> property and the corresponding <code>contents</code> data is arbitrary, but
+this mechanism is used for publishing &quot;asks&quot; for storage contracts. In this
+case, the <code>topic</code> is equal to the unique <a href="Contract.html">Contract</a> type and the
+<code>contents</code> is equal to the proposed contract itself:</p>
+<pre class="prettyprint source lang-json"><code>{
+  &quot;method&quot;: &quot;PUBLISH&quot;,
+  &quot;params&quot;: {
+    &quot;uuid&quot;: &quot;7f0c40a2-e465-4f3e-b617-3d53460e34f7&quot;,
+    &quot;topic&quot;: &quot;56ce3e837f575827cb5a94e2b609756a48fa4a3882f5e762b262af31f432878d&quot;,
+    &quot;contents&quot;: {
+      &quot;type&quot;: &quot;56ce3e837f575827cb5a94e2b609756a48fa4a3882f5e762b262af31f432878d&quot;,
+      &quot;renter_id&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+      &quot;renter_signature&quot;: null,
+      &quot;farmer_id&quot;: null,
+      &quot;farmer_signature&quot;: null,
+      &quot;data_size&quot;: 4906,
+      &quot;data_hash&quot;: &quot;4efc1c36d3349189fb3486d2914f56e05d3e66f8&quot;,
+      &quot;store_begin&quot;: 1455228907665,
+      &quot;store_end&quot;: 2910457830468,
+      &quot;audit_count&quot;: 10,
+      &quot;payment_storage_price&quot;: 1200,
+      &quot;payment_download_price&quot;: 2,
+      &quot;payment_destination&quot;: null
+    },
+    &quot;publishers&quot;: [
+      &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+    ],
+    &quot;ttl&quot;: 1455228597837,
+    &quot;contact&quot;: {
+      &quot;address&quot;: &quot;10.0.0.2&quot;,
+      &quot;port&quot;: 1337,
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+    },
+    &quot;__nonce&quot;: 1455216323786,
+    &quot;__signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+  },
+  &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
+}</code></pre><p>Upon receipt of a <code>PUBLISH</code> message, a node must first check to make sure it
+has not already received the publication. This is done by caching the <code>uuid</code> of
+received publications. If the node has already seen the publication, it should
+respond with an error message indicating such. The node should also make sure
+that the publication has not expired by checking the <code>ttl</code> against the current
+UNIX time.</p>
+<p>If the node has not previously seen the publication and the message has not
+expired, then it must check to see if the publication topic is of interest to
+itself by testing it's attenuated bloom filter at index <code>0</code> for the topic. If
+the node is interested in the publication, it may take action accordingly. In
+the case of storage contract, the node may begin communicating directly with
+the original publisher to finalize the contract.</p>
+<p>Regardless of whether or not the node is interested in the publication, it
+should acknowledge receipt of the publication to the forwarder:</p>
+<pre class="prettyprint source lang-json"><code>{
+  &quot;result&quot;: {
+    &quot;contact&quot;: {
+      &quot;address&quot;: &quot;10.0.0.2&quot;,
+      &quot;port&quot;: 1337,
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+    },
+    &quot;__nonce&quot;: 1455216323786,
+    &quot;__signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+  },
+  &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
+}</code></pre><p>Then, it must append <em>negative information</em> to the publication message by
+adding it's own <code>nodeID</code> to the <code>publishers</code> property. Once the message has
+been updated with the negative information, the node must check it's attenuated
+bloom filter to see if any of it's neighbors are also interested and, if so,
+forward the message along to them. If no neighbors are interested, the node
+must select a random contact from the routing table and forward the message to
+that contact.</p>
+<h3>Negotiating Storage Contracts</h3><p>When a node receives a contract proposal in the form of a <code>PUBLISH</code> message and
+that proposal meets the recipient's criteria, it can send an <code>OFFER</code> message to
+the original publisher.</p>
+<h4>OFFER</h4><p>The offer message must contain the original contract, supplemented with the
+information that is required of the offering node, which at minimum must
+include <code>farmer_id</code>, <code>farmer_signature</code>, and <code>payment_destination</code>.</p>
+<blockquote>
+<p>The <code>*_signature</code> property value should be the hex-encoded signature of the
+JSON string representation of the contract, minus both signature fields and
+with keys sorted alphanumerically.</p>
+</blockquote>
+<p>In addition to these fields, the offering node (or &quot;farmer&quot;) may modify the
+other fields in the contract to their liking if they wish to counter the
+original offer:</p>
+<pre class="prettyprint source lang-json"><code>{
+  &quot;method&quot;: &quot;OFFER&quot;,
+  &quot;params&quot;: {
+    &quot;contract&quot;: {
+      &quot;type&quot;: &quot;56ce3e837f575827cb5a94e2b609756a48fa4a3882f5e762b262af31f432878d&quot;,
+      &quot;renter_id&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+      &quot;renter_signature&quot;: null,
+      &quot;farmer_id&quot;: &quot;58dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+      &quot;farmer_signature&quot;: &quot;304502203f2be986f4213c45bf2f78c57cbf4001b049c4fd...&quot;,
+      &quot;data_size&quot;: 4906,
+      &quot;data_hash&quot;: &quot;4efc1c36d3349189fb3486d2914f56e05d3e66f8&quot;,
+      &quot;store_begin&quot;: 1455228907665,
+      &quot;store_end&quot;: 2910457830468,
+      &quot;audit_count&quot;: 10,
+      &quot;payment_storage_price&quot;: 1200,
+      &quot;payment_download_price&quot;: 2,
+      &quot;payment_destination&quot;: &quot;1JUhMAZj2Mkb4mRaGxbBYPsStryPyDxPuj&quot;
+    },
+    &quot;contact&quot;: {
+      &quot;address&quot;: &quot;10.0.0.2&quot;,
+      &quot;port&quot;: 1337,
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+    },
+    &quot;__nonce&quot;: 1455216323786,
+    &quot;__signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+  },
+  &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
+}</code></pre><p>The receiving node must check the offer and determine whether or not the
+modified contract terms are satisfactory. If so, it may finalize the contract
+by adding it's signature to the <code>renter_signature</code> field:</p>
+<pre class="prettyprint source lang-json"><code>{
+  &quot;result&quot;: {
+    &quot;contract&quot;: {
+      &quot;type&quot;: &quot;56ce3e837f575827cb5a94e2b609756a48fa4a3882f5e762b262af31f432878d&quot;,
+      &quot;renter_id&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+      &quot;renter_signature&quot;: &quot;304402202ccc152ee81fbff7e802c290cabea0c62384bb12...&quot;,
+      &quot;farmer_id&quot;: &quot;58dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+      &quot;farmer_signature&quot;: &quot;304502203f2be986f4213c45bf2f78c57cbf4001b049c4fd...&quot;,
+      &quot;data_size&quot;: 4906,
+      &quot;data_hash&quot;: &quot;4efc1c36d3349189fb3486d2914f56e05d3e66f8&quot;,
+      &quot;store_begin&quot;: 1455228907665,
+      &quot;store_end&quot;: 2910457830468,
+      &quot;audit_count&quot;: 10,
+      &quot;payment_storage_price&quot;: 1200,
+      &quot;payment_download_price&quot;: 2,
+      &quot;payment_destination&quot;: &quot;1JUhMAZj2Mkb4mRaGxbBYPsStryPyDxPuj&quot;
+    },
+    &quot;contact&quot;: {
+      &quot;address&quot;: &quot;10.0.0.2&quot;,
+      &quot;port&quot;: 1337,
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+    },
+    &quot;__nonce&quot;: 1455216323786,
+    &quot;__signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+  },
+  &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
+}</code></pre><p>Alternatively, the receiving node may counter the offer by modifying any of the
+fields and returning those in the response. The farmer must check the contract
+against it's signature to determine if the terms of the contract have been
+changed. This counter offer loop can continue until one party abandons the
+offer loop or until both parties have signed the same contract.</p>
+<blockquote>
+<p>Once a contract has been finalized, each node should store a copy locally
+that can be keyed by the contract's hash (RIPEMD160(SHA256(JSON(CONTRACT)))).</p>
+</blockquote>
+<h3>Executing a Storage Contract</h3><p>Once a storage contract has been signed by both parties, the renter may execute
+the terms of the contract by issuing a <code>CONSIGN</code> message to the farmer. The
+purpose of this message is to deliver the data referenced by the contract for
+the farmer to store. The consign message must contain the hex-encoded
+<code>data_shard</code> itself, the <code>contract_hash</code>, as well as an <code>audit_tree</code> that
+contains the bottom leaves of the audit strategy's merkle tree (see <strong>Auditing
+a Storage Contract</strong> below).</p>
+<pre class="prettyprint source lang-json"><code>{
+  &quot;method&quot;: &quot;CONSIGN&quot;,
+  &quot;params&quot;: {
+    &quot;data_hash&quot;: &quot;4efc1c36d3349189fb3486d2914f56e05d3e66f8&quot;,
+    &quot;data_shard&quot;: &quot;7b0a2020226e616d65223a202273746f726a222c0a20202276657273696f...&quot;,
+    &quot;audit_tree&quot;: [
+      &quot;40a98e19c298631cba19d6c19691360ce08ccf36&quot;,
+      &quot;02f0d971096305e797da9165cd50d4d1bb19590b&quot;,
+      &quot;a44ad75d8aa118cdd73df77ae2543d3e87f94576&quot;,
+      &quot;d84e8bfac28a98df418d0c3029f77a4d9f338e9e&quot;,
+      &quot;7408bb5b0a9eefa56f3234fc83d2423f76c4b857&quot;,
+      &quot;d1b71886c910d34b31cee9e23316abded9ef3fe0&quot;,
+      &quot;0ac89686a12e26aaf952180c0fec5373224c4c1e&quot;,
+      &quot;98c304116e7eb89839ff6c96202eb4c3cbdaf8e0&quot;,
+      &quot;c7937b8a1be9da426e076eff70c5b4edf8a66270&quot;,
+      &quot;c6c2c5cdafb99e4d62185d42e59522d15c33d676&quot;,
+      &quot;1f87ca29e75944aa36e676b3ddf27e49a8ca4fe2&quot;,
+      &quot;8585e356a517535b8a36ec9222b955c5b61a5227&quot;,
+      &quot;ba084d3f143f2896809d3f1d7dffed472b39d8de&quot;,
+      &quot;ba084d3f143f2896809d3f1d7dffed472b39d8de&quot;,
+      &quot;ba084d3f143f2896809d3f1d7dffed472b39d8de&quot;,
+      &quot;ba084d3f143f2896809d3f1d7dffed472b39d8de&quot;
+    ],
+    &quot;contact&quot;: {
+      &quot;address&quot;: &quot;10.0.0.2&quot;,
+      &quot;port&quot;: 1337,
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+    },
+    &quot;__nonce&quot;: 1455216323786,
+    &quot;__signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+  },
+  &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
+}</code></pre><p>Upon receipt of a <code>CONSIGN</code> message, the farmer must lookup the reference
+contract by the supplied <code>data_hash</code> and verify that the <code>data_shard</code> hashes to
+the <code>data_hash</code> supplied in the original contract, the size of the <code>data_shard</code>
+does not exceed the <code>data_size</code> supplied in the original contract, and that the
+number of items in the <code>audit_tree</code> is equal to the next power of 2 of the
+<code>audit_count</code> supplied in the origin contract.</p>
+<p>In addition, the farmer should verify that the current UNIX time is greater
+than or equal to the agreed upon <code>store_begin</code> and less than the agreed upon
+<code>store_end</code>. If everything checks out, the farmer must store the consigned data
+in such a way that it may later be retrieved by it's hash. Once the farmer has
+done this, it must acknowledge the renter to confirm:</p>
+<pre class="prettyprint source lang-json"><code>{
+  &quot;result&quot;: {
+    &quot;contact&quot;: {
+      &quot;address&quot;: &quot;10.0.0.2&quot;,
+      &quot;port&quot;: 1337,
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+    },
+    &quot;__nonce&quot;: 1455216323786,
+    &quot;__signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+  },
+  &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
+}</code></pre><h3>Auditing a Storage Contract</h3><p>Before a renter issues a <code>CONSIGN</code> RPC, it must pre-calculate a series of
+&quot;challenges&quot;, the number of which must equal the <code>audit_count</code> defined in the
+negotiated contract. A challenge is simply 32 random bytes encoded as hex. The
+generated challenges must not be shared until the renter wishes to issue an
+<code>AUDIT</code> request.</p>
+<p>When issuing a <code>CONSIGN</code> request, the renter must include an <code>audit_tree</code> which
+contains the bottom leaves of a merkle tree. Each of the bottom leaves of the
+tree must be equal to the double <code>RIPEMD160(SHA256(challenge + shard))</code> encoded
+as hex. In order to ensure that the resulting merkle tree is properly
+&quot;balanced&quot;, the number of bottom leaves must be equal to the next power of 2 of
+the audit count. To ensure this, the additional leaves can simply be the double
+<code>RIPEMD160(SHA256(''))</code> (the same hash function for an audit, but applied to an
+empty buffer).</p>
+<p>To audit a farmer is to request proof that it is still honoring the terms of
+the storage contract without the need to have them supply the entire
+<code>data_shard</code>. To do this, the renter must supply the farmer with one of the
+secret pre-calculated challenges:</p>
+<pre class="prettyprint source lang-json"><code>{
+  &quot;method&quot;: &quot;AUDIT&quot;,
+  &quot;params&quot;: {
+    &quot;data_hash&quot;: &quot;4efc1c36d3349189fb3486d2914f56e05d3e66f8&quot;,
+    &quot;challenge&quot;: &quot;6290bb9e1766bf3fc00eea3bb14146925611026d453e1aa95c32973f8baa5c98&quot;,
+    &quot;contact&quot;: {
+      &quot;address&quot;: &quot;10.0.0.2&quot;,
+      &quot;port&quot;: 1337,
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+    },
+    &quot;__nonce&quot;: 1455216323786,
+    &quot;__signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+  },
+  &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
+}</code></pre><p>Upon receipt of an <code>AUDIT</code> request, the farmer must lookup the <code>data_shard</code> by
+the supplied <code>data_hash</code>, then calculate the <em>single</em>
+<code>RIPEMD160(SHA256(challenge + shard))</code>.</p>
+<blockquote>
+<p>The result of this operation should hash again to match one of the items
+supplied in the <code>audit_tree</code> property of the original <code>CONSIGN</code> request.</p>
+</blockquote>
+<p>In addition to supplying this value as proof that the farmer is still honoring
+the terms of the contract, the farmer must <em>also</em> provide the uncles required
+to rebuild the merkle tree. This <strong>proof</strong> response is specified as a series
+of nested JSON arrays:</p>
+<pre class="prettyprint source lang-json"><code>{
+  &quot;result&quot;: {
+    &quot;proof&quot;: [
+      [
+        [
+          [
+            [
+              &quot;6a2f02144c461e178dc4496c263313e64d7a56ab&quot;
+            ],
+            &quot;efb0dfa48813e3289ba8d16e9e23cf1efa1a99fd&quot;
+          ],
+          &quot;dfb8877b84e7a7496a4b08b2aef6ffd02ccbfccc&quot;
+        ],
+        &quot;82c60f546bcaaabeb908c911b1fadb816e039409&quot;
+      ],
+      &quot;5e265b0256cd471c6af22bd66b59ed9242067654&quot;
+    ],
+    &quot;contact&quot;: {
+      &quot;address&quot;: &quot;10.0.0.2&quot;,
+      &quot;port&quot;: 1337,
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+    },
+    &quot;__nonce&quot;: 1455216323786,
+    &quot;__signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+  },
+  &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
+}</code></pre><p>Upon receipt of the farmer's proof, the renter must verify that the proof is
+valid by using it to rebuild the merkle tree. See <a href="Verification.html#verify">Verification#verify</a>
+for an implementation example. If the proof is verified successfully, then the
+renter is expected to issue a payment to the <code>payment_destination</code> defined in
+the original contract. The amount of the payment should be equal to:</p>
+<pre class="prettyprint source"><code>(payment_storage_price / audit_count) + (payment_download_price * downloads_since_last_audit)</code></pre><p>If the verification fails then the contract is null and no payment is required.
+Conversely, if the verification succeeds and the renter does not issue the
+payment in a timely manner, then the contract is also null and the farmer may
+decide to cease storage of the data.</p>
+<h3>Downloading Consigned Data</h3><p>When a renter wishes to retrieve data that is stored under contract, it can
+issue a <code>RETRIEVE</code> RPC message that includes the <code>data_hash</code> to the farmer
+storing the data:</p>
+<pre class="prettyprint source lang-json"><code>{
+  &quot;method&quot;: &quot;RETRIEVE&quot;,
+  &quot;params&quot;: {
+    &quot;data_hash&quot;: &quot;4efc1c36d3349189fb3486d2914f56e05d3e66f8&quot;,
+    &quot;contact&quot;: {
+      &quot;address&quot;: &quot;10.0.0.2&quot;,
+      &quot;port&quot;: 1337,
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+    },
+    &quot;__nonce&quot;: 1455216323786,
+    &quot;__signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+  },
+  &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
+}</code></pre><p>After the recipient of the <code>RETRIEVE</code> message verifies the sender's signature
+it must lookup the storage contract by the supplied <code>data_hash</code> and verify that
+the sender is the party with which the contract was negotiated. If all tests
+pass, then the farmer must respond with the hex encoded <code>data_shard</code>. After the
+<code>data_shard</code> is delivered successfully, the farmer must increment it's record
+of the <code>downloads_since_last_audit</code> (which must be reset after the next audit).</p>
+<pre class="prettyprint source lang-json"><code>{
+  &quot;result&quot;: {
+    &quot;data_shard&quot;: &quot;7b0a2020226e616d65223a202273746f726a222c0a20202276657273696f...&quot;,
+    &quot;contact&quot;: {
+      &quot;address&quot;: &quot;10.0.0.2&quot;,
+      &quot;port&quot;: 1337,
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+    },
+    &quot;__nonce&quot;: 1455216323786,
+    &quot;__signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+  },
+  &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
+}</code></pre><p>In addition, the renter must check the integrity of the returned <code>data_shard</code>
+by calculating the hash and checking it against the expected <code>data_hash</code>. If
+the test fails, then this effectively a failed audit and the contract is null.</p>
+</article>
+
+</section>
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Fri Feb 12 2016 13:57:39 GMT-0500 (EST) using the Minami theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>

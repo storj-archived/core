@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>KeyPair - Documentation</title>
+    <title>lib/network/transport.js - Documentation</title>
 
     <script src="scripts/prettify/prettify.js"></script>
     <script src="scripts/prettify/lang-css.js"></script>
@@ -28,596 +28,144 @@
 
 <div id="main">
     
-    <h1 class="page-title">KeyPair</h1>
-    
-
-    
-
-
-
-
-<section>
-
-<header>
-    
-        <h2>
-        KeyPair
-        </h2>
-        
-    
-</header>
-
-<article>
-    <div class="container-overview">
-    
-        
-
-    
-
-    <h4 class="name" id="KeyPair"><span class="type-signature"></span>new KeyPair<span class="signature">(privkey)</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-<div class="description">
-    Represents a ECDSA key pair
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>privkey</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-|
-
-<span class="param-type">Buffer</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">WIF encoded ECDSA private key</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_keypair.js_.html">lib/keypair.js</a>, <a href="lib_keypair.js_.html#line10">line 10</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-    </div>
-
-    
-
-    
-
-    
-
-     
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        
-            
-
-    
-
-    <h4 class="name" id="getAddress"><span class="type-signature"></span>getAddress<span class="signature">()</span><span class="type-signature"> &rarr; {String}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Returns the bitcoin address version of the nodeID
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_keypair.js_.html">lib/keypair.js</a>, <a href="lib_keypair.js_.html#line54">line 54</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    address - Base58 encoded address
-</div>
-
-
-
-<dl class="param-type">
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">String</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="getNodeID"><span class="type-signature"></span>getNodeID<span class="signature">()</span><span class="type-signature"> &rarr; {String}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Returns the NodeID derived from the public key
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_keypair.js_.html">lib/keypair.js</a>, <a href="lib_keypair.js_.html#line44">line 44</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    nodeID - RIPEMD160 hash of public key
-</div>
-
-
-
-<dl class="param-type">
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">String</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="getPrivateKey"><span class="type-signature"></span>getPrivateKey<span class="signature">()</span><span class="type-signature"> &rarr; {Buffer}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Returns the private key
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_keypair.js_.html">lib/keypair.js</a>, <a href="lib_keypair.js_.html#line28">line 28</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<dl class="param-type">
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Buffer</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="getPublicKey"><span class="type-signature"></span>getPublicKey<span class="signature">()</span><span class="type-signature"> &rarr; {Buffer}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Returns the public key
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_keypair.js_.html">lib/keypair.js</a>, <a href="lib_keypair.js_.html#line36">line 36</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<dl class="param-type">
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Buffer</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-    
-
-    
-
-    
-</article>
-
-</section>
+    <h1 class="page-title">lib/network/transport.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use strict';
+
+var assert = require('assert');
+var kad = require('kad');
+var inherits = require('util').inherits;
+var net = require('net');
+var es = require('event-stream');
+var KeyPair = require('../keypair');
+var ECIES = require('bitcore-ecies');
+
+/**
+* Defines the end-to-end encrypted RPC interface
+* @constructor
+* @param {kad.Contact} contact
+* @param {Object} options
+*/
+function EncryptedTransport(contact, options) {
+  if (!(this instanceof EncryptedTransport)) {
+    return new EncryptedTransport(contact, options);
+  }
+
+  assert(options.keypair instanceof KeyPair, 'Invalid keypair supplied');
+  kad.RPC.call(this, contact, options);
+
+  this._keypair = options.keypair;
+  this._pubkeys = {};
+  this._queuedResponses = {};
+}
+
+inherits(EncryptedTransport, kad.RPC);
+
+/**
+* Opens a TCP socket and sets up event listeners
+* @param {Function} ready
+*/
+EncryptedTransport.prototype._open = function(ready) {
+  var self = this;
+
+  this._socket = net.createServer(this._handleConnection.bind(this));
+
+  this._socket.on('error', function(err) {
+    self._log.error('rpc encountered and error: %s', err.message);
+  });
+
+  this._socket.on('listening', ready).listen(
+    this._contact.port,
+    this._contact.address
+  );
+};
+
+/**
+* Send a RPC to the given contact
+* @param {Buffer} data
+* @param {kad.Contact} contact
+*/
+EncryptedTransport.prototype._send = function(data, contact) {
+  var self = this;
+  var parsed = JSON.parse(data.toString());
+  var encrypter = new ECIES().privateKey(self._keypair._privkey);
+  var message = null;
+
+  try {
+    encrypter.publicKey(this._pubkeys[contact.nodeID]);
+    message = encrypter.encrypt(data);
+  } catch (err) {
+    self._logger.warn('failed to encrypt message, will send as cleartext');
+    message = data;
+  }
+
+  if (this._queuedResponses[parsed.id]) {
+    this._queuedResponses[parsed.id].end(data);
+    return delete this._queuedResponses[parsed.id];
+  }
+
+  var sock = net.createConnection(contact.port, contact.address);
+
+  sock.on('error', function(err) {
+    self._log.error('error connecting to peer', err);
+  });
+
+  this._queuedResponses[parsed.id] = sock;
+  this._handleConnection(sock);
+  sock.write(data);
+};
+
+/**
+ * Handle incoming connection stream
+ * @private
+ * @param {net.Socket} connection
+ */
+EncryptedTransport.prototype._handleConnection = function(connection) {
+  var self = this;
+
+  var chunks = connection.pipe(es.split('\n'));
+  var messages = chunks.pipe(es.map(function(chunk, callback) {
+    var decrypter = new ECIES({
+      noKey: true
+    }).privateKey(self._keypair._privkey);
+
+    try {
+      callback(null, decrypter.decrypt(chunk));
+    } catch (err) {
+      self._logger.warn('failed to decrypt message, will parse as cleartext');
+      callback(null, chunk);
+    }
+  }));
+
+  messages.on('data', function(clearbuffer) {
+    self.receive(clearbuffer);
+  });
+
+  messages.on('error', function(err) {
+    self._log.error('error decrypting message, reason:', err.message);
+    self.receive(null);
+  });
+};
+
+/**
+* Closes the underlying TCP socket
+*/
+EncryptedTransport.prototype._close = function() {
+  this._socket.close();
+};
+
+module.exports = EncryptedTransport;
+</code></pre>
+        </article>
+    </section>
 
 
 

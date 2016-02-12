@@ -503,7 +503,7 @@ changed. This counter offer loop can continue until one party abandons the
 offer loop or until both parties have signed the same contract.
 
 > Once a contract has been finalized, each node should store a copy locally
-> that can be keyed by the contract's hash (RIPEMD160(SHA256(JSON(CONTRACT)))).
+> that can be keyed by the `data_hash`.
 
 ### Executing a Storage Contract
 
@@ -556,7 +556,7 @@ contract by the supplied `data_hash` and verify that the `data_shard` hashes to
 the `data_hash` supplied in the original contract, the size of the `data_shard`
 does not exceed the `data_size` supplied in the original contract, and that the
 number of items in the `audit_tree` is equal to the next power of 2 of the
-`audit_count` supplied in the origin contract.
+`audit_count` supplied in the original contract.
 
 In addition, the farmer should verify that the current UNIX time is greater
 than or equal to the agreed upon `store_begin` and less than the agreed upon

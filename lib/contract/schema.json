@@ -8,30 +8,12 @@
       "type": ["string", "null"],
       "pattern": "[A-Fa-f0-9]{40}$"
     },
-    "renter_address": {
-      "type": ["string", "null"],
-      "format": "ipv4"
-    },
-    "renter_port": {
-      "type": ["integer", "null"],
-      "minimum": 1,
-      "maximum": 65535
-    },
     "renter_signature": {
       "type": ["string", "null"]
     },
     "farmer_id": {
       "type": ["string", "null"],
       "pattern": "[A-Fa-f0-9]{40}$"
-    },
-    "farmer_address": {
-      "type": ["string", "null"],
-      "format": "ipv4"
-    },
-    "farmer_port": {
-      "type": ["integer", "null"],
-      "minimum": 1,
-      "maximum": 65535
     },
     "farmer_signature": {
       "type": ["string", "null"]
@@ -48,25 +30,15 @@
       "type": ["integer", "null"],
       "minimum": 0
     },
-    "store_duration": {
-      "type": ["integer", "null"],
-      "minimum": 0
-    },
     "store_end": {
       "type": ["integer", "null"],
       "minimum": 0
-    },
-    "audit_algorithm": {
-      "type": ["string", "null"]
     },
     "audit_count": {
       "type": ["integer", "null"],
       "minimum": 0
     },
-    "payment_currency": {
-      "type": ["string", "null"]
-    },
-    "payment_amount": {
+    "payment_storage_price": {
       "type": ["integer", "null"]
     },
     "payment_download_price": {
@@ -74,21 +46,6 @@
     },
     "payment_destination": {
       "type": ["string", "null"]
-    },
-    "payment_source": {
-      "type": ["string", "null"]
-    },
-    "payment_begin": {
-      "type": ["integer", "null"],
-      "minimum": 0
-    },
-    "payment_settlements": {
-      "type": ["integer", "null"],
-      "minimum": 0
-    },
-    "payment_interval": {
-      "type": ["integer", "null"],
-      "minimum": 0
     }
   }
 }

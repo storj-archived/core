@@ -164,7 +164,7 @@ describe('Contract', function() {
   describe('#get', function() {
 
     it('should return the property value', function() {
-      expect(Contract().get('payment_amount')).to.equal(0);
+      expect(Contract().get('payment_storage_price')).to.equal(0);
     });
 
     it('should return undefined', function() {
@@ -177,9 +177,9 @@ describe('Contract', function() {
 
     it('should set and return the property value', function() {
       var contract = new Contract();
-      var amount = contract.set('payment_amount', 100);
+      var amount = contract.set('payment_storage_price', 100);
       expect(amount).to.equal(100);
-      expect(contract._properties.payment_amount).to.equal(100);
+      expect(contract._properties.payment_storage_price).to.equal(100);
     });
 
     it('should return undefined', function() {
@@ -196,14 +196,10 @@ describe('Contract', function() {
     it('should update all the supplied fields', function() {
       var contract = new Contract();
       contract.update({
-        payment_amount: 100,
-        renter_port: 1337,
-        renter_address: '0.0.0.0',
+        payment_storage_price: 100,
         invalid_property: true
       });
-      expect(contract._properties.payment_amount).to.equal(100);
-      expect(contract._properties.renter_port).to.equal(1337);
-      expect(contract._properties.renter_address).to.equal('0.0.0.0');
+      expect(contract._properties.payment_storage_price).to.equal(100);
       expect(contract._properties.invalid_property).to.equal(undefined);
     });
 

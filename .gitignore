@@ -33,8 +33,7 @@ node_modules
 .node_repl_history
 
 # Ignore compiled docs, but leave the directory
-doc/out
-!doc/out/.gitkeep
+jsdoc
 
 # Ignore browser build, but leave the directory
 dist/**

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>lib/network/index.js - Documentation</title>
+    <title>lib/shard/manager.js - Documentation</title>
 
     <script src="scripts/prettify/prettify.js"></script>
     <script src="scripts/prettify/lang-css.js"></script>
@@ -28,7 +28,7 @@
 
 <div id="main">
     
-    <h1 class="page-title">lib/network/index.js</h1>
+    <h1 class="page-title">lib/shard/manager.js</h1>
     
 
     
@@ -40,251 +40,84 @@
         <article>
             <pre class="prettyprint source linenums"><code>'use strict';
 
-var platform = require('os').platform();
-var path = require('path');
-var url = require('url');
 var assert = require('assert');
-var merge = require('merge');
 var async = require('async');
-var kad = require('kad');
-var bitcore = require('bitcore-lib');
-var constants = require('../constants');
-var utils = require('../utils');
-var Message = require('bitcore-message');
-var Quasar = require('kad-quasar');
-var KeyPair = require('../keypair');
-var Protocol = require('./protocol');
-var Contract = require('../contract');
-var ShardManager = require('../shard/manager');
-var ContractManager = require('../contract/manager');
-
-var HOME = platform !== 'win32' ? process.env.HOME : process.env.USER_PROFILE;
+var path = require('path');
+var fs = require('fs');
+var storage = require('kad').storage;
+var Shard = require('./');
 
 /**
- * Storj network interface
+ * Provides an interface for managing shards
  * @constructor
- * @param {KeyPair} keypair
- * @param {Object} options
+ * @param {String} datadir - Directory path for data shards/audits
  */
-function Network(keypair, options) {
-  if (!(this instanceof Network)) {
-    return new Network(keypair, options);
+function ShardManager(datadir) {
+  if (!(this instanceof ShardManager)) {
+    return new ShardManager(datadir);
   }
 
-  assert(keypair instanceof KeyPair, 'Invalid keypair supplied');
+  assert(fs.existsSync(path.dirname(datadir)), 'Storage path does not exist');
 
-  this._keypair = keypair;
-  this._options = merge(Object.create(Network.DEFAULTS), options);
-  this._logger = new kad.Logger(this._options.loglevel, 'storjnode');
-  this._contact = new kad.contacts.AddressPortContact(
-    merge(this._options.contact, { nodeID: this._keypair.getNodeID() })
-  );
-  this._transport = new kad.transports.HTTP(this._contact, {
-    logger: this._logger
-  });
-  this._router = new kad.Router({
-    transport: this._transport,
-    logger: this._logger
-  });
-  this._pubsub = new Quasar(this._router);
-
-  if (this._options.datadir) {
-    this._storage = new kad.storage.FS(this._options.datadir);
-  } else {
-    this._storage = new kad.storage.MemStore();
-  }
-
-  this._open = false;
+  this._path = datadir;
+  this._store = new storage.FS(this._path);
 }
 
-Network.DEFAULTS = {
-  loglevel: 3,
-  seeds: [
-    'storj://127.0.0.1:4001/02b60f4fc7934f95dca1c00186a09f01653a593d',
-    'storj://127.0.0.1:4002/a09d63dea0bd1e9856d6824181bce100ff44c013',
-    'storj://127.0.0.1:4003/de3bb839a705d26f6abc6885d07c813748b4f128',
-  ],
-  datadir: path.join(HOME, '.storjnode'),
-  contact: {
-    address: '127.0.0.1',
-    port: 4000,
-  }
-};
-
 /**
- * Opens the connection to the network
+ * Stores the shard
+ * @param {Shard} shard
  * @param {Function} callback
  */
-Network.prototype.open = function(callback) {
-  var seeds = this._options.seeds.map(this._createContact);
-  var protocol = new Protocol({
-    network: this,
-    shards: new ShardManager(
-      path.join(this._options.datadir, 'shards')
-    ),
-    contracts: new ContractManager(
-      path.join(this._options.datadir, 'contracts')
-    )
-  });
+ShardManager.prototype.add = function(shard, callback) {
+  assert(shard instanceof Shard, 'Invalid shard object supplied');
 
-  assert(!this._open, 'Network interface already open');
+  var self = this;
+  var data = [[shard.getHash(), 'data'].join('.'), shard.getHash()];
+  var tree = [[shard.getHash(), 'tree'].join('.'), shard.getTree()];
 
-  this._transport.on('error', this._handleTransportError.bind(this));
-  this._transport.before('serialize', this._signMessage.bind(this));
-  this._transport.before('receive', this._verifyMessage.bind(this));
-  this._transport.before('receive', protocol.handlers());
-
-  this._node = new kad.Node({
-    transport: this._transport,
-    router: this._router,
-    storage: this._storage,
-    logger: this._logger
-  });
-
-  this._open = true;
-
-  async.each(seeds, this._node.connect, callback);
+  async.each([data, tree], function(pair, done) {
+    self._store.put(pair[0], pair[1], done);
+  }, callback);
 };
 
 /**
- * Connects to the node at the given URI
- * @param {String} uri
+ * Removes the shard
+ * @param {String} shard_hash
  * @param {Function} callback
  */
-Network.prototype.connect = function(uri, callback) {
-  return this._node.connect(this._createContact(uri), callback);
+ShardManager.prototype.remove = function(shard_hash, callback) {
+  assert.ok(shard_hash, 'Invalid shard hash supplied');
+
+  var self = this;
+  var keys = [[shard_hash, 'data'].join('.'), [shard_hash, 'tree'].join('.')];
+
+  async.each(keys, self._store.del.bind(self._store), callback);
 };
 
 /**
- * Stores an item in the DHT
- * @param {Buffer} item
+ * Stores the shard
+ * @param {String} shard_hash
  * @param {Function} callback
  */
-Network.prototype.store = function(item, callback) {
-  return this._node.put(
-    utils.rmd160sha256(item.toJSON()),
-    item.toJSON(),
-    callback
-  );
-};
+ShardManager.prototype.load = function(shard_hash, callback) {
+  assert.ok(shard_hash, 'Invalid shard hash supplied');
 
-/**
- * Fetches an item from the DHT
- * @param {String} key
- * @param {Function} callback
- */
-Network.prototype.fetch = function(key, callback) {
-  return this._node.get(key, callback);
-};
+  var self = this;
+  var keys = [[shard_hash, 'data'].join('.'), [shard_hash, 'tree'].join('.')];
 
-/**
- * Publishes a contract to the network
- * @param {String} identifier
- * @param {Contract} contract
- */
-Network.prototype.publish = function(identifier, contract) {
-  assert(contract instanceof Contract, 'Invalid contract supplied');
-  return this._pubsub.publish(identifier, contract);
-};
+  async.map(keys, self._store.get.bind(self._store), function(err, results) {
+    if (err) {
+      return callback(err);
+    }
 
-/**
- * Subscribes to a contract identifier on the network
- * @param {String} identifier
- * @param {Function} handler
- */
-Network.prototype.subscribe = function(identifier, handler) {
-  return this._pubsub.subscribe(identifier, function(contract) {
-    handler(Contract.fromObject(contract));
+    var data = new Buffer(results[0], 'hex');
+    var tree = JSON.parse(results[1]);
+
+    callback(null, new Shard(data, tree));
   });
 };
 
-/**
- * Returns a Storj contact from the URI
- * @private
- * @param {String} uri
- */
-Network.prototype._createContact = function(uri) {
-  var parsed = url.parse(uri);
-
-  return new kad.contacts.AddressPortContact({
-    address: parsed.address,
-    port: parsed.port,
-    nodeID: parsed.path.substr(1)
-  });
-};
-
-/**
- * Signs an outgoing message
- * @private
- * @param {kad.Message} message
- * @param {Function} callback
- */
-Network.prototype._signMessage = function(message, callback) {
-  var nonce = Date.now();
-  var target = message.id + nonce;
-  var signature = Message(target).sign(this._keypair._privkey);
-
-  if (kad.Message.isRequest(message)) {
-    message.params.__nonce = nonce;
-    message.params.__signature = signature;
-  } else {
-    message.result.__nonce = nonce;
-    message.result.__signature = signature;
-  }
-
-  callback();
-};
-
-/**
- * Verifies an incoming message
- * @private
- * @param {kad.Message} message
- * @param {Contact} contact
- * @param {Function} callback
- */
-Network.prototype._verifyMessage = function(message, contact, callback) {
-  var nonce, signature;
-
-  if (kad.Message.isRequest(message)) {
-    nonce = message.params.__nonce;
-    signature = message.params.__signature;
-  } else {
-    nonce = message.result.__nonce;
-    signature = message.result.__signature;
-  }
-
-  if (Date.now() > (constants.NONCE_EXPIRE + nonce)) {
-    return callback(new Error('Message signature expired'));
-  }
-
-  var target = message.id + nonce;
-  var addr = bitcore.Address.fromPublicKeyHash(Buffer(contact.nodeID, 'hex'));
-  var signobj = bitcore.Signature.fromCompact(new Buffer(signature, 'base64'));
-  var signedmsg = Message(target);
-  var ecdsa = new bitcore.crypto.ECDSA();
-
-  ecdsa.hashbuf = signedmsg.magicHash();
-  ecdsa.sig = signobj;
-
-  this._pubkeys[contact.nodeID] = ecdsa.toPublicKey();
-
-  if (!signedmsg.verify(addr, signature)) {
-    return callback(new Error('Signature verification failed'));
-  }
-
-  callback();
-};
-
-/**
- * Proxies error events from the underlying transport adapter
- * @private
- * @param {Error} error
- */
-Network.prototype._handleTransportError = function(error) {
-  this._logger.error(error.message);
-};
-
-module.exports = Network;
+module.exports = ShardManager;
 </code></pre>
         </article>
     </section>

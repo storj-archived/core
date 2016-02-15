@@ -17,7 +17,7 @@ describe('Network/Protocol', function() {
   var network = new Network(new KeyPair(), {
     loglevel: 0,
     seeds: [],
-    datadir: null,
+    datadir: os.tmpdir(),
     contact: {
       address: '127.0.0.1',
       port: 4000,

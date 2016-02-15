@@ -27,6 +27,9 @@ module.exports.ShardManager = require('./lib/shard/manager');
 /** {@link Audit} */
 module.exports.Audit = require('./lib/audit');
 
+/** {@link AuditManager} */
+module.exports.AuditManager = require('./lib/audit/manager');
+
 /** {@link Proof} */
 module.exports.Proof = require('./lib/proof');
 

@@ -10,7 +10,7 @@ module.exports = {};
 module.exports.Network = require('./lib/network');
 
 /** {@link Protocol} */
-module.exports.Protocol = require('./lib/protocol');
+module.exports.Protocol = require('./lib/network/protocol');
 
 /** {@link Contract} */
 module.exports.Contract = require('./lib/contract');

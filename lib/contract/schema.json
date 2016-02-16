@@ -24,7 +24,7 @@
     },
     "data_hash": {
       "type": ["string", "null"],
-      "pattern": "^[0-9a-f]{64,64}$"
+      "pattern": "^[0-9a-f]{40}$"
     },
     "store_begin": {
       "type": ["integer", "null"],

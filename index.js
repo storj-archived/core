@@ -4,7 +4,7 @@
 
 'use strict';
 
-module.exports = {};
+module.exports = { version: require('./package').version };
 
 /** {@link Network} */
 module.exports.Network = require('./lib/network');

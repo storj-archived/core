@@ -44,7 +44,7 @@
     "event-stream": "^3.3.2",
     "jsen": "^0.6.0",
     "json-stable-stringify": "^1.0.1",
-    "kad": "^1.4.1",
+    "kad": "^1.4.2",
     "kad-quasar": "0.0.2",
     "merge": "^1.2.0",
     "ms": "^0.7.1",

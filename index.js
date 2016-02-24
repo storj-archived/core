@@ -15,26 +15,29 @@ module.exports.Protocol = require('./lib/network/protocol');
 /** {@link Contract} */
 module.exports.Contract = require('./lib/contract');
 
-/** {@link Shard} */
-module.exports.Shard = require('./lib/shard');
-
-/** {@link ContractManager} */
-module.exports.ContractManager = require('./lib/contract/manager');
-
-/** {@link ShardManager} */
-module.exports.ShardManager = require('./lib/shard/manager');
-
 /** {@link Audit} */
 module.exports.Audit = require('./lib/audit');
-
-/** {@link AuditManager} */
-module.exports.AuditManager = require('./lib/audit/manager');
 
 /** {@link Proof} */
 module.exports.Proof = require('./lib/proof');
 
 /** {@link Verification} */
 module.exports.Verification = require('./lib/verification');
+
+/** {@link Manager} */
+module.exports.Manager = require('./lib/manager');
+
+/** {@link StorageAdapter} */
+module.exports.StorageAdapter = require('./lib/storage/adapter');
+
+/** {@link FSStorageAdapter} */
+module.exports.FSStorageAdapter = require('./lib/storage/adapters/fs');
+
+/** {@link RAMStorageAdapter} */
+module.exports.RAMStorageAdapter = require('./lib/storage/adapters/ram');
+
+/** {@link StorageItem} */
+module.exports.StorageItem = require('./lib/storage/item');
 
 /** {@link KeyPair} */
 module.exports.KeyPair = require('./lib/keypair');

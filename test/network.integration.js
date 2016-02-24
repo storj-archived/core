@@ -15,12 +15,15 @@ var STARTING_PORT = 65535;
 
 function createNode(farming) {
   var kp = new storj.KeyPair();
+  var manager = new storj.Manager(new storj.RAMStorageAdapter());
   var datadir = path.join(os.tmpdir(), kp.getNodeID());
   var contact = { address: '127.0.0.1', port: STARTING_PORT-- };
 
   fs.mkdirSync(datadir);
 
-  var node = new storj.Network(kp, {
+  var node = new storj.Network({
+    keypair: kp,
+    manager: manager,
     loglevel: 2,
     seeds: NODE_LIST.length ? [NODE_LIST[0]] : NODE_LIST,
     datadir: datadir,

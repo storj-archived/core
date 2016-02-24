@@ -5,16 +5,15 @@ var expect = require('chai').expect;
 var KeyPair = require('../lib/keypair');
 var Network = require('../lib/network');
 var Protocol = require('../lib/network/protocol');
-var ShardManager = require('../lib/shard/manager');
-var ContractManager = require('../lib/contract/manager');
+var Manager = require('../lib/manager');
+var RAMStorage = require('../lib/storage/adapters/ram');
 
 describe('Network/Protocol', function() {
 
-  var t = Date.now();
   var protocol = null;
-  var shardman = new ShardManager(os.tmpdir() + '/shards-' + t);
-  var contractman = new ContractManager(os.tmpdir() + '/contracts-' + t);
-  var network = new Network(new KeyPair(), {
+  var network = new Network({
+    keypair: new KeyPair(),
+    manager: new Manager(new RAMStorage()),
     loglevel: 0,
     seeds: [],
     datadir: os.tmpdir(),
@@ -28,9 +27,7 @@ describe('Network/Protocol', function() {
 
     it('should create an instance without the new keyword', function() {
       protocol = new Protocol({
-        network: network,
-        shards: shardman,
-        contracts: contractman
+        network: network
       });
       expect(protocol).to.be.instanceof(Protocol);
     });

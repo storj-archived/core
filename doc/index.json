@@ -1,5 +1,8 @@
 {
   "protocol-spec": {
     "title": "Protocol Specification"
+  },
+  "cli-usage": {
+    "title": "Command Line Interface"
   }
 }

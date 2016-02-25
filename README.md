@@ -38,6 +38,9 @@ var network = new storj.Network({
     address: 'ip.or.hostname',
     port: 4000
   },
+  seeds: [
+    'storj://dev.metadisk.org:7500/9f7e84fa954ef691c1de73002ad1cfcd12b13a26'
+  ],
   loglevel: 3,
   datadir: '/path/to/datadir',
   farmer: false

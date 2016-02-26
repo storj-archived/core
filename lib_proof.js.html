@@ -92,8 +92,8 @@ var utils = require('./utils');
  * Provides interface for proving possession of a file for an {@link Audit}
  * @constructor
  * @param {Object} options
- * @param {Array} options.leaves
- * @param {Buffer} options.shard
+ * @param {Array} options.leaves - Bottom leaves of the audit merkle tree
+ * @param {Buffer} options.shard - Binary shard data
  */
 function Proof(options) {
   if (!(this instanceof Proof)) {
@@ -113,8 +113,8 @@ function Proof(options) {
 
 /**
  * Calculate audit response
- * @param {String} challenge
- * @returns {Array} result
+ * @param {String} challenge - Challenge string sent by auditor
+ * @returns {Array} result - Challenge response
  */
 Proof.prototype.prove = function(challenge) {
   var response = utils.rmd160sha256(challenge + this._shard.toString('hex'));
@@ -148,9 +148,11 @@ Proof.prototype.prove = function(challenge) {
  */
 Proof.prototype._generateLeaves = function(leaves) {
   var numEmpty = utils.getNextPowerOfTwo(leaves.length) - leaves.length;
-  var emptyLeaves = Array(numEmpty).map(function() {
-    return '';
-  });
+  var emptyLeaves = [];
+
+  for (var i = 0; i &lt; numEmpty; i++) {
+    emptyLeaves.push(utils.rmd160sha256(''));
+  }
 
   return leaves.concat(emptyLeaves);
 };

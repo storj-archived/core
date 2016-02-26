@@ -92,7 +92,7 @@ var crypto = require('crypto');
 
 /**
  * Returns the SHA-256 hash of the input
- * @param {String|Buffer} input
+ * @param {String|Buffer} input - Data to hash
  * @returns {String}
  */
 module.exports.sha256 = function(input) {
@@ -101,7 +101,7 @@ module.exports.sha256 = function(input) {
 
 /**
  * Returns the RIPEMD-160 hash of the input
- * @param {String|Buffer} input
+ * @param {String|Buffer} input - Data to hash
  * @returns {String}
  */
 module.exports.rmd160 = function(input) {
@@ -110,7 +110,7 @@ module.exports.rmd160 = function(input) {
 
 /**
  * Returns the RIPEMD-160 SHA-256 hash of this input
- * @param {String|Buffer} input
+ * @param {String|Buffer} input - Data to hash
  * @returns {String}
  */
 module.exports.rmd160sha256 = function(input) {

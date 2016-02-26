@@ -119,7 +119,8 @@ Example Directory Tree
 /**
  * Implements a file-system based storage adapter
  * @constructor
- * @param {String} datadir
+ * @extends {StorageAdapter}
+ * @param {String} datadir - Directory path to store data
  */
 function FSStorageAdapter(datadir) {
   if (!(this instanceof FSStorageAdapter)) {
@@ -164,7 +165,11 @@ FSStorageAdapter.prototype._get = function(key, callback) {
 
   function checkTarget(done) {
     fs.exists(target, function(exists) {
-      done(exists ? null : new Error('Shard data not found'));
+      if (exists) {
+        return done();
+      }
+
+      done(new Error('Shard data not found'));
     });
   }
 
@@ -236,7 +241,7 @@ FSStorageAdapter.prototype._put = function(key, item, callback) {
         return done();
       }
 
-      async.each(directories, function(dirname, next) {
+      async.eachSeries(directories, function(dirname, next) {
         fs.mkdir(dirname, function(err) {
           if (err) {
             return next(err);
@@ -301,7 +306,7 @@ FSStorageAdapter.prototype.__fromDirectory = function(dirname, callback) {
   }
 
   function loadFile(filename, done) {
-    fs.readFile(filename, function(err, buffer) {
+    fs.readFile(path.join(dirname, filename), function(err, buffer) {
       if (err) {
         return done(err);
       }

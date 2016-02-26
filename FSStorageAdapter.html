@@ -156,7 +156,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">Directory path to store data</td>
         </tr>
 
     
@@ -201,7 +201,7 @@
 		<ul class="dummy">
 			<li>
 				<a href="lib_storage_adapters_fs.js.html">lib/storage/adapters/fs.js</a>,
-				 <a href="lib_storage_adapters_fs.js.html#sunlight-1-line-40">line 40</a>
+				 <a href="lib_storage_adapters_fs.js.html#sunlight-1-line-41">line 41</a>
 			</li>
 		</ul>
 	</dd>
@@ -232,6 +232,17 @@
 
     
     </div>
+
+    
+        <h3 class="subsection-title">Extends</h3>
+
+        
+
+
+    <ul>
+        <li><a href="StorageAdapter.html">StorageAdapter</a></li>
+    </ul>
+
 
     
 
@@ -252,7 +263,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="__fromDirectory"><span class="type-signature">&lt;private> </span>__fromDirectory(dirname, callback)</h4>
+    <h4 class="name" id="get"><span class="type-signature"></span>get(key, callback)</h4>
     
     
 </dt>
@@ -260,356 +271,7 @@
 
     
     <div class="description">
-        Loads the directory contents as an object where key is the file's basename
-and value is the parsed JSON object
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>dirname</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>callback</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_storage_adapters_fs.js.html">lib/storage/adapters/fs.js</a>,
-				 <a href="lib_storage_adapters_fs.js.html#sunlight-1-line-208">line 208</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="__toDirectory"><span class="type-signature">&lt;private> </span>__toDirectory(dirname, data, callback)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Writes the data object to the supplied directory
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>dirname</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>data</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>callback</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_storage_adapters_fs.js.html">lib/storage/adapters/fs.js</a>,
-				 <a href="lib_storage_adapters_fs.js.html#sunlight-1-line-251">line 251</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="_get"><span class="type-signature">&lt;private> </span>_get(key, callback)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Implements the abstract <a href="StorageAdapter.html#_get">StorageAdapter#_get</a>
+        Calls the implemented <a href="StorageAdapter.html#_get">StorageAdapter#_get</a> and validates the result
     </div>
     
 
@@ -661,7 +323,7 @@ and value is the parsed JSON object
 
             
 
-            <td class="description last"></td>
+            <td class="description last">Shard hash to get metadata for</td>
         </tr>
 
     
@@ -685,7 +347,7 @@ and value is the parsed JSON object
 
             
 
-            <td class="description last"></td>
+            <td class="description last">Called with error or <a href="StorageItem.html">StorageItem</a></td>
         </tr>
 
     
@@ -702,6 +364,15 @@ and value is the parsed JSON object
 
 	
 
+	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="StorageAdapter.html#get">StorageAdapter#get</a>
+			</li>
+		</ul>
+	</dd>
 	
 
     
@@ -729,8 +400,8 @@ and value is the parsed JSON object
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_storage_adapters_fs.js.html">lib/storage/adapters/fs.js</a>,
-				 <a href="lib_storage_adapters_fs.js.html#sunlight-1-line-65">line 65</a>
+				<a href="lib_storage_adapter.js.html">lib/storage/adapter.js</a>,
+				 <a href="lib_storage_adapter.js.html#sunlight-1-line-21">line 21</a>
 			</li>
 		</ul>
 	</dd>
@@ -763,7 +434,7 @@ and value is the parsed JSON object
             
 <hr>
 <dt>
-    <h4 class="name" id="_put"><span class="type-signature">&lt;private> </span>_put(key, item, callback)</h4>
+    <h4 class="name" id="put"><span class="type-signature"></span>put(item, callback)</h4>
     
     
 </dt>
@@ -771,7 +442,7 @@ and value is the parsed JSON object
 
     
     <div class="description">
-        Implements the abstract <a href="StorageAdapter.html#_put">StorageAdapter#_put</a>
+        Calls the implemented <a href="StorageAdapter.html#_put">StorageAdapter#_put</a> and validates the input
     </div>
     
 
@@ -802,30 +473,6 @@ and value is the parsed JSON object
     </thead>
 
     <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>key</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
     
 
         <tr>
@@ -847,7 +494,7 @@ and value is the parsed JSON object
 
             
 
-            <td class="description last"></td>
+            <td class="description last">Item to write to storage</td>
         </tr>
 
     
@@ -871,7 +518,7 @@ and value is the parsed JSON object
 
             
 
-            <td class="description last"></td>
+            <td class="description last">Called on complete write</td>
         </tr>
 
     
@@ -888,6 +535,15 @@ and value is the parsed JSON object
 
 	
 
+	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="StorageAdapter.html#put">StorageAdapter#put</a>
+			</li>
+		</ul>
+	</dd>
 	
 
     
@@ -915,8 +571,8 @@ and value is the parsed JSON object
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_storage_adapters_fs.js.html">lib/storage/adapters/fs.js</a>,
-				 <a href="lib_storage_adapters_fs.js.html#sunlight-1-line-139">line 139</a>
+				<a href="lib_storage_adapter.js.html">lib/storage/adapter.js</a>,
+				 <a href="lib_storage_adapter.js.html#sunlight-1-line-34">line 34</a>
 			</li>
 		</ul>
 	</dd>

@@ -84,7 +84,6 @@
         <pre
             class="sunlight-highlight-javascript linenums">'use strict';
 
-var platform = require('os').platform();
 var path = require('path');
 var url = require('url');
 var assert = require('assert');
@@ -105,21 +104,19 @@ var Contract = require('../contract');
 var Audit = require('../audit');
 var Verification = require('../verification');
 
-var HOME = platform !== 'win32' ? process.env.HOME : process.env.USER_PROFILE;
-
 /**
  * Storj network interface
  * @constructor
  * @param {Object} options
- * @param {KeyPair} options.keypair
- * @param {Manager} options.manager
- * @param {Number} options.loglevel
- * @param {Array} options.seeds
- * @param {String} options.datadir
+ * @param {KeyPair} options.keypair - Node's cryptographic identity
+ * @param {Manager} options.manager - Persistence management interface
+ * @param {Number} options.loglevel - Verbosity level 0 - 4
+ * @param {Array} options.seeds - List of seed URIs to join
+ * @param {String} options.datadir - Directory path to store data
  * @param {Object} options.contact
- * @param {String} options.contact.address
- * @param {Number} options.contact.port
- * @param {Boolean} options.farmer
+ * @param {String} options.contact.address - Public node IP or hostname
+ * @param {Number} options.contact.port - Listening port for RPC
+ * @param {Boolean} options.farmer - Flag indicating desire for contracts
  */
 function Network(options) {
   if (!(this instanceof Network)) {
@@ -162,7 +159,7 @@ function Network(options) {
 Network.DEFAULTS = {
   loglevel: 3,
   seeds: [],
-  datadir: path.join(HOME, '.storjnode'),
+  datadir: null,
   contact: {
     address: '127.0.0.1',
     port: 4000,
@@ -172,7 +169,7 @@ Network.DEFAULTS = {
 
 /**
  * Opens the connection to the network
- * @param {Function} callback
+ * @param {Function} callback - Called on successful network join
  */
 Network.prototype.join = function(callback) {
   var self = this;
@@ -202,11 +199,7 @@ Network.prototype.join = function(callback) {
       }
     });
     next();
-  }, function(err) {
-    if (err) {
-      return callback(err);
-    }
-
+  }, function() {
     if (self._options.farmer) {
       self._farm();
     }
@@ -217,7 +210,7 @@ Network.prototype.join = function(callback) {
 
 /**
  * Disconnects from the network
- * @param {Function} callback
+ * @param {Function} callback - Called when successful disconnect
  */
 Network.prototype.leave = function(callback) {
   this._removePingInterval();
@@ -229,8 +222,8 @@ Network.prototype.leave = function(callback) {
  * the shard. Look up the appropriate challenge and send it to the node
  * for verification. If successful, invalidate the challenge and pass,
  * otherwise, invalidate the contract.
- * @param {String} hash
- * @param {Function} callback
+ * @param {String} hash - RIPEMD-160 SHA-256 hash of the file to audit
+ * @param {Function} callback - Called with validity information
  */
 Network.prototype.audit = function(hash, callback) {
   var self = this;
@@ -292,8 +285,8 @@ Network.prototype.audit = function(hash, callback) {
  * Look up the storage contract by the hash to find the node who has
  * the shard, then execute a RETRIEVE RPC to the node and return the
  * data as a buffer.
- * @param {String} hash
- * @param {Function} callback
+ * @param {String} hash - RIPEMD-160 SHA-256 hash of the file to retrieve
+ * @param {Function} callback - Called with an error or the file buffer
  */
 Network.prototype.retrieve = function(hash, callback) {
   var self = this;
@@ -349,9 +342,9 @@ Network.prototype.retrieve = function(hash, callback) {
  * on the network. Keep track of the pending contract until it becomes
  * fulfilled by an OFFER, then issue a CONSIGN RPC to the offerer and
  * callback when the data is stored.
- * @param {Buffer} data
+ * @param {Buffer} data - Raw binary blob to store
  * @param {String} duration - String representation of time for `ms` like "2w"
- * @param {Function} callback
+ * @param {Function} callback - Called on successful store
  */
 Network.prototype.store = function(data, duration, callback) {
   assert(Buffer.isBuffer(data), 'Invalid data supplied');
@@ -420,6 +413,7 @@ Network.prototype.store = function(data, duration, callback) {
 /**
  * Subscribes to all storage contracts and issues offers, for now this just
  * accepts the initial offer and signs it
+ * @private
  */
 Network.prototype._farm = function() {
   var self = this;

@@ -157,122 +157,9 @@ along with metadata describing download count, payments, etc
 
             
 
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_storage_item.js.html">lib/storage/item.js</a>,
-				 <a href="lib_storage_item.js.html#sunlight-1-line-13">line 13</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        <dl>
-            
-<hr>
-<dt>
-    <h4 class="name" id="_init"><span class="type-signature">&lt;private> </span>_init(data)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Initializes the item values with the given data
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
+            <td class="description last">
+                <h6 class="method-params-label method-subparams-label">Properties</h6>
+                
 
 <table class="params table table-striped">
     <thead>
@@ -296,7 +183,58 @@ along with metadata describing download count, payments, etc
 
         <tr>
             
-                <td class="name"><code>data</code></td>
+                <td class="name"><code>hash</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Shard hash to use as storage key</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>shard</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Buffer</span>
+|
+
+<span class="param-type">null</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Raw binary blob of shard</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>contracts</code></td>
             
 
             <td class="type">
@@ -313,7 +251,86 @@ along with metadata describing download count, payments, etc
 
             
 
-            <td class="description last"></td>
+            <td class="description last">Dictionary of nodeID:<a href="Contract.html">Contract</a></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>trees</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Dictionary of nodeID:merkleLeaves</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>challenges</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Dictionary of nodeID:privateAuditData</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>meta</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Dictionary of arbitrary nodeID:metadata</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
         </tr>
 
     
@@ -358,7 +375,7 @@ along with metadata describing download count, payments, etc
 		<ul class="dummy">
 			<li>
 				<a href="lib_storage_item.js.html">lib/storage/item.js</a>,
-				 <a href="lib_storage_item.js.html#sunlight-1-line-34">line 34</a>
+				 <a href="lib_storage_item.js.html#sunlight-1-line-19">line 19</a>
 			</li>
 		</ul>
 	</dd>
@@ -383,31 +400,25 @@ along with metadata describing download count, payments, etc
     
 
     
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="StorageItem.html">StorageItem</a></span>
-
-
-
-    </dd>
-</dl>
-
-
-        
 
     
 </dd>
 
-        </dl>
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
     
 
     

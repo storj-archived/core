@@ -199,7 +199,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">Total number of challenges to generate</td>
         </tr>
 
     
@@ -223,7 +223,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">Data to create audit challenges for</td>
         </tr>
 
     
@@ -326,392 +326,6 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="_createResponseInput"><span class="type-signature">&lt;private> </span>_createResponseInput(response)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Create a challenge response input to merkle tree
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>response</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_audit.js.html">lib/audit.js</a>,
-				 <a href="lib_audit.js.html#sunlight-1-line-101">line 101</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    input - Concatenated challenge+shard_hash
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Buffer</span>
-
-
-
-    </dd>
-</dl>
-
-
-        
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="_generateChallenge"><span class="type-signature">&lt;private> </span>_generateChallenge()</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Generate a random challenge buffer
-    </div>
-    
-
-    
-
-    
-
-    
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_audit.js.html">lib/audit.js</a>,
-				 <a href="lib_audit.js.html#sunlight-1-line-91">line 91</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    Hex encoded random bytes
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">String</span>
-
-
-
-    </dd>
-</dl>
-
-
-        
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="_generateTree"><span class="type-signature">&lt;private> </span>_generateTree()</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Generate the audit merkle tree from a series of challenges
-    </div>
-    
-
-    
-
-    
-
-    
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_audit.js.html">lib/audit.js</a>,
-				 <a href="lib_audit.js.html#sunlight-1-line-64">line 64</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    self
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="Audit.html">Audit</a></span>
-
-
-
-    </dd>
-</dl>
-
-
-        
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
     <h4 class="name" id="getPrivateRecord"><span class="type-signature"></span>getPrivateRecord()</h4>
     
     
@@ -767,7 +381,7 @@
 		<ul class="dummy">
 			<li>
 				<a href="lib_audit.js.html">lib/audit.js</a>,
-				 <a href="lib_audit.js.html#sunlight-1-line-51">line 51</a>
+				 <a href="lib_audit.js.html#sunlight-1-line-53">line 53</a>
 			</li>
 		</ul>
 	</dd>
@@ -792,6 +406,30 @@
     
 
     
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    challenge - Private audit record with challenges
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
 
     
 </dd>
@@ -855,7 +493,7 @@
 		<ul class="dummy">
 			<li>
 				<a href="lib_audit.js.html">lib/audit.js</a>,
-				 <a href="lib_audit.js.html#sunlight-1-line-44">line 44</a>
+				 <a href="lib_audit.js.html#sunlight-1-line-45">line 45</a>
 			</li>
 		</ul>
 	</dd>
@@ -880,6 +518,30 @@
     
 
     
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    leaves - Bottom merkle leaves of audit tree
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
 
     
 </dd>

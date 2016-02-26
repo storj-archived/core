@@ -199,7 +199,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">Node's cryptographic identity</td>
         </tr>
 
     
@@ -223,7 +223,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">Persistence management interface</td>
         </tr>
 
     
@@ -247,7 +247,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">Verbosity level 0 - 4</td>
         </tr>
 
     
@@ -271,7 +271,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">List of seed URIs to join</td>
         </tr>
 
     
@@ -295,7 +295,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">Directory path to store data</td>
         </tr>
 
     
@@ -362,7 +362,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">Public node IP or hostname</td>
         </tr>
 
     
@@ -386,7 +386,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">Listening port for RPC</td>
         </tr>
 
     
@@ -417,7 +417,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">Flag indicating desire for contracts</td>
         </tr>
 
     
@@ -469,7 +469,7 @@
 		<ul class="dummy">
 			<li>
 				<a href="lib_network_index.js.html">lib/network/index.js</a>,
-				 <a href="lib_network_index.js.html#sunlight-1-line-40">line 40</a>
+				 <a href="lib_network_index.js.html#sunlight-1-line-37">line 37</a>
 			</li>
 		</ul>
 	</dd>
@@ -517,1505 +517,6 @@
         <h3 class="subsection-title">Methods</h3>
 
         <dl>
-            
-<hr>
-<dt>
-    <h4 class="name" id="_addPingInterval"><span class="type-signature">&lt;private> </span>_addPingInterval(contact, interval)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Setup a PING message to the given contact on an interval
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>contact</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Contact</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>interval</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Number</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_network_index.js.html">lib/network/index.js</a>,
-				 <a href="lib_network_index.js.html#sunlight-1-line-541">line 541</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="_connect"><span class="type-signature">&lt;private> </span>_connect(uri, callback)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Connects to the node at the given URI
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>uri</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>callback</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_network_index.js.html">lib/network/index.js</a>,
-				 <a href="lib_network_index.js.html#sunlight-1-line-444">line 444</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="_createContact"><span class="type-signature">&lt;private> </span>_createContact(uri)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Returns a Storj contact from the URI
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>uri</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_network_index.js.html">lib/network/index.js</a>,
-				 <a href="lib_network_index.js.html#sunlight-1-line-453">line 453</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="_farm"><span class="type-signature"></span>_farm()</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Subscribes to all storage contracts and issues offers, for now this just
-accepts the initial offer and signs it
-    </div>
-    
-
-    
-
-    
-
-    
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_network_index.js.html">lib/network/index.js</a>,
-				 <a href="lib_network_index.js.html#sunlight-1-line-340">line 340</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="_handleTransportError"><span class="type-signature">&lt;private> </span>_handleTransportError(error)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Proxies error events from the underlying transport adapter
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>error</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Error</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_network_index.js.html">lib/network/index.js</a>,
-				 <a href="lib_network_index.js.html#sunlight-1-line-531">line 531</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="_publish"><span class="type-signature">&lt;private> </span>_publish(identifier, contract)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Publishes a contract to the network
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>identifier</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>contract</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="Contract.html">Contract</a></span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_network_index.js.html">lib/network/index.js</a>,
-				 <a href="lib_network_index.js.html#sunlight-1-line-413">line 413</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="_removePingInterval"><span class="type-signature">&lt;private> </span>_removePingInterval(contact)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Stop sending PING message to the given contact
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>contact</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Contact</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_network_index.js.html">lib/network/index.js</a>,
-				 <a href="lib_network_index.js.html#sunlight-1-line-565">line 565</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="_signMessage"><span class="type-signature">&lt;private> </span>_signMessage(message, callback)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Signs an outgoing message
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>message</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">kad.Message</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>callback</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_network_index.js.html">lib/network/index.js</a>,
-				 <a href="lib_network_index.js.html#sunlight-1-line-469">line 469</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="_subscribe"><span class="type-signature">&lt;private> </span>_subscribe(identifier, handler)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Subscribes to a contract identifier on the network
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>identifier</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>handler</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_network_index.js.html">lib/network/index.js</a>,
-				 <a href="lib_network_index.js.html#sunlight-1-line-424">line 424</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="_verifyMessage"><span class="type-signature">&lt;private> </span>_verifyMessage(message, contact, callback)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Verifies an incoming message
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>message</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">kad.Message</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>contact</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Contact</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>callback</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_network_index.js.html">lib/network/index.js</a>,
-				 <a href="lib_network_index.js.html#sunlight-1-line-492">line 492</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-        
             
 <hr>
 <dt>
@@ -2082,7 +583,7 @@ otherwise, invalidate the contract.
 
             
 
-            <td class="description last"></td>
+            <td class="description last">RIPEMD-160 SHA-256 hash of the file to audit</td>
         </tr>
 
     
@@ -2106,7 +607,7 @@ otherwise, invalidate the contract.
 
             
 
-            <td class="description last"></td>
+            <td class="description last">Called with validity information</td>
         </tr>
 
     
@@ -2151,7 +652,7 @@ otherwise, invalidate the contract.
 		<ul class="dummy">
 			<li>
 				<a href="lib_network_index.js.html">lib/network/index.js</a>,
-				 <a href="lib_network_index.js.html#sunlight-1-line-151">line 151</a>
+				 <a href="lib_network_index.js.html#sunlight-1-line-144">line 144</a>
 			</li>
 		</ul>
 	</dd>
@@ -2244,7 +745,7 @@ otherwise, invalidate the contract.
 
             
 
-            <td class="description last"></td>
+            <td class="description last">Called on successful network join</td>
         </tr>
 
     
@@ -2289,7 +790,7 @@ otherwise, invalidate the contract.
 		<ul class="dummy">
 			<li>
 				<a href="lib_network_index.js.html">lib/network/index.js</a>,
-				 <a href="lib_network_index.js.html#sunlight-1-line-93">line 93</a>
+				 <a href="lib_network_index.js.html#sunlight-1-line-90">line 90</a>
 			</li>
 		</ul>
 	</dd>
@@ -2382,7 +883,7 @@ otherwise, invalidate the contract.
 
             
 
-            <td class="description last"></td>
+            <td class="description last">Called when successful disconnect</td>
         </tr>
 
     
@@ -2427,7 +928,7 @@ otherwise, invalidate the contract.
 		<ul class="dummy">
 			<li>
 				<a href="lib_network_index.js.html">lib/network/index.js</a>,
-				 <a href="lib_network_index.js.html#sunlight-1-line-138">line 138</a>
+				 <a href="lib_network_index.js.html#sunlight-1-line-131">line 131</a>
 			</li>
 		</ul>
 	</dd>
@@ -2522,7 +1023,7 @@ data as a buffer.
 
             
 
-            <td class="description last"></td>
+            <td class="description last">RIPEMD-160 SHA-256 hash of the file to retrieve</td>
         </tr>
 
     
@@ -2546,7 +1047,7 @@ data as a buffer.
 
             
 
-            <td class="description last"></td>
+            <td class="description last">Called with an error or the file buffer</td>
         </tr>
 
     
@@ -2591,7 +1092,7 @@ data as a buffer.
 		<ul class="dummy">
 			<li>
 				<a href="lib_network_index.js.html">lib/network/index.js</a>,
-				 <a href="lib_network_index.js.html#sunlight-1-line-214">line 214</a>
+				 <a href="lib_network_index.js.html#sunlight-1-line-207">line 207</a>
 			</li>
 		</ul>
 	</dd>
@@ -2687,7 +1188,7 @@ callback when the data is stored.
 
             
 
-            <td class="description last"></td>
+            <td class="description last">Raw binary blob to store</td>
         </tr>
 
     
@@ -2735,7 +1236,7 @@ callback when the data is stored.
 
             
 
-            <td class="description last"></td>
+            <td class="description last">Called on successful store</td>
         </tr>
 
     
@@ -2780,7 +1281,7 @@ callback when the data is stored.
 		<ul class="dummy">
 			<li>
 				<a href="lib_network_index.js.html">lib/network/index.js</a>,
-				 <a href="lib_network_index.js.html#sunlight-1-line-272">line 272</a>
+				 <a href="lib_network_index.js.html#sunlight-1-line-265">line 265</a>
 			</li>
 		</ul>
 	</dd>

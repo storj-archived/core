@@ -95,8 +95,8 @@ var utils = require('./utils');
  * Represents an auditing interface using a precomputed merkle tree
  * @constructor
  * @param {Object} options
- * @param {Number} options.audits
- * @param {Buffer} options.shard
+ * @param {Number} options.audits - Total number of challenges to generate
+ * @param {Buffer} options.shard - Data to create audit challenges for
  */
 function Audit(options) {
   if (!(this instanceof Audit)) {
@@ -124,6 +124,7 @@ Audit.DEFAULTS = {
 
 /**
  * Returns the bottom leaves of the merkle tree for sending to farmer
+ * @returns {Array} leaves - Bottom merkle leaves of audit tree
  */
 Audit.prototype.getPublicRecord = function() {
   return this._tree.level(this._tree.levels() - 1);
@@ -131,6 +132,7 @@ Audit.prototype.getPublicRecord = function() {
 
 /**
  * Returns the challenges, the tree depth, and merkle root
+ * @returns {Object} challenge - Private audit record with challenges
  */
 Audit.prototype.getPrivateRecord = function() {
   return {

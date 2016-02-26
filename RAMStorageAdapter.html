@@ -151,7 +151,7 @@
 		<ul class="dummy">
 			<li>
 				<a href="lib_storage_adapters_ram.js.html">lib/storage/adapters/ram.js</a>,
-				 <a href="lib_storage_adapters_ram.js.html#sunlight-1-line-10">line 10</a>
+				 <a href="lib_storage_adapters_ram.js.html#sunlight-1-line-11">line 11</a>
 			</li>
 		</ul>
 	</dd>
@@ -184,6 +184,17 @@
     </div>
 
     
+        <h3 class="subsection-title">Extends</h3>
+
+        
+
+
+    <ul>
+        <li><a href="StorageAdapter.html">StorageAdapter</a></li>
+    </ul>
+
+
+    
 
     
 
@@ -202,7 +213,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="_get"><span class="type-signature">&lt;private> </span>_get(key, callback)</h4>
+    <h4 class="name" id="get"><span class="type-signature"></span>get(key, callback)</h4>
     
     
 </dt>
@@ -210,7 +221,7 @@
 
     
     <div class="description">
-        Implements the abstract <a href="StorageAdapter.html#_get">StorageAdapter#_get</a>
+        Calls the implemented <a href="StorageAdapter.html#_get">StorageAdapter#_get</a> and validates the result
     </div>
     
 
@@ -262,7 +273,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">Shard hash to get metadata for</td>
         </tr>
 
     
@@ -286,7 +297,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">Called with error or <a href="StorageItem.html">StorageItem</a></td>
         </tr>
 
     
@@ -303,6 +314,15 @@
 
 	
 
+	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="StorageAdapter.html#get">StorageAdapter#get</a>
+			</li>
+		</ul>
+	</dd>
 	
 
     
@@ -330,8 +350,8 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_storage_adapters_ram.js.html">lib/storage/adapters/ram.js</a>,
-				 <a href="lib_storage_adapters_ram.js.html#sunlight-1-line-26">line 26</a>
+				<a href="lib_storage_adapter.js.html">lib/storage/adapter.js</a>,
+				 <a href="lib_storage_adapter.js.html#sunlight-1-line-21">line 21</a>
 			</li>
 		</ul>
 	</dd>
@@ -364,7 +384,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="_put"><span class="type-signature">&lt;private> </span>_put(key, item, callback)</h4>
+    <h4 class="name" id="put"><span class="type-signature"></span>put(item, callback)</h4>
     
     
 </dt>
@@ -372,7 +392,7 @@
 
     
     <div class="description">
-        Implements the abstract <a href="StorageAdapter.html#_put">StorageAdapter#_put</a>
+        Calls the implemented <a href="StorageAdapter.html#_put">StorageAdapter#_put</a> and validates the input
     </div>
     
 
@@ -403,30 +423,6 @@
     </thead>
 
     <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>key</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
     
 
         <tr>
@@ -448,7 +444,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">Item to write to storage</td>
         </tr>
 
     
@@ -472,7 +468,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">Called on complete write</td>
         </tr>
 
     
@@ -489,6 +485,15 @@
 
 	
 
+	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="StorageAdapter.html#put">StorageAdapter#put</a>
+			</li>
+		</ul>
+	</dd>
 	
 
     
@@ -516,8 +521,8 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_storage_adapters_ram.js.html">lib/storage/adapters/ram.js</a>,
-				 <a href="lib_storage_adapters_ram.js.html#sunlight-1-line-43">line 43</a>
+				<a href="lib_storage_adapter.js.html">lib/storage/adapter.js</a>,
+				 <a href="lib_storage_adapter.js.html#sunlight-1-line-34">line 34</a>
 			</li>
 		</ul>
 	</dd>

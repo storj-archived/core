@@ -30,9 +30,11 @@ function createNode(farming) {
     contact: contact,
     farmer: farming
   });
+
   NODE_LIST.push([
     'storj://', contact.address, ':', contact.port, '/', kp.getNodeID()
   ].join(''));
+  
   return node;
 }
 

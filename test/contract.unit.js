@@ -32,6 +32,16 @@ describe('Contract#fromBuffer', function() {
 
 });
 
+describe('Contract#compare', function() {
+
+  it('should return true for the same contract', function() {
+    var c1 = Contract.fromBuffer(new Buffer('{}'));
+    var c2 = Contract.fromBuffer(new Buffer('{}'));
+    expect(Contract.compare(c1, c2)).to.be.equal(true);
+  });
+
+});
+
 describe('Contract', function() {
 
   describe('#_clean', function() {

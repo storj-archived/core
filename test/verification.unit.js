@@ -43,7 +43,7 @@ describe('Verification', function() {
       var secret = audit.getPrivateRecord();
       var request = audit.getPublicRecord();
       var proof = new Proof({ shard: SHARD, leaves: request });
-      var response = proof.prove(secret.challenges[0]);
+      var response = proof.prove(secret.challenges[1]);
       var verification = new Verification(response);
       var result = verification.verify(secret.root, secret.depth);
       expect(result[0]).to.equal(result[1]);

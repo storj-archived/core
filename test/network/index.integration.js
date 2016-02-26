@@ -8,7 +8,7 @@ var async = require('async');
 var os = require('os');
 var fs = require('fs');
 var path = require('path');
-var storj = require('..');
+var storj = require('../../');
 
 var NODE_LIST = [];
 var STARTING_PORT = 65535;

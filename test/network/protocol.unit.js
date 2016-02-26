@@ -2,11 +2,11 @@
 
 var os = require('os');
 var expect = require('chai').expect;
-var KeyPair = require('../lib/keypair');
-var Network = require('../lib/network');
-var Protocol = require('../lib/network/protocol');
-var Manager = require('../lib/manager');
-var RAMStorage = require('../lib/storage/adapters/ram');
+var KeyPair = require('../../lib/keypair');
+var Network = require('../../lib/network');
+var Protocol = require('../../lib/network/protocol');
+var Manager = require('../../lib/manager');
+var RAMStorage = require('../../lib/storage/adapters/ram');
 
 describe('Network/Protocol', function() {
 

@@ -2,8 +2,8 @@
 
 var crypto = require('crypto');
 var expect = require('chai').expect;
-var Contract = require('../lib/contract');
-var KeyPair = require('../lib/keypair');
+var Contract = require('../../lib/contract');
+var KeyPair = require('../../lib/keypair');
 
 var kp1 = new KeyPair();
 var kp2 = new KeyPair();

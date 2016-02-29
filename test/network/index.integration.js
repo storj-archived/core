@@ -24,7 +24,7 @@ function createNode(farming) {
   var node = new storj.Network({
     keypair: kp,
     manager: manager,
-    loglevel: 2,
+    loglevel: 0,
     seeds: NODE_LIST.length ? [NODE_LIST[0]] : NODE_LIST,
     datadir: datadir,
     contact: contact,
@@ -34,7 +34,7 @@ function createNode(farming) {
   NODE_LIST.push([
     'storj://', contact.address, ':', contact.port, '/', kp.getNodeID()
   ].join(''));
-  
+
   return node;
 }
 

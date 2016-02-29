@@ -31,7 +31,7 @@ program
   .version(storj.version)
   .option(
     '-d, --datadir [path]',
-    'Set configurationa and storage path',
+    'Set configuration and storage path',
     DEFAULTS.datadir
   )
   .parse(process.argv);

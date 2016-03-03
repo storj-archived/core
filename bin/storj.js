@@ -34,6 +34,11 @@ program
     'Set configuration and storage path',
     DEFAULTS.datadir
   )
+  .option(
+    '-p, --password [password]',
+    'Password to unlock your private key',
+    ''
+  )
   .parse(process.argv);
 
 var schema = {
@@ -163,14 +168,8 @@ function start(datadir) {
   );
   var privkey = fs.readFileSync(config.keypath).toString();
 
-  prompt.start();
-
-  prompt.get(keypass, function(err, result) {
-    if (err) {
-      return console.log(err);
-    }
-
-    privkey = decrypt(result.password, privkey);
+  function open(passwd, privkey) {
+    privkey = decrypt(passwd, privkey);
 
     var network = storj.Network({
       keypair: storj.KeyPair(privkey),
@@ -191,7 +190,20 @@ function start(datadir) {
         process.exit();
       }
     });
-  });
+  }
+
+  if (program.password) {
+    open(program.password, privkey);
+  } else {
+    prompt.start();
+    prompt.get(keypass, function(err, result) {
+      if (err) {
+        return console.log(err);
+      }
+
+      open(result.password, privkey);
+    });
+  }
 }
 
 if (!fs.existsSync(program.datadir)) {

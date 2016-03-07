@@ -28,7 +28,8 @@ function createNode(farming) {
     seeds: NODE_LIST.length ? [NODE_LIST[0]] : NODE_LIST,
     datadir: datadir,
     contact: contact,
-    farmer: farming
+    farmer: farming,
+    upnp: false
   });
 
   NODE_LIST.push([

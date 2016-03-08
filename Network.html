@@ -33,14 +33,14 @@
 			<li class="dropdown">
 				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_utils.html">storj/utils</a></li><li><a href="module-storjnode.html">storjnode</a></li>
+					<li><a href="module-storjnode.html">storjnode</a></li><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_utils.html">storj/utils</a></li>
 				</ul>
 			</li>
 			
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Proof.html">Proof</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="Verification.html">Verification</a></li>
+					<li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="Proof.html">Proof</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="Verification.html">Verification</a></li>
 				</ul>
 			</li>
 			
@@ -469,7 +469,7 @@
 		<ul class="dummy">
 			<li>
 				<a href="lib_network_index.js.html">lib/network/index.js</a>,
-				 <a href="lib_network_index.js.html#sunlight-1-line-37">line 37</a>
+				 <a href="lib_network_index.js.html#sunlight-1-line-39">line 39</a>
 			</li>
 		</ul>
 	</dd>
@@ -517,171 +517,6 @@
         <h3 class="subsection-title">Methods</h3>
 
         <dl>
-            
-<hr>
-<dt>
-    <h4 class="name" id="audit"><span class="type-signature"></span>audit(hash, callback)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Look up the storage contract by the hash to find the node who has
-the shard. Look up the appropriate challenge and send it to the node
-for verification. If successful, invalidate the challenge and pass,
-otherwise, invalidate the contract.
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>hash</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">RIPEMD-160 SHA-256 hash of the file to audit</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>callback</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Called with validity information</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_network_index.js.html">lib/network/index.js</a>,
-				 <a href="lib_network_index.js.html#sunlight-1-line-144">line 144</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-        
             
 <hr>
 <dt>
@@ -790,7 +625,7 @@ otherwise, invalidate the contract.
 		<ul class="dummy">
 			<li>
 				<a href="lib_network_index.js.html">lib/network/index.js</a>,
-				 <a href="lib_network_index.js.html#sunlight-1-line-90">line 90</a>
+				 <a href="lib_network_index.js.html#sunlight-1-line-99">line 99</a>
 			</li>
 		</ul>
 	</dd>
@@ -928,7 +763,172 @@ otherwise, invalidate the contract.
 		<ul class="dummy">
 			<li>
 				<a href="lib_network_index.js.html">lib/network/index.js</a>,
-				 <a href="lib_network_index.js.html#sunlight-1-line-131">line 131</a>
+				 <a href="lib_network_index.js.html#sunlight-1-line-140">line 140</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="audit"><span class="type-signature"></span>audit(hash, callback)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Look up the storage contract by the hash to find the node who has
+the shard. Look up the appropriate challenge and send it to the node
+for verification. If successful, invalidate the challenge and pass,
+otherwise, invalidate the contract.
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>hash</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">RIPEMD-160 SHA-256 hash of the file to audit</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Called with validity information</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_network_index.js.html">lib/network/index.js</a>,
+				 <a href="lib_network_index.js.html#sunlight-1-line-153">line 153</a>
 			</li>
 		</ul>
 	</dd>
@@ -1092,7 +1092,7 @@ data as a buffer.
 		<ul class="dummy">
 			<li>
 				<a href="lib_network_index.js.html">lib/network/index.js</a>,
-				 <a href="lib_network_index.js.html#sunlight-1-line-207">line 207</a>
+				 <a href="lib_network_index.js.html#sunlight-1-line-216">line 216</a>
 			</li>
 		</ul>
 	</dd>
@@ -1281,7 +1281,7 @@ callback when the data is stored.
 		<ul class="dummy">
 			<li>
 				<a href="lib_network_index.js.html">lib/network/index.js</a>,
-				 <a href="lib_network_index.js.html#sunlight-1-line-265">line 265</a>
+				 <a href="lib_network_index.js.html#sunlight-1-line-274">line 274</a>
 			</li>
 		</ul>
 	</dd>

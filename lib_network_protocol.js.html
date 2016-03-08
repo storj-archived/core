@@ -33,14 +33,14 @@
 			<li class="dropdown">
 				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_utils.html">storj/utils</a></li><li><a href="module-storjnode.html">storjnode</a></li>
+					<li><a href="module-storjnode.html">storjnode</a></li><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_utils.html">storj/utils</a></li>
 				</ul>
 			</li>
 			
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Proof.html">Proof</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="Verification.html">Verification</a></li>
+					<li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="Proof.html">Proof</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="Verification.html">Verification</a></li>
 				</ul>
 			</li>
 			
@@ -88,6 +88,7 @@ var assert = require('assert');
 var utils = require('../utils');
 var Proof = require('../proof');
 var Contract = require('../contract');
+var StorageItem = require('../storage/item');
 
 /**
  * Defines the Storj protocol methods and mounts on a {@link Network} instance
@@ -148,13 +149,28 @@ Protocol.prototype._handleOffer = function(params, callback) {
     return callback(new Error('Contract is not complete'));
   }
 
-  if (self._network._pendingContracts[key]) {
-    callback(null, { contract: contract.toObject() });
-    self._network._pendingContracts[key](params.contact);
-    delete self._network._pendingContracts[key];
-  } else {
+  if (!self._network._pendingContracts[key]) {
     return callback(new Error('Contract no longer open to offers'));
   }
+
+  var doConsign = self._network._pendingContracts[key].bind(
+    self._network,
+    params.contact
+  );
+  delete self._network._pendingContracts[key];
+
+  var item = new StorageItem({ hash: key });
+
+  item.contracts[params.contact.nodeID] = contract;
+
+  self._network._manager.save(item, function(err) {
+    if (err) {
+      return callback(err);
+    }
+
+    callback(null, { contract: contract.toObject() });
+    doConsign();
+  });
 };
 
 /**
@@ -198,7 +214,7 @@ Protocol.prototype._handleConsign = function(params, callback) {
       return callback(err);
     }
 
-    var contract = new Contract(item.contracts[params.contact.nodeID]);
+    var contract = item.contracts[params.contact.nodeID];
     var t = Date.now();
 
     item.shard = new Buffer(params.data_shard, 'hex');

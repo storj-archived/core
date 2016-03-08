@@ -33,14 +33,14 @@
 			<li class="dropdown">
 				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_utils.html">storj/utils</a></li><li><a href="module-storjnode.html">storjnode</a></li>
+					<li><a href="module-storjnode.html">storjnode</a></li><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_utils.html">storj/utils</a></li>
 				</ul>
 			</li>
 			
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Proof.html">Proof</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="Verification.html">Verification</a></li>
+					<li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="Proof.html">Proof</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="Verification.html">Verification</a></li>
 				</ul>
 			</li>
 			
@@ -163,7 +163,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id=".getNextPowerOfTwo"><span class="type-signature">&lt;static> </span>getNextPowerOfTwo(number)</h4>
+    <h4 class="name" id=".sha256"><span class="type-signature">&lt;static> </span>sha256(input)</h4>
     
     
 </dt>
@@ -171,7 +171,7 @@
 
     
     <div class="description">
-        Returns the next power of two number
+        Returns the SHA-256 hash of the input
     </div>
     
 
@@ -206,13 +206,16 @@
 
         <tr>
             
-                <td class="name"><code>number</code></td>
+                <td class="name"><code>input</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Number</span>
+<span class="param-type">String</span>
+|
+
+<span class="param-type">Buffer</span>
 
 
 
@@ -223,7 +226,7 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">Data to hash</td>
         </tr>
 
     
@@ -268,7 +271,7 @@
 		<ul class="dummy">
 			<li>
 				<a href="lib_utils.js.html">lib/utils.js</a>,
-				 <a href="lib_utils.js.html#sunlight-1-line-41">line 41</a>
+				 <a href="lib_utils.js.html#sunlight-1-line-14">line 14</a>
 			</li>
 		</ul>
 	</dd>
@@ -304,7 +307,7 @@
     </dt>
     <dd>
         
-<span class="param-type">Number</span>
+<span class="param-type">String</span>
 
 
 
@@ -643,7 +646,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id=".sha256"><span class="type-signature">&lt;static> </span>sha256(input)</h4>
+    <h4 class="name" id=".getNextPowerOfTwo"><span class="type-signature">&lt;static> </span>getNextPowerOfTwo(number)</h4>
     
     
 </dt>
@@ -651,7 +654,7 @@
 
     
     <div class="description">
-        Returns the SHA-256 hash of the input
+        Returns the next power of two number
     </div>
     
 
@@ -686,16 +689,13 @@
 
         <tr>
             
-                <td class="name"><code>input</code></td>
+                <td class="name"><code>number</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">String</span>
-|
-
-<span class="param-type">Buffer</span>
+<span class="param-type">Number</span>
 
 
 
@@ -706,7 +706,7 @@
 
             
 
-            <td class="description last">Data to hash</td>
+            <td class="description last"></td>
         </tr>
 
     
@@ -751,7 +751,263 @@
 		<ul class="dummy">
 			<li>
 				<a href="lib_utils.js.html">lib/utils.js</a>,
-				 <a href="lib_utils.js.html#sunlight-1-line-14">line 14</a>
+				 <a href="lib_utils.js.html#sunlight-1-line-41">line 41</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Number</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id=".getContactURL"><span class="type-signature">&lt;static> </span>getContactURL(contact)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Returns a stringified URL from the supplied contact object
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>contact</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">
+                <h6 class="method-params-label method-subparams-label">Properties</h6>
+                
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>address</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>port</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>nodeID</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_utils.js.html">lib/utils.js</a>,
+				 <a href="lib_utils.js.html#sunlight-1-line-53">line 53</a>
 			</li>
 		</ul>
 	</dd>

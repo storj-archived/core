@@ -33,14 +33,14 @@
 			<li class="dropdown">
 				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_utils.html">storj/utils</a></li><li><a href="module-storjnode.html">storjnode</a></li>
+					<li><a href="module-storjnode.html">storjnode</a></li><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_utils.html">storj/utils</a></li>
 				</ul>
 			</li>
 			
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Proof.html">Proof</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="Verification.html">Verification</a></li>
+					<li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="Proof.html">Proof</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="Verification.html">Verification</a></li>
 				</ul>
 			</li>
 			
@@ -90,11 +90,12 @@ var assert = require('assert');
 var merge = require('merge');
 var async = require('async');
 var kad = require('kad');
+var traverse = require('kad-traverse');
 var ms = require('ms');
 var bitcore = require('bitcore-lib');
 var constants = require('../constants');
 var Message = require('bitcore-message');
-var Quasar = require('kad-quasar');
+var Quasar = require('kad-quasar').Protocol;
 var utils = require('../utils');
 var KeyPair = require('../keypair');
 var Manager = require('../manager');
@@ -103,6 +104,7 @@ var Protocol = require('./protocol');
 var Contract = require('../contract');
 var Audit = require('../audit');
 var Verification = require('../verification');
+var StorjTransport = traverse.TransportDecorator(kad.transports.HTTP);
 
 /**
  * Storj network interface
@@ -134,9 +136,15 @@ function Network(options) {
   this._contact = new kad.contacts.AddressPortContact(
     merge(this._options.contact, { nodeID: this._keypair.getNodeID() })
   );
-  this._transport = new kad.transports.HTTP(this._contact, {
+  this._transport = new StorjTransport(this._contact, {
     logger: this._logger,
-    cors: true
+    cors: true,
+    traverse: {
+      none: true,
+      upnp: options.upnp ? { ttl: 0, forward: this._contact.port } : false,
+      stun: false,
+      turn: false
+    }
   });
   this._router = new kad.Router({
     transport: this._transport,
@@ -164,7 +172,8 @@ Network.DEFAULTS = {
     address: '127.0.0.1',
     port: 4000,
   },
-  farmer: false
+  farmer: false,
+  upnp: true
 };
 
 /**
@@ -391,7 +400,6 @@ Network.prototype.store = function(data, duration, callback) {
           item = new StorageItem({ hash: shardHash });
         }
 
-        item.contracts[farmer.nodeID] = contract;
         item.trees[farmer.nodeID] = audit.getPublicRecord();
         item.challenges[farmer.nodeID] = audit.getPrivateRecord();
         item.meta[farmer.nodeID] = {};
@@ -429,7 +437,7 @@ Network.prototype._farm = function() {
 
     self._router.findNode(contract.get('renter_id'), function(err, nodes) {
       if (err) {
-        return false;
+        return self._logger.error(err.message);
       }
 
       var renter = nodes.filter(function(node) {
@@ -437,7 +445,7 @@ Network.prototype._farm = function() {
       })[0];
 
       if (!renter) {
-        return false;
+        return self._logger.error('Could not locate renter for offer');
       }
 
       var message = new kad.Message({
@@ -450,21 +458,23 @@ Network.prototype._farm = function() {
 
       self._transport.send(renter, message, function(err, response) {
         if (err) {
-          return false;
+          return self._logger.error(err.message);
         }
 
         if (response.error || !response.result.contract) {
-          return false;
+          return self._logger.error(
+            response.error ? response.error.message : 'Renter refused to sign'
+          );
         }
 
         try {
           final = Contract.fromObject(response.result.contract);
         } catch (err) {
-          return false;
+          return self._logger.error('Renter responded with invalid contract');
         }
 
         if (!final.verify('renter', contract.get('renter_id'))) {
-          return false;
+          return self._logger.error('Renter signature is invalid');
         }
 
         self._manager.load(contract.get('data_hash'), function(err, item) {
@@ -629,7 +639,7 @@ Network.prototype._addPingInterval = function(contact, interval) {
     self._transport.send(contact, new kad.Message({
       method: 'PING',
       params: { contact: self._node._self }
-    }));
+    }), function noop() {});
   }
 
   this._pingSeeds[contact.nodeID] = setInterval(pingSeed, interval);

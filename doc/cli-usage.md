@@ -24,7 +24,7 @@ encrypted with a passphrase of your choice.
  :STORJ: >> Enter the port number the service should use >>  (4000)
  :STORJ: >> Enter the level of verbosity for the logs (0-4) >>  (3)
  :STORJ: >> Accept storage contracts from the network? (true/false) >>  (false)
- :STORJ: >> Enter the URI of a known seed >>  (storj://dev.metadisk.org:7500/9f7e84fa954ef691c1de73002ad1cfcd12b13a26)
+ :STORJ: >> Enter the URI of a known seed >>  (storj://api.metadisk.org:8443/593844dc7f0076a1aeda9a6b9788af17e67c1052)
  :STORJ: >> Enter the path to store configuration and data >>  (/home/gordon/.storjnode)
  :STORJ: >> Enter the path to store your encrypted private key >>  (/home/gordon/.storjnode/id_ecdsa)
  :STORJ: >> Enter a password to protect your private key >>  ********

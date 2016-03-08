@@ -20,7 +20,7 @@ var DEFAULTS = {
   address: '127.0.0.1',
   port: 4000,
   farmer: false,
-  seed: 'storj://dev.metadisk.org:7500/9f7e84fa954ef691c1de73002ad1cfcd12b13a26'
+  seed: 'storj://api.metadisk.org:8443/593844dc7f0076a1aeda9a6b9788af17e67c1052'
 };
 var CONFNAME = 'config.json';
 

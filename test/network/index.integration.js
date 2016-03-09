@@ -29,7 +29,7 @@ function createNode(farming) {
     datadir: datadir,
     contact: contact,
     farmer: farming,
-    upnp: false
+    noforward: true
   });
 
   NODE_LIST.push([

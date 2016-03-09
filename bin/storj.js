@@ -169,7 +169,12 @@ function start(datadir) {
   var privkey = fs.readFileSync(config.keypath).toString();
 
   function open(passwd, privkey) {
-    privkey = decrypt(passwd, privkey);
+    try {
+      privkey = decrypt(passwd, privkey);
+    } catch (err) {
+      console.log('Failed to unlock private key - incorrect password');
+      process.exit();
+    }
 
     var network = storj.Network({
       keypair: storj.KeyPair(privkey),

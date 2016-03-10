@@ -9,6 +9,12 @@ module.exports = { version: require('./package').version };
 /** {@link Network} */
 module.exports.Network = require('./lib/network');
 
+/** {@link DataChannelClient} */
+module.exports.DataChannelClient = require('./lib/datachannel/client');
+
+/** {@link DataChannelServer} */
+module.exports.DataChannelServer = require('./lib/datachannel/server');
+
 /** {@link Protocol} */
 module.exports.Protocol = require('./lib/network/protocol');
 

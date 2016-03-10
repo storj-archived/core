@@ -13,7 +13,7 @@ var prompt = require('prompt');
 var url = require('url');
 var colors = require('colors/safe');
 
-var HOME = platform !== 'win32' ? process.env.HOME : process.env.USER_PROFILE;
+var HOME = platform !== 'win32' ? process.env.HOME : process.env.USERPROFILE;
 var DEFAULTS = {
   verbosity: 3,
   datadir: path.join(HOME, '.storjnode'),

@@ -92,10 +92,16 @@ describe('Storj/Integration', function() {
 
     it('should fetch the file from the farmer', function(done) {
       var renter = renters[renters.length - 1];
+      var buffer = Buffer([]);
       renter.retrieve(hash, function(err, result) {
         expect(err).to.equal(null);
-        expect(Buffer.compare(data, result)).to.equal(0);
-        done();
+        result.on('end', function() {
+          expect(Buffer.compare(data, buffer)).to.equal(0);
+          done();
+        });
+        result.on('data', function(data) {
+          buffer = Buffer.concat([buffer, data]);
+        });
       });
     });
 

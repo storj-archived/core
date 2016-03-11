@@ -186,7 +186,8 @@ function start(datadir) {
         address: config.address,
         port: config.port,
       },
-      farmer: config.farmer
+      farmer: config.farmer,
+      noforward: config.noforward
     });
 
     network.join(function(err) {

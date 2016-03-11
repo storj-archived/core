@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Storj JS Source: lib/storage/adapter.js</title>
+	<title>Storj JS Class: Transport</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -72,82 +72,309 @@
 <div class="row">
 
 	
-	<div class="col-md-12">
+	<div class="col-md-8">
 	
 		<div id="main">
 			
 
-		<h1 class="page-title">Source: lib/storage/adapter.js</h1>
-    
+	<h1 class="page-title">Class: Transport</h1>
 <section>
-    <article>
-        <pre
-            class="sunlight-highlight-javascript linenums">'use strict';
 
-var assert = require('assert');
-var Item = require('./item');
+<header>
+    
+        <h2>
+        Transport
+        </h2>
+        
+    
+</header>
 
-/**
- * Abstract base class for storage adapter
- * @constructor
- */
-function StorageAdapter() {
-  if (!(this instanceof StorageAdapter)) {
-    return new StorageAdapter();
-  }
-}
 
-/**
- * Calls the implemented {@link StorageAdapter#_get} and validates the result
- * @param {String} key - Shard hash to get metadata for
- * @param {Function} callback - Called with error or {@link StorageItem}
- */
-StorageAdapter.prototype.get = function(key, callback) {
-  assert(typeof key === 'string', 'Invalid key supplied');
-  assert(key.length === 40, 'Key must be 160 bit hex string');
-  assert(typeof callback === 'function', 'Callback function must be supplied');
+<article>
+    <div class="container-overview">
+    
+        
+<hr>
+<dt>
+    <h4 class="name" id="Transport"><span class="type-signature"></span>new Transport(contact, options)</h4>
+    
+    
+</dt>
+<dd>
 
-  return this._get(key, callback);
-};
+    
+    <div class="description">
+        Custom HTTP transport adapter
+    </div>
+    
 
-/**
- * Calls the implemented {@link StorageAdapter#_put} and validates the input
- * @param {StorageItem} item - Item to write to storage
- * @param {Function} callback - Called on complete write
- */
-StorageAdapter.prototype.put = function(item, callback) {
-  assert(item instanceof Item, 'Invalid storage item supplied');
-  assert(typeof callback === 'function', 'Callback function must be supplied');
+    
 
-  return this._put(item.hash, item, callback);
-};
+    
 
-/**
- * Performs lookup and provides an {@link StorageItem} to the callback
- * @abstract
- * @param {String} key - Shard hash
- * @param {Function} callback - Called on complete
- */
-StorageAdapter.prototype._get = function(/* key, callback */) {
-  throw new Error('Method not implemented');
-};
+    
+    
+        <h5>Parameters:</h5>
+        
 
-/**
- * Stores the {@link StorageItem}
- * @abstract
- * @param {String} key - Shard hash
- * @param {Item} item - Item to store
- * @param {Function} callback - Called on complete
- */
-StorageAdapter.prototype._put = function(/* item, callback */) {
-  throw new Error('Method not implemented');
-};
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
 
-module.exports = StorageAdapter;
-</pre>
-    </article>
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>contact</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">kad.Contact</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">
+                <h6 class="method-params-label method-subparams-label">Properties</h6>
+                
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>logger</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Logger</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>cors</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>tunnelHost</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_network_transport.js.html">lib/network/transport.js</a>,
+				 <a href="lib_network_transport.js.html#sunlight-1-line-19">line 19</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
 </section>
-
 
 
 
@@ -157,6 +384,10 @@ module.exports = StorageAdapter;
 
 	<div class="clearfix"></div>
 
+	
+		<div class="col-md-3">
+			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
+		</div>
 	
 
 </div>

@@ -1,184 +1,324 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <title>lib/network/transport.js - Documentation</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Storj JS Source: lib/network/transport.js</title>
 
-    <script src="scripts/prettify/prettify.js"></script>
-    <script src="scripts/prettify/lang-css.js"></script>
-    <!--[if lt IE 9]>
-      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <link type="text/css" rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
-    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
-    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.cosmo.css">
+
 </head>
+
 <body>
 
-<input type="checkbox" id="nav-trigger" class="nav-trigger" />
-<label for="nav-trigger" class="navicon-button x">
-  <div class="navicon"></div>
-</label>
-
-<label for="nav-trigger" class="overlay"></label>
-
-<nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Audit.html">Audit</a><ul class='methods'><li data-type='method'><a href="Audit.html#_createResponseInput">_createResponseInput</a></li><li data-type='method'><a href="Audit.html#_generateChallenge">_generateChallenge</a></li><li data-type='method'><a href="Audit.html#_generateTree">_generateTree</a></li><li data-type='method'><a href="Audit.html#getPrivateRecord">getPrivateRecord</a></li><li data-type='method'><a href="Audit.html#getPublicRecord">getPublicRecord</a></li></ul></li><li><a href="Contract.html">Contract</a><ul class='methods'><li data-type='method'><a href="Contract.html#.createValidator">createValidator</a></li><li data-type='method'><a href="Contract.html#.fromBuffer">fromBuffer</a></li><li data-type='method'><a href="Contract.html#.fromJSON">fromJSON</a></li><li data-type='method'><a href="Contract.html#.fromObject">fromObject</a></li><li data-type='method'><a href="Contract.html#_clean">_clean</a></li><li data-type='method'><a href="Contract.html#_complete">_complete</a></li><li data-type='method'><a href="Contract.html#_getSigningData">_getSigningData</a></li><li data-type='method'><a href="Contract.html#_validate">_validate</a></li><li data-type='method'><a href="Contract.html#get">get</a></li><li data-type='method'><a href="Contract.html#getHash">getHash</a></li><li data-type='method'><a href="Contract.html#set">set</a></li><li data-type='method'><a href="Contract.html#sign">sign</a></li><li data-type='method'><a href="Contract.html#toBuffer">toBuffer</a></li><li data-type='method'><a href="Contract.html#toJSON">toJSON</a></li><li data-type='method'><a href="Contract.html#toObject">toObject</a></li><li data-type='method'><a href="Contract.html#update">update</a></li><li data-type='method'><a href="Contract.html#verify">verify</a></li></ul></li><li><a href="EncryptedTransport.html">EncryptedTransport</a><ul class='methods'><li data-type='method'><a href="EncryptedTransport.html#_close">_close</a></li><li data-type='method'><a href="EncryptedTransport.html#_handleConnection">_handleConnection</a></li><li data-type='method'><a href="EncryptedTransport.html#_open">_open</a></li><li data-type='method'><a href="EncryptedTransport.html#_send">_send</a></li></ul></li><li><a href="KeyPair.html">KeyPair</a><ul class='methods'><li data-type='method'><a href="KeyPair.html#getAddress">getAddress</a></li><li data-type='method'><a href="KeyPair.html#getNodeID">getNodeID</a></li><li data-type='method'><a href="KeyPair.html#getPrivateKey">getPrivateKey</a></li><li data-type='method'><a href="KeyPair.html#getPublicKey">getPublicKey</a></li></ul></li><li><a href="module-storj_network_protocol-Protocol.html">Protocol</a></li><li><a href="Network.html">Network</a><ul class='methods'><li data-type='method'><a href="Network.html#_createContact">_createContact</a></li><li data-type='method'><a href="Network.html#_handleTransportError">_handleTransportError</a></li><li data-type='method'><a href="Network.html#_signMessage">_signMessage</a></li><li data-type='method'><a href="Network.html#_verifyMessage">_verifyMessage</a></li><li data-type='method'><a href="Network.html#connect">connect</a></li><li data-type='method'><a href="Network.html#fetch">fetch</a></li><li data-type='method'><a href="Network.html#open">open</a></li><li data-type='method'><a href="Network.html#publish">publish</a></li><li data-type='method'><a href="Network.html#store">store</a></li><li data-type='method'><a href="Network.html#subscribe">subscribe</a></li></ul></li><li><a href="Proof.html">Proof</a><ul class='methods'><li data-type='method'><a href="Proof.html#_generateLeaves">_generateLeaves</a></li><li data-type='method'><a href="Proof.html#prove">prove</a></li></ul></li><li><a href="Verification.html">Verification</a><ul class='methods'><li data-type='method'><a href="Verification.html#_getChallengeResponse">_getChallengeResponse</a></li><li data-type='method'><a href="Verification.html#verify">verify</a></li></ul></li></ul><h3>Modules</h3><ul><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_network_protocol.html">storj/network/protocol</a></li><li><a href="module-storj_utils.html">storj/utils</a><ul class='methods'><li data-type='method'><a href="module-storj_utils.html#.getNextPowerOfTwo">getNextPowerOfTwo</a></li><li data-type='method'><a href="module-storj_utils.html#.rmd160">rmd160</a></li><li data-type='method'><a href="module-storj_utils.html#.rmd160sha256">rmd160sha256</a></li><li data-type='method'><a href="module-storj_utils.html#.sha256">sha256</a></li></ul></li><li><a href="module-storjnode.html">storjnode</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li></ul>
-</nav>
-
-<div id="main">
-    
-    <h1 class="page-title">lib/network/transport.js</h1>
-    
-
-    
-
-
-
-    
-    <section>
-        <article>
-            <pre class="prettyprint source linenums"><code>'use strict';
-
-var assert = require('assert');
-var kad = require('kad');
-var inherits = require('util').inherits;
-var net = require('net');
-var es = require('event-stream');
-var KeyPair = require('../keypair');
-var ECIES = require('bitcore-ecies');
-
-/**
-* Defines the end-to-end encrypted RPC interface
-* @constructor
-* @param {kad.Contact} contact
-* @param {Object} options
-*/
-function EncryptedTransport(contact, options) {
-  if (!(this instanceof EncryptedTransport)) {
-    return new EncryptedTransport(contact, options);
-  }
-
-  assert(options.keypair instanceof KeyPair, 'Invalid keypair supplied');
-  kad.RPC.call(this, contact, options);
-
-  this._keypair = options.keypair;
-  this._pubkeys = {};
-  this._queuedResponses = {};
-}
-
-inherits(EncryptedTransport, kad.RPC);
-
-/**
-* Opens a TCP socket and sets up event listeners
-* @param {Function} ready
-*/
-EncryptedTransport.prototype._open = function(ready) {
-  var self = this;
-
-  this._socket = net.createServer(this._handleConnection.bind(this));
-
-  this._socket.on('error', function(err) {
-    self._log.error('rpc encountered and error: %s', err.message);
-  });
-
-  this._socket.on('listening', ready).listen(
-    this._contact.port,
-    this._contact.address
-  );
-};
-
-/**
-* Send a RPC to the given contact
-* @param {Buffer} data
-* @param {kad.Contact} contact
-*/
-EncryptedTransport.prototype._send = function(data, contact) {
-  var self = this;
-  var parsed = JSON.parse(data.toString());
-  var encrypter = new ECIES().privateKey(self._keypair._privkey);
-  var message = null;
-
-  try {
-    encrypter.publicKey(this._pubkeys[contact.nodeID]);
-    message = encrypter.encrypt(data);
-  } catch (err) {
-    self._logger.warn('failed to encrypt message, will send as cleartext');
-    message = data;
-  }
-
-  if (this._queuedResponses[parsed.id]) {
-    this._queuedResponses[parsed.id].end(data);
-    return delete this._queuedResponses[parsed.id];
-  }
-
-  var sock = net.createConnection(contact.port, contact.address);
-
-  sock.on('error', function(err) {
-    self._log.error('error connecting to peer', err);
-  });
-
-  this._queuedResponses[parsed.id] = sock;
-  this._handleConnection(sock);
-  sock.write(data);
-};
-
-/**
- * Handle incoming connection stream
- * @private
- * @param {net.Socket} connection
- */
-EncryptedTransport.prototype._handleConnection = function(connection) {
-  var self = this;
-
-  var chunks = connection.pipe(es.split('\n'));
-  var messages = chunks.pipe(es.map(function(chunk, callback) {
-    var decrypter = new ECIES({
-      noKey: true
-    }).privateKey(self._keypair._privkey);
-
-    try {
-      callback(null, decrypter.decrypt(chunk));
-    } catch (err) {
-      self._logger.warn('failed to decrypt message, will parse as cleartext');
-      callback(null, chunk);
-    }
-  }));
-
-  messages.on('data', function(clearbuffer) {
-    self.receive(clearbuffer);
-  });
-
-  messages.on('error', function(err) {
-    self._log.error('error decrypting message, reason:', err.message);
-    self.receive(null);
-  });
-};
-
-/**
-* Closes the underlying TCP socket
-*/
-EncryptedTransport.prototype._close = function() {
-  this._socket.close();
-};
-
-module.exports = EncryptedTransport;
-</code></pre>
-        </article>
-    </section>
-
-
-
+<div class="navbar navbar-default navbar-fixed-top navbar-inverse">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">Storj JS</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="module-storjnode.html">storjnode</a></li><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_utils.html">storj/utils</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="Transport.html">Transport</a></li><li><a href="Proof.html">Proof</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="Verification.html">Verification</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="tutorials.list.html" class="dropdown-toggle" data-toggle="dropdown">Tutorials<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="tutorial-cli-usage.html">Command Line Interface</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+		<div class="col-sm-3 col-md-3">
+            <form class="navbar-form" role="search">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                    <div class="input-group-btn">
+                        <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                    </div>
+                </div>
+            </form>
+        </div>
+	</div>
 
 </div>
+</div>
 
-<br class="clear">
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: lib/network/transport.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">'use strict';
+
+var inherits = require('util').inherits;
+var kad = require('kad');
+var natupnp = require('nat-upnp').createClient();
+var ip = require('ip');
+var tunnel = require('localtunnel');
+var url = require('url');
+
+/**
+ * Custom HTTP transport adapter
+ * @constructor
+ * @param {kad.Contact}
+ * @param {Object} options
+ * @param {Logger} options.logger
+ * @param {Boolean} options.cors
+ * @param {String} options.tunnelHost
+ */
+function Transport(contact, options) {
+  if (!(this instanceof Transport)) {
+    return new Transport(contact, options);
+  }
+
+  this._tunnelhost = options.tunnelhost;
+  this._noforward = options.noforward;
+
+  kad.transports.HTTP.call(this, contact, options);
+}
+
+inherits(Transport, kad.transports.HTTP);
+
+/**
+ * Opens the transport, trying UPnP to become publicly addressable and falling
+ * back to using a Tunnel
+ * @private
+ * @param {Function} callback
+ */
+Transport.prototype._open = function(callback) {
+  var self = this;
+
+  if (ip.isPublic(self._contact.address) || self._noforward) {
+    return kad.transports.HTTP.prototype._open.call(self, callback);
+  }
+
+  self._log.warn(
+    'you are not bound to a public address, trying traversal strategies...'
+  );
+  self._forwardPort(function(err) {
+    if (err) {
+      self._log.info('attempting to open connection tunnel...');
+      return tunnel(self._contact.port, {
+        subdomain: self._contact.nodeID.substr(0, 8),
+        host: self._tunnelhost
+      }, function(err, client) {
+        if (err) {
+          self._log.warn(
+            'failed to tunnel connection, reason: %s', err.message
+          );
+          return kad.transports.HTTP.prototype._open.call(self, callback);
+        }
+
+        self._log.info('established tunnel, you are: %s', client.url);
+
+        var addr = url.parse(client.url);
+        self._tunnel = client;
+
+        kad.transports.HTTP.prototype._open.call(self, callback);
+
+        self._contact.address = addr.hostname;
+        self._contact.port = addr.protocol === 'https:' ? 443 : 80;
+      });
+    }
+
+    kad.transports.HTTP.prototype._open.call(self, callback);
+  });
+};
+
+/**
+ * Forwards a port and resolves the public IP
+ * @private
+ * @param {Function} callback
+ */
+Transport.prototype._forwardPort = function(callback) {
+  var self = this;
+
+  natupnp.portMapping({
+    public: self._contact.port,
+    private: self._contact.port,
+    ttl: 0
+  }, function(err) {
+    if (err) {
+      self._log.warn('could not connect to NAT device via UPnP');
+      return callback(err);
+    }
+
+    natupnp.externalIp(function(err, ip) {
+      if (err) {
+        self._log.warn('could not obtain public IP address');
+        return callback(err);
+      }
+
+      self._contact.address = ip;
+
+      self._log.info('successfully traversed NAT via UPnP');
+      callback(null);
+    });
+  });
+};
+
+module.exports = Transport;
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+<div class="modal fade" id="searchResults">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Search results</h4>
+      </div>
+      <div class="modal-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div>
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Fri Feb 12 2016 14:46:11 GMT-0500 (EST) using the Minami theme.
+
+
+	<span class="copyright">
+	Copyright 2016 Storj Labs
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a>
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
 </footer>
 
-<script>prettyPrint();</script>
-<script src="scripts/linenumber.js"></script>
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+<script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			var id = $( heading ).attr( "id" );
+			return id && id.replace(/\~/g, '-inner-').replace(/\./g, '-static-') || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		SearcherDisplay.init();
+	});
+</script>
+
 </body>
 </html>

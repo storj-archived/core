@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Storj JS Class: FSStorageAdapter</title>
+	<title>Storj JS Class: DataChannelServer</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -77,13 +77,13 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: FSStorageAdapter</h1>
+	<h1 class="page-title">Class: DataChannelServer</h1>
 <section>
 
 <header>
     
         <h2>
-        FSStorageAdapter
+        DataChannelServer
         </h2>
         
     
@@ -96,7 +96,7 @@
         
 <hr>
 <dt>
-    <h4 class="name" id="FSStorageAdapter"><span class="type-signature"></span>new FSStorageAdapter(datadir)</h4>
+    <h4 class="name" id="DataChannelServer"><span class="type-signature"></span>new DataChannelServer(options)</h4>
     
     
 </dt>
@@ -104,7 +104,7 @@
 
     
     <div class="description">
-        Implements a file-system based storage adapter
+        Creates a data channel server for sending and receiving consigned file shards
     </div>
     
 
@@ -139,13 +139,13 @@
 
         <tr>
             
-                <td class="name"><code>datadir</code></td>
+                <td class="name"><code>options</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">Object</span>
 
 
 
@@ -156,7 +156,129 @@
 
             
 
-            <td class="description last">Directory path to store data</td>
+            <td class="description last">
+                <h6 class="method-params-label method-subparams-label">Properties</h6>
+                
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>transport</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Transport.html">Transport</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Transport adapter from <a href="Network.html">Network</a></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>manager</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Manager.html">Manager</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The Manager from <a href="Network.html">Network</a></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>logger</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">kad.Logger</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Logger to use from <a href="Network.html">Network</a></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ttl</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Close after idle for this length of time</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
         </tr>
 
     
@@ -200,8 +322,8 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_storage_adapters_fs.js.html">lib/storage/adapters/fs.js</a>,
-				 <a href="lib_storage_adapters_fs.js.html#sunlight-1-line-41">line 41</a>
+				<a href="lib_datachannel_server.js.html">lib/datachannel/server.js</a>,
+				 <a href="lib_datachannel_server.js.html#sunlight-1-line-22">line 22</a>
 			</li>
 		</ul>
 	</dd>
@@ -232,17 +354,6 @@
 
     
     </div>
-
-    
-        <h3 class="subsection-title">Extends</h3>
-
-        
-
-
-    <ul>
-        <li><a href="StorageAdapter.html">StorageAdapter</a></li>
-    </ul>
-
 
     
 
@@ -263,7 +374,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="get"><span class="type-signature"></span>get(key, callback)</h4>
+    <h4 class="name" id="accept"><span class="type-signature"></span>accept(token, filehash)</h4>
     
     
 </dt>
@@ -271,7 +382,7 @@
 
     
     <div class="description">
-        Calls the implemented <a href="StorageAdapter.html#_get">StorageAdapter#_get</a> and validates the result
+        Begin accepting data for the given file hash and token
     </div>
     
 
@@ -306,7 +417,7 @@
 
         <tr>
             
-                <td class="name"><code>key</code></td>
+                <td class="name"><code>token</code></td>
             
 
             <td class="type">
@@ -323,20 +434,20 @@
 
             
 
-            <td class="description last">Shard hash to get metadata for</td>
+            <td class="description last">The authorization token created for transfer</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>callback</code></td>
+                <td class="name"><code>filehash</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">function</span>
+<span class="param-type">String</span>
 
 
 
@@ -347,7 +458,7 @@
 
             
 
-            <td class="description last">Called with error or <a href="StorageItem.html">StorageItem</a></td>
+            <td class="description last">The shard hash to allow for the token</td>
         </tr>
 
     
@@ -364,15 +475,6 @@
 
 	
 
-	
-	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-	<dd class="inherited-from">
-		<ul class="dummy">
-			<li>
-				<a href="StorageAdapter.html#get">StorageAdapter#get</a>
-			</li>
-		</ul>
-	</dd>
 	
 
     
@@ -400,8 +502,8 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_storage_adapter.js.html">lib/storage/adapter.js</a>,
-				 <a href="lib_storage_adapter.js.html#sunlight-1-line-21">line 21</a>
+				<a href="lib_datachannel_server.js.html">lib/datachannel/server.js</a>,
+				 <a href="lib_datachannel_server.js.html#sunlight-1-line-52">line 52</a>
 			</li>
 		</ul>
 	</dd>
@@ -434,7 +536,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="put"><span class="type-signature"></span>put(item, callback)</h4>
+    <h4 class="name" id="reject"><span class="type-signature"></span>reject(token)</h4>
     
     
 </dt>
@@ -442,7 +544,7 @@
 
     
     <div class="description">
-        Calls the implemented <a href="StorageAdapter.html#_put">StorageAdapter#_put</a> and validates the input
+        Stop accepting data for the given token
     </div>
     
 
@@ -477,13 +579,13 @@
 
         <tr>
             
-                <td class="name"><code>item</code></td>
+                <td class="name"><code>token</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type"><a href="StorageItem.html">StorageItem</a></span>
+<span class="param-type">String</span>
 
 
 
@@ -494,31 +596,7 @@
 
             
 
-            <td class="description last">Item to write to storage</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>callback</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Called on complete write</td>
+            <td class="description last">The authorization token created for transfer</td>
         </tr>
 
     
@@ -535,15 +613,6 @@
 
 	
 
-	
-	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
-	<dd class="inherited-from">
-		<ul class="dummy">
-			<li>
-				<a href="StorageAdapter.html#put">StorageAdapter#put</a>
-			</li>
-		</ul>
-	</dd>
 	
 
     
@@ -571,8 +640,96 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_storage_adapter.js.html">lib/storage/adapter.js</a>,
-				 <a href="lib_storage_adapter.js.html#sunlight-1-line-34">line 34</a>
+				<a href="lib_datachannel_server.js.html">lib/datachannel/server.js</a>,
+				 <a href="lib_datachannel_server.js.html#sunlight-1-line-63">line 63</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="close"><span class="type-signature"></span>close()</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Closes the data channel and disconnects all clients
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_datachannel_server.js.html">lib/datachannel/server.js</a>,
+				 <a href="lib_datachannel_server.js.html#sunlight-1-line-78">line 78</a>
 			</li>
 		</ul>
 	</dd>

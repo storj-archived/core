@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Storj JS Source: lib/storage/adapter.js</title>
+	<title>Storj JS Source: lib/datachannel/client.js</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -77,73 +77,118 @@
 		<div id="main">
 			
 
-		<h1 class="page-title">Source: lib/storage/adapter.js</h1>
+		<h1 class="page-title">Source: lib/datachannel/client.js</h1>
     
 <section>
     <article>
         <pre
             class="sunlight-highlight-javascript linenums">'use strict';
 
+var BinaryClient = require('binaryjs').BinaryClient;
 var assert = require('assert');
-var Item = require('./item');
+var events = require('events');
+var inherits = require('util').inherits;
+var url = require('url');
+var utils = require('../utils');
 
 /**
- * Abstract base class for storage adapter
+ * Creates a data channel client for sending and receiving consigned file shards
  * @constructor
+ * @param {Object} contact
+ * @param {String} contact.address - The address of the target farmer
+ * @param {Number} contact.port - The port of the target farmer
  */
-function StorageAdapter() {
-  if (!(this instanceof StorageAdapter)) {
-    return new StorageAdapter();
+function DataChannelClient(contact) {
+  if (!(this instanceof DataChannelClient)) {
+    return new DataChannelClient(contact);
   }
+
+  assert.ok(contact, 'No contact was supplied to constructor');
+  assert(typeof contact.address === 'string', 'Invalid contact address');
+  assert(typeof contact.port === 'number', 'Invalid contact port');
+
+  events.EventEmitter.call(this);
+
+  this._contact = contact;
+  this._client = new BinaryClient(DataChannelClient.getChannelURL(contact));
+
+  this._client.on('open', this._handleChannelOpen.bind(this));
+  this._client.on('error', this._handleChannelError.bind(this));
 }
 
-/**
- * Calls the implemented {@link StorageAdapter#_get} and validates the result
- * @param {String} key - Shard hash to get metadata for
- * @param {Function} callback - Called with error or {@link StorageItem}
- */
-StorageAdapter.prototype.get = function(key, callback) {
-  assert(typeof key === 'string', 'Invalid key supplied');
-  assert(key.length === 40, 'Key must be 160 bit hex string');
-  assert(typeof callback === 'function', 'Callback function must be supplied');
+inherits(DataChannelClient, events.EventEmitter);
 
-  return this._get(key, callback);
+/**
+ * Creates a Readable Stream for the token and hash that receives the data
+ * @param {String} token - The RETRIEVE token supplied by the farmer
+ * @param {String} hash - The hash of the data to retrieve
+ * @returns {stream.Readable}
+ */
+DataChannelClient.prototype.retrieve = function(token, hash) {
+  var channel = this._client.send(null, {
+    token: token,
+    hash: hash,
+    operation: 'PULL'
+  });
+
+  return channel;
 };
 
 /**
- * Calls the implemented {@link StorageAdapter#_put} and validates the input
- * @param {StorageItem} item - Item to write to storage
- * @param {Function} callback - Called on complete write
+ * Creates a Writable Stream for the token and hash that stores the data
+ * @param {String} token - The CONSIGN token supplied by the farmer
+ * @param {Buffer} data - The data to store
  */
-StorageAdapter.prototype.put = function(item, callback) {
-  assert(item instanceof Item, 'Invalid storage item supplied');
-  assert(typeof callback === 'function', 'Callback function must be supplied');
+DataChannelClient.prototype.consign = function(token, data, callback) {
+  var hash = utils.rmd160sha256(data);
+  var channel = this._client.send(data, {
+    token: token,
+    hash: hash,
+    operation: 'PUSH'
+  });
 
-  return this._put(item.hash, item, callback);
+  channel.on('data', function(data) {
+    if (data.error) {
+      callback(new Error(data.message));
+    } else {
+      callback(null, hash);
+    }
+
+    channel.end();
+  });
 };
 
 /**
- * Performs lookup and provides an {@link StorageItem} to the callback
- * @abstract
- * @param {String} key - Shard hash
- * @param {Function} callback - Called on complete
+ * Handles the open event from the underlying client
+ * @private
  */
-StorageAdapter.prototype._get = function(/* key, callback */) {
-  throw new Error('Method not implemented');
+DataChannelClient.prototype._handleChannelOpen = function() {
+  this.emit('open');
 };
 
 /**
- * Stores the {@link StorageItem}
- * @abstract
- * @param {String} key - Shard hash
- * @param {Item} item - Item to store
- * @param {Function} callback - Called on complete
+ * Handles the open event from the underlying client
+ * @private
  */
-StorageAdapter.prototype._put = function(/* item, callback */) {
-  throw new Error('Method not implemented');
+DataChannelClient.prototype._handleChannelError = function(err) {
+  this.emit('error', err);
 };
 
-module.exports = StorageAdapter;
+/**
+ * Returns the URI of the contact's data channel
+ * @static
+ * @param {Object} contact
+ */
+DataChannelClient.getChannelURL = function(contact) {
+  return url.format({
+    protocol: 'ws',
+    slashes: true,
+    hostname: contact.address,
+    port: contact.port
+  });
+};
+
+module.exports = DataChannelClient;
 </pre>
     </article>
 </section>

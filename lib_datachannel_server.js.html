@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Storj JS Source: lib/storage/adapters/fs.js</title>
+	<title>Storj JS Source: lib/datachannel/server.js</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -77,292 +77,234 @@
 		<div id="main">
 			
 
-		<h1 class="page-title">Source: lib/storage/adapters/fs.js</h1>
+		<h1 class="page-title">Source: lib/datachannel/server.js</h1>
     
 <section>
     <article>
         <pre
             class="sunlight-highlight-javascript linenums">'use strict';
 
-var async = require('async');
+var BinaryServer = require('binaryjs').BinaryServer;
+var assert = require('assert');
+var Transport = require('../network/transport');
+var Manager = require('../manager');
+var events = require('events');
 var inherits = require('util').inherits;
-var path = require('path');
-var fs = require('fs');
-var StorageAdapter = require('../adapter');
-var StorageItem = require('../item');
-
-var HOME_DIR = process.platform === 'win32' ?
-               process.env.USERPROFILE :
-               process.env.HOME;
-
-/*
-Example Directory Tree
-======================
-  |- &lt;datadir>/
-  | |- shards/
-  | | |- &lt;shard_hash>/
-  | | | |- contracts/
-  | | | | |- renter_or_farmer_id_1
-  | | | | |- renter_or_farmer_id_2
-  | | | |- trees/
-  | | | | |- renter_or_farmer_id_1
-  | | | | |- renter_or_farmer_id_1
-  | | | |- challenges/
-  | | | | |- farmer_id_1
-  | | | | |- farmer_id_2
-  | | | |- meta/
-  | | | | |- renter_or_farmer_id_1
-  | | | | |- renter_or_farmer_id_1
-  | | | |- shard.data
-*/
+var ms = require('ms');
+var crypto = require('crypto');
+var utils = require('../utils');
 
 /**
- * Implements a file-system based storage adapter
+ * Creates a data channel server for sending and receiving consigned file shards
  * @constructor
- * @extends {StorageAdapter}
- * @param {String} datadir - Directory path to store data
+ * @param {Object} options
+ * @param {Transport} options.transport - Transport adapter from {@link Network}
+ * @param {Manager} options.manager - The Manager from {@link Network}
+ * @param {kad.Logger} options.logger - Logger to use from {@link Network}
+ * @param {Number} options.ttl - Close after idle for this length of time
  */
-function FSStorageAdapter(datadir) {
-  if (!(this instanceof FSStorageAdapter)) {
-    return new FSStorageAdapter(datadir);
+function DataChannelServer(options) {
+  if (!(this instanceof DataChannelServer)) {
+    return new DataChannelServer(options);
   }
 
-  this._datadir = datadir || path.join(HOME_DIR, '.storjnode');
-  this._sharddir = path.join(this._datadir, 'shards');
+  assert.ok(options, 'No options were supplied to constructor');
+  assert(options.transport instanceof Transport, 'Invalid transport adapter');
+  assert(options.manager instanceof Manager, 'Invalid manager supplied');
+  assert.ok(options.logger, 'Invalid logger supplied');
 
-  if (!fs.existsSync(this._datadir)) {
-    fs.mkdirSync(this._datadir);
-  }
+  events.EventEmitter.call(this);
 
-  if (!fs.existsSync(this._sharddir)) {
-    fs.mkdirSync(this._sharddir);
-  }
+  this._transport = options.transport;
+  this._manager = options.manager;
+  this._log = options.logger;
+  this._ttl = options.ttl || ms('2m');
+  this._server = new BinaryServer({ server: this._transport._server });
+  this._allowed = {};
+
+  this._server.on('connection', this._handleConnection.bind(this));
+  this._server.on('error', this._handleError.bind(this));
 }
 
-inherits(FSStorageAdapter, StorageAdapter);
+inherits(DataChannelServer, events.EventEmitter);
 
 /**
- * Implements the abstract {@link StorageAdapter#_get}
- * @private
- * @param {String} key
- * @param {Function} callback
+ * Begin accepting data for the given file hash and token
+ * @param {String} token - The authorization token created for transfer
+ * @param {String} filehash - The shard hash to allow for the token
  */
-FSStorageAdapter.prototype._get = function(key, callback) {
+DataChannelServer.prototype.accept = function(token, filehash) {
+  assert(typeof token === 'string', 'Invalid token supplied');
+  assert(typeof filehash === 'string', 'Invalid filehash supplied');
+
+  this._allowed[token] = { hash: filehash, client: null };
+};
+
+/**
+ * Stop accepting data for the given token
+ * @param {String} token - The authorization token created for transfer
+ */
+DataChannelServer.prototype.reject = function(token) {
+  assert(typeof token === 'string', 'Invalid token supplied');
+
+  if (this._allowed[token]) {
+    if (this._allowed[token].client) {
+      this._allowed[token].client.close();
+    }
+
+    delete this._allowed[token];
+  }
+};
+
+/**
+ * Closes the data channel and disconnects all clients
+ */
+DataChannelServer.prototype.close = function() {
+  return this._server.close();
+};
+
+/**
+ * Handles incoming connections
+ * @private
+ * @param {BinaryClient} client - The connected client object
+ */
+DataChannelServer.prototype._handleConnection = function(client) {
   var self = this;
-  var target = path.join(this._sharddir, key);
-  var contracts = path.join(target, 'contracts');
-  var trees = path.join(target, 'trees');
-  var challenges = path.join(target, 'challenges');
-  var meta = path.join(target, 'meta');
-  var data = {
-    hash: key,
-    shard: null,
-    contracts: null,
-    trees: null,
-    challenges: null,
-    meta: null
-  };
 
-  function checkTarget(done) {
-    fs.exists(target, function(exists) {
-      if (exists) {
-        return done();
-      }
+  this._log.info('data channel connection opened');
+  this.emit('connection', client);
 
-      done(new Error('Shard data not found'));
-    });
-  }
-
-  function getShard(done) {
-    var shardpath = path.join(target, 'shard.data');
-
-    fs.exists(shardpath, function(exists) {
-      if (exists) {
-        data.shard = fs.createReadStream(shardpath);
-      } else {
-        data.shard = fs.createWriteStream(shardpath);
-      }
-
-      done();
-    });
-  }
-
-  function getItemData(done) {
-    async.parallel([
-      function getContracts(done) {
-        self.__fromDirectory(contracts, function(err, result) {
-          data.contracts = result;
-          done(err);
-        });
-      },
-      function getTrees(done) {
-        self.__fromDirectory(trees, function(err, result) {
-          data.trees = result;
-          done(err);
-        });
-      },
-      function getChallenges(done) {
-        self.__fromDirectory(challenges, function(err, result) {
-          data.challenges = result;
-          done(err);
-        });
-      },
-      function getMeta(done) {
-        self.__fromDirectory(meta, function(err, result) {
-          data.meta = result;
-          done(err);
-        });
-      }
-    ], done);
-  }
-
-  async.series([checkTarget, getShard, getItemData], function(err) {
-    if (err) {
-      return callback(err);
-    }
-
-    callback(null, new StorageItem(data));
+  client.on('error', function(err) {
+    self._log.error('data channel connection error: %s', err.message);
+    client.close();
   });
-};
 
-/**
- * Implements the abstract {@link StorageAdapter#_put}
- * @private
- * @param {String} key
- * @param {StorageItem} item
- * @param {Function} callback
- */
-FSStorageAdapter.prototype._put = function(key, item, callback) {
-  var self = this;
-  var target = path.join(this._sharddir, key);
-  var contracts = path.join(target, 'contracts');
-  var trees = path.join(target, 'trees');
-  var challenges = path.join(target, 'challenges');
-  var meta = path.join(target, 'meta');
-  // var shardpath = path.join(target, 'shard.data');
-  var directories = [target, contracts, trees, challenges, meta];
+  client.on('stream', function(stream, meta) {
+    self._log.info('receiving stream from client');
 
-  function checkTarget(done) {
-    fs.exists(target, function(exists) {
-      if (exists) {
-        return done();
-      }
-
-      async.eachSeries(directories, function(dirname, next) {
-        fs.mkdir(dirname, function(err) {
-          if (err) {
-            return next(err);
-          }
-
-          next();
-        });
-      }, done);
-    });
-  }
-
-  // function writeShard(done) {
-  //   if (!item.shard) {
-  //     return done();
-  //   }
-  //
-  //   fs.writeFile(shardpath, item.shard, done);
-  // }
-
-  function writeItemData(done) {
-    async.parallel([
-      function writeContracts(done) {
-        self.__toDirectory(contracts, item.contracts, done);
-      },
-      function writeTrees(done) {
-        self.__toDirectory(trees, item.trees, done);
-      },
-      function writeChallenges(done) {
-        self.__toDirectory(challenges, item.challenges, done);
-      },
-      function writeMeta(done) {
-        self.__toDirectory(meta, item.meta, done);
-      }
-    ], done);
-  }
-
-  async.series([checkTarget, /*writeShard, */writeItemData], function(err) {
-    if (err) {
-      return callback(err);
-    }
-
-    callback(null);
-  });
-};
-
-/**
- * Loads the directory contents as an object where key is the file's basename
- * and value is the parsed JSON object
- * @private
- * @param {String} dirname
- * @param {Function} callback
- */
-FSStorageAdapter.prototype.__fromDirectory = function(dirname, callback) {
-  var result = {};
-
-  function onComplete(err) {
-    if (err) {
-      return callback(err);
-    }
-
-    callback(null, result);
-  }
-
-  function loadFile(filename, done) {
-    fs.readFile(path.join(dirname, filename), function(err, buffer) {
-      if (err) {
-        return done(err);
-      }
-
-      try {
-        result[path.basename(filename)] = JSON.parse(buffer.toString('utf8'));
-      } catch (err) {
-        return done(err);
-      }
-
-      done();
-    });
-  }
-
-  fs.readdir(dirname, function(err, contents) {
-    if (err) {
-      return callback(err);
-    }
-
-    async.each(contents, loadFile, onComplete);
-  });
-};
-
-/**
- * Writes the data object to the supplied directory
- * @private
- * @param {String} dirname
- * @param {Object} data
- * @param {Function} callback
- */
-FSStorageAdapter.prototype.__toDirectory = function(dirname, data, callback) {
-  var filenames = Object.keys(data);
-
-  function writeFile(filename, next) {
-    var buffer;
+    var token = meta.token;
+    var hash = meta.hash;
+    var operation = meta.operation;
 
     try {
-      buffer = new Buffer(JSON.stringify(data[filename]));
+      assert.ok(token, 'You did not supply a token');
+      assert.ok(self._allowed[token], 'The supplied token is not accepted');
+      assert.ok(hash, 'You did not supply the data hash');
+      assert(self._allowed[token].client === null, 'Channel is already active');
+      assert(self._allowed[token].hash === hash, 'Token not valid for hash');
     } catch (err) {
-      return next(err);
+      stream.write({ message: err.message, error: true });
+      return client.close();
     }
 
-    fs.writeFile(path.join(dirname, filename), buffer, next);
-  }
+    self._allowed[token].client = client;
 
-  async.each(filenames, writeFile, callback);
+    switch (operation) {
+      case 'PUSH':
+        return self._handleConsignStream(stream, token);
+      case 'PULL':
+        return self._handleRetrieveStream(stream, token);
+      default:
+        return self._handleUnknownStream(stream, token);
+    }
+  });
 };
 
-module.exports = FSStorageAdapter;
+/**
+ * Receives the data stream and writes it to storage
+ * @private
+ * @param {stream.Readable} stream - The incoming data stream
+ * @param {String} token - The valid channel token
+ */
+DataChannelServer.prototype._handleConsignStream = function(stream, token) {
+  var self = this;
+  var hasher = crypto.createHash('sha256');
+  var hash = this._allowed[token].hash;
+
+  this._manager.load(hash, function(err, item) {
+    if (err) {
+      stream.write({ error: true, message: err.message });
+      return self.reject(token);
+    }
+
+    stream.on('data', function(chunk) {
+      hasher.update(chunk);
+      item.shard.write(chunk);
+    });
+
+    stream.on('end', function() {
+      if (utils.rmd160(hasher.digest('hex')) !== hash) {
+        stream.write({
+          error: true,
+          message: 'Calculated hash does not match the expected result'
+        });
+        return self.reject(token);
+      }
+
+      item.shard.end();
+      stream.write({
+        error: false,
+        message: 'Consignment completed successfully'
+      });
+
+      self.reject(token);
+    });
+  });
+};
+
+/**
+ * Pumps the data through to the client
+ * @private
+ * @param {stream.Readable} stream - The incoming data stream
+ * @param {String} token - The valid channel token
+ */
+DataChannelServer.prototype._handleRetrieveStream = function(stream, token) {
+  var self = this;
+  var hash = this._allowed[token].hash;
+
+  this._manager.load(hash, function(err, item) {
+    if (err) {
+      stream.write({ error: true, message: err.message });
+      return self.reject(token);
+    }
+
+    var filestream = item.shard.pipe(stream);
+
+    filestream.on('end', function() {
+      stream.end();
+      self.reject(token);
+    });
+  });
+};
+
+/**
+ * Closes the stream if it cannot be handled
+ * @private
+ * @param {stream.Readable} stream - The incoming data stream
+ * @param {String} token - The valid channel token
+ */
+DataChannelServer.prototype._handleUnknownStream = function(stream, token) {
+  var client = this._allowed[token].client;
+
+  client.send({
+    error: true,
+    message: 'Failed to handle the defined operation'
+  });
+
+  this.reject(token);
+};
+
+/**
+ * Handles binary server errors
+ * @private
+ * @param {Error} err - The error object
+ */
+DataChannelServer.prototype._handleError = function(err) {
+  this._log.error('data channel server encountered an error: %s', err.message);
+  this.emit('error', err);
+};
+
+module.exports = DataChannelServer;
 </pre>
     </article>
 </section>

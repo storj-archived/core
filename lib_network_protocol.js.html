@@ -40,7 +40,7 @@
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="Proof.html">Proof</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="Verification.html">Verification</a></li>
+					<li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="Transport.html">Transport</a></li><li><a href="Proof.html">Proof</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="Verification.html">Verification</a></li>
 				</ul>
 			</li>
 			
@@ -89,6 +89,7 @@ var utils = require('../utils');
 var Proof = require('../proof');
 var Contract = require('../contract');
 var StorageItem = require('../storage/item');
+var stream = require('stream');
 
 /**
  * Defines the Storj protocol methods and mounts on a {@link Network} instance
@@ -181,22 +182,29 @@ Protocol.prototype._handleOffer = function(params, callback) {
  */
 Protocol.prototype._handleAudit = function(params, callback) {
   var self = this;
+  var shard = new Buffer([]);
 
   self._network._manager.load(params.data_hash, function(err, item) {
     if (err) {
       return callback(err);
     }
 
-    if (!item.shard) {
+    if (item.shard instanceof stream.Writable) {
       return callback(new Error('Shard not found'));
     }
 
-    var proof = new Proof({
-      leaves: item.trees[params.contact.nodeID],
-      shard: item.shard
+    item.shard.on('data', function(chunk) {
+      shard = Buffer.concat([shard, chunk]);
     });
 
-    callback(null, { proof: proof.prove(params.challenge) });
+    item.shard.on('end', function() {
+      var proof = new Proof({
+        leaves: item.trees[params.contact.nodeID],
+        shard: shard
+      });
+
+      callback(null, { proof: proof.prove(params.challenge) });
+    });
   });
 };
 
@@ -208,6 +216,7 @@ Protocol.prototype._handleAudit = function(params, callback) {
  */
 Protocol.prototype._handleConsign = function(params, callback) {
   var self = this;
+  var token = utils.generateToken();
 
   self._network._manager.load(params.data_hash, function(err, item) {
     if (err) {
@@ -216,22 +225,12 @@ Protocol.prototype._handleConsign = function(params, callback) {
 
     var contract = item.contracts[params.contact.nodeID];
     var t = Date.now();
-
-    item.shard = new Buffer(params.data_shard, 'hex');
     item.trees[contract.get('renter_id')] = params.audit_tree;
 
     try {
       assert(
-        item.shard.length &lt;= contract.get('data_size'),
-        'Shard size exceeds the contract'
-      );
-      assert(
         t &lt; contract.get('store_end') || t > contract.get('store_begin'),
         'Consignment violates contract store time'
-      );
-      assert(
-        utils.rmd160sha256(item.shard) === contract.get('data_hash'),
-        'Shard hash does not match contract'
       );
     } catch (err) {
       return callback(err);
@@ -242,7 +241,8 @@ Protocol.prototype._handleConsign = function(params, callback) {
         return callback(err);
       }
 
-      callback();
+      self._network._channel.accept(token, params.data_hash);
+      callback(null, { token: token });
     });
   });
 };
@@ -256,6 +256,7 @@ Protocol.prototype._handleConsign = function(params, callback) {
 Protocol.prototype._handleRetrieve = function(params, callback) {
   var self = this;
   var hash = params.data_hash;
+  var token = utils.generateToken();
 
   // TODO: We will need to increment the download count to track payments, as
   // TODO: well as make sure that the requester is allowed to fetch the shard
@@ -266,7 +267,8 @@ Protocol.prototype._handleRetrieve = function(params, callback) {
       return callback(err);
     }
 
-    callback(null, { data_shard: item.shard.toString('hex') });
+    self._network._channel.accept(token, item.hash);
+    callback(null, { token: token });
   });
 };
 

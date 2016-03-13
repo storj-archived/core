@@ -29,6 +29,22 @@ source ~/.profile
 nvm install 4.2.3
 ```
 
+### Using the Command Line Interface
+
+Install *globally* as user with NPM:
+
+```
+npm install storj --global
+```
+
+Install *globally* as root with NPM:
+
+```
+npm install storj --global --unsafe-perm
+```
+
+### Using the Library
+
 Install *locally* as user with NPM:
 
 ```
@@ -38,11 +54,11 @@ npm install storj --save
 Install *locally* as root with NPM:
 
 ```
-npm -unsafe-perm install storj --save
+npm install storj --unsafe-perm --save
 ```
 
-Import the storj module, generate a key pair, configure your persistence layer,
-and join the network in just a few lines of code:
+Import the `storj` module, generate a key pair, configure your persistence
+layer, and join the network in just a few lines of code:
 
 ```
 var storj = require('storj');
@@ -59,7 +75,7 @@ var network = new storj.Network({
     port: 4000
   },
   seeds: [
-    'storj://dev.metadisk.org:7500/9f7e84fa954ef691c1de73002ad1cfcd12b13a26'
+    'storj://api.metadisk.org:8443/593844dc7f0076a1aeda9a6b9788af17e67c1052'
   ],
   loglevel: 3,
   datadir: '/path/to/datadir',

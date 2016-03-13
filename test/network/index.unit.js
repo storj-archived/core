@@ -17,7 +17,8 @@ describe('Network', function() {
         loglevel: 0,
         seeds: [],
         contact: { address: '127.0.0.1', port: 0 },
-        farmer: false
+        farmer: false,
+        noforward: true
       })).to.be.instanceOf(Network);
     });
 

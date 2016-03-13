@@ -4,5 +4,8 @@
   },
   "cli-usage": {
     "title": "Command Line Interface"
+  },
+  "data-channels": {
+    "title": "Transferring File Shards"
   }
 }

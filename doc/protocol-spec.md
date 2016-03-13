@@ -228,30 +228,11 @@ subscribed 3 "hops" away.
 ```json
 {
   "result": {
-    "bloom": {
-      "filters": [{
-        "bitfield": {
-          "buffer": {
-            "type": "Buffer",
-            "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-          }
-        }
-      }, {
-        "bitfield": {
-          "buffer": {
-            "type": "Buffer",
-            "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-          }
-        }
-      }, {
-        "bitfield": {
-          "buffer": {
-            "type": "Buffer",
-            "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-          }
-        }
-      }]
-    },
+    "filters": [
+      "0000000000000000000000000000000000000000",
+      "0000000000000000000000000000000000000000",
+      "0000000000000000000000000000000000000000"
+    ],
     "contact": {
       "address": "10.0.0.3",
       "port": 1337,
@@ -279,30 +260,11 @@ subscriptions by providing it's own attenuated bloom filter:
 {
   "method": "UPDATE",
   "params": {
-    "bloom": {
-      "filters": [{
-        "bitfield": {
-          "buffer": {
-            "type": "Buffer",
-            "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-          }
-        }
-      }, {
-        "bitfield": {
-          "buffer": {
-            "type": "Buffer",
-            "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-          }
-        }
-      }, {
-        "bitfield": {
-          "buffer": {
-            "type": "Buffer",
-            "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-          }
-        }
-      }]
-    },
+    "filters": [
+      "0000000000000000000000000000000000000000",
+      "0000000000000000000000000000000000000000",
+      "0000000000000000000000000000000000000000"
+    ],
     "contact": {
       "address": "10.0.0.2",
       "port": 1337,
@@ -520,7 +482,6 @@ a Storage Contract** below).
   "method": "CONSIGN",
   "params": {
     "data_hash": "4efc1c36d3349189fb3486d2914f56e05d3e66f8",
-    "data_shard": "7b0a2020226e616d65223a202273746f726a222c0a20202276657273696f...",
     "audit_tree": [
       "40a98e19c298631cba19d6c19691360ce08ccf36",
       "02f0d971096305e797da9165cd50d4d1bb19590b",
@@ -552,11 +513,13 @@ a Storage Contract** below).
 ```
 
 Upon receipt of a `CONSIGN` message, the farmer must lookup the reference
-contract by the supplied `data_hash` and verify that the `data_shard` hashes to
-the `data_hash` supplied in the original contract, the size of the `data_shard`
-does not exceed the `data_size` supplied in the original contract, and that the
-number of items in the `audit_tree` is equal to the next power of 2 of the
-`audit_count` supplied in the original contract.
+contract by the supplied `data_hash` and verify that the renter is authorized
+to store the data and that the number of items in the `audit_tree` is equal to
+the next power of 2 of the `audit_count` supplied in the original contract.
+
+Once verified, the farmer must respond with a generated token that the renter
+can use to open a data channel with the farmer (via websocket) to deliver the
+data as a binary stream.
 
 In addition, the farmer should verify that the current UNIX time is greater
 than or equal to the agreed upon `store_begin` and less than the agreed upon
@@ -567,6 +530,7 @@ done this, it must acknowledge the renter to confirm:
 ```json
 {
   "result": {
+    "token": "3f62b781e3b5b5288dca587807248261d109bbfb",
     "contact": {
       "address": "10.0.0.2",
       "port": 1337,
@@ -702,14 +666,16 @@ storing the data:
 After the recipient of the `RETRIEVE` message verifies the sender's signature
 it must lookup the storage contract by the supplied `data_hash` and verify that
 the sender is the party with which the contract was negotiated. If all tests
-pass, then the farmer must respond with the hex encoded `data_shard`. After the
-`data_shard` is delivered successfully, the farmer must increment it's record
-of the `downloads_since_last_audit` (which must be reset after the next audit).
+pass, then the farmer must respond with a generated token to allow the renter
+to open a data channel (via websocket) to retrieve the data as a binary stream.
+After the data shard is delivered successfully, the farmer must increment
+it's record of the `downloads_since_last_audit` (which must be reset after the
+next audit).
 
 ```json
 {
   "result": {
-    "data_shard": "7b0a2020226e616d65223a202273746f726a222c0a20202276657273696f...",
+    "token": "3f62b781e3b5b5288dca587807248261d109bbfb",
     "contact": {
       "address": "10.0.0.2",
       "port": 1337,

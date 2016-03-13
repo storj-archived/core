@@ -29,10 +29,16 @@ source ~/.profile
 nvm install 4.2.3
 ```
 
-Install *locally* with NPM:
+Install *locally* as user with NPM:
 
 ```
 npm install storj --save
+```
+
+Install *locally* as root with NPM:
+
+```
+npm -unsafe-perm install storj --save
 ```
 
 Import the storj module, generate a key pair, configure your persistence layer,

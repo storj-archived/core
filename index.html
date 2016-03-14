@@ -47,7 +47,7 @@
 			<li class="dropdown">
 				<a href="tutorials.list.html" class="dropdown-toggle" data-toggle="dropdown">Tutorials<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="tutorial-cli-usage.html">Command Line Interface</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li>
+					<li><a href="tutorial-cli-usage.html">Command Line Interface</a></li><li><a href="tutorial-data-channels.html">Transferring File Shards</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li>
 				</ul>
 			</li>
 			
@@ -109,9 +109,12 @@ integrate with the Storj network.</p>
 <pre class="prettyprint source"><code>apt-get install wget</code></pre><p>Install NVM, Node.js and NPM:</p>
 <pre class="prettyprint source"><code>wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.30.1/install.sh | bash
 source ~/.profile
-nvm install 4.2.3</code></pre><p>Install <em>locally</em> with NPM:</p>
-<pre class="prettyprint source"><code>npm install storj --save</code></pre><p>Import the storj module, generate a key pair, configure your persistence layer,
-and join the network in just a few lines of code:</p>
+nvm install 4.2.3</code></pre><h3>Using the Command Line Interface</h3><p>Install <em>globally</em> as user with NPM:</p>
+<pre class="prettyprint source"><code>npm install storj --global</code></pre><p>Install <em>globally</em> as root with NPM:</p>
+<pre class="prettyprint source"><code>npm install storj --global --unsafe-perm</code></pre><h3>Using the Library</h3><p>Install <em>locally</em> as user with NPM:</p>
+<pre class="prettyprint source"><code>npm install storj --save</code></pre><p>Install <em>locally</em> as root with NPM:</p>
+<pre class="prettyprint source"><code>npm install storj --unsafe-perm --save</code></pre><p>Import the <code>storj</code> module, generate a key pair, configure your persistence
+layer, and join the network in just a few lines of code:</p>
 <pre class="prettyprint source"><code>var storj = require('storj');
 
 var keypair = new storj.KeyPair(/* existing_key */);
@@ -126,7 +129,7 @@ var network = new storj.Network({
     port: 4000
   },
   seeds: [
-    'storj://dev.metadisk.org:7500/9f7e84fa954ef691c1de73002ad1cfcd12b13a26'
+    'storj://api.metadisk.org:8443/593844dc7f0076a1aeda9a6b9788af17e67c1052'
   ],
   loglevel: 3,
   datadir: '/path/to/datadir',

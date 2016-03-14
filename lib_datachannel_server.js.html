@@ -47,7 +47,7 @@
 			<li class="dropdown">
 				<a href="tutorials.list.html" class="dropdown-toggle" data-toggle="dropdown">Tutorials<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="tutorial-cli-usage.html">Command Line Interface</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li>
+					<li><a href="tutorial-cli-usage.html">Command Line Interface</a></li><li><a href="tutorial-data-channels.html">Transferring File Shards</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li>
 				</ul>
 			</li>
 			
@@ -224,6 +224,16 @@ DataChannelServer.prototype._handleConsignStream = function(stream, token) {
   this._manager.load(hash, function(err, item) {
     if (err) {
       stream.write({ error: true, message: err.message });
+      return self.reject(token);
+    }
+
+    // If the shard is not writable, it means we already have it, so let's
+    // just respond with a success message
+    if (typeof item.shard.write !== 'function') {
+      stream.write({
+        error: false,
+        message: 'Consignment completed successfully'
+      });
       return self.reject(token);
     }
 

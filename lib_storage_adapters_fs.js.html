@@ -47,7 +47,7 @@
 			<li class="dropdown">
 				<a href="tutorials.list.html" class="dropdown-toggle" data-toggle="dropdown">Tutorials<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="tutorial-cli-usage.html">Command Line Interface</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li>
+					<li><a href="tutorial-cli-usage.html">Command Line Interface</a></li><li><a href="tutorial-data-channels.html">Transferring File Shards</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li>
 				</ul>
 			</li>
 			
@@ -192,25 +192,25 @@ FSStorageAdapter.prototype._get = function(key, callback) {
       function getContracts(done) {
         self.__fromDirectory(contracts, function(err, result) {
           data.contracts = result;
-          done(err);
+          done(new Error('Failed to load the shard contracts'));
         });
       },
       function getTrees(done) {
         self.__fromDirectory(trees, function(err, result) {
           data.trees = result;
-          done(err);
+          done(new Error('Failed to load the shard audit trees'));
         });
       },
       function getChallenges(done) {
         self.__fromDirectory(challenges, function(err, result) {
           data.challenges = result;
-          done(err);
+          done(new Error('Failed to load the shard audit challenges'));
         });
       },
       function getMeta(done) {
         self.__fromDirectory(meta, function(err, result) {
           data.meta = result;
-          done(err);
+          done(new Error('Failed to load the shard metadata'));
         });
       }
     ], done);
@@ -239,7 +239,6 @@ FSStorageAdapter.prototype._put = function(key, item, callback) {
   var trees = path.join(target, 'trees');
   var challenges = path.join(target, 'challenges');
   var meta = path.join(target, 'meta');
-  // var shardpath = path.join(target, 'shard.data');
   var directories = [target, contracts, trees, challenges, meta];
 
   function checkTarget(done) {
@@ -260,14 +259,6 @@ FSStorageAdapter.prototype._put = function(key, item, callback) {
     });
   }
 
-  // function writeShard(done) {
-  //   if (!item.shard) {
-  //     return done();
-  //   }
-  //
-  //   fs.writeFile(shardpath, item.shard, done);
-  // }
-
   function writeItemData(done) {
     async.parallel([
       function writeContracts(done) {
@@ -285,9 +276,9 @@ FSStorageAdapter.prototype._put = function(key, item, callback) {
     ], done);
   }
 
-  async.series([checkTarget, /*writeShard, */writeItemData], function(err) {
+  async.series([checkTarget, writeItemData], function(err) {
     if (err) {
-      return callback(err);
+      return callback(new Error('Failed to write shard data'));
     }
 
     callback(null);

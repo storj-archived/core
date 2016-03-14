@@ -47,7 +47,7 @@
 			<li class="dropdown">
 				<a href="tutorials.list.html" class="dropdown-toggle" data-toggle="dropdown">Tutorials<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="tutorial-cli-usage.html">Command Line Interface</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li>
+					<li><a href="tutorial-cli-usage.html">Command Line Interface</a></li><li><a href="tutorial-data-channels.html">Transferring File Shards</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li>
 				</ul>
 			</li>
 			
@@ -255,30 +255,11 @@ structure represents 3 sets of topics to which the recipient's neighbors are
 subscribed 3 &quot;hops&quot; away.</p>
 <pre class="prettyprint source lang-json"><code>{
   &quot;result&quot;: {
-    &quot;bloom&quot;: {
-      &quot;filters&quot;: [{
-        &quot;bitfield&quot;: {
-          &quot;buffer&quot;: {
-            &quot;type&quot;: &quot;Buffer&quot;,
-            &quot;data&quot;: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-          }
-        }
-      }, {
-        &quot;bitfield&quot;: {
-          &quot;buffer&quot;: {
-            &quot;type&quot;: &quot;Buffer&quot;,
-            &quot;data&quot;: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-          }
-        }
-      }, {
-        &quot;bitfield&quot;: {
-          &quot;buffer&quot;: {
-            &quot;type&quot;: &quot;Buffer&quot;,
-            &quot;data&quot;: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-          }
-        }
-      }]
-    },
+    &quot;filters&quot;: [
+      &quot;0000000000000000000000000000000000000000&quot;,
+      &quot;0000000000000000000000000000000000000000&quot;,
+      &quot;0000000000000000000000000000000000000000&quot;
+    ],
     &quot;contact&quot;: {
       &quot;address&quot;: &quot;10.0.0.3&quot;,
       &quot;port&quot;: 1337,
@@ -298,30 +279,11 @@ subscriptions by providing it's own attenuated bloom filter:</p>
 <pre class="prettyprint source lang-json"><code>{
   &quot;method&quot;: &quot;UPDATE&quot;,
   &quot;params&quot;: {
-    &quot;bloom&quot;: {
-      &quot;filters&quot;: [{
-        &quot;bitfield&quot;: {
-          &quot;buffer&quot;: {
-            &quot;type&quot;: &quot;Buffer&quot;,
-            &quot;data&quot;: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-          }
-        }
-      }, {
-        &quot;bitfield&quot;: {
-          &quot;buffer&quot;: {
-            &quot;type&quot;: &quot;Buffer&quot;,
-            &quot;data&quot;: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-          }
-        }
-      }, {
-        &quot;bitfield&quot;: {
-          &quot;buffer&quot;: {
-            &quot;type&quot;: &quot;Buffer&quot;,
-            &quot;data&quot;: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-          }
-        }
-      }]
-    },
+    &quot;filters&quot;: [
+      &quot;0000000000000000000000000000000000000000&quot;,
+      &quot;0000000000000000000000000000000000000000&quot;,
+      &quot;0000000000000000000000000000000000000000&quot;
+    ],
     &quot;contact&quot;: {
       &quot;address&quot;: &quot;10.0.0.2&quot;,
       &quot;port&quot;: 1337,
@@ -500,7 +462,6 @@ a Storage Contract</strong> below).</p>
   &quot;method&quot;: &quot;CONSIGN&quot;,
   &quot;params&quot;: {
     &quot;data_hash&quot;: &quot;4efc1c36d3349189fb3486d2914f56e05d3e66f8&quot;,
-    &quot;data_shard&quot;: &quot;7b0a2020226e616d65223a202273746f726a222c0a20202276657273696f...&quot;,
     &quot;audit_tree&quot;: [
       &quot;40a98e19c298631cba19d6c19691360ce08ccf36&quot;,
       &quot;02f0d971096305e797da9165cd50d4d1bb19590b&quot;,
@@ -529,11 +490,12 @@ a Storage Contract</strong> below).</p>
   },
   &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
 }</code></pre><p>Upon receipt of a <code>CONSIGN</code> message, the farmer must lookup the reference
-contract by the supplied <code>data_hash</code> and verify that the <code>data_shard</code> hashes to
-the <code>data_hash</code> supplied in the original contract, the size of the <code>data_shard</code>
-does not exceed the <code>data_size</code> supplied in the original contract, and that the
-number of items in the <code>audit_tree</code> is equal to the next power of 2 of the
-<code>audit_count</code> supplied in the original contract.</p>
+contract by the supplied <code>data_hash</code> and verify that the renter is authorized
+to store the data and that the number of items in the <code>audit_tree</code> is equal to
+the next power of 2 of the <code>audit_count</code> supplied in the original contract.</p>
+<p>Once verified, the farmer must respond with a generated token that the renter
+can use to open a data channel with the farmer (via websocket) to deliver the
+data as a binary stream.</p>
 <p>In addition, the farmer should verify that the current UNIX time is greater
 than or equal to the agreed upon <code>store_begin</code> and less than the agreed upon
 <code>store_end</code>. If everything checks out, the farmer must store the consigned data
@@ -541,6 +503,7 @@ in such a way that it may later be retrieved by it's hash. Once the farmer has
 done this, it must acknowledge the renter to confirm:</p>
 <pre class="prettyprint source lang-json"><code>{
   &quot;result&quot;: {
+    &quot;token&quot;: &quot;3f62b781e3b5b5288dca587807248261d109bbfb&quot;,
     &quot;contact&quot;: {
       &quot;address&quot;: &quot;10.0.0.2&quot;,
       &quot;port&quot;: 1337,
@@ -646,12 +609,14 @@ storing the data:</p>
 }</code></pre><p>After the recipient of the <code>RETRIEVE</code> message verifies the sender's signature
 it must lookup the storage contract by the supplied <code>data_hash</code> and verify that
 the sender is the party with which the contract was negotiated. If all tests
-pass, then the farmer must respond with the hex encoded <code>data_shard</code>. After the
-<code>data_shard</code> is delivered successfully, the farmer must increment it's record
-of the <code>downloads_since_last_audit</code> (which must be reset after the next audit).</p>
+pass, then the farmer must respond with a generated token to allow the renter
+to open a data channel (via websocket) to retrieve the data as a binary stream.
+After the data shard is delivered successfully, the farmer must increment
+it's record of the <code>downloads_since_last_audit</code> (which must be reset after the
+next audit).</p>
 <pre class="prettyprint source lang-json"><code>{
   &quot;result&quot;: {
-    &quot;data_shard&quot;: &quot;7b0a2020226e616d65223a202273746f726a222c0a20202276657273696f...&quot;,
+    &quot;token&quot;: &quot;3f62b781e3b5b5288dca587807248261d109bbfb&quot;,
     &quot;contact&quot;: {
       &quot;address&quot;: &quot;10.0.0.2&quot;,
       &quot;port&quot;: 1337,

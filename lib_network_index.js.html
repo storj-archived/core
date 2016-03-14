@@ -47,7 +47,7 @@
 			<li class="dropdown">
 				<a href="tutorials.list.html" class="dropdown-toggle" data-toggle="dropdown">Tutorials<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="tutorial-cli-usage.html">Command Line Interface</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li>
+					<li><a href="tutorial-cli-usage.html">Command Line Interface</a></li><li><a href="tutorial-data-channels.html">Transferring File Shards</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li>
 				</ul>
 			</li>
 			
@@ -256,6 +256,7 @@ Network.prototype.audit = function(hash, callback) {
 
     // TODO: Be smarter about which contract holder we choose if there is more
     // TODO: than a single farmer holding our shard.
+    // TODO: Also, if one farmer fails to respond, we should try another
     var farmerID = Object.keys(item.contracts)[0];
 
     self._router.findNode(farmerID, function(err, nodes) {

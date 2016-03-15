@@ -9,6 +9,9 @@ module.exports = { version: require('./package').version };
 /** {@link Network} */
 module.exports.Network = require('./lib/network');
 
+/** {@link Transport} */
+module.exports.Transport = require('./lib/network/transport');
+
 /** {@link DataChannelClient} */
 module.exports.DataChannelClient = require('./lib/datachannel/client');
 

@@ -8,6 +8,7 @@ var async = require('async');
 var os = require('os');
 var fs = require('fs');
 var path = require('path');
+var sinon = require('sinon');
 var storj = require('../../');
 
 var NODE_LIST = [];
@@ -46,6 +47,19 @@ function createRenter() {
 function createFarmer() {
   return createNode(true);
 }
+
+var _forwardPort;
+
+before(function() {
+  _forwardPort = sinon.stub(
+    storj.Transport.prototype,
+    '_forwardPort'
+  ).callsArg(0);
+});
+
+after(function() {
+  _forwardPort.restore();
+});
 
 describe('Storj/Integration', function() {
 

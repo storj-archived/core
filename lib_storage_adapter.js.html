@@ -40,7 +40,7 @@
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="Transport.html">Transport</a></li><li><a href="Proof.html">Proof</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="Verification.html">Verification</a></li>
+					<li><a href="KeyPair.html">KeyPair</a></li><li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="Transport.html">Transport</a></li><li><a href="Proof.html">Proof</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="Verification.html">Verification</a></li>
 				</ul>
 			</li>
 			
@@ -84,8 +84,10 @@
         <pre
             class="sunlight-highlight-javascript linenums">'use strict';
 
+var stream = require('readable-stream');
 var assert = require('assert');
 var Item = require('./item');
+var Contract = require('../contract');
 
 /**
  * Abstract base class for storage adapter
@@ -119,7 +121,85 @@ StorageAdapter.prototype.put = function(item, callback) {
   assert(item instanceof Item, 'Invalid storage item supplied');
   assert(typeof callback === 'function', 'Callback function must be supplied');
 
+  for (var nodeID in item.contracts) {
+    if (item.contracts[nodeID] instanceof Contract) {
+      item.contracts[nodeID] = item.contracts[nodeID].toObject();
+    }
+  }
+
   return this._put(item.hash, item, callback);
+};
+
+/**
+ * Calls the implemented {@link StorageAdapter#_del}
+ * @param {String} key - Shard hash to delete the data for
+ * @param {Function} callback - Called with error or {@link StorageItem}
+ */
+StorageAdapter.prototype.del = function(key, callback) {
+  assert(typeof key === 'string', 'Invalid key supplied');
+  assert(key.length === 40, 'Key must be 160 bit hex string');
+  assert(typeof callback === 'function', 'Callback function must be supplied');
+
+  return this._del(key, callback);
+};
+
+/**
+ * Calls the implemented {@link StorageAdapter#_keys} and returns a readable
+ * stream containing each stored item
+ * @return {ReadableStream}
+ */
+StorageAdapter.prototype.createReadStream = function() {
+  var self = this;
+  var keys = null;
+  var current = 0;
+
+  return new stream.Readable({
+    objectMode: true,
+    read: function() {
+      var rstream = this;
+
+      function handleError(err) {
+        rstream.emit('error', err);
+        rstream.push(null);
+      }
+
+      if (!keys) {
+        return self._keys(function(err, result) {
+          if (err) {
+            return handleError(err);
+          }
+
+          keys = result;
+
+          if (!keys[current]) {
+            return rstream.push(null);
+          }
+
+          self.get(keys[current], function(err, item) {
+            if (err) {
+              return handleError(err);
+            }
+
+            current++;
+            rstream.push(item);
+          });
+        });
+      }
+
+      if (!keys[current]) {
+        return rstream.push(null);
+      }
+
+      self.get(keys[current], function(err, item) {
+        if (err) {
+          return handleError(err);
+        }
+
+        current++;
+        rstream.push(item);
+      });
+    }
+  });
 };
 
 /**
@@ -133,6 +213,16 @@ StorageAdapter.prototype._get = function(/* key, callback */) {
 };
 
 /**
+ * Delete the shard data at the given key
+ * @abstract
+ * @param {String} key - Shard hash
+ * @param {Function} callback - Called on complete
+ */
+StorageAdapter.prototype._del = function(/* key, callback */) {
+  throw new Error('Method not implemented');
+};
+
+/**
  * Stores the {@link StorageItem}
  * @abstract
  * @param {String} key - Shard hash
@@ -140,6 +230,15 @@ StorageAdapter.prototype._get = function(/* key, callback */) {
  * @param {Function} callback - Called on complete
  */
 StorageAdapter.prototype._put = function(/* item, callback */) {
+  throw new Error('Method not implemented');
+};
+
+/**
+ * Returns the hashes of all shards stored
+ * @abstract
+ * @param {Function} callback - Called on complete
+ */
+StorageAdapter.prototype._keys = function(/* callback */) {
   throw new Error('Method not implemented');
 };
 

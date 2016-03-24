@@ -40,7 +40,7 @@
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="Transport.html">Transport</a></li><li><a href="Proof.html">Proof</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="Verification.html">Verification</a></li>
+					<li><a href="KeyPair.html">KeyPair</a></li><li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="Transport.html">Transport</a></li><li><a href="Proof.html">Proof</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="Verification.html">Verification</a></li>
 				</ul>
 			</li>
 			
@@ -84,7 +84,8 @@
         <pre
             class="sunlight-highlight-javascript linenums">'use strict';
 
-var BinaryClient = require('binaryjs').BinaryClient;
+var WebSocketClient = require('ws');
+var stream = require('stream');
 var assert = require('assert');
 var events = require('events');
 var inherits = require('util').inherits;
@@ -110,7 +111,7 @@ function DataChannelClient(contact) {
   events.EventEmitter.call(this);
 
   this._contact = contact;
-  this._client = new BinaryClient(DataChannelClient.getChannelURL(contact));
+  this._client = new WebSocketClient(DataChannelClient.getChannelURL(contact));
 
   this._client.on('open', this._handleChannelOpen.bind(this));
   this._client.on('error', this._handleChannelError.bind(this));
@@ -125,13 +126,35 @@ inherits(DataChannelClient, events.EventEmitter);
  * @returns {stream.Readable}
  */
 DataChannelClient.prototype.retrieve = function(token, hash) {
-  var channel = this._client.send(null, {
+  var pstream = new stream.PassThrough();
+
+  this._client.on('message', function(data) {
+    if (!Buffer.isBuffer(data)) {
+      try {
+        data = JSON.parse(data);
+      } catch (err) {
+        return pstream.emit('error', err);
+      }
+
+      if (data.code &amp;&amp; data.code !== 200) {
+        pstream.emit('error', new Error(data.message));
+      }
+    }
+
+    pstream.write(data);
+  });
+
+  this._client.on('close', function() {
+    pstream.end();
+  });
+
+  this._client.send(JSON.stringify({
     token: token,
     hash: hash,
     operation: 'PULL'
-  });
+  }));
 
-  return channel;
+  return pstream;
 };
 
 /**
@@ -140,21 +163,25 @@ DataChannelClient.prototype.retrieve = function(token, hash) {
  * @param {Buffer} data - The data to store
  */
 DataChannelClient.prototype.consign = function(token, data, callback) {
+  var self = this;
   var hash = utils.rmd160sha256(data);
-  var channel = this._client.send(data, {
-    token: token,
-    hash: hash,
-    operation: 'PUSH'
-  });
 
-  channel.on('data', function(data) {
-    if (data.error) {
+  self._client.on('message', function(data) {
+    if (data.code &amp;&amp; data.code !== 200) {
       callback(new Error(data.message));
     } else {
       callback(null, hash);
     }
 
-    channel.end();
+    this.close();
+  });
+
+  this._client.send(JSON.stringify({
+    token: token,
+    hash: hash,
+    operation: 'PUSH'
+  }), function() {
+    self._client.send(data, { binary: true });
   });
 };
 

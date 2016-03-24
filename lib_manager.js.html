@@ -40,7 +40,7 @@
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="Transport.html">Transport</a></li><li><a href="Proof.html">Proof</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="Verification.html">Verification</a></li>
+					<li><a href="KeyPair.html">KeyPair</a></li><li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="Transport.html">Transport</a></li><li><a href="Proof.html">Proof</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="Verification.html">Verification</a></li>
 				</ul>
 			</li>
 			
@@ -136,6 +136,38 @@ Manager.prototype.save = function(item, callback) {
   assert(typeof callback === 'function', 'Callback function must be supplied');
 
   this._storage.put(item, callback);
+};
+
+/**
+ * Enumerates all storage contracts and reaps stale data
+ * @param {Function} callback - Called on complete
+ */
+Manager.prototype.clean = function(callback) {
+  var self = this;
+  var rstream = this._storage.createReadStream();
+
+  rstream.on('data', function(item) {
+    rstream.pause();
+
+    var total = Object.keys(item.contracts).length;
+    var ended = 0;
+
+    for (var nodeID in item.contracts) {
+      if (item.contracts[nodeID].get('store_end') &lt; Date.now()) {
+        ended++;
+      }
+    }
+
+    if (total === ended) {
+      self._storage.del(item.hash, function(/* err */) {
+        rstream.resume();
+      });
+    } else {
+      rstream.resume();
+    }
+  });
+
+  rstream.on('end', callback);
 };
 
 module.exports = Manager;

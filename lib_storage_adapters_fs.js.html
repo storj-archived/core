@@ -40,7 +40,7 @@
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="Transport.html">Transport</a></li><li><a href="Proof.html">Proof</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="Verification.html">Verification</a></li>
+					<li><a href="KeyPair.html">KeyPair</a></li><li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="Transport.html">Transport</a></li><li><a href="Proof.html">Proof</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="Verification.html">Verification</a></li>
 				</ul>
 			</li>
 			
@@ -177,7 +177,7 @@ FSStorageAdapter.prototype._get = function(key, callback) {
     var shardpath = path.join(target, 'shard.data');
 
     fs.exists(shardpath, function(exists) {
-      if (exists) {
+      if (exists &amp;&amp; fs.statSync(shardpath).size) {
         data.shard = fs.createReadStream(shardpath);
       } else {
         data.shard = fs.createWriteStream(shardpath);
@@ -192,25 +192,45 @@ FSStorageAdapter.prototype._get = function(key, callback) {
       function getContracts(done) {
         self.__fromDirectory(contracts, function(err, result) {
           data.contracts = result;
-          done(new Error('Failed to load the shard contracts'));
+
+          if (err) {
+            return done(new Error('Failed to load the shard contracts'));
+          }
+
+          done();
         });
       },
       function getTrees(done) {
         self.__fromDirectory(trees, function(err, result) {
           data.trees = result;
-          done(new Error('Failed to load the shard audit trees'));
+
+          if (err) {
+            return done(new Error('Failed to load the shard audit trees'));
+          }
+
+          done();
         });
       },
       function getChallenges(done) {
         self.__fromDirectory(challenges, function(err, result) {
           data.challenges = result;
-          done(new Error('Failed to load the shard audit challenges'));
+
+          if (err) {
+            return done(new Error('Failed to load the shard audit challenges'));
+          }
+
+          done();
         });
       },
       function getMeta(done) {
         self.__fromDirectory(meta, function(err, result) {
           data.meta = result;
-          done(new Error('Failed to load the shard metadata'));
+
+          if (err) {
+            return done(new Error('Failed to load the shard metadata'));
+          }
+
+          done();
         });
       }
     ], done);
@@ -242,12 +262,12 @@ FSStorageAdapter.prototype._put = function(key, item, callback) {
   var directories = [target, contracts, trees, challenges, meta];
 
   function checkTarget(done) {
-    fs.exists(target, function(exists) {
-      if (exists) {
-        return done();
-      }
+    async.eachSeries(directories, function(dirname, next) {
+      fs.exists(dirname, function(exists) {
+        if (exists) {
+          return next();
+        }
 
-      async.eachSeries(directories, function(dirname, next) {
         fs.mkdir(dirname, function(err) {
           if (err) {
             return next(err);
@@ -255,8 +275,8 @@ FSStorageAdapter.prototype._put = function(key, item, callback) {
 
           next();
         });
-      }, done);
-    });
+      });
+    }, done);
   }
 
   function writeItemData(done) {
@@ -286,6 +306,34 @@ FSStorageAdapter.prototype._put = function(key, item, callback) {
 };
 
 /**
+ * Implements the abstract {@link StorageAdapter#_del}
+ * @private
+ * @param {String} key
+ * @param {Function} callback
+ */
+FSStorageAdapter.prototype._del = function(key, callback) {
+  var target = path.join(this._sharddir, key);
+  var shard = path.join(target, 'shard.data');
+
+  fs.exists(shard, function(exists) {
+    if (!exists) {
+      return callback(null);
+    }
+
+    fs.unlink(shard, callback);
+  });
+};
+
+/**
+ * Implements the abstract {@link StorageAdapter#_keys}
+ * @private
+ * @param {Function} callback
+ */
+FSStorageAdapter.prototype._keys = function(callback) {
+  fs.readdir(this._sharddir, callback);
+};
+
+/**
  * Loads the directory contents as an object where key is the file's basename
  * and value is the parsed JSON object
  * @private
@@ -306,13 +354,13 @@ FSStorageAdapter.prototype.__fromDirectory = function(dirname, callback) {
   function loadFile(filename, done) {
     fs.readFile(path.join(dirname, filename), function(err, buffer) {
       if (err) {
-        return done(err);
-      }
-
-      try {
-        result[path.basename(filename)] = JSON.parse(buffer.toString('utf8'));
-      } catch (err) {
-        return done(err);
+        result[path.basename(filename)] = {};
+      } else {
+        try {
+          result[path.basename(filename)] = JSON.parse(buffer.toString('utf8'));
+        } catch (err) {
+          return done(err);
+        }
       }
 
       done();

@@ -40,7 +40,7 @@
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="Transport.html">Transport</a></li><li><a href="Proof.html">Proof</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="Verification.html">Verification</a></li>
+					<li><a href="KeyPair.html">KeyPair</a></li><li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="Transport.html">Transport</a></li><li><a href="Proof.html">Proof</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="Verification.html">Verification</a></li>
 				</ul>
 			</li>
 			
@@ -145,7 +145,7 @@ function Network(options) {
     cors: true,
     // TODO: make this configurable allow farmers to tunnel for others
     tunnelhost: 'http://tunnel.metadisk.org',
-    noforward: options.noforward
+    noforward: this._options.noforward
   });
 
   this._transport.after('open', function() {
@@ -174,6 +174,8 @@ function Network(options) {
 
   this._pubkeys = {};
   this._open = false;
+
+  this._initShardReaper();
 }
 
 Network.DEFAULTS = {
@@ -216,7 +218,7 @@ Network.prototype.join = function(callback) {
   async.each(seeds, function(contact, next) {
     self._node.connect(contact, function(err) {
       if (!err) {
-        self._addPingInterval(contact, ms('1m'));
+        self._addPingInterval(contact, ms('5m'));
       }
     });
     next();
@@ -458,58 +460,69 @@ Network.prototype._farm = function() {
     contract.sign('farmer', self._keypair.getPrivateKey());
 
     var final;
+    var item = new StorageItem({ hash: contract.get('data_hash') });
+    var renterId = contract.get('renter_id');
 
-    self._router.findNode(contract.get('renter_id'), function(err, nodes) {
+    item.contracts[renterId] = contract.toObject();
+    item.meta[renterId] = {};
+
+    self._manager.save(item, function(err) {
       if (err) {
         return self._logger.error(err.message);
       }
 
-      var renter = nodes.filter(function(node) {
-        return node.nodeID === contract.get('renter_id');
-      })[0];
-
-      if (!renter) {
-        return self._logger.error('Could not locate renter for offer');
-      }
-
-      var message = new kad.Message({
-        method: 'OFFER',
-        params: {
-          contract: contract.toObject(),
-          contact: self._contact
-        }
-      });
-
-      self._transport.send(renter, message, function(err, response) {
+      self._router.findNode(renterId, function(err, nodes) {
         if (err) {
           return self._logger.error(err.message);
         }
 
-        if (response.error || !response.result.contract) {
-          return self._logger.error(
-            response.error ? response.error.message : 'Renter refused to sign'
-          );
+        var renter = nodes.filter(function(node) {
+          return node.nodeID === renterId;
+        })[0];
+
+        if (!renter) {
+          return self._logger.error('Could not locate renter for offer');
         }
 
-        try {
-          final = Contract.fromObject(response.result.contract);
-        } catch (err) {
-          return self._logger.error('Renter responded with invalid contract');
-        }
+        var message = new kad.Message({
+          method: 'OFFER',
+          params: {
+            contract: contract.toObject(),
+            contact: self._contact
+          }
+        });
 
-        if (!final.verify('renter', contract.get('renter_id'))) {
-          return self._logger.error('Renter signature is invalid');
-        }
-
-        self._manager.load(contract.get('data_hash'), function(err, item) {
+        self._transport.send(renter, message, function(err, response) {
           if (err) {
-            item = new StorageItem({ hash: contract.get('data_hash') });
+            return self._logger.error(err.message);
           }
 
-          item.contracts[renter.nodeID] = contract.toObject();
-          item.meta[renter.nodeID] = {};
+          if (response.error || !response.result.contract) {
+            return self._logger.error(
+              response.error ? response.error.message : 'Renter refused to sign'
+            );
+          }
 
-          self._manager.save(item, function() {});
+          try {
+            final = Contract.fromObject(response.result.contract);
+          } catch (err) {
+            return self._logger.error('Renter responded with invalid contract');
+          }
+
+          if (!final.verify('renter', contract.get('renter_id'))) {
+            return self._logger.error('Renter signature is invalid');
+          }
+
+          self._manager.load(contract.get('data_hash'), function(err, item) {
+            if (err) {
+              item = new StorageItem({ hash: contract.get('data_hash') });
+            }
+
+            item.contracts[renter.nodeID] = contract.toObject();
+            item.meta[renter.nodeID] = {};
+
+            self._manager.save(item, function() {});
+          });
         });
       });
     });
@@ -682,6 +695,24 @@ Network.prototype._removePingInterval = function(contact) {
   } else {
     clearInterval(this._pingSeeds[contact.nodeID]);
   }
+};
+
+/**
+ * Initialize the shard reaper to check for stale contracts and reap shards
+ * @private
+ */
+Network.prototype._initShardReaper = function() {
+  var self = this;
+
+  function startReapInterval() {
+    setInterval(
+      self._manager.clean.bind(self, function() {}),
+      constants.CLEAN_INTERVAL
+    );
+  }
+
+  this._logger.info('scanning for expired storage contracts');
+  this._manager.clean(startReapInterval);
 };
 
 module.exports = Network;

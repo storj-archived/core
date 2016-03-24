@@ -40,7 +40,7 @@
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="Transport.html">Transport</a></li><li><a href="Proof.html">Proof</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="Verification.html">Verification</a></li>
+					<li><a href="KeyPair.html">KeyPair</a></li><li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="Transport.html">Transport</a></li><li><a href="Proof.html">Proof</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="Verification.html">Verification</a></li>
 				</ul>
 			</li>
 			
@@ -84,7 +84,8 @@
         <pre
             class="sunlight-highlight-javascript linenums">'use strict';
 
-var BinaryServer = require('binaryjs').BinaryServer;
+var ws = require('ws');
+var PassThrough = require('stream').PassThrough;
 var assert = require('assert');
 var Transport = require('../network/transport');
 var Manager = require('../manager');
@@ -119,7 +120,7 @@ function DataChannelServer(options) {
   this._manager = options.manager;
   this._log = options.logger;
   this._ttl = options.ttl || ms('2m');
-  this._server = new BinaryServer({ server: this._transport._server });
+  this._server = new ws.Server({ server: this._transport._server });
   this._allowed = {};
 
   this._server.on('connection', this._handleConnection.bind(this));
@@ -166,25 +167,37 @@ DataChannelServer.prototype.close = function() {
 /**
  * Handles incoming connections
  * @private
- * @param {BinaryClient} client - The connected client object
+ * @param {Socket} socket - The connected socket object
  */
-DataChannelServer.prototype._handleConnection = function(client) {
+DataChannelServer.prototype._handleConnection = function(socket) {
   var self = this;
+  var token, hash, operation;
 
   this._log.info('data channel connection opened');
-  this.emit('connection', client);
+  this.emit('connection', socket);
 
-  client.on('error', function(err) {
+  socket.on('error', function(err) {
     self._log.error('data channel connection error: %s', err.message);
-    client.close();
+    socket.send(JSON.stringify({ code: 500, message: err.message }));
   });
 
-  client.on('stream', function(stream, meta) {
-    self._log.info('receiving stream from client');
+  socket.on('message', function(data/*, flags */) {
+    if (self._allowed[token] &amp;&amp; self._allowed[token].client !== null) {
+      return;
+    }
 
-    var token = meta.token;
-    var hash = meta.hash;
-    var operation = meta.operation;
+    try {
+      data = JSON.parse(data);
+    } catch (err) {
+      return socket.send(JSON.stringify({
+        code: 400,
+        message: 'Failed to parse message'
+      })).terminate();
+    }
+
+    token = data.token;
+    hash = data.hash;
+    operation = data.operation;
 
     try {
       assert.ok(token, 'You did not supply a token');
@@ -193,19 +206,20 @@ DataChannelServer.prototype._handleConnection = function(client) {
       assert(self._allowed[token].client === null, 'Channel is already active');
       assert(self._allowed[token].hash === hash, 'Token not valid for hash');
     } catch (err) {
-      stream.write({ message: err.message, error: true });
-      return client.close();
+      return socket.send(JSON.stringify({
+        code: 400, message: err.message
+      })).terminate();
     }
 
-    self._allowed[token].client = client;
+    self._allowed[token].client = socket;
 
     switch (operation) {
       case 'PUSH':
-        return self._handleConsignStream(stream, token);
+        return self._handleConsignStream(socket, token);
       case 'PULL':
-        return self._handleRetrieveStream(stream, token);
+        return self._handleRetrieveStream(socket, token);
       default:
-        return self._handleUnknownStream(stream, token);
+        return self._handleUnknownStream(socket, token);
     }
   });
 };
@@ -213,49 +227,67 @@ DataChannelServer.prototype._handleConnection = function(client) {
 /**
  * Receives the data stream and writes it to storage
  * @private
- * @param {stream.Readable} stream - The incoming data stream
+ * @param {stream.Readable} socket - The connected socket
  * @param {String} token - The valid channel token
  */
-DataChannelServer.prototype._handleConsignStream = function(stream, token) {
+DataChannelServer.prototype._handleConsignStream = function(socket, token) {
   var self = this;
   var hasher = crypto.createHash('sha256');
   var hash = this._allowed[token].hash;
+  var passthrough = new PassThrough();
+  var received = 0;
+
+  passthrough.pause();
+
+  socket.on('message', function(data) {
+    received += data.length;
+    passthrough.write(data);
+  });
 
   this._manager.load(hash, function(err, item) {
     if (err) {
-      stream.write({ error: true, message: err.message });
+      socket.send(JSON.stringify({ code: 500, message: err.message }));
       return self.reject(token);
     }
+
+    var contract = Object.keys(item.contracts)[0];
+    var shardsize = item.contracts[contract].get('data_size');
+
+    socket.resume();
 
     // If the shard is not writable, it means we already have it, so let's
     // just respond with a success message
     if (typeof item.shard.write !== 'function') {
-      stream.write({
-        error: false,
+      socket.send(JSON.stringify({
+        code: 200,
         message: 'Consignment completed successfully'
-      });
+      }));
       return self.reject(token);
     }
 
-    stream.on('data', function(chunk) {
+    passthrough.on('data', function(chunk) {
       hasher.update(chunk);
       item.shard.write(chunk);
-    });
 
-    stream.on('end', function() {
+      if (received >= shardsize) {
+        passthrough.end();
+      }
+    }).resume();
+
+    passthrough.on('end', function() {
       if (utils.rmd160(hasher.digest('hex')) !== hash) {
-        stream.write({
-          error: true,
+        socket.send(JSON.stringify({
+          code: 400,
           message: 'Calculated hash does not match the expected result'
-        });
+        }));
         return self.reject(token);
       }
 
       item.shard.end();
-      stream.write({
-        error: false,
+      socket.send(JSON.stringify({
+        code: 200,
         message: 'Consignment completed successfully'
-      });
+      }));
 
       self.reject(token);
     });
@@ -265,23 +297,29 @@ DataChannelServer.prototype._handleConsignStream = function(stream, token) {
 /**
  * Pumps the data through to the client
  * @private
- * @param {stream.Readable} stream - The incoming data stream
+ * @param {stream.Readable} socket - The incoming data stream
  * @param {String} token - The valid channel token
  */
-DataChannelServer.prototype._handleRetrieveStream = function(stream, token) {
+DataChannelServer.prototype._handleRetrieveStream = function(socket, token) {
   var self = this;
   var hash = this._allowed[token].hash;
 
   this._manager.load(hash, function(err, item) {
     if (err) {
-      stream.write({ error: true, message: err.message });
+      socket.send(JSON.stringify({ code: 500, message: err.message }));
       return self.reject(token);
     }
 
-    var filestream = item.shard.pipe(stream);
+    var filestream = item.shard;
+
+    filestream.on('data', function(data) {
+      filestream.pause();
+      socket.send(data, { binary: true }, function() {
+        filestream.resume();
+      });
+    });
 
     filestream.on('end', function() {
-      stream.end();
       self.reject(token);
     });
   });
@@ -297,7 +335,7 @@ DataChannelServer.prototype._handleUnknownStream = function(stream, token) {
   var client = this._allowed[token].client;
 
   client.send({
-    error: true,
+    code: 400,
     message: 'Failed to handle the defined operation'
   });
 

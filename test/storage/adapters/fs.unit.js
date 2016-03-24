@@ -56,4 +56,10 @@ describe('FSStorageAdapter', function() {
 
   });
 
+  describe('#_keys', function() {
+
+    
+
+  });
+
 });

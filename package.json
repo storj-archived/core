@@ -1,6 +1,6 @@
 {
   "name": "storj",
-  "version": "0.2.4",
+  "version": "0.3.0",
   "description": "implementation of the storj protocol for node.js and the browser",
   "main": "index.js",
   "directories": {
@@ -37,7 +37,6 @@
   },
   "dependencies": {
     "async": "^1.5.2",
-    "binaryjs": "^0.2.1",
     "bitcore-ecies": "^1.0.1",
     "bitcore-lib": "^0.13.12",
     "bitcore-message": "^1.0.2",
@@ -54,7 +53,9 @@
     "ms": "^0.7.1",
     "mtree": "^0.0.1",
     "nat-upnp": "^1.0.0",
-    "prompt": "^1.0.0"
+    "prompt": "^1.0.0",
+    "readable-stream": "^2.0.6",
+    "ws": "^1.0.1"
   },
   "devDependencies": {
     "browserify": "^11.1.0",

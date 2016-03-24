@@ -30,4 +30,10 @@ describe('Manager', function() {
 
   });
 
+  describe('#clean', function() {
+
+
+
+  });
+
 });

@@ -33,7 +33,7 @@
 			<li class="dropdown">
 				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="module-storjnode.html">storjnode</a></li><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_utils.html">storj/utils</a></li>
+					<li><a href="module-storj.html">storj</a></li><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_utils.html">storj/utils</a></li>
 				</ul>
 			</li>
 			
@@ -84,7 +84,108 @@
 </header>
 
 <article>
-    <p>TODO</p>
+    <p>Nodes on the Storj network implement a separate &quot;data channel&quot; for file
+transfer. Each node must expose a
+<a href="https://tools.ietf.org/html/rfc6455">WebSocket</a> server that accepts connections
+from clients who wish to use the channel for shard consignments and retrieval.</p>
+<p>The WebSocket server must be accessible at the same path as the JSON-RPC server
+and is negotiated by sending the <code>Sec-WebSocket-Key</code> header to indicate the
+connection upgrade as defined by RFC6455. Once the WebSocket connection is
+open, the client must send a JSON formatted message including the necessary
+information for the farmer to authorize the data channel.</p>
+<h3>Authorizing a Channel</h3><p>The JSON message the client must provide to the farmer before establishing the
+channel must contain the <code>token</code> provided from a previous <code>CONSIGN</code> or
+<code>RETRIEVE</code> request, the <code>hash</code> of the data being transferred, and the
+<code>operation</code> (either <code>PUSH</code> or <code>PULL</code>).</p>
+<pre class="prettyprint source"><code>{
+  &quot;token&quot;: &quot;5a7ac2dd58377085bad57f864b3a493c288b7c07&quot;,
+  &quot;hash&quot;: &quot;ba084d3f143f2896809d3f1d7dffed472b39d8de&quot;,
+  &quot;operation&quot;: &quot;PUSH&quot;
+}</code></pre><blockquote>
+<p>Authorization message frames must use opcode <code>0x1</code> (textual).</p>
+</blockquote>
+<p>The receiving farmer must check that she issued the received <code>token</code> within a
+reasonable amount of time (recommend 2 minutes) and that the supplied <code>hash</code> is
+associated with that token before sending or receiving any other data.</p>
+<p>If the authorization fails, the farmer must close the data channel, optionally
+responding with a status message.</p>
+<h3>Status Messages</h3><p>Farmers can communicate their status or the result of an operation by sending
+JSON formatted messages including <code>code</code> (HTTP status code) and <code>message</code>.</p>
+<pre class="prettyprint source"><code>{
+  &quot;code&quot;: 200,
+  &quot;message&quot;: &quot;Data consigned successfully&quot;
+}</code></pre><pre class="prettyprint source"><code>{
+  &quot;code&quot;: 401,
+  &quot;message&quot;: &quot;Failed to authorize channel&quot;
+}</code></pre><blockquote>
+<p>Status message frames must use opcode <code>0x1</code> (textual).</p>
+</blockquote>
+<h3>Consigning a Shard</h3><p>To consign a shard (to upload the shard to a farmer), first send the
+appropriate authorization message. If the farmer does not respond with a failed
+status message, the channel is open and you can begin sending binary frames.</p>
+<p>Farmers must track the amount of data received and ensure that it does not
+exceed the amount defined in the contract. Once the farmer has received the
+number of bytes defined in the contract, she must verify the data against the
+hash defined in the contract.</p>
+<p>If these checks are successfully executed, then the farmer must respond with a
+positive status message and terminate the channel.</p>
+<blockquote>
+<p>Shard message frames must use opcode <code>0x2</code> (binary).</p>
+</blockquote>
+<h4>Example (browser-based)</h4><pre class="prettyprint source"><code>var channel = new WebSocket('&lt;farmer_uri>');
+
+channel.addEventListener('open', function() {
+  channel.send(JSON.stringify({
+    token: '&lt;token>',
+    hash: '&lt;hash>',
+    operation: 'PUSH'
+  });
+
+  channel.send(new Blob([/* ... */]));
+});
+
+channel.addEventListener('message', function(e) {
+  var data = JSON.parse(e.data);
+
+  if (data.code && data.code !== 200) {
+    console.error('Error consigning data:', data.message);
+  } else {
+    console.log('Successfully consigned data!');
+  }
+});</code></pre><h3>Retrieving a Shard</h3><p>To retrieve a shard from a farmer, first send the appropriate authorization
+message. The farmer will respond with a negative status message frame if you
+are not authorized and terminate the channel. If authorization is successful,
+you will immediately begin receiving binary message frames until there is no
+more data to be transferred - at which point the farmer must terminate the
+channel.</p>
+<blockquote>
+<p>Shard message frames must use opcode <code>0x2</code> (binary).</p>
+</blockquote>
+<h4>Example (browser-based)</h4><pre class="prettyprint source"><code>var channel = new WebSocket('&lt;farmer_uri>');
+var fileparts = [];
+
+channel.addEventListener('open', function() {
+  channel.send(JSON.stringify({
+    token: '&lt;token>',
+    hash: '&lt;hash>',
+    operation: 'PULL'
+  });
+});
+
+channel.addEventListener('message', function(e) {
+  fileparts.push(e.data);
+});
+
+channel.addEventListener('close', function() {
+  var file = new Blob(fileparts, { type: '&lt;mime_type>' });
+  var url = URL.createObjectURL(file);
+
+  location.href = url;
+});</code></pre><h3>File Reconstruction</h3><p>In most cases a complete file is consigned to a number of different farmers. To
+reconstruct a file, you'll need to know the location of each shard and the
+concatenation order. With this information, you can open data channels to each
+of the farmers storing the file's shards (with whatever degree of parallelism
+suits your needs) and concatenate the binary blobs received in the proper order.</p>
 </article>
 
 </section>

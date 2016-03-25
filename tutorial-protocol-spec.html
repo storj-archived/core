@@ -33,7 +33,7 @@
 			<li class="dropdown">
 				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="module-storjnode.html">storjnode</a></li><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_utils.html">storj/utils</a></li>
+					<li><a href="module-storj.html">storj</a></li><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_utils.html">storj/utils</a></li>
 				</ul>
 			</li>
 			
@@ -95,7 +95,7 @@ needed for a Storj protocol compliant implementation.</p>
 <h3>Request Format</h3><p>Requests are formed according to the JSON-RPC 2.0 specification and are issued
 via HTTP POST. The Storj protocol requires the use of <em>named parameters</em> -
 positional parameters are not supported. Example:</p>
-<pre class="prettyprint source lang-json"><code>{
+<pre class="prettyprint source"><code>{
   &quot;method&quot;: &quot;PING&quot;,
   &quot;params&quot;: {
     &quot;contact&quot;: {
@@ -110,7 +110,7 @@ positional parameters are not supported. Example:</p>
 }</code></pre><p>The receiving node for this request would then respond with the result, which
 in the case of a <code>PING</code> message, is simply an acknowledgement that includes
 the recipient's contact information and required <code>__signature</code> and <code>__nonce</code>:</p>
-<pre class="prettyprint source lang-json"><code>{
+<pre class="prettyprint source"><code>{
   &quot;result&quot;: {
     &quot;contact&quot;: {
       &quot;address&quot;: &quot;10.0.0.3&quot;,
@@ -124,7 +124,7 @@ the recipient's contact information and required <code>__signature</code> and <c
 }</code></pre><p>In the event that an error occurs, an <code>error</code> property must be <em>added</em> to the
 response. You <em>still</em> need to include your <code>contact</code> data in the <code>result</code>
 property of the response:</p>
-<pre class="prettyprint source lang-json"><code>{
+<pre class="prettyprint source"><code>{
   &quot;result&quot;: {
     &quot;contact&quot;: {
       &quot;address&quot;: &quot;10.0.0.3&quot;,
@@ -171,7 +171,7 @@ known seeds. The request must include a <code>key</code>, <code>contact</code> (
 <h4>FIND_NODE</h4><p>When issuing a <code>FIND_NODE</code> request, you provide a <code>key</code> that represents the
 <code>nodeID</code> of the contact of which you would like to their neighbors. When
 joining the network, this value is <em>your own <code>nodeID</code></em>.</p>
-<pre class="prettyprint source lang-json"><code>{
+<pre class="prettyprint source"><code>{
   &quot;method&quot;: &quot;FIND_NODE&quot;,
   &quot;params&quot;: {
     &quot;key&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
@@ -191,7 +191,7 @@ metric as the Storj network uses a
 <a href="https://en.wikipedia.org/wiki/Kademlia">Kademlia</a>-based overlay. In addition,
 if the receiving node is not already aware of the requesting node, it may add
 the requester to it's own routing table to later inform other requesters.</p>
-<pre class="prettyprint source lang-json"><code>{
+<pre class="prettyprint source"><code>{
   &quot;result&quot;: {
     &quot;nodes&quot;: [
       {
@@ -237,7 +237,7 @@ process repeats until an interested node fulfills the contract.</p>
 <h4>SUBSCRIBE</h4><p>In order to know what publications in which your neighbors are interested, we
 select the 3 nodes in our routing table that are identified by a <code>nodeID</code> that
 is closest to ours and we issue a <code>SUBSCRIBE</code> message to each of them:</p>
-<pre class="prettyprint source lang-json"><code>{
+<pre class="prettyprint source"><code>{
   &quot;method&quot;: &quot;SUBSCRIBE&quot;,
   &quot;params&quot;: {
     &quot;contact&quot;: {
@@ -253,7 +253,7 @@ is closest to ours and we issue a <code>SUBSCRIBE</code> message to each of them
 <em>attenuated bloom filter</em>, with a size 160 bits and a depth of 3. This data
 structure represents 3 sets of topics to which the recipient's neighbors are
 subscribed 3 &quot;hops&quot; away.</p>
-<pre class="prettyprint source lang-json"><code>{
+<pre class="prettyprint source"><code>{
   &quot;result&quot;: {
     &quot;filters&quot;: [
       &quot;0000000000000000000000000000000000000000&quot;,
@@ -276,7 +276,7 @@ interested).</p>
 <h4>UPDATE</h4><p>After the requester updates it's local view of it's neighbor's publication
 subscriptions, it must in turn update it's neighbors with it's own publication
 subscriptions by providing it's own attenuated bloom filter:</p>
-<pre class="prettyprint source lang-json"><code>{
+<pre class="prettyprint source"><code>{
   &quot;method&quot;: &quot;UPDATE&quot;,
   &quot;params&quot;: {
     &quot;filters&quot;: [
@@ -307,7 +307,7 @@ subscriptions.</p>
 this mechanism is used for publishing &quot;asks&quot; for storage contracts. In this
 case, the <code>topic</code> is equal to the unique <a href="Contract.html">Contract</a> type and the
 <code>contents</code> is equal to the proposed contract itself:</p>
-<pre class="prettyprint source lang-json"><code>{
+<pre class="prettyprint source"><code>{
   &quot;method&quot;: &quot;PUBLISH&quot;,
   &quot;params&quot;: {
     &quot;uuid&quot;: &quot;7f0c40a2-e465-4f3e-b617-3d53460e34f7&quot;,
@@ -354,7 +354,7 @@ the case of storage contract, the node may begin communicating directly with
 the original publisher to finalize the contract.</p>
 <p>Regardless of whether or not the node is interested in the publication, it
 should acknowledge receipt of the publication to the forwarder:</p>
-<pre class="prettyprint source lang-json"><code>{
+<pre class="prettyprint source"><code>{
   &quot;result&quot;: {
     &quot;contact&quot;: {
       &quot;address&quot;: &quot;10.0.0.2&quot;,
@@ -386,7 +386,7 @@ with keys sorted alphanumerically.</p>
 <p>In addition to these fields, the offering node (or &quot;farmer&quot;) may modify the
 other fields in the contract to their liking if they wish to counter the
 original offer:</p>
-<pre class="prettyprint source lang-json"><code>{
+<pre class="prettyprint source"><code>{
   &quot;method&quot;: &quot;OFFER&quot;,
   &quot;params&quot;: {
     &quot;contract&quot;: {
@@ -416,7 +416,7 @@ original offer:</p>
 }</code></pre><p>The receiving node must check the offer and determine whether or not the
 modified contract terms are satisfactory. If so, it may finalize the contract
 by adding it's signature to the <code>renter_signature</code> field:</p>
-<pre class="prettyprint source lang-json"><code>{
+<pre class="prettyprint source"><code>{
   &quot;result&quot;: {
     &quot;contract&quot;: {
       &quot;type&quot;: &quot;56ce3e837f575827cb5a94e2b609756a48fa4a3882f5e762b262af31f432878d&quot;,
@@ -458,7 +458,7 @@ the farmer to store. The consign message must contain the hex-encoded
 <code>data_shard</code> itself, the <code>contract_hash</code>, as well as an <code>audit_tree</code> that
 contains the bottom leaves of the audit strategy's merkle tree (see <strong>Auditing
 a Storage Contract</strong> below).</p>
-<pre class="prettyprint source lang-json"><code>{
+<pre class="prettyprint source"><code>{
   &quot;method&quot;: &quot;CONSIGN&quot;,
   &quot;params&quot;: {
     &quot;data_hash&quot;: &quot;4efc1c36d3349189fb3486d2914f56e05d3e66f8&quot;,
@@ -496,12 +496,16 @@ the next power of 2 of the <code>audit_count</code> supplied in the original con
 <p>Once verified, the farmer must respond with a generated token that the renter
 can use to open a data channel with the farmer (via websocket) to deliver the
 data as a binary stream.</p>
+<blockquote>
+<p>For more information on the Data Channel specification see the tutorial for
+<a href="tutorial-data-channels.html">Transferring File Shards</a>.</p>
+</blockquote>
 <p>In addition, the farmer should verify that the current UNIX time is greater
 than or equal to the agreed upon <code>store_begin</code> and less than the agreed upon
 <code>store_end</code>. If everything checks out, the farmer must store the consigned data
 in such a way that it may later be retrieved by it's hash. Once the farmer has
 done this, it must acknowledge the renter to confirm:</p>
-<pre class="prettyprint source lang-json"><code>{
+<pre class="prettyprint source"><code>{
   &quot;result&quot;: {
     &quot;token&quot;: &quot;3f62b781e3b5b5288dca587807248261d109bbfb&quot;,
     &quot;contact&quot;: {
@@ -530,7 +534,7 @@ empty buffer).</p>
 the storage contract without the need to have them supply the entire
 <code>data_shard</code>. To do this, the renter must supply the farmer with one of the
 secret pre-calculated challenges:</p>
-<pre class="prettyprint source lang-json"><code>{
+<pre class="prettyprint source"><code>{
   &quot;method&quot;: &quot;AUDIT&quot;,
   &quot;params&quot;: {
     &quot;data_hash&quot;: &quot;4efc1c36d3349189fb3486d2914f56e05d3e66f8&quot;,
@@ -555,7 +559,7 @@ supplied in the <code>audit_tree</code> property of the original <code>CONSIGN</
 the terms of the contract, the farmer must <em>also</em> provide the uncles required
 to rebuild the merkle tree. This <strong>proof</strong> response is specified as a series
 of nested JSON arrays:</p>
-<pre class="prettyprint source lang-json"><code>{
+<pre class="prettyprint source"><code>{
   &quot;result&quot;: {
     &quot;proof&quot;: [
       [
@@ -593,7 +597,7 @@ decide to cease storage of the data.</p>
 <h3>Downloading Consigned Data</h3><p>When a renter wishes to retrieve data that is stored under contract, it can
 issue a <code>RETRIEVE</code> RPC message that includes the <code>data_hash</code> to the farmer
 storing the data:</p>
-<pre class="prettyprint source lang-json"><code>{
+<pre class="prettyprint source"><code>{
   &quot;method&quot;: &quot;RETRIEVE&quot;,
   &quot;params&quot;: {
     &quot;data_hash&quot;: &quot;4efc1c36d3349189fb3486d2914f56e05d3e66f8&quot;,
@@ -614,7 +618,11 @@ to open a data channel (via websocket) to retrieve the data as a binary stream.
 After the data shard is delivered successfully, the farmer must increment
 it's record of the <code>downloads_since_last_audit</code> (which must be reset after the
 next audit).</p>
-<pre class="prettyprint source lang-json"><code>{
+<blockquote>
+<p>For more information on the Data Channel specification see the tutorial for
+<a href="tutorial-data-channels.html">Transferring File Shards</a>.</p>
+</blockquote>
+<pre class="prettyprint source"><code>{
   &quot;result&quot;: {
     &quot;token&quot;: &quot;3f62b781e3b5b5288dca587807248261d109bbfb&quot;,
     &quot;contact&quot;: {

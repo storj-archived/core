@@ -14,7 +14,7 @@ Requests are formed according to the JSON-RPC 2.0 specification and are issued
 via HTTP POST. The Storj protocol requires the use of *named parameters* -
 positional parameters are not supported. Example:
 
-```json
+```
 {
   "method": "PING",
   "params": {
@@ -34,7 +34,7 @@ The receiving node for this request would then respond with the result, which
 in the case of a `PING` message, is simply an acknowledgement that includes
 the recipient's contact information and required `__signature` and `__nonce`:
 
-```json
+```
 {
   "result": {
     "contact": {
@@ -53,7 +53,7 @@ In the event that an error occurs, an `error` property must be *added* to the
 response. You *still* need to include your `contact` data in the `result`
 property of the response:
 
-```json
+```
 {
   "result": {
     "contact": {
@@ -121,7 +121,7 @@ When issuing a `FIND_NODE` request, you provide a `key` that represents the
 `nodeID` of the contact of which you would like to their neighbors. When
 joining the network, this value is *your own `nodeID`*.
 
-```json
+```
 {
   "method": "FIND_NODE",
   "params": {
@@ -146,7 +146,7 @@ metric as the Storj network uses a
 if the receiving node is not already aware of the requesting node, it may add
 the requester to it's own routing table to later inform other requesters.
 
-```json
+```
 {
   "result": {
     "nodes": [
@@ -204,7 +204,7 @@ In order to know what publications in which your neighbors are interested, we
 select the 3 nodes in our routing table that are identified by a `nodeID` that
 is closest to ours and we issue a `SUBSCRIBE` message to each of them:
 
-```json
+```
 {
   "method": "SUBSCRIBE",
   "params": {
@@ -225,7 +225,7 @@ To properly handle a `SUBSCRIBE` message, the recipient must respond with an
 structure represents 3 sets of topics to which the recipient's neighbors are
 subscribed 3 "hops" away.
 
-```json
+```
 {
   "result": {
     "filters": [
@@ -256,7 +256,7 @@ After the requester updates it's local view of it's neighbor's publication
 subscriptions, it must in turn update it's neighbors with it's own publication
 subscriptions by providing it's own attenuated bloom filter:
 
-```json
+```
 {
   "method": "UPDATE",
   "params": {
@@ -296,7 +296,7 @@ this mechanism is used for publishing "asks" for storage contracts. In this
 case, the `topic` is equal to the unique {@link Contract} type and the
 `contents` is equal to the proposed contract itself:
 
-```json
+```
 {
   "method": "PUBLISH",
   "params": {
@@ -350,7 +350,7 @@ the original publisher to finalize the contract.
 Regardless of whether or not the node is interested in the publication, it
 should acknowledge receipt of the publication to the forwarder:
 
-```json
+```
 {
   "result": {
     "contact": {
@@ -393,7 +393,7 @@ In addition to these fields, the offering node (or "farmer") may modify the
 other fields in the contract to their liking if they wish to counter the
 original offer:
 
-```json
+```
 {
   "method": "OFFER",
   "params": {
@@ -428,7 +428,7 @@ The receiving node must check the offer and determine whether or not the
 modified contract terms are satisfactory. If so, it may finalize the contract
 by adding it's signature to the `renter_signature` field:
 
-```json
+```
 {
   "result": {
     "contract": {
@@ -477,7 +477,7 @@ the farmer to store. The consign message must contain the hex-encoded
 contains the bottom leaves of the audit strategy's merkle tree (see **Auditing
 a Storage Contract** below).
 
-```json
+```
 {
   "method": "CONSIGN",
   "params": {
@@ -521,13 +521,16 @@ Once verified, the farmer must respond with a generated token that the renter
 can use to open a data channel with the farmer (via websocket) to deliver the
 data as a binary stream.
 
+> For more information on the Data Channel specification see the tutorial for
+> {@tutorial data-channels}.
+
 In addition, the farmer should verify that the current UNIX time is greater
 than or equal to the agreed upon `store_begin` and less than the agreed upon
 `store_end`. If everything checks out, the farmer must store the consigned data
 in such a way that it may later be retrieved by it's hash. Once the farmer has
 done this, it must acknowledge the renter to confirm:
 
-```json
+```
 {
   "result": {
     "token": "3f62b781e3b5b5288dca587807248261d109bbfb",
@@ -565,7 +568,7 @@ the storage contract without the need to have them supply the entire
 `data_shard`. To do this, the renter must supply the farmer with one of the
 secret pre-calculated challenges:
 
-```json
+```
 {
   "method": "AUDIT",
   "params": {
@@ -595,7 +598,7 @@ the terms of the contract, the farmer must *also* provide the uncles required
 to rebuild the merkle tree. This **proof** response is specified as a series
 of nested JSON arrays:
 
-```json
+```
 {
   "result": {
     "proof": [
@@ -646,7 +649,7 @@ When a renter wishes to retrieve data that is stored under contract, it can
 issue a `RETRIEVE` RPC message that includes the `data_hash` to the farmer
 storing the data:
 
-```json
+```
 {
   "method": "RETRIEVE",
   "params": {
@@ -672,7 +675,10 @@ After the data shard is delivered successfully, the farmer must increment
 it's record of the `downloads_since_last_audit` (which must be reset after the
 next audit).
 
-```json
+> For more information on the Data Channel specification see the tutorial for
+> {@tutorial data-channels}.
+
+```
 {
   "result": {
     "token": "3f62b781e3b5b5288dca587807248261d109bbfb",

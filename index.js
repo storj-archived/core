@@ -1,5 +1,5 @@
 /**
- * @module storjnode
+ * @module storj
  */
 
 'use strict';

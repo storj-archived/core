@@ -46,7 +46,7 @@
     "ip": "^1.1.2",
     "jsen": "^0.6.0",
     "json-stable-stringify": "^1.0.1",
-    "kad": "^1.5.1",
+    "kad": "^1.5.3",
     "kad-quasar": "0.1.0",
     "localtunnel": "^1.8.1",
     "merge": "^1.2.0",

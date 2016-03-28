@@ -12,6 +12,9 @@ module.exports.Network = require('./lib/network');
 /** {@link Transport} */
 module.exports.Transport = require('./lib/network/transport');
 
+/** {@link Contact} */
+module.exports.Contact = require('./lib/network/contact');
+
 /** {@link DataChannelClient} */
 module.exports.DataChannelClient = require('./lib/datachannel/client');
 

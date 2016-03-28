@@ -24,6 +24,17 @@ describe('Network', function() {
 
   });
 
+  describe('#_verifyMessage', function() {
 
+    it('should fail if incompatible version', function(done) {
+      var verify = Network.prototype._verifyMessage;
+
+      verify({}, { protocol: '0.0.0' }, function(err) {
+        expect(err.message).to.equal('Protocol version is incompatible');
+        done();
+      });
+    });
+
+  });
 
 });

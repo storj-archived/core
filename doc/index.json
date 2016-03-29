@@ -7,5 +7,8 @@
   },
   "data-channels": {
     "title": "Transferring File Shards"
+  },
+  "contract-topics": {
+    "title": "Publishing Storage Contracts"
   }
 }

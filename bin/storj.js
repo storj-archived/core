@@ -19,10 +19,11 @@ var DEFAULTS = {
   datadir: path.join(HOME, '.storjnode'),
   address: '127.0.0.1',
   port: 4000,
-  farmer: false,
+  farmer: [],
   seed: 'storj://api.metadisk.org:8443/593844dc7f0076a1aeda9a6b9788af17e67c1052'
 };
 var CONFNAME = 'config.json';
+var DEFAULT_FARMER_TOPICS = ['01020202', '02020202', '03020202'];
 
 prompt.message = colors.white.bold(' :STORJ:');
 prompt.delimiter = colors.blue(' >> ');
@@ -168,6 +169,21 @@ function start(datadir) {
   );
   var privkey = fs.readFileSync(config.keypath).toString();
 
+  // NB: Patch for updating configuration files to 0.4.0 farmer property
+  // NB: This will go away in a future version
+  if (!Array.isArray(config.farmer)) {
+    if (config.farmer) {
+      config.farmer = DEFAULT_FARMER_TOPICS;
+    } else {
+      config.farmer = [];
+    }
+
+    fs.writeFileSync(
+      path.join(datadir, CONFNAME),
+      JSON.stringify(config, null, 2)
+    );
+  }
+
   function open(passwd, privkey) {
     try {
       privkey = decrypt(passwd, privkey);
@@ -226,7 +242,7 @@ if (!fs.existsSync(program.datadir)) {
       address: result.address,
       port: result.port,
       seeds: [result.seed],
-      farmer: result.farmer,
+      farmer: result.farmer ? DEFAULT_FARMER_TOPICS : [],
       loglevel: result.verbosity,
       keypath: result.keypath
     };

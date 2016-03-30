@@ -65,3 +65,49 @@ the program will connect to the network.
 You can run multiple instances by specifying a different data directory using
 the `--datadir` option. If no configuration has been created for the given
 data directory, then the setup wizard will run again.
+
+### Running in the Background
+
+You can run a farmer in the background using a process manager like
+[PM2](https://github.com/Unitech/pm2):
+
+```
+npm install -g pm2
+```
+
+Now you can instruct PM2 to start your farmer in the background and keep it
+running, restarting it automatically in the event that it goes down.
+
+```
+pm2 start path/to/node-storj/bin/storj.js -- --password <your_password>
+```
+
+Check the logs at any time with:
+
+```
+pm2 logs 0
+```
+
+### Configuring Contract Subscriptions
+
+By default, if you indicated during the wizard that you'd like to accept
+storage contracts from the network, `storj` will set a few common contract
+opcode sequences in your configuration file:
+
+```
+{
+  ...
+  "farmer": [
+    "01020202",
+    "02020202",
+    "03020202"
+  ],
+  ...
+}
+```
+
+These opcodes indicate you are interested in storing shards between 0mb-32mb
+for up to 90 days at a time and that your availability and speed is average. You
+might like to tweak these settings to better suit your hardware. See
+{@tutorial contract-topics} for more information on which opcodes you should
+use.

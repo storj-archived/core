@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Storj JS Source: lib/manager.js</title>
+	<title>Storj JS Class: Contact</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -72,109 +72,187 @@
 <div class="row">
 
 	
-	<div class="col-md-12">
+	<div class="col-md-8">
 	
 		<div id="main">
 			
 
-		<h1 class="page-title">Source: lib/manager.js</h1>
-    
+	<h1 class="page-title">Class: Contact</h1>
 <section>
-    <article>
-        <pre
-            class="sunlight-highlight-javascript linenums">'use strict';
 
-var assert = require('assert');
-var StorageAdapter = require('./storage/adapter');
-var StorageItem = require('./storage/item');
+<header>
+    
+        <h2>
+        Contact
+        </h2>
+        
+    
+</header>
 
-/**
- * Interface for managing contracts, shards, and audits
- * @constructor
- * @param {StorageAdapter} storage - Storage adapter to use
- */
-function Manager(storage) {
-  if (!(this instanceof Manager)) {
-    return new Manager(storage);
-  }
 
-  assert(storage instanceof StorageAdapter, 'Invalid storage adapter');
+<article>
+    <div class="container-overview">
+    
+        
+<hr>
+<dt>
+    <h4 class="name" id="Contact"><span class="type-signature"></span>new Contact(options)</h4>
+    
+    
+</dt>
+<dd>
 
-  this._storage = storage;
-}
+    
+    <div class="description">
+        Represents a Storj contact (or peer)
+    </div>
+    
 
-/**
- * Loads the storage {@link Item} at the given key
- * @param {String} hash - Shard hash to load data for
- * @param {Function} callback - Called with error or {@link StorageItem}
- */
-Manager.prototype.load = function(hash, callback) {
-  assert(typeof hash === 'string', 'Invalid key supplied');
-  assert(hash.length === 40, 'Key must be 160 bit hex string');
-  assert(typeof callback === 'function', 'Callback function must be supplied');
+    
 
-  this._storage.get(hash, function(err, item) {
-    if (err) {
-      return callback(err);
-    }
+    
 
-    if (!(item instanceof StorageItem)) {
-      return callback(new Error('Storage adapter provided invalid result'));
-    }
+    
+    
+        <h5>Parameters:</h5>
+        
 
-    callback(null, item);
-  });
-};
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
 
-/**
- * Saves the storage {@link StorageItem} at the given key
- * @param {StorageItem} item - The {@link StorageItem} to store
- * @param {Function} callback - Called on complete
- */
-Manager.prototype.save = function(item, callback) {
-  assert(item instanceof StorageItem, 'Invalid storage item supplied');
-  assert(typeof callback === 'function', 'Callback function must be supplied');
+        <th>Type</th>
 
-  this._storage.put(item, callback);
-};
+        
 
-/**
- * Enumerates all storage contracts and reaps stale data
- * @param {Function} callback - Called on complete
- */
-Manager.prototype.clean = function(callback) {
-  var self = this;
-  var rstream = this._storage.createReadStream();
+        
 
-  rstream.on('data', function(item) {
-    rstream.pause();
+        <th class="last">Description</th>
+    </tr>
+    </thead>
 
-    var total = Object.keys(item.contracts).length;
-    var ended = 0;
+    <tbody>
+    
 
-    for (var nodeID in item.contracts) {
-      if (item.contracts[nodeID].get('store_end') &lt; Date.now()) {
-        ended++;
-      }
-    }
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
 
-    if (total === ended) {
-      self._storage.del(item.hash, function(/* err */) {
-        rstream.resume();
-      });
-    } else {
-      rstream.resume();
-    }
-  });
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
 
-  rstream.on('end', callback);
-};
 
-module.exports = Manager;
-</pre>
-    </article>
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_network_contact.js.html">lib/network/contact.js</a>,
+				 <a href="lib_network_contact.js.html#sunlight-1-line-11">line 11</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
 </section>
-
 
 
 
@@ -184,6 +262,10 @@ module.exports = Manager;
 
 	<div class="clearfix"></div>
 
+	
+		<div class="col-md-3">
+			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
+		</div>
 	
 
 </div>

@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Storj JS Tutorials</title>
+	<title>Storj JS Source: lib/network/contact.js</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -72,145 +72,43 @@
 <div class="row">
 
 	
-	<div class="col-md-8">
+	<div class="col-md-12">
 	
 		<div id="main">
 			
 
-	<h1 class="page-title">Tutorials</h1>
+		<h1 class="page-title">Source: lib/network/contact.js</h1>
+    
 <section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">'use strict';
 
-<header>
-    
-        <h2>
-        
-        </h2>
-        
-    
-</header>
+var kad = require('kad');
+var inherits = require('util').inherits;
 
+/**
+* Represents a Storj contact (or peer)
+* @constructor
+* @param {Object} options
+*/
+function StorjContact(options) {
+  if (!(this instanceof StorjContact)) {
+    return new StorjContact(options);
+  }
 
-<article>
-    <div class="container-overview">
-    
-        
+  this.protocol = require('../../package').version;
 
-        
-<dl class="details">
-    
+  kad.contacts.AddressPortContact.call(this, options);
+}
 
-	
+inherits(StorjContact, kad.contacts.AddressPortContact);
 
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Classes</h3>
-
-        <dl>
-            <dt><a href="DataChannelServer.html">DataChannelServer</a></dt>
-            <dd></dd>
-        
-            <dt><a href="Audit.html">Audit</a></dt>
-            <dd></dd>
-        
-            <dt><a href="Contract.html">Contract</a></dt>
-            <dd></dd>
-        
-            <dt><a href="DataChannelClient.html">DataChannelClient</a></dt>
-            <dd></dd>
-        
-            <dt><a href="KeyPair.html">KeyPair</a></dt>
-            <dd></dd>
-        
-            <dt><a href="Manager.html">Manager</a></dt>
-            <dd></dd>
-        
-            <dt><a href="StorjContact.html">StorjContact</a></dt>
-            <dd></dd>
-        
-            <dt><a href="Network.html">Network</a></dt>
-            <dd></dd>
-        
-            <dt><a href="Protocol.html">Protocol</a></dt>
-            <dd></dd>
-        
-            <dt><a href="Transport.html">Transport</a></dt>
-            <dd></dd>
-        
-            <dt><a href="Proof.html">Proof</a></dt>
-            <dd></dd>
-        
-            <dt><a href="StorageAdapter.html">StorageAdapter</a></dt>
-            <dd></dd>
-        
-            <dt><a href="FSStorageAdapter.html">FSStorageAdapter</a></dt>
-            <dd></dd>
-        
-            <dt><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></dt>
-            <dd></dd>
-        
-            <dt><a href="StorageItem.html">StorageItem</a></dt>
-            <dd></dd>
-        
-            <dt><a href="Verification.html">Verification</a></dt>
-            <dd></dd>
-        </dl>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</article>
-
+module.exports = StorjContact;
+</pre>
+    </article>
 </section>
+
 
 
 
@@ -220,10 +118,6 @@
 
 	<div class="clearfix"></div>
 
-	
-		<div class="col-md-3">
-			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
-		</div>
 	
 
 </div>

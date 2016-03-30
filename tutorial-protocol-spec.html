@@ -40,14 +40,14 @@
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="KeyPair.html">KeyPair</a></li><li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="Transport.html">Transport</a></li><li><a href="Proof.html">Proof</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="Verification.html">Verification</a></li>
+					<li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="Manager.html">Manager</a></li><li><a href="StorjContact.html">StorjContact</a></li><li><a href="Network.html">Network</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="Transport.html">Transport</a></li><li><a href="Proof.html">Proof</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="Verification.html">Verification</a></li>
 				</ul>
 			</li>
 			
 			<li class="dropdown">
 				<a href="tutorials.list.html" class="dropdown-toggle" data-toggle="dropdown">Tutorials<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="tutorial-cli-usage.html">Command Line Interface</a></li><li><a href="tutorial-data-channels.html">Transferring File Shards</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li>
+					<li><a href="tutorial-cli-usage.html">Command Line Interface</a></li><li><a href="tutorial-contract-topics.html">Publishing Storage Contracts</a></li><li><a href="tutorial-data-channels.html">Transferring File Shards</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li>
 				</ul>
 			</li>
 			
@@ -101,24 +101,26 @@ positional parameters are not supported. Example:</p>
     &quot;contact&quot;: {
       &quot;address&quot;: &quot;10.0.0.2&quot;,
       &quot;port&quot;: 1337,
-      &quot;nodeID&quot;: &quot;89cc3ddb4209c6e7e301c10c0257adf4fd85f253&quot;
+      &quot;nodeID&quot;: &quot;89cc3ddb4209c6e7e301c10c0257adf4fd85f253&quot;,
+      &quot;protocol&quot;: &quot;0.3.0&quot;
     },
-    &quot;__nonce&quot;: 1455216323786,
-    &quot;__signature&quot;: &quot;3045022100de2e162d017a1e9d0ebfe2a94df3fc847b68281a9882...&quot;
+    &quot;nonce&quot;: 1455216323786,
+    &quot;signature&quot;: &quot;3045022100de2e162d017a1e9d0ebfe2a94df3fc847b68281a9882...&quot;
   },
   &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
 }</code></pre><p>The receiving node for this request would then respond with the result, which
 in the case of a <code>PING</code> message, is simply an acknowledgement that includes
-the recipient's contact information and required <code>__signature</code> and <code>__nonce</code>:</p>
+the recipient's contact information and required <code>signature</code> and <code>nonce</code>:</p>
 <pre class="prettyprint source"><code>{
   &quot;result&quot;: {
     &quot;contact&quot;: {
       &quot;address&quot;: &quot;10.0.0.3&quot;,
       &quot;port&quot;: 1337,
-      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+      &quot;protocol&quot;: &quot;0.3.0&quot;
     },
-    &quot;__nonce&quot;: 1455216323786,
-    &quot;__signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+    &quot;nonce&quot;: 1455216323786,
+    &quot;signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
   },
   &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
 }</code></pre><p>In the event that an error occurs, an <code>error</code> property must be <em>added</em> to the
@@ -129,10 +131,11 @@ property of the response:</p>
     &quot;contact&quot;: {
       &quot;address&quot;: &quot;10.0.0.3&quot;,
       &quot;port&quot;: 1337,
-      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+      &quot;protocol&quot;: &quot;0.3.0&quot;
     },
-    &quot;__nonce&quot;: 1455216323786,
-    &quot;__signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+    &quot;nonce&quot;: 1455216323786,
+    &quot;signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
   },
   &quot;error&quot;: {
     &quot;code&quot;: -32603,
@@ -146,6 +149,7 @@ three properties:</p>
 <li><code>address</code> - hostname, domain, or IP</li>
 <li><code>port</code> - port number on which the node is listening</li>
 <li><code>nodeID</code> - hash of the node's public key (see below)</li>
+<li><code>protocol</code> - version of the protocol implementation</li>
 </ul>
 <p>This information can be expressed as a URI in the following format:</p>
 <pre class="prettyprint source"><code>storj://10.0.0.2:1337/89cc3ddb4209c6e7e301c10c0257adf4fd85f253</code></pre><p>In addition to knowing this information about the seed, you also will need to
@@ -167,7 +171,7 @@ and verify messages. This ensures that nodes are unable to assume the identity
 of another node by claiming it has the same <code>nodeID</code>.</p>
 <p>Joining the network begins with a <code>FIND_NODE</code> request sent to one or more
 known seeds. The request must include a <code>key</code>, <code>contact</code> (you), along with a
-<code>__signature</code> and <code>__nonce</code>.</p>
+<code>signature</code> and <code>nonce</code>.</p>
 <h4>FIND_NODE</h4><p>When issuing a <code>FIND_NODE</code> request, you provide a <code>key</code> that represents the
 <code>nodeID</code> of the contact of which you would like to their neighbors. When
 joining the network, this value is <em>your own <code>nodeID</code></em>.</p>
@@ -178,10 +182,11 @@ joining the network, this value is <em>your own <code>nodeID</code></em>.</p>
     &quot;contact&quot;: {
       &quot;address&quot;: &quot;10.0.0.3&quot;,
       &quot;port&quot;: 1337,
-      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+      &quot;protocol&quot;: &quot;0.3.0&quot;
     },
-    &quot;__nonce&quot;: 1455216323786,
-    &quot;__signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+    &quot;nonce&quot;: 1455216323786,
+    &quot;signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
   },
   &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
 }</code></pre><p>When a node receives a <code>FIND_NODE</code> RPC message, it must perform a lookup in
@@ -197,26 +202,30 @@ the requester to it's own routing table to later inform other requesters.</p>
       {
         &quot;address&quot;: &quot;10.0.0.4&quot;,
         &quot;port&quot;: 1337,
-        &quot;nodeID&quot;: &quot;58dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+        &quot;nodeID&quot;: &quot;58dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+        &quot;protocol&quot;: &quot;0.3.0&quot;
       },
       {
         &quot;address&quot;: &quot;10.0.0.5&quot;,
         &quot;port&quot;: 1337,
-        &quot;nodeID&quot;: &quot;68dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+        &quot;nodeID&quot;: &quot;68dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+        &quot;protocol&quot;: &quot;0.3.0&quot;
       },
       {
         &quot;address&quot;: &quot;10.0.0.6&quot;,
         &quot;port&quot;: 1337,
-        &quot;nodeID&quot;: &quot;78dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+        &quot;nodeID&quot;: &quot;78dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+        &quot;protocol&quot;: &quot;0.3.0&quot;
       }
     ],
     &quot;contact&quot;: {
       &quot;address&quot;: &quot;10.0.0.3&quot;,
       &quot;port&quot;: 1337,
-      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+      &quot;protocol&quot;: &quot;0.3.0&quot;
     },
-    &quot;__nonce&quot;: 1455216323786,
-    &quot;__signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+    &quot;nonce&quot;: 1455216323786,
+    &quot;signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
   },
   &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
 }</code></pre><p>Upon receipt of the <code>FIND_NODE</code> response, the node attempting to join the
@@ -243,10 +252,11 @@ is closest to ours and we issue a <code>SUBSCRIBE</code> message to each of them
     &quot;contact&quot;: {
       &quot;address&quot;: &quot;10.0.0.2&quot;,
       &quot;port&quot;: 1337,
-      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+      &quot;protocol&quot;: &quot;0.3.0&quot;
     },
-    &quot;__nonce&quot;: 1455216323786,
-    &quot;__signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+    &quot;nonce&quot;: 1455216323786,
+    &quot;signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
   },
   &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
 }</code></pre><p>To properly handle a <code>SUBSCRIBE</code> message, the recipient must respond with an
@@ -263,10 +273,11 @@ subscribed 3 &quot;hops&quot; away.</p>
     &quot;contact&quot;: {
       &quot;address&quot;: &quot;10.0.0.3&quot;,
       &quot;port&quot;: 1337,
-      &quot;nodeID&quot;: &quot;58dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+      &quot;nodeID&quot;: &quot;58dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+      &quot;protocol&quot;: &quot;0.3.0&quot;
     },
-    &quot;__nonce&quot;: 1455216323786,
-    &quot;__signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+    &quot;nonce&quot;: 1455216323786,
+    &quot;signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
   },
   &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
 }</code></pre><p>When the original requesting node receives this response, it must update it's
@@ -287,10 +298,11 @@ subscriptions by providing it's own attenuated bloom filter:</p>
     &quot;contact&quot;: {
       &quot;address&quot;: &quot;10.0.0.2&quot;,
       &quot;port&quot;: 1337,
-      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+      &quot;protocol&quot;: &quot;0.3.0&quot;
     },
-    &quot;__nonce&quot;: 1455216323786,
-    &quot;__signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+    &quot;nonce&quot;: 1455216323786,
+    &quot;signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
   },
   &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
 }</code></pre><p>This method is essentially the &quot;push&quot; version of the <code>SUBSCRIBE</code> message, where
@@ -305,13 +317,14 @@ then relay it to their neighbors based upon their own view of nearby
 subscriptions.</p>
 <p>The <code>topic</code> property and the corresponding <code>contents</code> data is arbitrary, but
 this mechanism is used for publishing &quot;asks&quot; for storage contracts. In this
-case, the <code>topic</code> is equal to the unique <a href="Contract.html">Contract</a> type and the
-<code>contents</code> is equal to the proposed contract itself:</p>
+case, the <code>topic</code> is equal to the <a href="Contract.html">Contract</a> type and the <code>contents</code> is
+equal to the proposed contract itself. See <a href="tutorial-contract-topics.html">Publishing Storage Contracts</a> for more
+information on how to choose a valid contract type for your storage needs.</p>
 <pre class="prettyprint source"><code>{
   &quot;method&quot;: &quot;PUBLISH&quot;,
   &quot;params&quot;: {
     &quot;uuid&quot;: &quot;7f0c40a2-e465-4f3e-b617-3d53460e34f7&quot;,
-    &quot;topic&quot;: &quot;56ce3e837f575827cb5a94e2b609756a48fa4a3882f5e762b262af31f432878d&quot;,
+    &quot;topic&quot;: &quot;02010303&quot;,
     &quot;contents&quot;: {
       &quot;type&quot;: &quot;56ce3e837f575827cb5a94e2b609756a48fa4a3882f5e762b262af31f432878d&quot;,
       &quot;renter_id&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
@@ -334,10 +347,11 @@ case, the <code>topic</code> is equal to the unique <a href="Contract.html">Cont
     &quot;contact&quot;: {
       &quot;address&quot;: &quot;10.0.0.2&quot;,
       &quot;port&quot;: 1337,
-      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+      &quot;protocol&quot;: &quot;0.3.0&quot;
     },
-    &quot;__nonce&quot;: 1455216323786,
-    &quot;__signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+    &quot;nonce&quot;: 1455216323786,
+    &quot;signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
   },
   &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
 }</code></pre><p>Upon receipt of a <code>PUBLISH</code> message, a node must first check to make sure it
@@ -359,10 +373,11 @@ should acknowledge receipt of the publication to the forwarder:</p>
     &quot;contact&quot;: {
       &quot;address&quot;: &quot;10.0.0.2&quot;,
       &quot;port&quot;: 1337,
-      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+      &quot;protocol&quot;: &quot;0.3.0&quot;
     },
-    &quot;__nonce&quot;: 1455216323786,
-    &quot;__signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+    &quot;nonce&quot;: 1455216323786,
+    &quot;signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
   },
   &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
 }</code></pre><p>Then, it must append <em>negative information</em> to the publication message by
@@ -407,10 +422,11 @@ original offer:</p>
     &quot;contact&quot;: {
       &quot;address&quot;: &quot;10.0.0.2&quot;,
       &quot;port&quot;: 1337,
-      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+      &quot;protocol&quot;: &quot;0.3.0&quot;
     },
-    &quot;__nonce&quot;: 1455216323786,
-    &quot;__signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+    &quot;nonce&quot;: 1455216323786,
+    &quot;signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
   },
   &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
 }</code></pre><p>The receiving node must check the offer and determine whether or not the
@@ -436,10 +452,11 @@ by adding it's signature to the <code>renter_signature</code> field:</p>
     &quot;contact&quot;: {
       &quot;address&quot;: &quot;10.0.0.2&quot;,
       &quot;port&quot;: 1337,
-      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+      &quot;protocol&quot;: &quot;0.3.0&quot;
     },
-    &quot;__nonce&quot;: 1455216323786,
-    &quot;__signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+    &quot;nonce&quot;: 1455216323786,
+    &quot;signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
   },
   &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
 }</code></pre><p>Alternatively, the receiving node may counter the offer by modifying any of the
@@ -483,10 +500,11 @@ a Storage Contract</strong> below).</p>
     &quot;contact&quot;: {
       &quot;address&quot;: &quot;10.0.0.2&quot;,
       &quot;port&quot;: 1337,
-      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+      &quot;protocol&quot;: &quot;0.3.0&quot;
     },
-    &quot;__nonce&quot;: 1455216323786,
-    &quot;__signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+    &quot;nonce&quot;: 1455216323786,
+    &quot;signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
   },
   &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
 }</code></pre><p>Upon receipt of a <code>CONSIGN</code> message, the farmer must lookup the reference
@@ -511,10 +529,11 @@ done this, it must acknowledge the renter to confirm:</p>
     &quot;contact&quot;: {
       &quot;address&quot;: &quot;10.0.0.2&quot;,
       &quot;port&quot;: 1337,
-      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+      &quot;protocol&quot;: &quot;0.3.0&quot;
     },
-    &quot;__nonce&quot;: 1455216323786,
-    &quot;__signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+    &quot;nonce&quot;: 1455216323786,
+    &quot;signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
   },
   &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
 }</code></pre><h3>Auditing a Storage Contract</h3><p>Before a renter issues a <code>CONSIGN</code> RPC, it must pre-calculate a series of
@@ -542,10 +561,11 @@ secret pre-calculated challenges:</p>
     &quot;contact&quot;: {
       &quot;address&quot;: &quot;10.0.0.2&quot;,
       &quot;port&quot;: 1337,
-      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+      &quot;protocol&quot;: &quot;0.3.0&quot;
     },
-    &quot;__nonce&quot;: 1455216323786,
-    &quot;__signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+    &quot;nonce&quot;: 1455216323786,
+    &quot;signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
   },
   &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
 }</code></pre><p>Upon receipt of an <code>AUDIT</code> request, the farmer must lookup the <code>data_shard</code> by
@@ -579,10 +599,11 @@ of nested JSON arrays:</p>
     &quot;contact&quot;: {
       &quot;address&quot;: &quot;10.0.0.2&quot;,
       &quot;port&quot;: 1337,
-      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+      &quot;protocol&quot;: &quot;0.3.0&quot;
     },
-    &quot;__nonce&quot;: 1455216323786,
-    &quot;__signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+    &quot;nonce&quot;: 1455216323786,
+    &quot;signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
   },
   &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
 }</code></pre><p>Upon receipt of the farmer's proof, the renter must verify that the proof is
@@ -604,10 +625,11 @@ storing the data:</p>
     &quot;contact&quot;: {
       &quot;address&quot;: &quot;10.0.0.2&quot;,
       &quot;port&quot;: 1337,
-      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+      &quot;protocol&quot;: &quot;0.3.0&quot;
     },
-    &quot;__nonce&quot;: 1455216323786,
-    &quot;__signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+    &quot;nonce&quot;: 1455216323786,
+    &quot;signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
   },
   &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
 }</code></pre><p>After the recipient of the <code>RETRIEVE</code> message verifies the sender's signature
@@ -628,10 +650,11 @@ next audit).</p>
     &quot;contact&quot;: {
       &quot;address&quot;: &quot;10.0.0.2&quot;,
       &quot;port&quot;: 1337,
-      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+      &quot;protocol&quot;: &quot;0.3.0&quot;
     },
-    &quot;__nonce&quot;: 1455216323786,
-    &quot;__signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+    &quot;nonce&quot;: 1455216323786,
+    &quot;signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
   },
   &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
 }</code></pre><p>In addition, the renter must check the integrity of the returned <code>data_shard</code>

@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Storj JS Class: DataChannelServer</title>
+	<title>Storj JS Class: StorjContact</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -77,13 +77,13 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: DataChannelServer</h1>
+	<h1 class="page-title">Class: StorjContact</h1>
 <section>
 
 <header>
     
         <h2>
-        DataChannelServer
+        StorjContact
         </h2>
         
     
@@ -96,7 +96,7 @@
         
 <hr>
 <dt>
-    <h4 class="name" id="DataChannelServer"><span class="type-signature"></span>new DataChannelServer(options)</h4>
+    <h4 class="name" id="StorjContact"><span class="type-signature"></span>new StorjContact(options)</h4>
     
     
 </dt>
@@ -104,7 +104,7 @@
 
     
     <div class="description">
-        Creates a data channel server for sending and receiving consigned file shards
+        Represents a Storj contact (or peer)
     </div>
     
 
@@ -156,129 +156,7 @@
 
             
 
-            <td class="description last">
-                <h6 class="method-params-label method-subparams-label">Properties</h6>
-                
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>transport</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="Transport.html">Transport</a></span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Transport adapter from <a href="Network.html">Network</a></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>manager</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="Manager.html">Manager</a></span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The Manager from <a href="Network.html">Network</a></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>logger</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">kad.Logger</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Logger to use from <a href="Network.html">Network</a></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>ttl</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Number</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Close after idle for this length of time</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-            </td>
+            <td class="description last"></td>
         </tr>
 
     
@@ -322,8 +200,8 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_datachannel_server.js.html">lib/datachannel/server.js</a>,
-				 <a href="lib_datachannel_server.js.html#sunlight-1-line-23">line 23</a>
+				<a href="lib_network_contact.js.html">lib/network/contact.js</a>,
+				 <a href="lib_network_contact.js.html#sunlight-1-line-11">line 11</a>
 			</li>
 		</ul>
 	</dd>
@@ -367,398 +245,6 @@
 
     
 
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        <dl>
-            
-<hr>
-<dt>
-    <h4 class="name" id="accept"><span class="type-signature"></span>accept(token, filehash)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Begin accepting data for the given file hash and token
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>token</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The authorization token created for transfer</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>filehash</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The shard hash to allow for the token</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_datachannel_server.js.html">lib/datachannel/server.js</a>,
-				 <a href="lib_datachannel_server.js.html#sunlight-1-line-53">line 53</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="reject"><span class="type-signature"></span>reject(token)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Stop accepting data for the given token
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>token</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The authorization token created for transfer</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_datachannel_server.js.html">lib/datachannel/server.js</a>,
-				 <a href="lib_datachannel_server.js.html#sunlight-1-line-64">line 64</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="close"><span class="type-signature"></span>close()</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Closes the data channel and disconnects all clients
-    </div>
-    
-
-    
-
-    
-
-    
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_datachannel_server.js.html">lib/datachannel/server.js</a>,
-				 <a href="lib_datachannel_server.js.html#sunlight-1-line-79">line 79</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-        </dl>
     
 
     

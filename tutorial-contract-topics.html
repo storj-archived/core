@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Storj JS Tutorials</title>
+	<title>Storj JS Tutorial: Publishing Storage Contracts</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -72,158 +72,100 @@
 <div class="row">
 
 	
-	<div class="col-md-8">
+	<div class="col-md-12">
 	
 		<div id="main">
-			
-
-	<h1 class="page-title">Tutorials</h1>
-<section>
+			<section class="tutorial-section">
 
 <header>
     
-        <h2>
-        
-        </h2>
-        
-    
+
+    <h2>Publishing Storage Contracts</h2>
 </header>
 
-
 <article>
-    <div class="container-overview">
-    
-        
-
-        
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Classes</h3>
-
-        <dl>
-            <dt><a href="DataChannelServer.html">DataChannelServer</a></dt>
-            <dd></dd>
-        
-            <dt><a href="Audit.html">Audit</a></dt>
-            <dd></dd>
-        
-            <dt><a href="Contract.html">Contract</a></dt>
-            <dd></dd>
-        
-            <dt><a href="DataChannelClient.html">DataChannelClient</a></dt>
-            <dd></dd>
-        
-            <dt><a href="KeyPair.html">KeyPair</a></dt>
-            <dd></dd>
-        
-            <dt><a href="Manager.html">Manager</a></dt>
-            <dd></dd>
-        
-            <dt><a href="StorjContact.html">StorjContact</a></dt>
-            <dd></dd>
-        
-            <dt><a href="Network.html">Network</a></dt>
-            <dd></dd>
-        
-            <dt><a href="Protocol.html">Protocol</a></dt>
-            <dd></dd>
-        
-            <dt><a href="Transport.html">Transport</a></dt>
-            <dd></dd>
-        
-            <dt><a href="Proof.html">Proof</a></dt>
-            <dd></dd>
-        
-            <dt><a href="StorageAdapter.html">StorageAdapter</a></dt>
-            <dd></dd>
-        
-            <dt><a href="FSStorageAdapter.html">FSStorageAdapter</a></dt>
-            <dd></dd>
-        
-            <dt><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></dt>
-            <dd></dd>
-        
-            <dt><a href="StorageItem.html">StorageItem</a></dt>
-            <dd></dd>
-        
-            <dt><a href="Verification.html">Verification</a></dt>
-            <dd></dd>
-        </dl>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
+    <p>Nodes solicit storage contracts with the network by publishing information
+about their storage requirements as outlined in <a href="tutorial-protocol-spec.html">Protocol Specification</a>.
+Storj implements a distributed publish/subscribe system based on an algorithm
+called <a href="https://github.com/kadtools/kad-quasar">Quasar</a>.</p>
+<p>Quasar works by allowing nodes to advertise topics of interest to their
+neighbors and keeping a record of these topics in their neighborhood by storing
+them in an attenuated bloom filter. Each node has a view of the topics in which
+their neighbors are interested up to 3 hops away. By the nature of this
+design, the network forms gravity wells wherein messages of interest are
+efficiently relayed to nodes that are subscribed to the topic without flooding
+the network.</p>
+<p>This approach works well when there is a diverse number of topics. The Storj
+protocol leverages this by defining a matrix of <em>criteria</em> and <em>descriptors</em>
+in the form of opcodes representing the degree of which the criteria must be
+met.</p>
+<h3>Criteria</h3><p>At the time of writing, there are 4 criteria column in the topic matrix:</p>
+<ul>
+<li>Size</li>
+<li>Duration</li>
+<li>Availability</li>
+<li>Speed</li>
+</ul>
+<h4>Size</h4><p>Refers to the size of the data to be stored.</p>
+<h4>Duration</h4><p>Refers to the length of time for which the data should be stored.</p>
+<h4>Availability</h4><p>Refers to the relative uptime of required by the contract for retrieval of the
+stored data.</p>
+<h4>Speed</h4><p>Refers to the throughput desired for retrieval of the stored data.</p>
+<h3>Descriptors</h3><p>At the time of writing, there are 3 descriptor opcodes representing <em>low</em>,
+<em>medium</em>, and <em>high</em> degrees of the criteria.</p>
+<ul>
+<li>Low: <code>0x01</code></li>
+<li>Medium: <code>0x02</code></li>
+<li>High: <code>0x03</code></li>
+</ul>
+<p>The ranges represented by these descriptors are advisory and may change based
+on network performance and improvements to hardware over time.</p>
+<pre class="prettyprint source"><code>-------------------------------------------------------------------------------
+| Descriptor      | Size        | Duration   | Availability | Speed           |
+|-----------------|-------------|------------|--------------|-----------------|
+| Low    (`0x01`) | 0mb - 8mb   | 0d - 30d   | 0% - 50%     | 0mbps - 6mbps   |
+|-----------------|-------------|------------|--------------|-----------------|
+| Medium (`0x02`) | 8mb - 16mb  | 30d - 90d  | 50% - 80%    | 6mbps - 12mbps  |
+|-----------------|-------------|------------|--------------|-----------------|
+| High   (`0x03`) | 16mb - 32mb | 90d - 270d | 80% - 99%    | 12mbps - 32mbps |
+-------------------------------------------------------------------------------</code></pre><h3>Topic Format</h3><p>When publishing or subscribing to a given topic representing the degrees of
+these criteria, nodes must serialize the opcodes as the hex representation of
+the bytes in proper sequence. This sequence is defined as:</p>
+<pre class="prettyprint source"><code>size|duration|availability|speed</code></pre><p>To illustrate by example, we can determine the proper topic by analyzing the
+<em>use case</em> for a given file shard. For instance, if we want to store an asset
+that is displayed on a web page we can infer the following:</p>
+<ul>
+<li>The file is small</li>
+<li>The file may change often, so we should only store it for medium duration</li>
+<li>The file needs to always be available</li>
+<li>The file should be transferred quickly</li>
+</ul>
+<p>Using the matrix, we can determine the proper opcode sequence:</p>
+<pre class="prettyprint source"><code>[0x01, 0x02, 0x03, 0x03]</code></pre><p>Serialized as hex, our topic string becomes:</p>
+<pre class="prettyprint source"><code>01020303</code></pre><p>Another example, by contrast, is data <em>backup</em>. Data backup is quite different
+than the previous example:</p>
+<ul>
+<li>The file is large (perhaps part of a hard drive backup)</li>
+<li>The file will not change and should be stored long term</li>
+<li>The file will not be accessed often, if ever</li>
+<li>The file does not need to be transferred at high speed</li>
+</ul>
+<p>Using the matrix, we can determine the proper opcode sequence:</p>
+<pre class="prettyprint source"><code>[0x03, 0x03, 0x01, 0x01]</code></pre><p>Serialized as hex, our topic string becomes:</p>
+<pre class="prettyprint source"><code>03030101</code></pre><p>The resulting hex string from the serialized opcode byte sequence should be
+used as the <code>topic</code> parameter of a <code>PUBLISH</code> RPC as defined in the
+<a href="tutorial-protocol-spec.html">Protocol Specification</a>. Nodes that are subscribed to the topic will receive
+the proposed storage contract and may begin contract negotiation with you
+directly.</p>
 </article>
 
 </section>
-
-
-
 
 		</div>
 	</div>
 
 	<div class="clearfix"></div>
 
-	
-		<div class="col-md-3">
-			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
-		</div>
 	
 
 </div>

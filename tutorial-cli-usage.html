@@ -40,14 +40,14 @@
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="KeyPair.html">KeyPair</a></li><li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="Transport.html">Transport</a></li><li><a href="Proof.html">Proof</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="Verification.html">Verification</a></li>
+					<li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="Manager.html">Manager</a></li><li><a href="StorjContact.html">StorjContact</a></li><li><a href="Network.html">Network</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="Transport.html">Transport</a></li><li><a href="Proof.html">Proof</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="Verification.html">Verification</a></li>
 				</ul>
 			</li>
 			
 			<li class="dropdown">
 				<a href="tutorials.list.html" class="dropdown-toggle" data-toggle="dropdown">Tutorials<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="tutorial-cli-usage.html">Command Line Interface</a></li><li><a href="tutorial-data-channels.html">Transferring File Shards</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li>
+					<li><a href="tutorial-cli-usage.html">Command Line Interface</a></li><li><a href="tutorial-contract-topics.html">Publishing Storage Contracts</a></li><li><a href="tutorial-data-channels.html">Transferring File Shards</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li>
 				</ul>
 			</li>
 			
@@ -131,6 +131,27 @@ the program will connect to the network.</p>
 :STORJ: {info} received valid message from {&quot;address&quot;:&quot;162.243.117.41&quot;,&quot;port&quot;:4000,&quot;nodeID&quot;:&quot;f67c29e5d555c8934b75292a136f545938bd3424&quot;,&quot;lastSeen&quot;:1456424334659}</code></pre><p>You can run multiple instances by specifying a different data directory using
 the <code>--datadir</code> option. If no configuration has been created for the given
 data directory, then the setup wizard will run again.</p>
+<h3>Running in the Background</h3><p>You can run a farmer in the background using a process manager like
+<a href="https://github.com/Unitech/pm2">PM2</a>:</p>
+<pre class="prettyprint source"><code>npm install -g pm2</code></pre><p>Now you can instruct PM2 to start your farmer in the background and keep it
+running, restarting it automatically in the event that it goes down.</p>
+<pre class="prettyprint source"><code>pm2 start path/to/node-storj/bin/storj.js -- --password &lt;your_password></code></pre><p>Check the logs at any time with:</p>
+<pre class="prettyprint source"><code>pm2 logs 0</code></pre><h3>Configuring Contract Subscriptions</h3><p>By default, if you indicated during the wizard that you'd like to accept
+storage contracts from the network, <code>storj</code> will set a few common contract
+opcode sequences in your configuration file:</p>
+<pre class="prettyprint source"><code>{
+  ...
+  &quot;farmer&quot;: [
+    &quot;01020202&quot;,
+    &quot;02020202&quot;,
+    &quot;03020202&quot;
+  ],
+  ...
+}</code></pre><p>These opcodes indicate you are interested in storing shards between 0mb-32mb
+for up to 90 days at a time and that your availability and speed is average. You
+might like to tweak these settings to better suit your hardware. See
+<a href="tutorial-contract-topics.html">Publishing Storage Contracts</a> for more information on which opcodes you should
+use.</p>
 </article>
 
 </section>

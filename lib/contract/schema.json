@@ -1,8 +1,9 @@
 {
   "type": "object",
   "properties": {
-    "type": {
-      "enum": ["56ce3e837f575827cb5a94e2b609756a48fa4a3882f5e762b262af31f432878d"]
+    "version": {
+      "type": ["integer"],
+      "minimum": 0
     },
     "renter_id": {
       "type": ["string", "null"],

@@ -41,11 +41,11 @@ function createNode(farming) {
 }
 
 function createRenter() {
-  return createNode(false);
+  return createNode([]);
 }
 
 function createFarmer() {
-  return createNode(true);
+  return createNode(['01010202']);
 }
 
 var _forwardPort;

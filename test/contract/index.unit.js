@@ -76,7 +76,7 @@ describe('Contract', function() {
 
     it('should invalidate the contract specification', function() {
       expect(function() {
-        Contract({ type: -1 });
+        Contract({ version: -1 });
       }).to.throw(Error);
     });
 

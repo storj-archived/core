@@ -79,7 +79,7 @@ var network = new storj.Network({
   ],
   loglevel: 3,
   datadir: '/path/to/datadir',
-  farmer: false
+  farmer: []
 });
 
 network.join(function(err) {

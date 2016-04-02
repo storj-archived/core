@@ -51,9 +51,6 @@ network.join(function(err) {
 });
 ```
 
-Once you are connected to the network, you can store, audit, and retrieve
-arbitrary data shards. [Complete documentation can be found here](http://storj.github.io/node-storj).
-
 License
 -------
 

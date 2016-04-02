@@ -174,15 +174,15 @@ Contract.CRITERIA = {
  */
 Contract.MATRIX = {
   size: function(size) {
-    if (size > 0 &amp;&amp; size &lt;= (8 * 1024)) {
+    if (size > 0 &amp;&amp; size &lt;= (8 * 1024 * 1024)) {
       return constants.OPCODE_DEG_LOW;
     }
 
-    if (size > (8 * 1024) &amp;&amp; size &lt;= (16 * 1024)) {
+    if (size > (8 * 1024) &amp;&amp; size &lt;= (16 * 1024 * 1024)) {
       return constants.OPCODE_DEG_MED;
     }
 
-    if (size > (16 * 1024) &amp;&amp; size &lt;= (32 * 1024)) {
+    if (size > (16 * 1024) &amp;&amp; size &lt;= (32 * 1024 * 1024)) {
       return constants.OPCODE_DEG_HIGH;
     }
   },

@@ -98,22 +98,13 @@
 
 
     <section class="readme-section">
-        <article><h1>Storj JS</h1><p><a href="https://travis-ci.org/Storj/node-storj"><img src="https://img.shields.io/travis/Storj/node-storj.svg?style=flat-square" alt="Build Status"></a>
+        <article><h1><a href="http://storj.github.io/node-storj"><img src="https://avatars3.githubusercontent.com/u/6308081?v=3&amp;s=200" alt="Storj"></a></h1><p><a href="https://travis-ci.org/Storj/node-storj"><img src="https://img.shields.io/travis/Storj/node-storj.svg?style=flat-square" alt="Build Status"></a>
 <a href="https://coveralls.io/r/Storj/node-storj"><img src="https://img.shields.io/coveralls/Storj/node-storj.svg?style=flat-square" alt="Coverage Status"></a>
 <a href="https://www.npmjs.com/package/storj"><img src="https://img.shields.io/npm/v/storj.svg?style=flat-square" alt="NPM"></a></p>
-<hr>
 <p>This package exposes a module that provides all of the tools needed to
-integrate with the Storj network.</p>
-<p><a href="http://storj.github.io/node-storj/"><strong>Complete documentation can be found here.</strong></a></p>
-<h2>Quick Start</h2><p>Install Wget:</p>
-<pre class="prettyprint source"><code>apt-get install wget</code></pre><p>Install NVM, Node.js and NPM:</p>
-<pre class="prettyprint source"><code>wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.30.1/install.sh | bash
-source ~/.profile
-nvm install 4.2.3</code></pre><h3>Using the Command Line Interface</h3><p>Install <em>globally</em> as user with NPM:</p>
-<pre class="prettyprint source"><code>npm install storj --global</code></pre><p>Install <em>globally</em> as root with NPM:</p>
-<pre class="prettyprint source"><code>npm install storj --global --unsafe-perm</code></pre><h3>Using the Library</h3><p>Install <em>locally</em> as user with NPM:</p>
-<pre class="prettyprint source"><code>npm install storj --save</code></pre><p>Install <em>locally</em> as root with NPM:</p>
-<pre class="prettyprint source"><code>npm install storj --unsafe-perm --save</code></pre><p>Import the <code>storj</code> module, generate a key pair, configure your persistence
+integrate with the Storj network. <a href="http://storj.github.io/node-storj">Complete documentation can be found here</a>.</p>
+<h2>Quick Start</h2><p>Install <em>locally</em> as user with NPM:</p>
+<pre class="prettyprint source"><code>npm install storj --save</code></pre><p>Import the <code>storj</code> module, generate a key pair, configure your persistence
 layer, and join the network in just a few lines of code:</p>
 <pre class="prettyprint source"><code>var storj = require('storj');
 
@@ -133,7 +124,7 @@ var network = new storj.Network({
   ],
   loglevel: 3,
   datadir: '/path/to/datadir',
-  farmer: false
+  farmer: []
 });
 
 network.join(function(err) {
@@ -142,9 +133,7 @@ network.join(function(err) {
   }
 
   console.log('Connected to the Storj network!');
-});</code></pre><p>Once you are connected to the network, you can store, audit, and retrieve
-arbitrary data shards.</p>
-<h2>License</h2><p>Storj JS - Implementation of the Storj protocol for Node.js
+});</code></pre><h2>License</h2><p>Storj JS - Implementation of the Storj protocol for Node.js
 Copyright (C) 2016  Storj Labs, Inc</p>
 <p>This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by

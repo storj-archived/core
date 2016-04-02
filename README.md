@@ -1,4 +1,4 @@
-[![Storj](https://raw.githubusercontent.com/Storj/node-storj/master/logo.png) Storj Protocol](http://storj.github.io/node-storj)
+[![Storj](https://avatars3.githubusercontent.com/u/6308081?v=3&s=200)](http://storj.github.io/node-storj)
 ==============
 
 [![Build Status](https://img.shields.io/travis/Storj/node-storj.svg?style=flat-square)](https://travis-ci.org/Storj/node-storj)
@@ -6,51 +6,15 @@
 [![NPM](https://img.shields.io/npm/v/storj.svg?style=flat-square)](https://www.npmjs.com/package/storj)
 
 This package exposes a module that provides all of the tools needed to
-integrate with the Storj network.
+integrate with the Storj network. [Complete documentation can be found here](http://storj.github.io/node-storj).
 
 Quick Start
 -----------
-
-Install Wget:
-
-```
-apt-get install wget
-```
-
-Install NVM, Node.js and NPM:
-
-```
-wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.30.1/install.sh | bash
-source ~/.profile
-nvm install 4.2.3
-```
-
-### Using the Command Line Interface
-
-Install *globally* as user with NPM:
-
-```
-npm install storj --global
-```
-
-Install *globally* as root with NPM:
-
-```
-npm install storj --global --unsafe-perm
-```
-
-### Using the Library
 
 Install *locally* as user with NPM:
 
 ```
 npm install storj --save
-```
-
-Install *locally* as root with NPM:
-
-```
-npm install storj --unsafe-perm --save
 ```
 
 Import the `storj` module, generate a key pair, configure your persistence
@@ -88,7 +52,7 @@ network.join(function(err) {
 ```
 
 Once you are connected to the network, you can store, audit, and retrieve
-arbitrary data shards.
+arbitrary data shards. [Complete documentation can be found here](http://storj.github.io/node-storj).
 
 License
 -------

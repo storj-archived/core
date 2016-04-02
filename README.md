@@ -1,5 +1,5 @@
-Storj JS
-========
+![Storj](https://raw.githubusercontent.com/Storj/node-storj/master/logo.png) Storj Protocol
+==============
 
 [![Build Status](https://img.shields.io/travis/Storj/node-storj.svg?style=flat-square)](https://travis-ci.org/Storj/node-storj)
 [![Coverage Status](https://img.shields.io/coveralls/Storj/node-storj.svg?style=flat-square)](https://coveralls.io/r/Storj/node-storj)

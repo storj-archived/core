@@ -1,16 +1,12 @@
-![Storj](https://raw.githubusercontent.com/Storj/node-storj/master/logo.png) Storj Protocol
+[![Storj](https://raw.githubusercontent.com/Storj/node-storj/master/logo.png) Storj Protocol](http://storj.github.io/node-storj)
 ==============
 
 [![Build Status](https://img.shields.io/travis/Storj/node-storj.svg?style=flat-square)](https://travis-ci.org/Storj/node-storj)
 [![Coverage Status](https://img.shields.io/coveralls/Storj/node-storj.svg?style=flat-square)](https://coveralls.io/r/Storj/node-storj)
 [![NPM](https://img.shields.io/npm/v/storj.svg?style=flat-square)](https://www.npmjs.com/package/storj)
 
----
-
 This package exposes a module that provides all of the tools needed to
 integrate with the Storj network.
-
-[**Complete documentation can be found here.**](http://storj.github.io/node-storj/)
 
 Quick Start
 -----------

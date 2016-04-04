@@ -1,12 +1,12 @@
-[![Storj](https://avatars3.githubusercontent.com/u/6308081?v=3&s=200)](http://storj.github.io/node-storj)
+[![Storj](https://avatars3.githubusercontent.com/u/6308081?v=3&s=200)](http://storj.github.io/core)
 ==============
 
-[![Build Status](https://img.shields.io/travis/Storj/node-storj.svg?style=flat-square)](https://travis-ci.org/Storj/node-storj)
-[![Coverage Status](https://img.shields.io/coveralls/Storj/node-storj.svg?style=flat-square)](https://coveralls.io/r/Storj/node-storj)
+[![Build Status](https://img.shields.io/travis/Storj/core.svg?style=flat-square)](https://travis-ci.org/Storj/core)
+[![Coverage Status](https://img.shields.io/coveralls/Storj/core.svg?style=flat-square)](https://coveralls.io/r/Storj/core)
 [![NPM](https://img.shields.io/npm/v/storj.svg?style=flat-square)](https://www.npmjs.com/package/storj)
 
 This package exposes a module that provides all of the tools needed to
-integrate with the Storj network. [Complete documentation can be found here](http://storj.github.io/node-storj).
+integrate with the Storj network. [Complete documentation can be found here](http://storj.github.io/core).
 
 Quick Start
 -----------
@@ -54,7 +54,7 @@ network.join(function(err) {
 License
 -------
 
-Storj JS - Implementation of the Storj protocol for Node.js
+Storj Core - Implementation of the Storj protocol for Node.js
 Copyright (C) 2016  Storj Labs, Inc
 
 This program is free software: you can redistribute it and/or modify

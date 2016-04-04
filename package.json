@@ -27,7 +27,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/storj/storjnode-js.git"
+    "url": "https://github.com/storj/core.git"
   },
   "author": "Gordon Hall <gordon@gordonwritescode.com>",
   "contributors": [],

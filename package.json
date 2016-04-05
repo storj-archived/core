@@ -1,16 +1,12 @@
 {
   "name": "storj",
-  "version": "0.4.3",
+  "version": "0.5.0",
   "description": "implementation of the storj protocol for node.js and the browser",
   "main": "index.js",
   "directories": {
     "test": "test",
     "lib": "lib",
-    "doc": "doc",
-    "example": "example"
-  },
-  "bin": {
-    "storj": "bin/storj.js"
+    "doc": "doc"
   },
   "scripts": {
     "test": "npm run testsuite && npm run linter",
@@ -40,9 +36,6 @@
     "bitcore-ecies": "^1.0.1",
     "bitcore-lib": "^0.13.12",
     "bitcore-message": "^1.0.2",
-    "bs58": "^3.0.0",
-    "colors": "^1.1.2",
-    "commander": "^2.9.0",
     "ip": "^1.1.2",
     "jsen": "^0.6.0",
     "json-stable-stringify": "^1.0.1",
@@ -53,7 +46,6 @@
     "ms": "^0.7.1",
     "mtree": "^0.0.1",
     "nat-upnp": "^1.0.0",
-    "prompt": "^1.0.0",
     "readable-stream": "^2.0.6",
     "semver": "^5.1.0",
     "ws": "^1.0.1"

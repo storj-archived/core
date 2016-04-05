@@ -2,13 +2,13 @@
   "protocol-spec": {
     "title": "Protocol Specification"
   },
-  "cli-usage": {
-    "title": "Command Line Interface"
-  },
   "data-channels": {
     "title": "Transferring File Shards"
   },
   "contract-topics": {
     "title": "Publishing Storage Contracts"
+  },
+  "private-testnet": {
+    "title": "Running a Test Network"
   }
 }

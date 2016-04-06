@@ -84,7 +84,51 @@
 </header>
 
 <article>
-    <p>TODO</p>
+    <p>Setting up a private or partitioned version of the Storj network is very simple.
+The Storj protocol requires the inclusion of a <code>protocol</code> property nested
+inside the <code>contact</code> data included in every RPC message. See
+<a href="tutorial-protocol-spec.html">Protocol Specification</a> for more information on the RPC message format.</p>
+<h3>Protocol Identifier Format</h3><p>Nodes on the Storj network identify the version of the protocol they are
+running with the use of a <a href="http://semver.org/">semantic version</a> tag. When a
+node is trying to determine whether or not another node is compatible with her
+version of the protocol, she checks the following:</p>
+<ul>
+<li>Is the <code>MAJOR</code> version the same?</li>
+<li>Is the <code>MAJOR</code> version <code>0</code>?</li>
+<li>Is the <code>MINOR</code> version the same?</li>
+</ul>
+<p>If both nodes are running the <em>same</em> <code>MAJOR</code> version and that version is
+<strong>not</strong> <code>0</code>, then the nodes are compatible. If the <code>MAJOR</code> version <strong>is</strong> <code>0</code>,
+then the nodes are compatible <em>only</em> if the <code>MINOR</code> version is the same.</p>
+<p>For example:</p>
+<ul>
+<li><code>0.5.1</code> <strong>is</strong> compatible with <code>0.5.3</code></li>
+<li><code>0.5.1</code> <strong>is not</strong> compatible with <code>0.6.0</code></li>
+<li><code>1.5.1</code> <strong>is</strong> compatible with <code>1.13.0</code></li>
+<li><code>2.1.0</code> <strong>is not</strong> compatible with <code>1.13.0</code></li>
+</ul>
+<h3>Special Identifiers</h3><p>The semantic versions specification also allows for special identifiers by
+postfixing the version with a hyphen followed by some identifier. This is where
+the network partitioning magic happens.</p>
+<p>Let's say, for example, I work for &quot;Widgets Ltd&quot; and I want to deploy a Storj
+network within the Widgets Ltd private network. Every workstation would run a
+modified version of <a href="https://github.com/storj/farmer"><code>storj/farmer</code></a> or maybe
+my own custom interface built atop <code>storj/core</code>.</p>
+<p>I would simply change my Storj-based software to use the version
+<code>1.5.0-widgetsltd</code>. The Storj protocol sees this identifies as a <em>strict</em> match
+and therefore any nodes running this version of the software will only
+communicate with nodes running the <strong>exact</strong> protocol identifier.</p>
+<h3>Changing the Version</h3><p>Changing the version in <code>storj/core</code> is easy as pie. In your code, simply
+import the module and change the identifier like so:</p>
+<pre class="prettyprint source"><code>// Import core library
+var storj = require('storj');
+
+// Modify protocol version
+storj.version = '1.5.0-widgetsltd';
+
+// Get on with your stuff...</code></pre><p>This concept applies broadly to deploying a custom Storj network for any
+purpose. This could be used for a public testnet (<code>x.x.x-testnet</code>) or for the
+private network example above.</p>
 </article>
 
 </section>

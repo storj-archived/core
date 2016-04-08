@@ -65,3 +65,14 @@ module.exports.abstract = require('./lib/abstract');
 
 /** {@link extensions} */
 module.exports.extensions = require('./lib/extensions');
+
+/** Expose Module Dependencies */
+module.exports.dependencies = (function() {
+  var deps = {};
+
+  Object.keys(require('./package').dependencies).forEach(function(name) {
+    deps[name] = require(name);
+  });
+
+  return deps;
+})();

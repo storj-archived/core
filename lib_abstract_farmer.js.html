@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Storj JS Index</title>
+	<title>Storj JS Source: lib/abstract/farmer.js</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -72,83 +72,148 @@
 <div class="row">
 
 	
-	<div class="col-md-8">
+	<div class="col-md-12">
 	
 		<div id="main">
 			
 
-	
-	
+		<h1 class="page-title">Source: lib/abstract/farmer.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">'use strict';
 
+var merge = require('merge');
+var assert = require('assert');
+var storj = require('../..');
+var portastic = require('portastic');
+var JSONLogger = require('kad-logger-json');
+var TelemetryReporter = require('../extensions/telemetry');
 
+/**
+ * Called after initializing a farmer instance
+ * @callback FarmerFactory~createCallback
+ * @param {Error|null} err - Error during farmer initialization, if any
+ * @param {Object} farmer
+ * @param {Object} farmer.node
+ * @param {Object} farmer.logger
+ * @param {TelemetryReporter|null} farmer.reporter
+ */
 
+/**
+ * Creates and a new farmer factory
+ * @constructor
+ */
+function FarmerFactory(config, callback) {
+  if (!(this instanceof FarmerFactory)) {
+    return new FarmerFactory(config, callback);
+  }
+}
 
+FarmerFactory.PORT_RANGE = { min: 49152, max: 65535 };
 
-
-
-
-
-
-
-	
-	
-
-
-
-
-
-    <section class="readme-section">
-        <article><h1><a href="http://storj.github.io/core"><img src="https://avatars3.githubusercontent.com/u/6308081?v=3&amp;s=200" alt="Storj"></a></h1><p><a href="https://travis-ci.org/Storj/core"><img src="https://img.shields.io/travis/Storj/core.svg?style=flat-square" alt="Build Status"></a>
-<a href="https://coveralls.io/r/Storj/core"><img src="https://img.shields.io/coveralls/Storj/core.svg?style=flat-square" alt="Coverage Status"></a>
-<a href="https://www.npmjs.com/package/storj"><img src="https://img.shields.io/npm/v/storj.svg?style=flat-square" alt="NPM"></a></p>
-<p>This package exposes a module that provides all of the tools needed to
-integrate with the Storj network. <a href="http://storj.github.io/core">Complete documentation can be found here</a>.</p>
-<h2>Quick Start</h2><p>Install <em>locally</em> as user with NPM:</p>
-<pre class="prettyprint source"><code>npm install storj --save</code></pre><p>Import the <code>storj</code> module, generate a key pair, configure your persistence
-layer, and join the network in just a few lines of code:</p>
-<pre class="prettyprint source"><code>var storj = require('storj');
-
-var keypair = new storj.KeyPair(/* existing_key */);
-var store = new storj.FSStorageAdapter('/path/to/datadir');
-var manager = new storj.Manager(store);
-
-var network = new storj.Network({
-  keypair: keypair,
-  manager: manager,
-  contact: {
-    address: 'ip.or.hostname',
-    port: 4000
+FarmerFactory.DEFAULTS = {
+  key: null,
+  address: null,
+  storage: {
+    path: '/tmp/storj-farmer',
+    size: 5,
+    unit: 'MB'
   },
-  seeds: [
-    'storj://api.metadisk.org:8443/593844dc7f0076a1aeda9a6b9788af17e67c1052'
-  ],
-  loglevel: 3,
-  datadir: '/path/to/datadir',
-  farmer: []
-});
+  network: {
+    address: '127.0.0.1',
+    port: 0,
+    seeds: [
+      'storj://api.metadisk.org:8443/593844dc7f0076a1aeda9a6b9788af17e67c1052'
+    ],
+    opcodes: ['01020202', '02020202', '03020202'],
+    version: storj.version,
+    forward: true
+  },
+  telemetry: {
+    service: 'https://status.storj.io',
+    enabled: false
+  }
+};
 
-network.join(function(err) {
-  if (err) {
-    return console.log('Failed to join network, reason: %s', err.message);
+/**
+ * Creates and initializes a new farmer
+ * @param {Object}  config
+ * @param {String}  config.key - ECDSA private key for farmer node
+ * @param {String}  config.address - BTC payment address
+ * @param {Object}  config.storage
+ * @param {String}  config.storage.path - File system path to store data
+ * @param {Number}  config.storage.size - Storage size to allocate
+ * @param {String}  config.storage.unit - Storage size unit (MB|GB|TB)
+ * @param {Object}  config.network
+ * @param {String}  config.network.address - Optional network address to bind to
+ * @param {Array}   config.network.seeds   - Optional Storj URIs to connect to
+ * @param {Array}   config.network.opcodes - Optional contract opcodes to farm
+ * @param {Array}   config.network.version - Optional protocol version override
+ * @param {Boolean} config.network.forward - Try NAT traversal strategies
+ * @param {FarmerFactory~createCallback} callback
+ */
+FarmerFactory.prototype.create = function(config, callback) {
+  assert.ok(config, 'No configuration was supplied');
+
+  var farmerconf = merge.recursive(
+    Object.create(FarmerFactory.DEFAULTS),
+    config
+  );
+
+  assert.ok(farmerconf.storage, 'No storage configuration supplied');
+  assert.ok(farmerconf.storage.path, 'Storage path does not exist');
+  assert.ok(farmerconf.storage.size, 'No storage size supplied');
+
+  var keypair = storj.KeyPair(farmerconf.key);
+  var store = storj.FSStorageAdapter(farmerconf.storage.path);
+  var manager = storj.Manager(store);
+  var reporter = null;
+
+  if (farmerconf.network.version !== storj.version) {
+    storj.version = farmerconf.network.version;
   }
 
-  console.log('Connected to the Storj network!');
-});</code></pre><h2>License</h2><p>Storj Core - Implementation of the Storj protocol for Node.js
-Copyright (C) 2016  Storj Labs, Inc</p>
-<p>This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.</p>
-<p>This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.</p>
-<p>You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see
-<a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.</p></article>
-    </section>
+  if (farmerconf.telemetry.enabled) {
+    assert.ok(farmerconf.address, 'No payout address supplied for telemetry');
+    reporter = new TelemetryReporter(farmerconf.telemetry.service, keypair);
+  }
 
+  function setup(ports) {
+    var logger = new JSONLogger();
+    var farmer = storj.Network({
+      keypair: keypair,
+      manager: manager,
+      contact: {
+        address: farmerconf.network.address,
+        port: ports.pop()
+      },
+      seeds: farmerconf.network.seeds,
+      logger: logger,
+      datadir: farmerconf.storage.path,
+      farmer: farmerconf.network.opcodes,
+      noforward: !farmerconf.network.forward
+    });
 
+    callback(null, {
+      node: farmer,
+      logger: logger,
+      reporter: reporter
+    });
+  }
+
+  if (farmerconf.network.port === 0) {
+    portastic.find(FarmerFactory.PORT_RANGE).then(setup, callback);
+  } else {
+    setup([farmerconf.network.port]);
+  }
+};
+
+module.exports = FarmerFactory;
+</pre>
+    </article>
+</section>
 
 
 
@@ -159,10 +224,6 @@ along with this program.  If not, see
 
 	<div class="clearfix"></div>
 
-	
-		<div class="col-md-3">
-			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
-		</div>
 	
 
 </div>

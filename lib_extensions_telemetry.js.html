@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Storj JS Index</title>
+	<title>Storj JS Source: lib/extensions/telemetry.js</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -72,83 +72,211 @@
 <div class="row">
 
 	
-	<div class="col-md-8">
+	<div class="col-md-12">
 	
 		<div id="main">
 			
 
-	
-	
+		<h1 class="page-title">Source: lib/extensions/telemetry.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">'use strict';
 
+var KeyPair = require('../keypair');
+var request = require('request');
+var stringify = require('json-stable-stringify');
+var Message = require('bitcore-message');
+var bitcore = require('bitcore-lib');
+var ECIES = require('bitcore-ecies');
+var crypto = require('crypto');
+var assert = require('assert');
+var JSONSchema = require('jsen');
 
-
-
-
-
-
-
-
-
-
-	
-	
-
-
-
-
-
-    <section class="readme-section">
-        <article><h1><a href="http://storj.github.io/core"><img src="https://avatars3.githubusercontent.com/u/6308081?v=3&amp;s=200" alt="Storj"></a></h1><p><a href="https://travis-ci.org/Storj/core"><img src="https://img.shields.io/travis/Storj/core.svg?style=flat-square" alt="Build Status"></a>
-<a href="https://coveralls.io/r/Storj/core"><img src="https://img.shields.io/coveralls/Storj/core.svg?style=flat-square" alt="Coverage Status"></a>
-<a href="https://www.npmjs.com/package/storj"><img src="https://img.shields.io/npm/v/storj.svg?style=flat-square" alt="NPM"></a></p>
-<p>This package exposes a module that provides all of the tools needed to
-integrate with the Storj network. <a href="http://storj.github.io/core">Complete documentation can be found here</a>.</p>
-<h2>Quick Start</h2><p>Install <em>locally</em> as user with NPM:</p>
-<pre class="prettyprint source"><code>npm install storj --save</code></pre><p>Import the <code>storj</code> module, generate a key pair, configure your persistence
-layer, and join the network in just a few lines of code:</p>
-<pre class="prettyprint source"><code>var storj = require('storj');
-
-var keypair = new storj.KeyPair(/* existing_key */);
-var store = new storj.FSStorageAdapter('/path/to/datadir');
-var manager = new storj.Manager(store);
-
-var network = new storj.Network({
-  keypair: keypair,
-  manager: manager,
-  contact: {
-    address: 'ip.or.hostname',
-    port: 4000
-  },
-  seeds: [
-    'storj://api.metadisk.org:8443/593844dc7f0076a1aeda9a6b9788af17e67c1052'
-  ],
-  loglevel: 3,
-  datadir: '/path/to/datadir',
-  farmer: []
-});
-
-network.join(function(err) {
-  if (err) {
-    return console.log('Failed to join network, reason: %s', err.message);
+/**
+ * Interface for sending telemetry data to Storj
+ * @constructor
+ * @param {String} serviceURI
+ * @param {KeyPair}
+ */
+function TelemetryReporter(serviceURI, keypair) {
+  if (!(this instanceof TelemetryReporter)) {
+    return new TelemetryReporter(serviceURI, keypair);
   }
 
-  console.log('Connected to the Storj network!');
-});</code></pre><h2>License</h2><p>Storj Core - Implementation of the Storj protocol for Node.js
-Copyright (C) 2016  Storj Labs, Inc</p>
-<p>This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.</p>
-<p>This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.</p>
-<p>You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see
-<a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.</p></article>
-    </section>
+  assert(typeof serviceURI === 'string', 'Invalid service URI supplied');
+  assert(keypair instanceof KeyPair, 'Invalid keypair supplied');
 
+  this._service = serviceURI;
+  this._keypair = keypair;
 
+  this._cipher = ECIES().privateKey(
+    this._keypair._privkey
+  ).publicKey(
+    bitcore.PublicKey.fromDER(TelemetryReporter.SERVICE_KEY)
+  );
+}
+
+/**
+ * Telemetry service public key
+ * @static
+ */
+TelemetryReporter.SERVICE_KEY = Buffer(
+  '028370c3f05161c2e05bb31068932b0797f8c56f6adf5e13bb731698486f0c58d3', 'hex'
+);
+
+/**
+ * Telemetry report schema
+ * @static
+ */
+TelemetryReporter.SCHEMA = JSONSchema({
+  type: 'object',
+  properties: {
+    storage: {
+      type: 'object',
+      properties: {
+        free: {
+          type: ['integer']
+        },
+        used: {
+          type: ['integer']
+        }
+      }
+    },
+    bandwidth: {
+      type: 'object',
+      properties: {
+        upload: {
+          type: ['number']
+        },
+        download: {
+          type: ['number']
+        }
+      }
+    },
+    contact: {
+      type: 'object',
+      properties: {
+        protocol: {
+          type: ['string']
+        },
+        address: {
+          type: ['string']
+        },
+        port: {
+          type: ['integer']
+        },
+        nodeID: {
+          type: ['string']
+        }
+      }
+    },
+    payment: {
+      type: ['string']
+    },
+    signature: {
+      type: ['string']
+    },
+    timestamp: {
+      type: ['integer']
+    }
+  }
+});
+
+/**
+ * Generate a random message ID
+ * @private
+ */
+TelemetryReporter.prototype._createMessageId = function() {
+  return crypto.randomBytes(16).toString('hex');
+};
+
+/**
+ * Signs the telemetry report
+ * @private
+ * @param {Object} report
+ * @return {Object}
+ */
+TelemetryReporter.prototype._addSignatureToReport = function(report) {
+  report.signature = Message(
+    stringify(report)
+  ).sign(this._keypair._privkey);
+
+  return report;
+};
+
+/**
+ * Adds a timestamp to the telemetry report
+ * @private
+ * @param {Object} report
+ * @return {Object}
+ */
+TelemetryReporter.prototype._addTimestampToReport = function(report) {
+  report.timestamp = Date.now();
+
+  return report;
+};
+
+/**
+ * Encrypts the payment address to the service public key
+ * @private
+ * @param {Object} report
+ * @return {Object}
+ */
+TelemetryReporter.prototype._encryptPaymentAddress = function(report) {
+  report.payment = this._cipher.encrypt(report.payment).toString('base64');
+
+  return report;
+};
+
+/**
+ * Send telemetry report
+ * @param {Object} report
+ * @param {Function} callback
+ */
+TelemetryReporter.prototype.send = function(report, callback) {
+  report = this._addTimestampToReport(report);
+  report = this._encryptPaymentAddress(report);
+  report = this._addSignatureToReport(report);
+
+  if (!TelemetryReporter.SCHEMA(report)) {
+    return callback(new Error('Invalid report supplied'));
+  }
+
+  var options = {
+    method: 'POST',
+    uri: this._service,
+    json: {
+      method: 'REPORT',
+      id: this._createMessageId(),
+      params: report
+    }
+  };
+
+  function handleResponse(err, res, body) {
+    if (err) {
+      return callback(err);
+    }
+
+    if (res.statusCode !== 200) {
+      if (!body || !body.error) {
+        return callback(new Error('Unknown error response'));
+      }
+
+      return callback(new Error(body.error.message));
+    }
+
+    callback(null, body.result);
+  }
+
+  return request(options, handleResponse);
+};
+
+module.exports = TelemetryReporter;
+</pre>
+    </article>
+</section>
 
 
 
@@ -159,10 +287,6 @@ along with this program.  If not, see
 
 	<div class="clearfix"></div>
 
-	
-		<div class="col-md-3">
-			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
-		</div>
 	
 
 </div>

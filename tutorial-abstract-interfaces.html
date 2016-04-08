@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Storj JS Index</title>
+	<title>Storj JS Tutorial: Abstract Interfaces</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -72,97 +72,52 @@
 <div class="row">
 
 	
-	<div class="col-md-8">
+	<div class="col-md-12">
 	
 		<div id="main">
-			
+			<section class="tutorial-section">
 
-	
-	
+<header>
+    
 
+    <h2>Abstract Interfaces</h2>
+</header>
 
-
-
-
-
-
-
-
-
-
-	
-	
-
-
-
-
-
-    <section class="readme-section">
-        <article><h1><a href="http://storj.github.io/core"><img src="https://avatars3.githubusercontent.com/u/6308081?v=3&amp;s=200" alt="Storj"></a></h1><p><a href="https://travis-ci.org/Storj/core"><img src="https://img.shields.io/travis/Storj/core.svg?style=flat-square" alt="Build Status"></a>
-<a href="https://coveralls.io/r/Storj/core"><img src="https://img.shields.io/coveralls/Storj/core.svg?style=flat-square" alt="Coverage Status"></a>
-<a href="https://www.npmjs.com/package/storj"><img src="https://img.shields.io/npm/v/storj.svg?style=flat-square" alt="NPM"></a></p>
-<p>This package exposes a module that provides all of the tools needed to
-integrate with the Storj network. <a href="http://storj.github.io/core">Complete documentation can be found here</a>.</p>
-<h2>Quick Start</h2><p>Install <em>locally</em> as user with NPM:</p>
-<pre class="prettyprint source"><code>npm install storj --save</code></pre><p>Import the <code>storj</code> module, generate a key pair, configure your persistence
-layer, and join the network in just a few lines of code:</p>
+<article>
+    <p>The <code>storj.abstract</code> module provides a collection of abstract interfaces for
+implementing common use cases.</p>
+<h3>Farmer</h3><p>Use the <code>FarmerFactory</code> to create a farmer from configuration:</p>
 <pre class="prettyprint source"><code>var storj = require('storj');
+var factory = new storj.abstract.FarmerFactory();
 
-var keypair = new storj.KeyPair(/* existing_key */);
-var store = new storj.FSStorageAdapter('/path/to/datadir');
-var manager = new storj.Manager(store);
+factory.create(config, function(err, farmer) {
+  // NB: The `farmer` object contains three properties:
+  // NB:   * node     - {storj.Network}          Storj network Interface
+  // NB:   * logger   - {ReadableStream}         Newline terminated JSON stream
+  // NB:   * reporter - {TelemetryReporter|null} Send usage statistics for beta
+});</code></pre><h4>Configuration</h4><p>The <a href="FarmerFactory.html#create">FarmerFactory#create</a> method accepts a dictionary with the following
+accepted properties:</p>
+<ul>
+<li><code>{String} key</code> - ECDSA private key for farmer node</li>
+<li><code>{String} address</code> - BTC payment address</li>
+<li><code>{String} storage.path</code> - File system path to store data</li>
+<li><code>{Number} storage.size</code> - Storage size to allocate</li>
+<li><code>{String} storage.unit</code> - Storage size unit (MB|GB|TB)</li>
+<li><code>{String} network.address</code> - Optional network address to bind to</li>
+<li><code>{Array} network.seeds</code>   - Optional Storj URIs to connect to</li>
+<li><code>{Array} network.opcodes</code> - Optional contract opcodes to farm</li>
+<li><code>{Array} network.version</code> - Optional protocol version override</li>
+<li><code>{Boolean} network.forward</code> - Try NAT traversal strategies</li>
+</ul>
+</article>
 
-var network = new storj.Network({
-  keypair: keypair,
-  manager: manager,
-  contact: {
-    address: 'ip.or.hostname',
-    port: 4000
-  },
-  seeds: [
-    'storj://api.metadisk.org:8443/593844dc7f0076a1aeda9a6b9788af17e67c1052'
-  ],
-  loglevel: 3,
-  datadir: '/path/to/datadir',
-  farmer: []
-});
-
-network.join(function(err) {
-  if (err) {
-    return console.log('Failed to join network, reason: %s', err.message);
-  }
-
-  console.log('Connected to the Storj network!');
-});</code></pre><h2>License</h2><p>Storj Core - Implementation of the Storj protocol for Node.js
-Copyright (C) 2016  Storj Labs, Inc</p>
-<p>This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.</p>
-<p>This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.</p>
-<p>You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see
-<a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.</p></article>
-    </section>
-
-
-
-
-
-
+</section>
 
 		</div>
 	</div>
 
 	<div class="clearfix"></div>
 
-	
-		<div class="col-md-3">
-			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
-		</div>
 	
 
 </div>

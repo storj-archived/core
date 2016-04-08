@@ -59,3 +59,9 @@ module.exports.constants = require('./lib/constants');
 
 /** {@link utils} */
 module.exports.utils = require('./lib/utils');
+
+/** {@link abstract} */
+module.exports.abstract = require('./lib/abstract');
+
+/** {@link extensions} */
+module.exports.extensions = require('./lib/extensions');

@@ -14,7 +14,7 @@ var storj = require('../../');
 var NODE_LIST = [];
 var STARTING_PORT = 65535;
 
-function createNode(farming) {
+function createNode(opcodes) {
   var kp = new storj.KeyPair();
   var manager = new storj.Manager(new storj.RAMStorageAdapter());
   var datadir = path.join(os.tmpdir(), kp.getNodeID());
@@ -29,7 +29,7 @@ function createNode(farming) {
     seeds: NODE_LIST.length ? [NODE_LIST[0]] : NODE_LIST,
     datadir: datadir,
     contact: contact,
-    farmer: farming,
+    opcodes: opcodes,
     noforward: true
   });
 
@@ -45,7 +45,7 @@ function createRenter() {
 }
 
 function createFarmer() {
-  return createNode(['01010202']);
+  return createNode(['0f01010202']);
 }
 
 var _forwardPort;

@@ -13,5 +13,8 @@
   },
   "abstract-interfaces": {
     "title": "Abstract Interfaces"
+  },
+  "tunnel-connections": {
+    "title": "Tunnelling Connections"
   }
 }

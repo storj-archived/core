@@ -142,7 +142,7 @@ The `PROBE` RPC message triggers the recipient to attempt to reach the
 supplied {@link Contact} directly by sending a `PING` RPC message. If the
 target {@link Contact} reponds to the `PING`, then the `PROBE` should yield
 a success response, which is indicated by simply responding to the RPC
-message with only the required parameters and now `error` property.
+message with only the required parameters and **no** `error` property.
 
 ```
 {

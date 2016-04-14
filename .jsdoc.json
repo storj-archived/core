@@ -3,12 +3,12 @@
     "template": "node_modules/ink-docstrap/template"
   },
   "templates": {
-    "systemName": "Storj JS",
+    "systemName": "StorjCORE",
     "copyright":  "Copyright 2016 Storj Labs",
     "includeDate": false,
     "navType": "vertical",
     "theme": "cosmo",
-    "linenums": true,
+    "linenums": false,
     "collapseSymbols": false,
     "inverseNav": true,
     "outputSourceFiles": true,

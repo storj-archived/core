@@ -24,6 +24,21 @@ module.exports.DataChannelServer = require('./lib/datachannel/server');
 /** {@link Protocol} */
 module.exports.Protocol = require('./lib/network/protocol');
 
+/** {@link Tunnel} */
+module.exports.Tunnel = require('./lib/tunnel');
+
+/** {@link Tunnel} */
+module.exports.TunnelMultiplexer = require('./lib/tunnel/multiplexer');
+
+/** {@link TunnelClient} */
+module.exports.TunnelClient = require('./lib/tunnel/client');
+
+/** {@link EncryptStream} */
+module.exports.EncryptStream = require('./lib/cryptostream/encrypt');
+
+/** {@link DecryptStream} */
+module.exports.DecryptStream = require('./lib/cryptostream/decrypt');
+
 /** {@link Contract} */
 module.exports.Contract = require('./lib/contract');
 

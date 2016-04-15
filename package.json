@@ -58,12 +58,13 @@
     "chai": "^2.2.0",
     "coveralls": "^2.11.2",
     "gh-pages": "^0.9.0",
+    "ink-docstrap": "^1.1.2",
     "istanbul": "^0.3.13",
     "jsdoc": "^3.4.0",
     "jshint": "2.8.0",
     "mocha": "^2.2.4",
+    "noisegen": "^1.0.0",
     "proxyquire": "^1.7.3",
-    "sinon": "^1.14.1",
-    "ink-docstrap": "^1.1.2"
+    "sinon": "^1.14.1"
   }
 }

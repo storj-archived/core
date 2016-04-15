@@ -308,12 +308,10 @@ information for the new entry point through which data will enter the tunnel.
 ```
 {
   "result": {
-    "tunnel": "ws://10.0.0.3:1337/tun/2bfb23f98e72",
+    "tunnel": "ws://10.0.0.3:1337/tun?token=2bfb23f98e72",
     "alias": {
       "address": "10.0.0.3",
-      "port": 1338,
-      "nodeID": "48dc026fa01ae26822bfb23f98e725444d6775b0",
-      "protocol": "0.6.0"
+      "port": 1338
     },
     "contact": {
       "address": "10.0.0.3",
@@ -558,7 +556,7 @@ information on how to choose a valid contract type for your storage needs.
   "method": "PUBLISH",
   "params": {
     "uuid": "7f0c40a2-e465-4f3e-b617-3d53460e34f7",
-    "topic": "02010303",
+    "topic": "0f02010303",
     "contents": {
       "type": "56ce3e837f575827cb5a94e2b609756a48fa4a3882f5e762b262af31f432878d",
       "renter_id": "48dc026fa01ae26822bfb23f98e725444d6775b0",

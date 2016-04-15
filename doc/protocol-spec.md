@@ -147,7 +147,6 @@ message with only the required parameters and **no** `error` property.
 ```
 {
   "result": {
-
     "contact": {
       "address": "10.0.0.3",
       "port": 1337,
@@ -161,7 +160,7 @@ message with only the required parameters and **no** `error` property.
 }
 ```
 
-If the `PING` message triggered by the `PROBE` fails, the the recipient of the
+If the `PING` message triggered by the `PROBE` fails, then the recipient of the
 `PROBE` RPC must respond with an error indicating to the sender that she is not
 addressable.
 
@@ -196,7 +195,7 @@ maintain a record of known nodes that are willing to tunnel, by subscribing to
 "tunnel announcements" over the publish/subscribe system.
 
 > For more information on how nodes announce willingness to tunnel, see the
-> documentation for {@tutorial tunnel-topics}.
+> documentation for {@tutorial tunnel-connections}.
 
 ```
 {

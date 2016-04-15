@@ -32,7 +32,7 @@ publish/subscribe system described in the {@tutorial contract-topics}
 specification which enables nodes to maintain a view of subscriptions in their
 neighborhood of the network as described in the {@tutorial protocol-spec}.
 
-The difference between an contract publication and a tunnel announcement is in
+The difference between a contract publication and a tunnel announcement is in
 the opcode used for the topic and in the contents of the publication. Tunnel
 announcement publications use the opcode prefix `0x0e` followed by a single
 criteria degree opcode to indicate their willingness to tunnel (`0x00` to
@@ -143,7 +143,7 @@ tunnel.addEventListener('message', function(e) {
 Once the WebSocket tunnel has been opened and authorized, both the private node
 and the tunneling node have a bidirectional communication channel. RPC messages
 received by the tunnel to the dedicated entry point will be written to the
-tunnel and must be handled by the private node. RPC messages are send with the
+tunnel and must be handled by the private node. RPC messages are sent with the
 WebSocket opcode `0x1` (textual) and must be parsed by the private node and
 then handled as if it were received directly.
 

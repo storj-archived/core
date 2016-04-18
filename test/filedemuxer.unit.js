@@ -10,13 +10,25 @@ describe('FileDemuxer', function() {
   describe('@constructor', function() {
 
     it('should create an instance with the new keyword', function() {
-      expect(new FileDemuxer(2, 10)).to.be.instanceOf(FileDemuxer);
-      expect(new FileDemuxer(2, 10)).to.be.instanceOf(stream.Writable);
+      expect(new FileDemuxer({
+        shards: 2,
+        length: 10
+      })).to.be.instanceOf(FileDemuxer);
+      expect(new FileDemuxer({
+        shards: 2,
+        length: 10
+      })).to.be.instanceOf(stream.Writable);
     });
 
     it('should create an instance without the new keyword', function() {
-      expect(FileDemuxer(2, 10)).to.be.instanceOf(FileDemuxer);
-      expect(FileDemuxer(2, 10)).to.be.instanceOf(stream.Writable);
+      expect(FileDemuxer({
+        shards: 2, 
+        length: 10 
+      })).to.be.instanceOf(FileDemuxer);
+      expect(FileDemuxer({
+        shards: 2, 
+        length: 10 
+      })).to.be.instanceOf(stream.Writable);
     });
 
   });
@@ -25,7 +37,7 @@ describe('FileDemuxer', function() {
 
     it('should correctly demux the even file stream', function(done) {
       var randomio = noisegen({ length: 4096 });
-      var dmx = new FileDemuxer(8, 4096);
+      var dmx = new FileDemuxer({ shards: 8, length: 4096 });
       var shards = 0;
 
       dmx.on('shard', function(shard) {
@@ -50,7 +62,7 @@ describe('FileDemuxer', function() {
 
     it('should correctly demux the odd file stream', function(done) {
       var randomio = noisegen({ length: 2512 });
-      var dmx = new FileDemuxer(11, 2512);
+      var dmx = new FileDemuxer({ shards: 11, length: 2512 });
       var shards = 0;
 
       dmx.on('shard', function(shard) {

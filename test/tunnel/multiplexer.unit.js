@@ -31,10 +31,10 @@ describe('TunnelMuxer', function() {
 
   });
 
-  describe('#read', function() {
+  describe('#transform', function() {
 
     var gateway = new TunnelGateway();
-    var tmuxer = new TunnelMuxer(gateway);
+    var tmuxer = new TunnelMuxer();
 
     tmuxer.source(gateway);
 
@@ -104,10 +104,10 @@ describe('TunnelMuxer', function() {
     });
 
     it('should emit an error when invlid data written', function(done) {
-      tmuxer.on('error', function(err) {
+      tmuxer.once('error', function(err) {
         expect(err.message).to.equal('Invalid input for tunnel muxing');
         done();
-      }).write({ somthing: 'wrong' });
+      }).write({ something: 'wrong' });
     });
 
   });

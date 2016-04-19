@@ -144,14 +144,18 @@ Once the WebSocket tunnel has been opened and authorized, both the private node
 and the tunneling node have a bidirectional communication channel. RPC messages
 received by the tunnel to the dedicated entry point will be written to the
 tunnel and must be handled by the private node. RPC messages are sent with the
-WebSocket opcode `0x1` (textual) and must be parsed by the private node and
+WebSocket opcode `0x2` (binary) and must be parsed by the private node and
 then handled as if it were received directly.
+
+The binary chunk representing the RPC message must be prefixed with a special
+opcode (`0x0c`) indicating that it should be demuxed and handled as an RPC
+message.
 
 Once the tunneled message has been appropriately handled, the private node can
 instruct the tunnel to respond to the request by simply writing it's response
-message back to the tunnel using the same WebSocket opcode `0x1` (textual). The
-tunneling node must parse the message and issue a response back to the
-originator of the message.
+message back to the tunnel using the same WebSocket opcode `0x2` (binary) with
+the appropriate `0x0c` prefix. The tunneling node must parse the message and
+issue a response back to the originator of the message.
 
 ### Tunneled Shard Transfer
 

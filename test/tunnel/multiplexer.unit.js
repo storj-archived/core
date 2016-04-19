@@ -12,17 +12,21 @@ describe('TunnelMuxer', function() {
   describe('@constructor', function() {
 
     it('should create an instance without the new keyword', function() {
-      expect(TunnelMuxer(TunnelGateway())).to.be.instanceOf(TunnelMuxer);
+      expect(TunnelMuxer()).to.be.instanceOf(TunnelMuxer);
     });
 
     it('should create an instance with the new keyword', function() {
-      expect(new TunnelMuxer(TunnelGateway())).to.be.instanceOf(TunnelMuxer);
+      expect(new TunnelMuxer()).to.be.instanceOf(TunnelMuxer);
     });
 
-    it('should not create an instance without a valid gateway', function() {
+  });
+
+  describe('#source', function() {
+
+    it('should not accept an invalid source', function() {
       expect(function() {
-        TunnelMuxer({});
-      }).to.throw(Error, 'Invalid gateway object supplied');
+        TunnelMuxer().source({});
+      }).to.throw(Error, 'Source must be a tunnel gateway or client');
     });
 
   });
@@ -31,6 +35,8 @@ describe('TunnelMuxer', function() {
 
     var gateway = new TunnelGateway();
     var tmuxer = new TunnelMuxer(gateway);
+
+    tmuxer.source(gateway);
 
     it('should read the correct format for RPC messages', function(done) {
       var time = Date.now();
@@ -95,6 +101,13 @@ describe('TunnelMuxer', function() {
         binary: true,
         quid: quid.toString('hex')
       });
+    });
+
+    it('should emit an error when invlid data written', function(done) {
+      tmuxer.on('error', function(err) {
+        expect(err.message).to.equal('Invalid input for tunnel muxing');
+        done();
+      }).write({ somthing: 'wrong' });
     });
 
   });

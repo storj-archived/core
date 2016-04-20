@@ -21,16 +21,6 @@ describe('TunnelMuxer', function() {
 
   });
 
-  describe('#source', function() {
-
-    it('should not accept an invalid source', function() {
-      expect(function() {
-        TunnelMuxer().source({});
-      }).to.throw(Error, 'Source must be a tunnel gateway or client');
-    });
-
-  });
-
   describe('#transform', function() {
 
     var gateway = new TunnelGateway();

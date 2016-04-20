@@ -11,9 +11,6 @@
   "private-testnet": {
     "title": "Running a Test Network"
   },
-  "abstract-interfaces": {
-    "title": "Abstract Interfaces"
-  },
   "tunnel-connections": {
     "title": "Tunnelling Connections"
   }

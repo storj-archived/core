@@ -78,25 +78,17 @@ module.exports.StorageItem = require('./lib/storage/item');
 /** {@link KeyPair} */
 module.exports.KeyPair = require('./lib/keypair');
 
+/** {@link RenterInterface} */
+module.exports.RenterInterface = require('./lib/interfaces/renter');
+
+/** {@link FarmerInterface} */
+module.exports.FarmerInterface = require('./lib/interfaces/farmer');
+
+/** {@link TelemetryReporter} */
+module.exports.TelemetryReporter = require('./lib/extensions/telemetry');
+
 /** {@link constants} */
 module.exports.constants = require('./lib/constants');
 
 /** {@link utils} */
 module.exports.utils = require('./lib/utils');
-
-/** {@link abstract} */
-module.exports.abstract = require('./lib/abstract');
-
-/** {@link extensions} */
-module.exports.extensions = require('./lib/extensions');
-
-/** Expose Module Dependencies */
-module.exports.dependencies = (function() {
-  var deps = {};
-
-  Object.keys(require('./package').dependencies).forEach(function(name) {
-    deps[name] = require(name);
-  });
-
-  return deps;
-})();

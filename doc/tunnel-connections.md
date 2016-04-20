@@ -49,7 +49,10 @@ message to it's nearest neighbors.
   "params": {
     "uuid": "7f0c40a2-e465-4f3e-b617-3d53460e34f7",
     "topic": "0e01",
-    "contents": {},
+    "contents": {
+      "address": "10.0.0.2",
+      "port": 1337
+    },
     "publishers": [
       "48dc026fa01ae26822bfb23f98e725444d6775b0"
     ],

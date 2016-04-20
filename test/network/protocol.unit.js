@@ -1,6 +1,6 @@
 'use strict';
 
-var os = require('os');
+var kad = require('kad');
 var expect = require('chai').expect;
 var KeyPair = require('../../lib/keypair');
 var Network = require('../../lib/network');
@@ -14,13 +14,10 @@ describe('Network/Protocol', function() {
   var network = new Network({
     keypair: new KeyPair(),
     manager: new Manager(new RAMStorage()),
-    loglevel: 0,
+    logger: kad.Logger(0),
     seeds: [],
-    datadir: os.tmpdir(),
-    contact: {
-      address: '127.0.0.1',
-      port: 4000,
-    },
+    address: '127.0.0.1',
+    port: 4000,
     noforward: true
   });
 

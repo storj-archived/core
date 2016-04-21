@@ -98,7 +98,7 @@ describe('Interfaces/Farmer+Renter/Integration', function() {
   describe('#store', function() {
 
     it('should negotiate a storage contract with a farmer', function(done) {
-      this.timeout(8000);
+      this.timeout(12000);
       var renter = renters[renters.length - 1];
       var duration = ms('20s');
       renter.store(data, duration, function(err, key) {

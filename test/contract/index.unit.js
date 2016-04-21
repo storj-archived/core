@@ -42,8 +42,8 @@ describe('Contract#compare', function() {
 
 });
 
-describe('Contract', function() {
-
+describe('Contract (private)', function() {
+  
   describe('#_clean', function() {
 
     it('should remove any non-standard contract fields', function() {
@@ -104,6 +104,10 @@ describe('Contract', function() {
     });
 
   });
+
+});
+
+describe('Contract (public)', function() {
 
   describe('#getHash', function() {
 

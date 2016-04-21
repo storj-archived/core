@@ -81,7 +81,7 @@ describe('Network/Integration/Tunnelling', function() {
   describe('#store (tunneled)', function() {
 
     it('should negotiate contract with a tunneled farmer', function(done) {
-      this.timeout(8000);
+      this.timeout(12000);
       var renter = renters[renters.length - 1];
       var duration = ms('20s');
       renter.store(data, duration, function(err, key) {

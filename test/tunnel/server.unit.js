@@ -1,7 +1,6 @@
 'use strict';
 
 var expect = require('chai').expect;
-var sinon = require('sinon');
 var TunnelServer = require('../../lib/tunnel/server');
 
 describe('TunnelServer', function() {

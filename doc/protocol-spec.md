@@ -613,7 +613,7 @@ the supplied `data_hash`, then calculate the *single*
 > The result of this operation should hash again to match one of the items
 > supplied in the `audit_tree` property of the original `CONSIGN` request.
 
-In addition to supplying this value as proof that the farmer is still honoring
+In addition to supplying this single-hashed value as proof that the farmer is still honoring
 the terms of the contract, the farmer must *also* provide the uncles required
 to rebuild the merkle tree. This **proof** response is specified as a series
 of nested JSON arrays:
@@ -647,6 +647,30 @@ of nested JSON arrays:
   },
   "id": "7b6a2ab35da6826995abf3310a4875097df88cdb"
 }
+```
+
+For clarification, given a simple merkle tree:
+
+```
++-- Hash_0 (Root)
+|   +-- Hash_1
+|   |   +-- Hash_3
+|   |   +-- Hash_4
+|   +-- Hash_2
+|   |   +-- Hash_5
+|   |   +-- Hash_6 = RIPEMD160(SHA256(RIPEMD160(SHA256(challenge + shard))))
+```
+
+The resulting format of a proof for an audit matching Hash_6 would appear as:
+
+```
+[Hash_1, [Hash_5, [RIPEMD160(SHA256(challenge + shard))]]]
+```
+
+And, the resulting format of a proof for an audit matching Hash_3 would appear as:
+
+```
+[[[RIPEMD160(SHA256(challenge + shard))], Hash_5], Hash_2]
 ```
 
 Upon receipt of the farmer's proof, the renter must verify that the proof is

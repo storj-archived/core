@@ -650,24 +650,28 @@ of nested JSON arrays:
 ```
 
 For clarification, given a simple merkle tree:
+
 ```
 +-- Hash_0 (Root)
 |   +-- Hash_1
-|   |   +-- Hash_3 = RIPEMD160(SHA256(RIPEMD160(SHA256(challenge + shard))))
+|   |   +-- Hash_3
 |   |   +-- Hash_4
 |   +-- Hash_2
 |   |   +-- Hash_5
 |   |   +-- Hash_6 = RIPEMD160(SHA256(RIPEMD160(SHA256(challenge + shard))))
 ```
+
 The resulting format of a proof for an audit matching Hash_6 would appear as:
+
 ```
 [Hash_1, [Hash_5, [RIPEMD160(SHA256(challenge + shard))]]]
 ```
+
 And, the resulting format of a proof for an audit matching Hash_3 would appear as:
+
 ```
 [[[RIPEMD160(SHA256(challenge + shard))], Hash_5], Hash_2]
 ```
-
 
 Upon receipt of the farmer's proof, the renter must verify that the proof is
 valid by using it to rebuild the merkle tree. See {@link Verification#verify}

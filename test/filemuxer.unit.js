@@ -112,6 +112,27 @@ describe('FileMuxer', function() {
         });
     });
 
+    it('should error if read with no inputs', function(done) {
+      FileMuxer({ shards: 2, length: 128 }).on('error', function(err) {
+        expect(err.message).to.equal('Unexpected end of input');
+        done();
+      }).read();
+
+    });
+
+    it('should error if input length exceeds declared length', function(done) {
+      var chunks = [0x01, 0x02, 0x03];
+      FileMuxer({ shards: 1, length: 2 }).on('error', function(err) {
+        expect(err.message).to.equal('Input exceeds the declared length');
+        done();
+      }).input(ReadableStream({
+        read: function() {
+          var chunk = chunks.pop();
+          this.push(chunk ? Buffer([chunk]) : null);
+        }
+      })).read();
+    });
+
   });
 
 });

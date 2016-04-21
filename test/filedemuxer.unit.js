@@ -22,12 +22,12 @@ describe('FileDemuxer', function() {
 
     it('should create an instance without the new keyword', function() {
       expect(FileDemuxer({
-        shards: 2, 
-        length: 10 
+        shards: 2,
+        length: 10
       })).to.be.instanceOf(FileDemuxer);
       expect(FileDemuxer({
-        shards: 2, 
-        length: 10 
+        shards: 2,
+        length: 10
       })).to.be.instanceOf(stream.Writable);
     });
 
@@ -79,6 +79,18 @@ describe('FileDemuxer', function() {
 
       dmx.on('finish', function() {
         expect(shards).to.equal(11);
+        done();
+      });
+
+      randomio.pipe(dmx);
+    });
+
+    it('should error if more data than declared is written', function(done) {
+      var randomio = noisegen({ length: 256 });
+      var dmx = new FileDemuxer({ shards: 4, length: 128 });
+
+      dmx.on('error', function(err) {
+        expect(err.message).to.equal('Write amount exceeds the length');
         done();
       });
 

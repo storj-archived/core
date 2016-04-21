@@ -19,6 +19,17 @@ describe('TunnelDemuxer', function() {
 
   });
 
+  describe('#_demuxDataChannel', function() {
+
+    it('should return an error for invalid opcode', function(done) {
+      TunnelDemuxer()._demuxDataChannel(Buffer([0x00, 0x00]), function(err) {
+        expect(err.message).to.equal('Invalid frame type opcode supplied');
+        done();
+      });
+    });
+
+  });
+
   describe('#transform', function() {
 
     var tdmuxer = new TunnelDemuxer();

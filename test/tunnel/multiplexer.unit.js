@@ -55,7 +55,7 @@ describe('TunnelMuxer', function() {
       tmuxer.once('data', function(data) {
         expect(Buffer.compare(
           data.slice(0, 1),
-          Buffer([constants.OPCODE_TUNDC_PREFIX])
+          Buffer([constants.OPCODE_TUNDCX_PREFIX])
         )).to.equal(0);
         expect(Buffer.compare(
           data.slice(1, 2),
@@ -77,7 +77,7 @@ describe('TunnelMuxer', function() {
       tmuxer.once('data', function(data) {
         expect(Buffer.compare(
           data.slice(0, 1),
-          Buffer([constants.OPCODE_TUNDC_PREFIX])
+          Buffer([constants.OPCODE_TUNDCX_PREFIX])
         )).to.equal(0);
         expect(Buffer.compare(
           data.slice(1, 2),

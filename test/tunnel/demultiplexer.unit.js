@@ -56,7 +56,7 @@ describe('TunnelDemuxer', function() {
         done();
       });
       tdmuxer.write(Buffer.concat([
-        Buffer([constants.OPCODE_TUNDC_PREFIX]),
+        Buffer([constants.OPCODE_TUNDCX_PREFIX]),
         Buffer([0x01]),
         Buffer([1, 2, 3, 4, 5, 6]),
         Buffer(JSON.stringify({
@@ -76,7 +76,7 @@ describe('TunnelDemuxer', function() {
         done();
       });
       tdmuxer.write(Buffer.concat([
-        Buffer([constants.OPCODE_TUNDC_PREFIX]),
+        Buffer([constants.OPCODE_TUNDCX_PREFIX]),
         Buffer([0x02]),
         Buffer([1, 2, 3, 4, 5, 6]),
         Buffer('hello demuxer')

@@ -56,6 +56,13 @@ storj.version = '1.5.0-widgetsltd';
 // Get on with your stuff...
 ```
 
+If you are running "vanilla" Storj software, you can change the protocol
+version by setting the `STORJ_PROTOCOL` environment variable:
+
+```
+STORJ_PROTOCOL=0.6.0-testnet storjfarm --datadir /path/to/shards
+```
+
 This concept applies broadly to deploying a custom Storj network for any
 purpose. This could be used for a public testnet (`x.x.x-testnet`) or for the
 private network example above.

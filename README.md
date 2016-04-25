@@ -23,32 +23,17 @@ layer, and join the network in just a few lines of code:
 ```
 var storj = require('storj');
 
-var keypair = new storj.KeyPair(/* existing_key */);
-var store = new storj.FSStorageAdapter('/path/to/datadir');
-var manager = new storj.Manager(store);
-
-var network = new storj.Network({
-  keypair: keypair,
-  manager: manager,
-  contact: {
-    address: 'ip.or.hostname',
-    port: 4000
-  },
+var network = storj.Network({
+  keypair: storj.KeyPair(/* existing_key */),
+  manager: storj.Manager(storj.FSStorageAdapter('/path/to/datadir')),
+  address: 'ip.or.hostname',
+  port: 4000,
   seeds: [
-    'storj://api.metadisk.org:8443/593844dc7f0076a1aeda9a6b9788af17e67c1052'
-  ],
-  loglevel: 3,
-  datadir: '/path/to/datadir',
-  farmer: []
+    'storj://api.storj.io:8443/593844dc7f0076a1aeda9a6b9788af17e67c1052'
+  ]
 });
 
-network.join(function(err) {
-  if (err) {
-    return console.log('Failed to join network, reason: %s', err.message);
-  }
-
-  console.log('Connected to the Storj network!');
-});
+network.join(/* callback */);
 ```
 
 License

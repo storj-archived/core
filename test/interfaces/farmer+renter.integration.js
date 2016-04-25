@@ -1,5 +1,8 @@
 'use strict';
 
+// TODO: Replace (or supplement) these integration tests with unit tests
+// TODO: when we have more time to do so.
+
 var expect = require('chai').expect;
 var async = require('async');
 var os = require('os');
@@ -11,7 +14,7 @@ var kad = require('kad');
 var ms = require('ms');
 
 var NODE_LIST = [];
-var STARTING_PORT = 64535;
+var STARTING_PORT = 65535;
 
 function createNode(opcodes) {
   var node = null;
@@ -25,7 +28,7 @@ function createNode(opcodes) {
   var options = {
     keypair: kp,
     manager: manager,
-    logger: kad.Logger(1),
+    logger: kad.Logger(0),
     seeds: NODE_LIST.length ? [NODE_LIST[0]] : NODE_LIST,
     address: '127.0.0.1',
     port: port,
@@ -54,33 +57,47 @@ function createFarmer() {
   return createNode(['0f01010202']);
 }
 
-describe('Network/Integration/Tunnelling', function() {
+var _forwardPort;
+
+before(function() {
+  _forwardPort = sinon.stub(
+    storj.Transport.prototype,
+    '_forwardPort'
+  ).callsArg(0);
+});
+
+after(function() {
+  _forwardPort.restore();
+});
+
+describe('Interfaces/Farmer+Renter/Integration', function() {
 
   var data = new Buffer('ALL THE SHARDS');
   var hash = storj.utils.rmd160sha256(data);
 
-  var renters = Array.apply(null, Array(2)).map(function() {
-    return createRenter();
-  });
   var farmers = Array.apply(null, Array(1)).map(function() {
     return createFarmer();
   });
-
-  before(function(done) {
-    sinon.stub(farmers[0], '_requestProbe').callsArgWith(
-      1, new Error('Probe failed')
-    ); // NB: Force tunneling
-
-    async.eachSeries(renters, function(node, done) {
-      node.join(done);
-    }, function() {
-      farmers[0].join(done);
-    });
+  var renters = Array.apply(null, Array(2)).map(function() {
+    return createRenter();
   });
 
-  describe('#store (tunneled)', function() {
+  describe('#join', function() {
 
-    it('should negotiate contract with a tunneled farmer', function(done) {
+    it('should connect all the nodes together', function(done) {
+      farmers[0].join(function() {
+        farmers.shift();
+        async.eachSeries(farmers.concat(renters), function(node, done) {
+          node.join(done);
+        }, done);
+      });
+    });
+
+  });
+
+  describe('#store', function() {
+
+    it('should negotiate a storage contract with a farmer', function(done) {
       this.timeout(12000);
       var renter = renters[renters.length - 1];
       var duration = ms('20s');
@@ -94,9 +111,9 @@ describe('Network/Integration/Tunnelling', function() {
   });
 
 
-  describe('#retrieve (tunneled)', function() {
+  describe('#retrieve', function() {
 
-    it('should fetch the file from a tunneled farmer', function(done) {
+    it('should fetch the file from the farmer', function(done) {
       var renter = renters[renters.length - 1];
       var buffer = Buffer([]);
       renter.retrieve(hash, function(err, result) {
@@ -114,9 +131,9 @@ describe('Network/Integration/Tunnelling', function() {
   });
 
 
-  describe('#audit (tunneled)', function() {
+  describe('#audit', function() {
 
-    it('should successfully audit the stored data via tunnel', function(done) {
+    it('should successfully audit the stored data', function(done) {
       var renter = renters[renters.length - 1];
       renter.audit(hash, function(err, result) {
         expect(err).to.equal(null);

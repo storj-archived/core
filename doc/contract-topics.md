@@ -73,8 +73,14 @@ these criteria, nodes must serialize the opcodes as the hex representation of
 the bytes in proper sequence. This sequence is defined as:
 
 ```
-size|duration|availability|speed
+prefix|size|duration|availability|speed
 ```
+
+The first byte, "prefix", is the **static identifier** for a contract
+publication. Contracts are not the only type of publication shared in the
+network, so the prefix acts as a namespace for a type of publication topic.
+
+**The prefix for a contract publication is:** `0x0f`.
 
 To illustrate by example, we can determine the proper topic by analyzing the
 *use case* for a given file shard. For instance, if we want to store an asset
@@ -88,13 +94,13 @@ that is displayed on a web page we can infer the following:
 Using the matrix, we can determine the proper opcode sequence:
 
 ```
-[0x01, 0x02, 0x03, 0x03]
+[0x0f, 0x01, 0x02, 0x03, 0x03]
 ```
 
 Serialized as hex, our topic string becomes:
 
 ```
-01020303
+0f01020303
 ```
 
 Another example, by contrast, is data *backup*. Data backup is quite different
@@ -108,13 +114,13 @@ than the previous example:
 Using the matrix, we can determine the proper opcode sequence:
 
 ```
-[0x03, 0x03, 0x01, 0x01]
+[0x0f, 0x03, 0x03, 0x01, 0x01]
 ```
 
 Serialized as hex, our topic string becomes:
 
 ```
-03030101
+0f03030101
 ```
 
 The resulting hex string from the serialized opcode byte sequence should be

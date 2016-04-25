@@ -4,6 +4,8 @@
 
 'use strict';
 
+require('./lib/patches')(); // NB: Apply any monkey patches
+
 module.exports.version = require('./lib/version');
 
 /** {@link Network} */
@@ -23,6 +25,30 @@ module.exports.DataChannelServer = require('./lib/datachannel/server');
 
 /** {@link Protocol} */
 module.exports.Protocol = require('./lib/network/protocol');
+
+/** {@link TunnelServer} */
+module.exports.Tunnel = require('./lib/tunnel/server');
+
+/** {@link TunnelMuxer} */
+module.exports.TunnelMuxer = require('./lib/tunnel/multiplexer');
+
+/** {@link TunnelDemuxer} */
+module.exports.TunnelDemuxer = require('./lib/tunnel/demultiplexer');
+
+/** {@link TunnelClient} */
+module.exports.TunnelClient = require('./lib/tunnel/client');
+
+/** {@link EncryptStream} */
+module.exports.EncryptStream = require('./lib/cryptostream/encrypt');
+
+/** {@link DecryptStream} */
+module.exports.DecryptStream = require('./lib/cryptostream/decrypt');
+
+/** {@link FileMuxer} */
+module.exports.FileMuxer = require('./lib/filemuxer');
+
+/** {@link FileDemuxer} */
+module.exports.FileDemuxer = require('./lib/filedemuxer');
 
 /** {@link Contract} */
 module.exports.Contract = require('./lib/contract');
@@ -54,25 +80,17 @@ module.exports.StorageItem = require('./lib/storage/item');
 /** {@link KeyPair} */
 module.exports.KeyPair = require('./lib/keypair');
 
+/** {@link RenterInterface} */
+module.exports.RenterInterface = require('./lib/interfaces/renter');
+
+/** {@link FarmerInterface} */
+module.exports.FarmerInterface = require('./lib/interfaces/farmer');
+
+/** {@link TelemetryReporter} */
+module.exports.TelemetryReporter = require('./lib/extensions/telemetry');
+
 /** {@link constants} */
 module.exports.constants = require('./lib/constants');
 
 /** {@link utils} */
 module.exports.utils = require('./lib/utils');
-
-/** {@link abstract} */
-module.exports.abstract = require('./lib/abstract');
-
-/** {@link extensions} */
-module.exports.extensions = require('./lib/extensions');
-
-/** Expose Module Dependencies */
-module.exports.dependencies = (function() {
-  var deps = {};
-
-  Object.keys(require('./package').dependencies).forEach(function(name) {
-    deps[name] = require(name);
-  });
-
-  return deps;
-})();

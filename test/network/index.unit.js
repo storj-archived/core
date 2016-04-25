@@ -5,6 +5,7 @@ var Network = require('../../lib/network');
 var Manager = require('../../lib/manager');
 var KeyPair = require('../../lib/keypair');
 var RAMStorageAdapter = require('../../lib/storage/adapters/ram');
+var Logger = require('kad').Logger;
 
 describe('Network', function() {
 
@@ -14,10 +15,10 @@ describe('Network', function() {
       expect(Network({
         keypair: KeyPair(),
         manager: Manager(RAMStorageAdapter()),
-        loglevel: 0,
+        logger: Logger(0),
         seeds: [],
-        contact: { address: '127.0.0.1', port: 0 },
-        farmer: false,
+        address: '127.0.0.1',
+        port: 0,
         noforward: true
       })).to.be.instanceOf(Network);
     });

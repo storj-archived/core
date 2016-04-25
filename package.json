@@ -1,6 +1,6 @@
 {
   "name": "storj",
-  "version": "0.5.2",
+  "version": "0.6.0",
   "description": "implementation of the storj protocol for node.js and the browser",
   "main": "index.js",
   "directories": {
@@ -26,7 +26,16 @@
     "url": "https://github.com/storj/core.git"
   },
   "author": "Gordon Hall <gordon@gordonwritescode.com>",
-  "contributors": [],
+  "contributors": [
+    {
+      "name": "littleskunk",
+      "url": "https://github.com/littleskunk"
+    },
+    {
+      "name": "Ryan Foran",
+      "url": "https://github.com/mrfancymonocle"
+    }
+  ],
   "license": "AGPL-3.0",
   "engines": {
     "node": "4.x.x"
@@ -39,15 +48,12 @@
     "ip": "^1.1.2",
     "jsen": "^0.6.0",
     "json-stable-stringify": "^1.0.1",
-    "kad": "^1.5.3",
-    "kad-logger-json": "^0.1.1",
+    "kad": "^1.5.5",
     "kad-quasar": "0.1.0",
-    "localtunnel": "^1.8.1",
     "merge": "^1.2.0",
     "ms": "^0.7.1",
     "mtree": "^0.0.1",
     "nat-upnp": "^1.0.0",
-    "portastic": "^1.0.1",
     "readable-stream": "^2.0.6",
     "request": "^2.70.0",
     "semver": "^5.1.0",
@@ -58,12 +64,14 @@
     "chai": "^2.2.0",
     "coveralls": "^2.11.2",
     "gh-pages": "^0.9.0",
+    "ink-docstrap": "^1.1.2",
     "istanbul": "^0.3.13",
     "jsdoc": "^3.4.0",
     "jshint": "2.8.0",
     "mocha": "^2.2.4",
+    "noisegen": "^1.0.0",
+    "pem": "^1.8.1",
     "proxyquire": "^1.7.3",
-    "sinon": "^1.14.1",
-    "ink-docstrap": "^1.1.2"
+    "sinon": "^1.14.1"
   }
 }

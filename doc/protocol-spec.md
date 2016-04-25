@@ -115,14 +115,255 @@ reconstruct the complete public key and is used in the Storj network to sign
 and verify messages. This ensures that nodes are unable to assume the identity
 of another node by claiming it has the same `nodeID`.
 
-Joining the network begins with a `FIND_NODE` request sent to one or more
-known seeds. The request must include a `key`, `contact` (you), along with a
-`signature` and `nonce`.
+#### PROBE
+
+Before a node can join the network, it must determine whether or not it is
+reachable (or *publicly addressable*). This can be determined by sending a
+`PROBE` request to a known seed.
+
+```
+{
+  "method": "PROBE",
+  "params": {
+    "contact": {
+      "address": "10.0.0.3",
+      "port": 1337,
+      "nodeID": "48dc026fa01ae26822bfb23f98e725444d6775b0",
+      "protocol": "0.6.0"
+    },
+    "nonce": 1455216323786,
+    "signature": "304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c..."
+  },
+  "id": "7b6a2ab35da6826995abf3310a4875097df88cdb"
+}
+```
+
+The `PROBE` RPC message triggers the recipient to attempt to reach the
+supplied {@link Contact} directly by sending a `PING` RPC message. If the
+target {@link Contact} reponds to the `PING`, then the `PROBE` should yield
+a success response, which is indicated by simply responding to the RPC
+message with only the required parameters and **no** `error` property.
+
+```
+{
+  "result": {
+    "contact": {
+      "address": "10.0.0.3",
+      "port": 1337,
+      "nodeID": "48dc026fa01ae26822bfb23f98e725444d6775b0",
+      "protocol": "0.6.0"
+    },
+    "nonce": 1455216323786,
+    "signature": "304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c..."
+  },
+  "id": "7b6a2ab35da6826995abf3310a4875097df88cdb"
+}
+```
+
+If the `PING` message triggered by the `PROBE` fails, then the recipient of the
+`PROBE` RPC must respond with an error indicating to the sender that she is not
+addressable.
+
+```
+{
+  "result": {
+    "contact": {
+      "address": "10.0.0.3",
+      "port": 1337,
+      "nodeID": "48dc026fa01ae26822bfb23f98e725444d6775b0",
+      "protocol": "0.6.0"
+    },
+    "nonce": 1455216323786,
+    "signature": "304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c..."
+  },
+  "error": {
+    "code": -32603,
+    "message": "PROBE FAILED"
+  },
+  "id": "7b6a2ab35da6826995abf3310a4875097df88cdb"
+}
+```
+
+If the `PROBE` fails, you cannot successfully join the overlay and need to
+establish a **tunnel** through a node that *is* addressable on the network.
+
+#### FIND_TUNNEL
+
+Finding a node that is willing to tunnel your connection to the overlay begins
+with a `FIND_TUNNEL` RPC message sent to a known seed. Nodes on the network
+maintain a record of known nodes that are willing to tunnel, by subscribing to
+"tunnel announcements" over the publish/subscribe system.
+
+> For more information on how nodes announce willingness to tunnel, see the
+> documentation for {@tutorial tunnel-connections}.
+
+```
+{
+  "method": "FIND_TUNNEL",
+  "params": {
+    "contact": {
+      "address": "10.0.0.3",
+      "port": 1337,
+      "nodeID": "48dc026fa01ae26822bfb23f98e725444d6775b0",
+      "protocol": "0.3.0"
+    },
+    "nonce": 1455216323786,
+    "signature": "304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c..."
+  },
+  "id": "7b6a2ab35da6826995abf3310a4875097df88cdb"
+}
+```
+
+When a node receives a `FIND_TUNNEL` message, it should respond with `ALPHA`
+(3) contacts that are close the the sender's `nodeID` who have previously
+published their willingness to tunnel. If the recipient herself is willing to
+tunnel the connection, she may include herself in the response even if her
+`nodeID` is not closer to the sender's `nodeID` than her known tunnels.
+
+```
+{
+  "result": {
+    "tunnels": [
+      {
+        "address": "10.0.0.4",
+        "port": 1337,
+        "nodeID": "58dc026fa01ae26822bfb23f98e725444d6775b0",
+        "protocol": "0.6.0"
+      },
+      {
+        "address": "10.0.0.5",
+        "port": 1337,
+        "nodeID": "68dc026fa01ae26822bfb23f98e725444d6775b0",
+        "protocol": "0.6.0"
+      },
+      {
+        "address": "10.0.0.6",
+        "port": 1337,
+        "nodeID": "78dc026fa01ae26822bfb23f98e725444d6775b0",
+        "protocol": "0.6.0"
+      }
+    ],
+    "contact": {
+      "address": "10.0.0.3",
+      "port": 1337,
+      "nodeID": "48dc026fa01ae26822bfb23f98e725444d6775b0",
+      "protocol": "0.6.0"
+    },
+    "nonce": 1455216323786,
+    "signature": "304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c..."
+  },
+  "id": "7b6a2ab35da6826995abf3310a4875097df88cdb"
+}
+```
+
+The result of a `FIND_TUNNEL` message looks almost identical to the result of a
+`FIND_NODE` message, with the exception being the name of the result key is
+`tunnels` instead of `nodes`. Now that the original sender possesses the
+contact information for some known tunnels, she should keep them in her record
+so that she can later respond to other's `FIND_TUNNEL` requests appropriately.
+
+Before the node can join the overlay (after determining it is not publicly
+addressable), it needs to establish a connection tunnel through one of the
+{@link Contact}s received from the `FIND_TUNNEL` request.
+
+#### OPEN_TUNNEL
+
+Establishing a tunnel is initiated by sending an `OPEN_TUNNEL` RPC message to a
+node who has indicated their willingness to tunnel. Only the minimum required
+parameters need to be sent.
+
+> In the future, the protocol may be enhanced to include additional information
+> in the `OPEN_TUNNEL` RPC for negotiating payment channels or other conditions.
+
+```
+{
+  "method": "OPEN_TUNNEL",
+  "params": {
+    "contact": {
+      "address": "10.0.0.3",
+      "port": 1337,
+      "nodeID": "48dc026fa01ae26822bfb23f98e725444d6775b0",
+      "protocol": "0.6.0"
+    },
+    "nonce": 1455216323786,
+    "signature": "304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c..."
+  },
+  "id": "7b6a2ab35da6826995abf3310a4875097df88cdb"
+}
+```
+
+The recipient of the `OPEN_TUNNEL` message must determine whether or not she
+can satisfy the request. This decision may be based upon an arbitrary limit
+set by the node regarding how many concurrent tunnels she wishes to open,
+available bandwidth, etc. If the node is capable of establishing the tunnel,
+she must do so, assigning a dedicated address or port to receive messages and
+data channel requests (see {@tutorial data-channels}).
+
+Once the tunnel's dedicated entry point has been established, she responds to
+the sender of the `OPEN_TUNNEL` request with a unique WebSocket URI that
+includes a token, as well as an `alias` property which contains the contact
+information for the new entry point through which data will enter the tunnel.
+
+```
+{
+  "result": {
+    "tunnel": "ws://10.0.0.3:1337/tun?token=2bfb23f98e72",
+    "alias": {
+      "address": "10.0.0.3",
+      "port": 1338
+    },
+    "contact": {
+      "address": "10.0.0.3",
+      "port": 1337,
+      "nodeID": "48dc026fa01ae26822bfb23f98e725444d6775b0",
+      "protocol": "0.6.0"
+    },
+    "nonce": 1455216323786,
+    "signature": "304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c..."
+  },
+  "id": "7b6a2ab35da6826995abf3310a4875097df88cdb"
+}
+```
+
+This response indicates that a tunnel has been established and the original
+sender can receive messages from the overlay by opening a WebSocket connection
+to the `tunnel` address in the reply. In addition, the sender must update it's
+{@link Contact} information to the included `alias` so that it can be reached
+by other peers in the overlay.
+
+If the recipient of the `OPEN_TUNNEL` message is not able to establish a tunnel
+for the sender, then she may respond with an error so that the sender can
+attempt to open a tunnel with other known contact.
+
+```
+{
+  "result": {
+    "contact": {
+      "address": "10.0.0.3",
+      "port": 1337,
+      "nodeID": "48dc026fa01ae26822bfb23f98e725444d6775b0",
+      "protocol": "0.6.0"
+    },
+    "nonce": 1455216323786,
+    "signature": "304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c..."
+  },
+  "error": {
+    "code": -32603,
+    "message": "Failed to establish tunnel, multiplexer full"
+  },
+  "id": "7b6a2ab35da6826995abf3310a4875097df88cdb"
+}
+```
+
+Once your node has determined that it is publicly addressable on the network
+or has successfully established a tunnel, it can join the overlay network by
+issuing a `FIND_NODE` request sent to one or more known seeds. The request must
+include a `key`, `contact` (you), along with a `signature` and `nonce`.
 
 #### FIND_NODE
 
 When issuing a `FIND_NODE` request, you provide a `key` that represents the
-`nodeID` of the contact of which you would like to their neighbors. When
+`nodeID` of the contact of which you would like to know their neighbors. When
 joining the network, this value is *your own `nodeID`*.
 
 ```
@@ -314,7 +555,7 @@ information on how to choose a valid contract type for your storage needs.
   "method": "PUBLISH",
   "params": {
     "uuid": "7f0c40a2-e465-4f3e-b617-3d53460e34f7",
-    "topic": "02010303",
+    "topic": "0f02010303",
     "contents": {
       "type": "56ce3e837f575827cb5a94e2b609756a48fa4a3882f5e762b262af31f432878d",
       "renter_id": "48dc026fa01ae26822bfb23f98e725444d6775b0",

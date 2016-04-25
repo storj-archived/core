@@ -4,6 +4,8 @@ var crypto = require('crypto');
 var expect = require('chai').expect;
 var Contract = require('../../lib/contract');
 var KeyPair = require('../../lib/keypair');
+var constants = require('../../lib/constants');
+var ms = require('ms');
 
 var kp1 = new KeyPair();
 var kp2 = new KeyPair();
@@ -42,7 +44,115 @@ describe('Contract#compare', function() {
 
 });
 
-describe('Contract', function() {
+describe('Contact#MATRIX', function() {
+
+  describe('#size', function() {
+
+    it('should return low degree', function() {
+      expect(Contract.MATRIX.size(
+        8 * 1024 * 1024
+      )).to.equal(constants.OPCODE_DEG_LOW);
+    });
+
+    it('should return medium degree', function() {
+      expect(Contract.MATRIX.size(
+        16 * 1024 * 1024
+      )).to.equal(constants.OPCODE_DEG_MED);
+    });
+
+    it('should return high degree', function() {
+      expect(Contract.MATRIX.size(
+        32 * 1024 * 1024
+      )).to.equal(constants.OPCODE_DEG_HIGH);
+    });
+
+    it('should return null degree', function() {
+      expect(Contract.MATRIX.size(
+        64 * 1024 * 1024
+      )).to.equal(null);
+    });
+
+  });
+
+  describe('#duration', function() {
+
+    it('should return low degree', function() {
+      expect(Contract.MATRIX.duration(
+        ms('30d')
+      )).to.equal(constants.OPCODE_DEG_LOW);
+    });
+
+    it('should return medium degree', function() {
+      expect(Contract.MATRIX.duration(
+        ms('90d')
+      )).to.equal(constants.OPCODE_DEG_MED);
+    });
+
+    it('should return high degree', function() {
+      expect(Contract.MATRIX.duration(
+        ms('320d')
+      )).to.equal(constants.OPCODE_DEG_HIGH);
+    });
+
+    it('should return null degree', function() {
+      expect(Contract.MATRIX.duration(
+        ms('365d')
+      )).to.equal(null);
+    });
+
+  });
+
+  describe('#availability', function() {
+
+    it('should return low degree', function() {
+      expect(Contract.MATRIX.availability(
+        0.7
+      )).to.equal(constants.OPCODE_DEG_LOW);
+    });
+
+    it('should return medium degree', function() {
+      expect(Contract.MATRIX.availability(
+        0.9
+      )).to.equal(constants.OPCODE_DEG_MED);
+    });
+
+    it('should return high degree', function() {
+      expect(Contract.MATRIX.availability(
+        1
+      )).to.equal(constants.OPCODE_DEG_HIGH);
+    });
+
+    it('should return null degree', function() {
+      expect(Contract.MATRIX.availability(
+        2
+      )).to.equal(null);
+    });
+
+  });
+
+  describe('#speed', function() {
+
+    it('should return low degree', function() {
+      expect(Contract.MATRIX.speed(6)).to.equal(constants.OPCODE_DEG_LOW);
+    });
+
+    it('should return medium degree', function() {
+      expect(Contract.MATRIX.speed(12)).to.equal(constants.OPCODE_DEG_MED);
+    });
+
+    it('should return high degree', function() {
+      expect(Contract.MATRIX.speed(32)).to.equal(constants.OPCODE_DEG_HIGH);
+    });
+
+    it('should return null degree', function() {
+      expect(Contract.MATRIX.speed(64)).to.equal(null);
+    });
+
+  });
+
+});
+
+describe('Contract (private)', function() {
 
   describe('#_clean', function() {
 
@@ -104,6 +214,10 @@ describe('Contract', function() {
     });
 
   });
+
+});
+
+describe('Contract (public)', function() {
 
   describe('#getHash', function() {
 

@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Storj JS Module: storj</title>
+	<title>StorjCORE Module: storj</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -20,7 +20,7 @@
 <div class="navbar navbar-default navbar-fixed-top navbar-inverse">
 <div class="container">
 	<div class="navbar-header">
-		<a class="navbar-brand" href="index.html">Storj JS</a>
+		<a class="navbar-brand" href="index.html">StorjCORE</a>
 		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
 			<span class="icon-bar"></span>
 			<span class="icon-bar"></span>
@@ -33,21 +33,28 @@
 			<li class="dropdown">
 				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="module-storj.html">storj</a></li><li><a href="module-storj_abstract.html">storj/abstract</a></li><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_extensions.html">storj/extensions</a></li><li><a href="module-storj_utils.html">storj/utils</a></li>
+					<li><a href="module-storj.html">storj</a></li><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_utils.html">storj/utils</a></li>
 				</ul>
 			</li>
 			
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="FarmerFactory.html">FarmerFactory</a></li><li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="TelemetryReporter.html">TelemetryReporter</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Contact.html">Contact</a></li><li><a href="Network.html">Network</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="Transport.html">Transport</a></li><li><a href="Proof.html">Proof</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="Verification.html">Verification</a></li>
+					<li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DecryptStream.html">DecryptStream</a></li><li><a href="EncryptStream.html">EncryptStream</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="TelemetryReporter.html">TelemetryReporter</a></li><li><a href="FileDemuxer.html">FileDemuxer</a></li><li><a href="FileMuxer.html">FileMuxer</a></li><li><a href="FarmerInterface.html">FarmerInterface</a></li><li><a href="RenterInterface.html">RenterInterface</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Contact.html">Contact</a></li><li><a href="Network.html">Network</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="Transport.html">Transport</a></li><li><a href="Proof.html">Proof</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="TunnelClient.html">TunnelClient</a></li><li><a href="TunnelDemuxer.html">TunnelDemuxer</a></li><li><a href="TunnelGateway.html">TunnelGateway</a></li><li><a href="TunnelMuxer.html">TunnelMuxer</a></li><li><a href="TunnelServer.html">TunnelServer</a></li><li><a href="Verification.html">Verification</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="events.list.html" class="dropdown-toggle" data-toggle="dropdown">Events<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="FileDemuxer.html#event:shard">FileDemuxer#event:shard</a></li><li><a href="FileMuxer.html#event:drain">FileMuxer#event:drain</a></li><li><a href="TunnelClient.html#event:open">TunnelClient#event:open</a></li><li><a href="TunnelClient.html#event:close">TunnelClient#event:close</a></li><li><a href="TunnelGateway.html#event:message/rpc">TunnelGateway#event:message/rpc</a></li><li><a href="TunnelGateway.html#event:open">TunnelGateway#event:open</a></li><li><a href="TunnelGateway.html#event:close">TunnelGateway#event:close</a></li><li><a href="TunnelGateway.html#event:message/datachannel">TunnelGateway#event:message/datachannel</a></li><li><a href="TunnelServer.html#event:locked">TunnelServer#event:locked</a></li><li><a href="TunnelServer.html#event:unlocked">TunnelServer#event:unlocked</a></li>
 				</ul>
 			</li>
 			
 			<li class="dropdown">
 				<a href="tutorials.list.html" class="dropdown-toggle" data-toggle="dropdown">Tutorials<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="tutorial-abstract-interfaces.html">Abstract Interfaces</a></li><li><a href="tutorial-contract-topics.html">Publishing Storage Contracts</a></li><li><a href="tutorial-data-channels.html">Transferring File Shards</a></li><li><a href="tutorial-private-testnet.html">Running a Test Network</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li>
+					<li><a href="tutorial-contract-topics.html">Publishing Storage Contracts</a></li><li><a href="tutorial-data-channels.html">Transferring File Shards</a></li><li><a href="tutorial-private-testnet.html">Running a Test Network</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li><li><a href="tutorial-tunnel-connections.html">Tunnelling Connections</a></li>
 				</ul>
 			</li>
 			
@@ -125,8 +132,7 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="index.js.html">index.js</a>,
-				 <a href="index.js.html#sunlight-1-line-1">line 1</a>
+				<a href="index.js.html">index.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -209,8 +215,7 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="index.js.html">index.js</a>,
-				 <a href="index.js.html#sunlight-1-line-13">line 13</a>
+				<a href="index.js.html">index.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -279,8 +284,7 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="index.js.html">index.js</a>,
-				 <a href="index.js.html#sunlight-1-line-16">line 16</a>
+				<a href="index.js.html">index.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -349,8 +353,7 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="index.js.html">index.js</a>,
-				 <a href="index.js.html#sunlight-1-line-19">line 19</a>
+				<a href="index.js.html">index.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -419,8 +422,7 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="index.js.html">index.js</a>,
-				 <a href="index.js.html#sunlight-1-line-22">line 22</a>
+				<a href="index.js.html">index.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -489,8 +491,559 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="index.js.html">index.js</a>,
-				 <a href="index.js.html#sunlight-1-line-25">line 25</a>
+				<a href="index.js.html">index.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt class="name" id=".Tunnel">
+    <h4><span class="type-signature">&lt;static> </span>Tunnel<span class="type-signature"></span></h4>
+
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <a href="TunnelServer.html">TunnelServer</a>
+    </div>
+    
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="index.js.html">index.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt class="name" id=".TunnelMuxer">
+    <h4><span class="type-signature">&lt;static> </span>TunnelMuxer<span class="type-signature"></span></h4>
+
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <a href="TunnelMuxer.html">TunnelMuxer</a>
+    </div>
+    
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="index.js.html">index.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt class="name" id=".TunnelDemuxer">
+    <h4><span class="type-signature">&lt;static> </span>TunnelDemuxer<span class="type-signature"></span></h4>
+
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <a href="TunnelDemuxer.html">TunnelDemuxer</a>
+    </div>
+    
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="index.js.html">index.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt class="name" id=".TunnelClient">
+    <h4><span class="type-signature">&lt;static> </span>TunnelClient<span class="type-signature"></span></h4>
+
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <a href="TunnelClient.html">TunnelClient</a>
+    </div>
+    
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="index.js.html">index.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt class="name" id=".EncryptStream">
+    <h4><span class="type-signature">&lt;static> </span>EncryptStream<span class="type-signature"></span></h4>
+
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <a href="EncryptStream.html">EncryptStream</a>
+    </div>
+    
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="index.js.html">index.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt class="name" id=".DecryptStream">
+    <h4><span class="type-signature">&lt;static> </span>DecryptStream<span class="type-signature"></span></h4>
+
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <a href="DecryptStream.html">DecryptStream</a>
+    </div>
+    
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="index.js.html">index.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt class="name" id=".FileMuxer">
+    <h4><span class="type-signature">&lt;static> </span>FileMuxer<span class="type-signature"></span></h4>
+
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <a href="FileMuxer.html">FileMuxer</a>
+    </div>
+    
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="index.js.html">index.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt class="name" id=".FileDemuxer">
+    <h4><span class="type-signature">&lt;static> </span>FileDemuxer<span class="type-signature"></span></h4>
+
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <a href="FileDemuxer.html">FileDemuxer</a>
+    </div>
+    
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="index.js.html">index.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -559,8 +1112,7 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="index.js.html">index.js</a>,
-				 <a href="index.js.html#sunlight-1-line-28">line 28</a>
+				<a href="index.js.html">index.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -629,8 +1181,7 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="index.js.html">index.js</a>,
-				 <a href="index.js.html#sunlight-1-line-31">line 31</a>
+				<a href="index.js.html">index.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -699,8 +1250,7 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="index.js.html">index.js</a>,
-				 <a href="index.js.html#sunlight-1-line-34">line 34</a>
+				<a href="index.js.html">index.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -769,8 +1319,7 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="index.js.html">index.js</a>,
-				 <a href="index.js.html#sunlight-1-line-37">line 37</a>
+				<a href="index.js.html">index.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -839,8 +1388,7 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="index.js.html">index.js</a>,
-				 <a href="index.js.html#sunlight-1-line-40">line 40</a>
+				<a href="index.js.html">index.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -909,8 +1457,7 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="index.js.html">index.js</a>,
-				 <a href="index.js.html#sunlight-1-line-43">line 43</a>
+				<a href="index.js.html">index.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -979,8 +1526,7 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="index.js.html">index.js</a>,
-				 <a href="index.js.html#sunlight-1-line-46">line 46</a>
+				<a href="index.js.html">index.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -1049,8 +1595,7 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="index.js.html">index.js</a>,
-				 <a href="index.js.html#sunlight-1-line-49">line 49</a>
+				<a href="index.js.html">index.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -1119,8 +1664,7 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="index.js.html">index.js</a>,
-				 <a href="index.js.html#sunlight-1-line-52">line 52</a>
+				<a href="index.js.html">index.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -1189,8 +1733,214 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="index.js.html">index.js</a>,
-				 <a href="index.js.html#sunlight-1-line-55">line 55</a>
+				<a href="index.js.html">index.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt class="name" id=".RenterInterface">
+    <h4><span class="type-signature">&lt;static> </span>RenterInterface<span class="type-signature"></span></h4>
+
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <a href="RenterInterface.html">RenterInterface</a>
+    </div>
+    
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="index.js.html">index.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt class="name" id=".FarmerInterface">
+    <h4><span class="type-signature">&lt;static> </span>FarmerInterface<span class="type-signature"></span></h4>
+
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <a href="FarmerInterface.html">FarmerInterface</a>
+    </div>
+    
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="index.js.html">index.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt class="name" id=".TelemetryReporter">
+    <h4><span class="type-signature">&lt;static> </span>TelemetryReporter<span class="type-signature"></span></h4>
+
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <a href="TelemetryReporter.html">TelemetryReporter</a>
+    </div>
+    
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="index.js.html">index.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -1259,8 +2009,7 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="index.js.html">index.js</a>,
-				 <a href="index.js.html#sunlight-1-line-58">line 58</a>
+				<a href="index.js.html">index.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -1329,218 +2078,7 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="index.js.html">index.js</a>,
-				 <a href="index.js.html#sunlight-1-line-61">line 61</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt class="name" id=".abstract">
-    <h4><span class="type-signature">&lt;static> </span>abstract<span class="type-signature"></span></h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        abstract
-    </div>
-    
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="index.js.html">index.js</a>,
-				 <a href="index.js.html#sunlight-1-line-64">line 64</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt class="name" id=".extensions">
-    <h4><span class="type-signature">&lt;static> </span>extensions<span class="type-signature"></span></h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        extensions
-    </div>
-    
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="index.js.html">index.js</a>,
-				 <a href="index.js.html#sunlight-1-line-67">line 67</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt class="name" id=".dependencies">
-    <h4><span class="type-signature">&lt;static> </span>dependencies<span class="type-signature"></span></h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        Expose Module Dependencies
-    </div>
-    
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="index.js.html">index.js</a>,
-				 <a href="index.js.html#sunlight-1-line-70">line 70</a>
+				<a href="index.js.html">index.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -1609,8 +2147,7 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="index.js.html">index.js</a>,
-				 <a href="index.js.html#sunlight-1-line-10">line 10</a>
+				<a href="index.js.html">index.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -1723,7 +2260,7 @@ $( function () {
 	} );
 
 	Sunlight.highlightAll( {
-		lineNumbers : true,
+		lineNumbers : false,
 		showMenu : true,
 		enableDoclinks : true
 	} );

@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Storj JS Class: Network</title>
+	<title>StorjCORE Class: Network</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -20,7 +20,7 @@
 <div class="navbar navbar-default navbar-fixed-top navbar-inverse">
 <div class="container">
 	<div class="navbar-header">
-		<a class="navbar-brand" href="index.html">Storj JS</a>
+		<a class="navbar-brand" href="index.html">StorjCORE</a>
 		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
 			<span class="icon-bar"></span>
 			<span class="icon-bar"></span>
@@ -33,21 +33,28 @@
 			<li class="dropdown">
 				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="module-storj.html">storj</a></li><li><a href="module-storj_abstract.html">storj/abstract</a></li><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_extensions.html">storj/extensions</a></li><li><a href="module-storj_utils.html">storj/utils</a></li>
+					<li><a href="module-storj.html">storj</a></li><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_utils.html">storj/utils</a></li>
 				</ul>
 			</li>
 			
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="FarmerFactory.html">FarmerFactory</a></li><li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="TelemetryReporter.html">TelemetryReporter</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Contact.html">Contact</a></li><li><a href="Network.html">Network</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="Transport.html">Transport</a></li><li><a href="Proof.html">Proof</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="Verification.html">Verification</a></li>
+					<li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DecryptStream.html">DecryptStream</a></li><li><a href="EncryptStream.html">EncryptStream</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="TelemetryReporter.html">TelemetryReporter</a></li><li><a href="FileDemuxer.html">FileDemuxer</a></li><li><a href="FileMuxer.html">FileMuxer</a></li><li><a href="FarmerInterface.html">FarmerInterface</a></li><li><a href="RenterInterface.html">RenterInterface</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Contact.html">Contact</a></li><li><a href="Network.html">Network</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="Transport.html">Transport</a></li><li><a href="Proof.html">Proof</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="TunnelClient.html">TunnelClient</a></li><li><a href="TunnelDemuxer.html">TunnelDemuxer</a></li><li><a href="TunnelGateway.html">TunnelGateway</a></li><li><a href="TunnelMuxer.html">TunnelMuxer</a></li><li><a href="TunnelServer.html">TunnelServer</a></li><li><a href="Verification.html">Verification</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="events.list.html" class="dropdown-toggle" data-toggle="dropdown">Events<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="FileDemuxer.html#event:shard">FileDemuxer#event:shard</a></li><li><a href="FileMuxer.html#event:drain">FileMuxer#event:drain</a></li><li><a href="TunnelClient.html#event:open">TunnelClient#event:open</a></li><li><a href="TunnelClient.html#event:close">TunnelClient#event:close</a></li><li><a href="TunnelGateway.html#event:message/rpc">TunnelGateway#event:message/rpc</a></li><li><a href="TunnelGateway.html#event:open">TunnelGateway#event:open</a></li><li><a href="TunnelGateway.html#event:close">TunnelGateway#event:close</a></li><li><a href="TunnelGateway.html#event:message/datachannel">TunnelGateway#event:message/datachannel</a></li><li><a href="TunnelServer.html#event:locked">TunnelServer#event:locked</a></li><li><a href="TunnelServer.html#event:unlocked">TunnelServer#event:unlocked</a></li>
 				</ul>
 			</li>
 			
 			<li class="dropdown">
 				<a href="tutorials.list.html" class="dropdown-toggle" data-toggle="dropdown">Tutorials<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="tutorial-abstract-interfaces.html">Abstract Interfaces</a></li><li><a href="tutorial-contract-topics.html">Publishing Storage Contracts</a></li><li><a href="tutorial-data-channels.html">Transferring File Shards</a></li><li><a href="tutorial-private-testnet.html">Running a Test Network</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li>
+					<li><a href="tutorial-contract-topics.html">Publishing Storage Contracts</a></li><li><a href="tutorial-data-channels.html">Transferring File Shards</a></li><li><a href="tutorial-private-testnet.html">Running a Test Network</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li><li><a href="tutorial-tunnel-connections.html">Tunnelling Connections</a></li>
 				</ul>
 			</li>
 			
@@ -230,30 +237,6 @@
 
         <tr>
             
-                <td class="name"><code>loglevel</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Number</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Verbosity level 0 - 4</td>
-        </tr>
-
-    
-
-        <tr>
-            
                 <td class="name"><code>logger</code></td>
             
 
@@ -298,73 +281,6 @@
             <td class="description last">List of seed URIs to join</td>
         </tr>
 
-    
-
-        <tr>
-            
-                <td class="name"><code>datadir</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Directory path to store data</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>contact</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <h6 class="method-params-label method-subparams-label">Properties</h6>
-                
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
     
 
         <tr>
@@ -414,17 +330,10 @@
         </tr>
 
     
-    </tbody>
-</table>
-
-            </td>
-        </tr>
-
-    
 
         <tr>
             
-                <td class="name"><code>farmer</code></td>
+                <td class="name"><code>opcodes</code></td>
             
 
             <td class="type">
@@ -466,6 +375,54 @@
             
 
             <td class="description last">Flag for skipping traversal strategies</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>tunnels</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Max number of tunnels to provide</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>tunport</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Port for tunnel server to use</td>
         </tr>
 
     
@@ -516,8 +473,7 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_network_index.js.html">lib/network/index.js</a>,
-				 <a href="lib_network_index.js.html#sunlight-1-line-43">line 43</a>
+				<a href="lib_network_index.js.html">lib/network/index.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -672,8 +628,7 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_network_index.js.html">lib/network/index.js</a>,
-				 <a href="lib_network_index.js.html#sunlight-1-line-115">line 115</a>
+				<a href="lib_network_index.js.html">lib/network/index.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -810,8 +765,7 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_network_index.js.html">lib/network/index.js</a>,
-				 <a href="lib_network_index.js.html#sunlight-1-line-156">line 156</a>
+				<a href="lib_network_index.js.html">lib/network/index.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -844,7 +798,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="audit"><span class="type-signature"></span>audit(hash, callback)</h4>
+    <h4 class="name" id="publish"><span class="type-signature"></span>publish(topic, contents)</h4>
     
     
 </dt>
@@ -852,10 +806,7 @@
 
     
     <div class="description">
-        Look up the storage contract by the hash to find the node who has
-the shard. Look up the appropriate challenge and send it to the node
-for verification. If successful, invalidate the challenge and pass,
-otherwise, invalidate the contract.
+        Publishes a topic with content to the network
     </div>
     
 
@@ -890,7 +841,7 @@ otherwise, invalidate the contract.
 
         <tr>
             
-                <td class="name"><code>hash</code></td>
+                <td class="name"><code>topic</code></td>
             
 
             <td class="type">
@@ -907,20 +858,20 @@ otherwise, invalidate the contract.
 
             
 
-            <td class="description last">RIPEMD-160 SHA-256 hash of the file to audit</td>
+            <td class="description last">The serialized opcode topic</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>callback</code></td>
+                <td class="name"><code>contents</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">function</span>
+<span class="param-type">Object</span>
 
 
 
@@ -931,7 +882,7 @@ otherwise, invalidate the contract.
 
             
 
-            <td class="description last">Called with validity information</td>
+            <td class="description last">Arbitrary publication contents</td>
         </tr>
 
     
@@ -975,8 +926,7 @@ otherwise, invalidate the contract.
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_network_index.js.html">lib/network/index.js</a>,
-				 <a href="lib_network_index.js.html#sunlight-1-line-169">line 169</a>
+				<a href="lib_network_index.js.html">lib/network/index.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -1009,7 +959,7 @@ otherwise, invalidate the contract.
             
 <hr>
 <dt>
-    <h4 class="name" id="retrieve"><span class="type-signature"></span>retrieve(hash, callback)</h4>
+    <h4 class="name" id="subscribe"><span class="type-signature"></span>subscribe(topic, handler)</h4>
     
     
 </dt>
@@ -1017,9 +967,7 @@ otherwise, invalidate the contract.
 
     
     <div class="description">
-        Look up the storage contract by the hash to find the node who has
-the shard, then execute a RETRIEVE RPC to the node and return the
-data as a buffer.
+        Subscribes to a topic on the network
     </div>
     
 
@@ -1054,7 +1002,7 @@ data as a buffer.
 
         <tr>
             
-                <td class="name"><code>hash</code></td>
+                <td class="name"><code>topic</code></td>
             
 
             <td class="type">
@@ -1071,20 +1019,20 @@ data as a buffer.
 
             
 
-            <td class="description last">RIPEMD-160 SHA-256 hash of the file to retrieve</td>
+            <td class="description last">The serialized opcode topic</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>callback</code></td>
+                <td class="name"><code>handler</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">function</span>
+<span class="param-type">Object</span>
 
 
 
@@ -1095,7 +1043,7 @@ data as a buffer.
 
             
 
-            <td class="description last">Called with an error or the file buffer</td>
+            <td class="description last">Function to handle received publications</td>
         </tr>
 
     
@@ -1139,8 +1087,7 @@ data as a buffer.
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_network_index.js.html">lib/network/index.js</a>,
-				 <a href="lib_network_index.js.html#sunlight-1-line-233">line 233</a>
+				<a href="lib_network_index.js.html">lib/network/index.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -1173,7 +1120,7 @@ data as a buffer.
             
 <hr>
 <dt>
-    <h4 class="name" id="store"><span class="type-signature"></span>store(data, duration, callback)</h4>
+    <h4 class="name" id="connect"><span class="type-signature"></span>connect(uri, callback)</h4>
     
     
 </dt>
@@ -1181,10 +1128,7 @@ data as a buffer.
 
     
     <div class="description">
-        Create a contract from the data and options supplied and publish it
-on the network. Keep track of the pending contract until it becomes
-fulfilled by an OFFER, then issue a CONSIGN RPC to the offerer and
-callback when the data is stored.
+        Connects to the node at the given URI
     </div>
     
 
@@ -1219,31 +1163,7 @@ callback when the data is stored.
 
         <tr>
             
-                <td class="name"><code>data</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Buffer</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Raw binary blob to store</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>duration</code></td>
+                <td class="name"><code>uri</code></td>
             
 
             <td class="type">
@@ -1260,7 +1180,7 @@ callback when the data is stored.
 
             
 
-            <td class="description last">String representation of time for `ms` like "2w"</td>
+            <td class="description last">The storj protocol URI to connect</td>
         </tr>
 
     
@@ -1284,7 +1204,7 @@ callback when the data is stored.
 
             
 
-            <td class="description last">Called on successful store</td>
+            <td class="description last">Called on connection or error</td>
         </tr>
 
     
@@ -1328,8 +1248,7 @@ callback when the data is stored.
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_network_index.js.html">lib/network/index.js</a>,
-				 <a href="lib_network_index.js.html#sunlight-1-line-292">line 292</a>
+				<a href="lib_network_index.js.html">lib/network/index.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -1452,7 +1371,7 @@ $( function () {
 	} );
 
 	Sunlight.highlightAll( {
-		lineNumbers : true,
+		lineNumbers : false,
 		showMenu : true,
 		enableDoclinks : true
 	} );

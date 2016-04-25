@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Storj JS Source: lib/network/protocol.js</title>
+	<title>StorjCORE Source: lib/network/protocol.js</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -20,7 +20,7 @@
 <div class="navbar navbar-default navbar-fixed-top navbar-inverse">
 <div class="container">
 	<div class="navbar-header">
-		<a class="navbar-brand" href="index.html">Storj JS</a>
+		<a class="navbar-brand" href="index.html">StorjCORE</a>
 		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
 			<span class="icon-bar"></span>
 			<span class="icon-bar"></span>
@@ -33,21 +33,28 @@
 			<li class="dropdown">
 				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="module-storj.html">storj</a></li><li><a href="module-storj_abstract.html">storj/abstract</a></li><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_extensions.html">storj/extensions</a></li><li><a href="module-storj_utils.html">storj/utils</a></li>
+					<li><a href="module-storj.html">storj</a></li><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_utils.html">storj/utils</a></li>
 				</ul>
 			</li>
 			
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="FarmerFactory.html">FarmerFactory</a></li><li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="TelemetryReporter.html">TelemetryReporter</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Contact.html">Contact</a></li><li><a href="Network.html">Network</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="Transport.html">Transport</a></li><li><a href="Proof.html">Proof</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="Verification.html">Verification</a></li>
+					<li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DecryptStream.html">DecryptStream</a></li><li><a href="EncryptStream.html">EncryptStream</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="TelemetryReporter.html">TelemetryReporter</a></li><li><a href="FileDemuxer.html">FileDemuxer</a></li><li><a href="FileMuxer.html">FileMuxer</a></li><li><a href="FarmerInterface.html">FarmerInterface</a></li><li><a href="RenterInterface.html">RenterInterface</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Contact.html">Contact</a></li><li><a href="Network.html">Network</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="Transport.html">Transport</a></li><li><a href="Proof.html">Proof</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="TunnelClient.html">TunnelClient</a></li><li><a href="TunnelDemuxer.html">TunnelDemuxer</a></li><li><a href="TunnelGateway.html">TunnelGateway</a></li><li><a href="TunnelMuxer.html">TunnelMuxer</a></li><li><a href="TunnelServer.html">TunnelServer</a></li><li><a href="Verification.html">Verification</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="events.list.html" class="dropdown-toggle" data-toggle="dropdown">Events<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="FileDemuxer.html#event:shard">FileDemuxer#event:shard</a></li><li><a href="FileMuxer.html#event:drain">FileMuxer#event:drain</a></li><li><a href="TunnelClient.html#event:open">TunnelClient#event:open</a></li><li><a href="TunnelClient.html#event:close">TunnelClient#event:close</a></li><li><a href="TunnelGateway.html#event:message/rpc">TunnelGateway#event:message/rpc</a></li><li><a href="TunnelGateway.html#event:open">TunnelGateway#event:open</a></li><li><a href="TunnelGateway.html#event:close">TunnelGateway#event:close</a></li><li><a href="TunnelGateway.html#event:message/datachannel">TunnelGateway#event:message/datachannel</a></li><li><a href="TunnelServer.html#event:locked">TunnelServer#event:locked</a></li><li><a href="TunnelServer.html#event:unlocked">TunnelServer#event:unlocked</a></li>
 				</ul>
 			</li>
 			
 			<li class="dropdown">
 				<a href="tutorials.list.html" class="dropdown-toggle" data-toggle="dropdown">Tutorials<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="tutorial-abstract-interfaces.html">Abstract Interfaces</a></li><li><a href="tutorial-contract-topics.html">Publishing Storage Contracts</a></li><li><a href="tutorial-data-channels.html">Transferring File Shards</a></li><li><a href="tutorial-private-testnet.html">Running a Test Network</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li>
+					<li><a href="tutorial-contract-topics.html">Publishing Storage Contracts</a></li><li><a href="tutorial-data-channels.html">Transferring File Shards</a></li><li><a href="tutorial-private-testnet.html">Running a Test Network</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li><li><a href="tutorial-tunnel-connections.html">Tunnelling Connections</a></li>
 				</ul>
 			</li>
 			
@@ -82,7 +89,7 @@
 <section>
     <article>
         <pre
-            class="sunlight-highlight-javascript linenums">'use strict';
+            class="sunlight-highlight-javascript ">'use strict';
 
 var assert = require('assert');
 var utils = require('../utils');
@@ -90,6 +97,7 @@ var Proof = require('../proof');
 var Contract = require('../contract');
 var StorageItem = require('../storage/item');
 var stream = require('stream');
+var kad = require('kad');
 
 /**
  * Defines the Storj protocol methods and mounts on a {@link Network} instance
@@ -106,6 +114,7 @@ function Protocol(opts) {
   assert(typeof opts === 'object' , 'Invalid options supplied');
 
   this._network = opts.network;
+  this._logger = this._network._logger;
 }
 
 /**
@@ -115,7 +124,12 @@ function Protocol(opts) {
  * @param {Function} callback
  */
 Protocol.prototype._handleOffer = function(params, callback) {
+  var self = this;
   var contract;
+
+  this._logger.info(
+    'handling storage contract offer from %s', params.contact.nodeID
+  );
 
   try {
     contract = Contract.fromObject(params.contract);
@@ -129,41 +143,58 @@ Protocol.prototype._handleOffer = function(params, callback) {
   // TODO: from the OFFER and we wish to CONSIGN it.
 
   // For now, we just accept any storage offer we get that matches our own...
-  var self = this;
   var key = contract.get('data_hash');
 
-  if (!self._network._pendingContracts[key]) {
+  this._verifyContract(contract, params.contact, function(err) {
+    if (err) {
+      return callback(err);
+    }
+
+    var doConsign = self._network._pendingContracts[key].bind(
+      self._network,
+      params.contact
+    );
+    delete self._network._pendingContracts[key];
+
+    var item = new StorageItem({ hash: key });
+
+    item.contracts[params.contact.nodeID] = contract;
+
+    self._network._manager.save(item, function(err) {
+      if (err) {
+        return callback(err);
+      }
+
+      self._logger.info(
+        'accepting storage contract offer from %s', params.contact.nodeID
+      );
+
+      callback(null, { contract: contract.toObject() });
+      doConsign();
+    });
+  });
+};
+
+/**
+ * Verifies that the contract is valid
+ * @private
+ */
+Protocol.prototype._verifyContract = function(contract, contact, callback) {
+  if (!this._network._pendingContracts[contract.get('data_hash')]) {
     return callback(new Error('Contract no longer open to offers'));
   }
 
-  if (!contract.verify('farmer', params.contact.nodeID)) {
+  if (!contract.verify('farmer', contact.nodeID)) {
     return callback(new Error('Invalid signature from farmer'));
   }
 
-  contract.sign('renter', self._network._keypair.getPrivateKey());
+  contract.sign('renter', this._network._keypair.getPrivateKey());
 
   if (!contract._complete()) {
     return callback(new Error('Contract is not complete'));
   }
 
-  var doConsign = self._network._pendingContracts[key].bind(
-    self._network,
-    params.contact
-  );
-  delete self._network._pendingContracts[key];
-
-  var item = new StorageItem({ hash: key });
-
-  item.contracts[params.contact.nodeID] = contract;
-
-  self._network._manager.save(item, function(err) {
-    if (err) {
-      return callback(err);
-    }
-
-    callback(null, { contract: contract.toObject() });
-    doConsign();
-  });
+  callback(null);
 };
 
 /**
@@ -175,6 +206,10 @@ Protocol.prototype._handleOffer = function(params, callback) {
 Protocol.prototype._handleAudit = function(params, callback) {
   var self = this;
   var shard = new Buffer([]);
+
+  this._logger.info(
+    'handling storage audit from %s', params.contact.nodeID
+  );
 
   self._network._manager.load(params.data_hash, function(err, item) {
     if (err) {
@@ -210,6 +245,10 @@ Protocol.prototype._handleConsign = function(params, callback) {
   var self = this;
   var token = utils.generateToken();
 
+  this._logger.info(
+    'handling storage consignment request from %s', params.contact.nodeID
+  );
+
   self._network._manager.load(params.data_hash, function(err, item) {
     if (err) {
       return callback(err);
@@ -232,6 +271,10 @@ Protocol.prototype._handleConsign = function(params, callback) {
       if (err) {
         return callback(err);
       }
+
+      self._logger.info(
+        'authorizing data channel for %s', params.contact.nodeID
+      );
 
       self._network._channel.accept(token, params.data_hash);
       callback(null, { token: token });
@@ -259,20 +302,143 @@ Protocol.prototype._handleRetrieve = function(params, callback) {
       return callback(err);
     }
 
+    self._logger.info(
+      'authorizing data channel for %s', params.contact.nodeID
+    );
+
     self._network._channel.accept(token, item.hash);
     callback(null, { token: token });
   });
 };
 
 /**
+ * Handles PROBE messages
+ * @private
+ * @param {Object} params
+ * @param {Function} callback
+ */
+Protocol.prototype._handleProbe = function(params, callback) {
+  var message = new kad.Message({
+    method: 'PING',
+    params: { contact: this._network._contact }
+  });
+
+  this._logger.info('performing probe for %s', params.contact.nodeID);
+  this._network._transport.send(params.contact, message, function(err) {
+    if (err) {
+      return callback(new Error('Probe failed, you are not addressable'));
+    }
+
+    callback(null, {});
+  });
+};
+
+/**
+ * Handles FIND_TUNNEL messages
+ * @private
+ * @param {Object} params
+ * @param {Function} callback
+ */
+Protocol.prototype._handleFindTunnel = function(params, callback) {
+  var available = this._network._transport._tunserver.hasTunnelAvailable();
+  var tunnels = [];
+
+  this._logger.info('finding tunnels for %s', params.contact.nodeID);
+
+  if (available) {
+    tunnels.push(this._network._contact);
+  }
+
+  if (tunnels.length) {
+    this._logger.info(
+      'sending %s tunnels to %s', tunnels.length, params.contact.nodeID
+    );
+    return callback(null, {
+      tunnels: tunnels.concat(this._network._tunnelers.getContactList())
+    });
+  }
+
+  this._askSeedForTunnels(callback);
+};
+
+/**
+ * Sends a FIND_TUNNEL to our seed on behalf of requester
+ * @private
+ */
+Protocol.prototype._askSeedForTunnels = function(callback) {
+  if (!this._network._options.seeds[0]) {
+    this._logger.info('there are no known tunnels to provide');
+    return callback(new Error('No known tunnels to provide'));
+  }
+
+  this._logger.info('asking original seed for known tunnels');
+
+  this._network._transport.send(
+    this._network._createContact(this._network._options.seeds[0]),
+    kad.Message({
+      method: 'FIND_TUNNEL',
+      params: { contact: this._network._contact }
+    }),
+    function(err, response) {
+      if (err) {
+        return callback(err);
+      }
+
+      callback(null, { tunnels: response.result.tunnels });
+    }
+  );
+};
+
+/**
+ * Handles OPEN_TUNNEL messages
+ * @private
+ * @param {Object} params
+ * @param {Function} callback
+ */
+Protocol.prototype._handleOpenTunnel = function(params, callback) {
+  var self = this;
+
+  this._logger.info('opening gateway for %s', params.contact.nodeID);
+  this._network._transport._tunserver.createGateway(function(err, gateway) {
+    if (err) {
+      return callback(err);
+    }
+
+    var tunnel = [
+      'ws://',
+      self._network._contact.address,
+      ':',
+      self._network._transport._tunserver.getListeningPort(),
+      '/tun?token=',
+      gateway.getEntranceToken()
+    ].join('');
+
+    var alias = {
+      address: self._network._contact.address,
+      port: gateway.getEntranceAddress().port
+    };
+
+    self._logger.info(
+      'gateway opened for %s at %j', params.contact.nodeID, alias
+    );
+
+    callback(null, { tunnel: tunnel, alias: alias });
+  });
+};
+
+/**
  * Returns bound references to the protocol handlers
+ * @returns {Object} handlers
  */
 Protocol.prototype.handlers = function() {
   return {
     OFFER: this._handleOffer.bind(this),
     AUDIT: this._handleAudit.bind(this),
     CONSIGN: this._handleConsign.bind(this),
-    RETRIEVE: this._handleRetrieve.bind(this)
+    RETRIEVE: this._handleRetrieve.bind(this),
+    PROBE: this._handleProbe.bind(this),
+    FIND_TUNNEL: this._handleFindTunnel.bind(this),
+    OPEN_TUNNEL: this._handleOpenTunnel.bind(this)
   };
 };
 
@@ -362,7 +528,7 @@ $( function () {
 	} );
 
 	Sunlight.highlightAll( {
-		lineNumbers : true,
+		lineNumbers : false,
 		showMenu : true,
 		enableDoclinks : true
 	} );

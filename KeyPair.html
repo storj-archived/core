@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Storj JS Class: KeyPair</title>
+	<title>StorjCORE Class: KeyPair</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -20,7 +20,7 @@
 <div class="navbar navbar-default navbar-fixed-top navbar-inverse">
 <div class="container">
 	<div class="navbar-header">
-		<a class="navbar-brand" href="index.html">Storj JS</a>
+		<a class="navbar-brand" href="index.html">StorjCORE</a>
 		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
 			<span class="icon-bar"></span>
 			<span class="icon-bar"></span>
@@ -33,21 +33,28 @@
 			<li class="dropdown">
 				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="module-storj.html">storj</a></li><li><a href="module-storj_abstract.html">storj/abstract</a></li><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_extensions.html">storj/extensions</a></li><li><a href="module-storj_utils.html">storj/utils</a></li>
+					<li><a href="module-storj.html">storj</a></li><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_utils.html">storj/utils</a></li>
 				</ul>
 			</li>
 			
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="FarmerFactory.html">FarmerFactory</a></li><li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="TelemetryReporter.html">TelemetryReporter</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Contact.html">Contact</a></li><li><a href="Network.html">Network</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="Transport.html">Transport</a></li><li><a href="Proof.html">Proof</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="Verification.html">Verification</a></li>
+					<li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DecryptStream.html">DecryptStream</a></li><li><a href="EncryptStream.html">EncryptStream</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="TelemetryReporter.html">TelemetryReporter</a></li><li><a href="FileDemuxer.html">FileDemuxer</a></li><li><a href="FileMuxer.html">FileMuxer</a></li><li><a href="FarmerInterface.html">FarmerInterface</a></li><li><a href="RenterInterface.html">RenterInterface</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Contact.html">Contact</a></li><li><a href="Network.html">Network</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="Transport.html">Transport</a></li><li><a href="Proof.html">Proof</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="TunnelClient.html">TunnelClient</a></li><li><a href="TunnelDemuxer.html">TunnelDemuxer</a></li><li><a href="TunnelGateway.html">TunnelGateway</a></li><li><a href="TunnelMuxer.html">TunnelMuxer</a></li><li><a href="TunnelServer.html">TunnelServer</a></li><li><a href="Verification.html">Verification</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="events.list.html" class="dropdown-toggle" data-toggle="dropdown">Events<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="FileDemuxer.html#event:shard">FileDemuxer#event:shard</a></li><li><a href="FileMuxer.html#event:drain">FileMuxer#event:drain</a></li><li><a href="TunnelClient.html#event:open">TunnelClient#event:open</a></li><li><a href="TunnelClient.html#event:close">TunnelClient#event:close</a></li><li><a href="TunnelGateway.html#event:message/rpc">TunnelGateway#event:message/rpc</a></li><li><a href="TunnelGateway.html#event:open">TunnelGateway#event:open</a></li><li><a href="TunnelGateway.html#event:close">TunnelGateway#event:close</a></li><li><a href="TunnelGateway.html#event:message/datachannel">TunnelGateway#event:message/datachannel</a></li><li><a href="TunnelServer.html#event:locked">TunnelServer#event:locked</a></li><li><a href="TunnelServer.html#event:unlocked">TunnelServer#event:unlocked</a></li>
 				</ul>
 			</li>
 			
 			<li class="dropdown">
 				<a href="tutorials.list.html" class="dropdown-toggle" data-toggle="dropdown">Tutorials<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="tutorial-abstract-interfaces.html">Abstract Interfaces</a></li><li><a href="tutorial-contract-topics.html">Publishing Storage Contracts</a></li><li><a href="tutorial-data-channels.html">Transferring File Shards</a></li><li><a href="tutorial-private-testnet.html">Running a Test Network</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li>
+					<li><a href="tutorial-contract-topics.html">Publishing Storage Contracts</a></li><li><a href="tutorial-data-channels.html">Transferring File Shards</a></li><li><a href="tutorial-private-testnet.html">Running a Test Network</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li><li><a href="tutorial-tunnel-connections.html">Tunnelling Connections</a></li>
 				</ul>
 			</li>
 			
@@ -203,8 +210,7 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_keypair.js.html">lib/keypair.js</a>,
-				 <a href="lib_keypair.js.html#sunlight-1-line-11">line 11</a>
+				<a href="lib_keypair.js.html">lib/keypair.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -309,8 +315,7 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_keypair.js.html">lib/keypair.js</a>,
-				 <a href="lib_keypair.js.html#sunlight-1-line-30">line 30</a>
+				<a href="lib_keypair.js.html">lib/keypair.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -421,8 +426,7 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_keypair.js.html">lib/keypair.js</a>,
-				 <a href="lib_keypair.js.html#sunlight-1-line-38">line 38</a>
+				<a href="lib_keypair.js.html">lib/keypair.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -533,8 +537,7 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_keypair.js.html">lib/keypair.js</a>,
-				 <a href="lib_keypair.js.html#sunlight-1-line-46">line 46</a>
+				<a href="lib_keypair.js.html">lib/keypair.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -645,8 +648,7 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_keypair.js.html">lib/keypair.js</a>,
-				 <a href="lib_keypair.js.html#sunlight-1-line-56">line 56</a>
+				<a href="lib_keypair.js.html">lib/keypair.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -794,6 +796,15 @@
     
 
 	
+	<dt class="important tag-deprecated method-doc-label method-doc-details-label">Deprecated:</dt>
+	
+    <dd>
+        <ul class="dummy">
+            <li>since v0.6.0 - use <a href="EncryptStream.html">EncryptStream</a> instead</li>
+        </ul>
+    </dd>
+    
+    
 
 	
 
@@ -810,8 +821,7 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_keypair.js.html">lib/keypair.js</a>,
-				 <a href="lib_keypair.js.html#sunlight-1-line-67">line 67</a>
+				<a href="lib_keypair.js.html">lib/keypair.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -955,6 +965,15 @@
     
 
 	
+	<dt class="important tag-deprecated method-doc-label method-doc-details-label">Deprecated:</dt>
+	
+    <dd>
+        <ul class="dummy">
+            <li>since v0.6.0 - use <a href="DecryptStream.html">DecryptStream</a> instead</li>
+        </ul>
+    </dd>
+    
+    
 
 	
 
@@ -971,8 +990,7 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_keypair.js.html">lib/keypair.js</a>,
-				 <a href="lib_keypair.js.html#sunlight-1-line-76">line 76</a>
+				<a href="lib_keypair.js.html">lib/keypair.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -1115,7 +1133,7 @@ $( function () {
 	} );
 
 	Sunlight.highlightAll( {
-		lineNumbers : true,
+		lineNumbers : false,
 		showMenu : true,
 		enableDoclinks : true
 	} );

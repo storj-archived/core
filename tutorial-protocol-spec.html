@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Storj JS Tutorial: Protocol Specification</title>
+	<title>StorjCORE Tutorial: Protocol Specification</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -20,7 +20,7 @@
 <div class="navbar navbar-default navbar-fixed-top navbar-inverse">
 <div class="container">
 	<div class="navbar-header">
-		<a class="navbar-brand" href="index.html">Storj JS</a>
+		<a class="navbar-brand" href="index.html">StorjCORE</a>
 		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
 			<span class="icon-bar"></span>
 			<span class="icon-bar"></span>
@@ -33,21 +33,28 @@
 			<li class="dropdown">
 				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="module-storj.html">storj</a></li><li><a href="module-storj_abstract.html">storj/abstract</a></li><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_extensions.html">storj/extensions</a></li><li><a href="module-storj_utils.html">storj/utils</a></li>
+					<li><a href="module-storj.html">storj</a></li><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_utils.html">storj/utils</a></li>
 				</ul>
 			</li>
 			
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="FarmerFactory.html">FarmerFactory</a></li><li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="TelemetryReporter.html">TelemetryReporter</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Contact.html">Contact</a></li><li><a href="Network.html">Network</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="Transport.html">Transport</a></li><li><a href="Proof.html">Proof</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="Verification.html">Verification</a></li>
+					<li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DecryptStream.html">DecryptStream</a></li><li><a href="EncryptStream.html">EncryptStream</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="TelemetryReporter.html">TelemetryReporter</a></li><li><a href="FileDemuxer.html">FileDemuxer</a></li><li><a href="FileMuxer.html">FileMuxer</a></li><li><a href="FarmerInterface.html">FarmerInterface</a></li><li><a href="RenterInterface.html">RenterInterface</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Contact.html">Contact</a></li><li><a href="Network.html">Network</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="Transport.html">Transport</a></li><li><a href="Proof.html">Proof</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="TunnelClient.html">TunnelClient</a></li><li><a href="TunnelDemuxer.html">TunnelDemuxer</a></li><li><a href="TunnelGateway.html">TunnelGateway</a></li><li><a href="TunnelMuxer.html">TunnelMuxer</a></li><li><a href="TunnelServer.html">TunnelServer</a></li><li><a href="Verification.html">Verification</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="events.list.html" class="dropdown-toggle" data-toggle="dropdown">Events<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="FileDemuxer.html#event:shard">FileDemuxer#event:shard</a></li><li><a href="FileMuxer.html#event:drain">FileMuxer#event:drain</a></li><li><a href="TunnelClient.html#event:open">TunnelClient#event:open</a></li><li><a href="TunnelClient.html#event:close">TunnelClient#event:close</a></li><li><a href="TunnelGateway.html#event:message/rpc">TunnelGateway#event:message/rpc</a></li><li><a href="TunnelGateway.html#event:open">TunnelGateway#event:open</a></li><li><a href="TunnelGateway.html#event:close">TunnelGateway#event:close</a></li><li><a href="TunnelGateway.html#event:message/datachannel">TunnelGateway#event:message/datachannel</a></li><li><a href="TunnelServer.html#event:locked">TunnelServer#event:locked</a></li><li><a href="TunnelServer.html#event:unlocked">TunnelServer#event:unlocked</a></li>
 				</ul>
 			</li>
 			
 			<li class="dropdown">
 				<a href="tutorials.list.html" class="dropdown-toggle" data-toggle="dropdown">Tutorials<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="tutorial-abstract-interfaces.html">Abstract Interfaces</a></li><li><a href="tutorial-contract-topics.html">Publishing Storage Contracts</a></li><li><a href="tutorial-data-channels.html">Transferring File Shards</a></li><li><a href="tutorial-private-testnet.html">Running a Test Network</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li>
+					<li><a href="tutorial-contract-topics.html">Publishing Storage Contracts</a></li><li><a href="tutorial-data-channels.html">Transferring File Shards</a></li><li><a href="tutorial-private-testnet.html">Running a Test Network</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li><li><a href="tutorial-tunnel-connections.html">Tunnelling Connections</a></li>
 				</ul>
 			</li>
 			
@@ -169,11 +176,203 @@ an ECDSA key pair. Key pairs are generated using curve SECP256K1 and a node's
 reconstruct the complete public key and is used in the Storj network to sign
 and verify messages. This ensures that nodes are unable to assume the identity
 of another node by claiming it has the same <code>nodeID</code>.</p>
-<p>Joining the network begins with a <code>FIND_NODE</code> request sent to one or more
-known seeds. The request must include a <code>key</code>, <code>contact</code> (you), along with a
-<code>signature</code> and <code>nonce</code>.</p>
+<h4>PROBE</h4><p>Before a node can join the network, it must determine whether or not it is
+reachable (or <em>publicly addressable</em>). This can be determined by sending a
+<code>PROBE</code> request to a known seed.</p>
+<pre class="prettyprint source"><code>{
+  &quot;method&quot;: &quot;PROBE&quot;,
+  &quot;params&quot;: {
+    &quot;contact&quot;: {
+      &quot;address&quot;: &quot;10.0.0.3&quot;,
+      &quot;port&quot;: 1337,
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+      &quot;protocol&quot;: &quot;0.6.0&quot;
+    },
+    &quot;nonce&quot;: 1455216323786,
+    &quot;signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+  },
+  &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
+}</code></pre><p>The <code>PROBE</code> RPC message triggers the recipient to attempt to reach the
+supplied <a href="Contact.html">Contact</a> directly by sending a <code>PING</code> RPC message. If the
+target <a href="Contact.html">Contact</a> reponds to the <code>PING</code>, then the <code>PROBE</code> should yield
+a success response, which is indicated by simply responding to the RPC
+message with only the required parameters and <strong>no</strong> <code>error</code> property.</p>
+<pre class="prettyprint source"><code>{
+  &quot;result&quot;: {
+    &quot;contact&quot;: {
+      &quot;address&quot;: &quot;10.0.0.3&quot;,
+      &quot;port&quot;: 1337,
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+      &quot;protocol&quot;: &quot;0.6.0&quot;
+    },
+    &quot;nonce&quot;: 1455216323786,
+    &quot;signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+  },
+  &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
+}</code></pre><p>If the <code>PING</code> message triggered by the <code>PROBE</code> fails, then the recipient of the
+<code>PROBE</code> RPC must respond with an error indicating to the sender that she is not
+addressable.</p>
+<pre class="prettyprint source"><code>{
+  &quot;result&quot;: {
+    &quot;contact&quot;: {
+      &quot;address&quot;: &quot;10.0.0.3&quot;,
+      &quot;port&quot;: 1337,
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+      &quot;protocol&quot;: &quot;0.6.0&quot;
+    },
+    &quot;nonce&quot;: 1455216323786,
+    &quot;signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+  },
+  &quot;error&quot;: {
+    &quot;code&quot;: -32603,
+    &quot;message&quot;: &quot;PROBE FAILED&quot;
+  },
+  &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
+}</code></pre><p>If the <code>PROBE</code> fails, you cannot successfully join the overlay and need to
+establish a <strong>tunnel</strong> through a node that <em>is</em> addressable on the network.</p>
+<h4>FIND_TUNNEL</h4><p>Finding a node that is willing to tunnel your connection to the overlay begins
+with a <code>FIND_TUNNEL</code> RPC message sent to a known seed. Nodes on the network
+maintain a record of known nodes that are willing to tunnel, by subscribing to
+&quot;tunnel announcements&quot; over the publish/subscribe system.</p>
+<blockquote>
+<p>For more information on how nodes announce willingness to tunnel, see the
+documentation for <a href="tutorial-tunnel-connections.html">Tunnelling Connections</a>.</p>
+</blockquote>
+<pre class="prettyprint source"><code>{
+  &quot;method&quot;: &quot;FIND_TUNNEL&quot;,
+  &quot;params&quot;: {
+    &quot;contact&quot;: {
+      &quot;address&quot;: &quot;10.0.0.3&quot;,
+      &quot;port&quot;: 1337,
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+      &quot;protocol&quot;: &quot;0.3.0&quot;
+    },
+    &quot;nonce&quot;: 1455216323786,
+    &quot;signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+  },
+  &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
+}</code></pre><p>When a node receives a <code>FIND_TUNNEL</code> message, it should respond with <code>ALPHA</code>
+(3) contacts that are close the the sender's <code>nodeID</code> who have previously
+published their willingness to tunnel. If the recipient herself is willing to
+tunnel the connection, she may include herself in the response even if her
+<code>nodeID</code> is not closer to the sender's <code>nodeID</code> than her known tunnels.</p>
+<pre class="prettyprint source"><code>{
+  &quot;result&quot;: {
+    &quot;tunnels&quot;: [
+      {
+        &quot;address&quot;: &quot;10.0.0.4&quot;,
+        &quot;port&quot;: 1337,
+        &quot;nodeID&quot;: &quot;58dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+        &quot;protocol&quot;: &quot;0.6.0&quot;
+      },
+      {
+        &quot;address&quot;: &quot;10.0.0.5&quot;,
+        &quot;port&quot;: 1337,
+        &quot;nodeID&quot;: &quot;68dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+        &quot;protocol&quot;: &quot;0.6.0&quot;
+      },
+      {
+        &quot;address&quot;: &quot;10.0.0.6&quot;,
+        &quot;port&quot;: 1337,
+        &quot;nodeID&quot;: &quot;78dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+        &quot;protocol&quot;: &quot;0.6.0&quot;
+      }
+    ],
+    &quot;contact&quot;: {
+      &quot;address&quot;: &quot;10.0.0.3&quot;,
+      &quot;port&quot;: 1337,
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+      &quot;protocol&quot;: &quot;0.6.0&quot;
+    },
+    &quot;nonce&quot;: 1455216323786,
+    &quot;signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+  },
+  &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
+}</code></pre><p>The result of a <code>FIND_TUNNEL</code> message looks almost identical to the result of a
+<code>FIND_NODE</code> message, with the exception being the name of the result key is
+<code>tunnels</code> instead of <code>nodes</code>. Now that the original sender possesses the
+contact information for some known tunnels, she should keep them in her record
+so that she can later respond to other's <code>FIND_TUNNEL</code> requests appropriately.</p>
+<p>Before the node can join the overlay (after determining it is not publicly
+addressable), it needs to establish a connection tunnel through one of the
+<a href="Contact.html">Contact</a>s received from the <code>FIND_TUNNEL</code> request.</p>
+<h4>OPEN_TUNNEL</h4><p>Establishing a tunnel is initiated by sending an <code>OPEN_TUNNEL</code> RPC message to a
+node who has indicated their willingness to tunnel. Only the minimum required
+parameters need to be sent.</p>
+<blockquote>
+<p>In the future, the protocol may be enhanced to include additional information
+in the <code>OPEN_TUNNEL</code> RPC for negotiating payment channels or other conditions.</p>
+</blockquote>
+<pre class="prettyprint source"><code>{
+  &quot;method&quot;: &quot;OPEN_TUNNEL&quot;,
+  &quot;params&quot;: {
+    &quot;contact&quot;: {
+      &quot;address&quot;: &quot;10.0.0.3&quot;,
+      &quot;port&quot;: 1337,
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+      &quot;protocol&quot;: &quot;0.6.0&quot;
+    },
+    &quot;nonce&quot;: 1455216323786,
+    &quot;signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+  },
+  &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
+}</code></pre><p>The recipient of the <code>OPEN_TUNNEL</code> message must determine whether or not she
+can satisfy the request. This decision may be based upon an arbitrary limit
+set by the node regarding how many concurrent tunnels she wishes to open,
+available bandwidth, etc. If the node is capable of establishing the tunnel,
+she must do so, assigning a dedicated address or port to receive messages and
+data channel requests (see <a href="tutorial-data-channels.html">Transferring File Shards</a>).</p>
+<p>Once the tunnel's dedicated entry point has been established, she responds to
+the sender of the <code>OPEN_TUNNEL</code> request with a unique WebSocket URI that
+includes a token, as well as an <code>alias</code> property which contains the contact
+information for the new entry point through which data will enter the tunnel.</p>
+<pre class="prettyprint source"><code>{
+  &quot;result&quot;: {
+    &quot;tunnel&quot;: &quot;ws://10.0.0.3:1337/tun?token=2bfb23f98e72&quot;,
+    &quot;alias&quot;: {
+      &quot;address&quot;: &quot;10.0.0.3&quot;,
+      &quot;port&quot;: 1338
+    },
+    &quot;contact&quot;: {
+      &quot;address&quot;: &quot;10.0.0.3&quot;,
+      &quot;port&quot;: 1337,
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+      &quot;protocol&quot;: &quot;0.6.0&quot;
+    },
+    &quot;nonce&quot;: 1455216323786,
+    &quot;signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+  },
+  &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
+}</code></pre><p>This response indicates that a tunnel has been established and the original
+sender can receive messages from the overlay by opening a WebSocket connection
+to the <code>tunnel</code> address in the reply. In addition, the sender must update it's
+<a href="Contact.html">Contact</a> information to the included <code>alias</code> so that it can be reached
+by other peers in the overlay.</p>
+<p>If the recipient of the <code>OPEN_TUNNEL</code> message is not able to establish a tunnel
+for the sender, then she may respond with an error so that the sender can
+attempt to open a tunnel with other known contact.</p>
+<pre class="prettyprint source"><code>{
+  &quot;result&quot;: {
+    &quot;contact&quot;: {
+      &quot;address&quot;: &quot;10.0.0.3&quot;,
+      &quot;port&quot;: 1337,
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+      &quot;protocol&quot;: &quot;0.6.0&quot;
+    },
+    &quot;nonce&quot;: 1455216323786,
+    &quot;signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+  },
+  &quot;error&quot;: {
+    &quot;code&quot;: -32603,
+    &quot;message&quot;: &quot;Failed to establish tunnel, multiplexer full&quot;
+  },
+  &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
+}</code></pre><p>Once your node has determined that it is publicly addressable on the network
+or has successfully established a tunnel, it can join the overlay network by
+issuing a <code>FIND_NODE</code> request sent to one or more known seeds. The request must
+include a <code>key</code>, <code>contact</code> (you), along with a <code>signature</code> and <code>nonce</code>.</p>
 <h4>FIND_NODE</h4><p>When issuing a <code>FIND_NODE</code> request, you provide a <code>key</code> that represents the
-<code>nodeID</code> of the contact of which you would like to their neighbors. When
+<code>nodeID</code> of the contact of which you would like to know their neighbors. When
 joining the network, this value is <em>your own <code>nodeID</code></em>.</p>
 <pre class="prettyprint source"><code>{
   &quot;method&quot;: &quot;FIND_NODE&quot;,
@@ -324,7 +523,7 @@ information on how to choose a valid contract type for your storage needs.</p>
   &quot;method&quot;: &quot;PUBLISH&quot;,
   &quot;params&quot;: {
     &quot;uuid&quot;: &quot;7f0c40a2-e465-4f3e-b617-3d53460e34f7&quot;,
-    &quot;topic&quot;: &quot;02010303&quot;,
+    &quot;topic&quot;: &quot;0f02010303&quot;,
     &quot;contents&quot;: {
       &quot;type&quot;: &quot;56ce3e837f575827cb5a94e2b609756a48fa4a3882f5e762b262af31f432878d&quot;,
       &quot;renter_id&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
@@ -575,7 +774,7 @@ the supplied <code>data_hash</code>, then calculate the <em>single</em>
 <p>The result of this operation should hash again to match one of the items
 supplied in the <code>audit_tree</code> property of the original <code>CONSIGN</code> request.</p>
 </blockquote>
-<p>In addition to supplying this value as proof that the farmer is still honoring
+<p>In addition to supplying this single-hashed value as proof that the farmer is still honoring
 the terms of the contract, the farmer must <em>also</em> provide the uncles required
 to rebuild the merkle tree. This <strong>proof</strong> response is specified as a series
 of nested JSON arrays:</p>
@@ -606,7 +805,16 @@ of nested JSON arrays:</p>
     &quot;signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
   },
   &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
-}</code></pre><p>Upon receipt of the farmer's proof, the renter must verify that the proof is
+}</code></pre><p>For clarification, given a simple merkle tree:</p>
+<pre class="prettyprint source"><code>+-- Hash_0 (Root)
+|   +-- Hash_1
+|   |   +-- Hash_3
+|   |   +-- Hash_4
+|   +-- Hash_2
+|   |   +-- Hash_5
+|   |   +-- Hash_6 = RIPEMD160(SHA256(RIPEMD160(SHA256(challenge + shard))))</code></pre><p>The resulting format of a proof for an audit matching Hash_6 would appear as:</p>
+<pre class="prettyprint source"><code>[Hash_1, [Hash_5, [RIPEMD160(SHA256(challenge + shard))]]]</code></pre><p>And, the resulting format of a proof for an audit matching Hash_3 would appear as:</p>
+<pre class="prettyprint source"><code>[[[RIPEMD160(SHA256(challenge + shard))], Hash_5], Hash_2]</code></pre><p>Upon receipt of the farmer's proof, the renter must verify that the proof is
 valid by using it to rebuild the merkle tree. See <a href="Verification.html#verify">Verification#verify</a>
 for an implementation example. If the proof is verified successfully, then the
 renter is expected to issue a payment to the <code>payment_destination</code> defined in
@@ -741,7 +949,7 @@ $( function () {
 	} );
 
 	Sunlight.highlightAll( {
-		lineNumbers : true,
+		lineNumbers : false,
 		showMenu : true,
 		enableDoclinks : true
 	} );

@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>StorjCORE Tutorial: Tunnelling Connections</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.cosmo.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top navbar-inverse">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">StorjCORE</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="module-storj.html">storj</a></li><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_utils.html">storj/utils</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="Audit.html">Audit</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DecryptStream.html">DecryptStream</a></li><li><a href="EncryptStream.html">EncryptStream</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="TelemetryReporter.html">TelemetryReporter</a></li><li><a href="FileDemuxer.html">FileDemuxer</a></li><li><a href="FileMuxer.html">FileMuxer</a></li><li><a href="FarmerInterface.html">FarmerInterface</a></li><li><a href="RenterInterface.html">RenterInterface</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Contact.html">Contact</a></li><li><a href="Network.html">Network</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="Transport.html">Transport</a></li><li><a href="Proof.html">Proof</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="TunnelClient.html">TunnelClient</a></li><li><a href="TunnelDemuxer.html">TunnelDemuxer</a></li><li><a href="TunnelGateway.html">TunnelGateway</a></li><li><a href="TunnelMuxer.html">TunnelMuxer</a></li><li><a href="TunnelServer.html">TunnelServer</a></li><li><a href="Verification.html">Verification</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="events.list.html" class="dropdown-toggle" data-toggle="dropdown">Events<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="FileDemuxer.html#event:shard">FileDemuxer#event:shard</a></li><li><a href="FileMuxer.html#event:drain">FileMuxer#event:drain</a></li><li><a href="TunnelClient.html#event:open">TunnelClient#event:open</a></li><li><a href="TunnelClient.html#event:close">TunnelClient#event:close</a></li><li><a href="TunnelGateway.html#event:message/rpc">TunnelGateway#event:message/rpc</a></li><li><a href="TunnelGateway.html#event:open">TunnelGateway#event:open</a></li><li><a href="TunnelGateway.html#event:close">TunnelGateway#event:close</a></li><li><a href="TunnelGateway.html#event:message/datachannel">TunnelGateway#event:message/datachannel</a></li><li><a href="TunnelServer.html#event:locked">TunnelServer#event:locked</a></li><li><a href="TunnelServer.html#event:unlocked">TunnelServer#event:unlocked</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="tutorials.list.html" class="dropdown-toggle" data-toggle="dropdown">Tutorials<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="tutorial-contract-topics.html">Publishing Storage Contracts</a></li><li><a href="tutorial-data-channels.html">Transferring File Shards</a></li><li><a href="tutorial-private-testnet.html">Running a Test Network</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li><li><a href="tutorial-tunnel-connections.html">Tunnelling Connections</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+		<div class="col-sm-3 col-md-3">
+            <form class="navbar-form" role="search">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                    <div class="input-group-btn">
+                        <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                    </div>
+                </div>
+            </form>
+        </div>
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			<section class="tutorial-section">
+
+<header>
+    
+
+    <h2>Tunnelling Connections</h2>
+</header>
+
+<article>
+    <p>One of the most daunting problems to tackle when designing a stable and
+reliable distributed network is the traversal of various constraints such as
+NAT and firewalls. In some cases, software can use various strategies to
+&quot;punch out&quot; of these constraints and become publicly addressable on the
+Internet. The StorjCORE library makes use of these strategies, but when they
+fail we must devise more complex tactics for ensuring that network participants
+are reachable by their peers.</p>
+<p>The Storj protocol defines a series of RPC messages that can be exchanged
+in order to establish a &quot;tunnel&quot;. See the <a href="tutorial-protocol-spec.html">Protocol Specification</a> for more
+detail on these RPC messages and their purposes. A tunnel is, in essence, a
+proxy that allows a client that is not exposed to the Internet to be
+addressable as if it were.</p>
+<p>This works by a private node opening a long-lived connection to a public node
+who establishes a dedicated means for accepting messages on behalf of the
+private node and &quot;pipes&quot; any data received via those means directly back to the
+private node over the previously established connection.</p>
+<p>Once a tunnel has been established, the private node can begin identifying
+herself to the network using her tunnel's address, instead of her own. Private
+nodes do not need to use the tunnel to contact other nodes on the network, but
+rather only <em>to be contacted</em>.</p>
+<h3>Announcing Willingness</h3><p>When a node joins the network and is publicly addressable, it has the ability
+to announce to the network that it is willing and capable of tunneling
+connections on behalf on nodes who are private or unable to punch out to
+become addressable on the Internet. The process of doing this uses the same
+publish/subscribe system described in the <a href="tutorial-contract-topics.html">Publishing Storage Contracts</a>
+specification which enables nodes to maintain a view of subscriptions in their
+neighborhood of the network as described in the <a href="tutorial-protocol-spec.html">Protocol Specification</a>.</p>
+<p>The difference between a contract publication and a tunnel announcement is in
+the opcode used for the topic and in the contents of the publication. Tunnel
+announcement publications use the opcode prefix <code>0x0e</code> followed by a single
+criteria degree opcode to indicate their willingness to tunnel (<code>0x00</code> to
+indicate &quot;I am no longer tunneling&quot; and <code>0x01</code> to indicate &quot;I am ready to
+tunnel&quot;).</p>
+<p>Whenever the condition changes, such as a node's maximum number of tunnels is
+reached or when a tunnel becomes available, it should issue a <code>PUBLISH</code> RPC
+message to it's nearest neighbors.</p>
+<pre class="prettyprint source"><code>{
+  &quot;method&quot;: &quot;PUBLISH&quot;,
+  &quot;params&quot;: {
+    &quot;uuid&quot;: &quot;7f0c40a2-e465-4f3e-b617-3d53460e34f7&quot;,
+    &quot;topic&quot;: &quot;0e01&quot;,
+    &quot;contents&quot;: {
+      &quot;address&quot;: &quot;10.0.0.2&quot;,
+      &quot;port&quot;: 1337
+    },
+    &quot;publishers&quot;: [
+      &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;
+    ],
+    &quot;ttl&quot;: 1455228597837,
+    &quot;contact&quot;: {
+      &quot;address&quot;: &quot;10.0.0.2&quot;,
+      &quot;port&quot;: 1337,
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+      &quot;protocol&quot;: &quot;0.6.0&quot;
+    },
+    &quot;nonce&quot;: 1455216323786,
+    &quot;signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+  },
+  &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
+}</code></pre><p>Public nodes should subscribe to these topics so that they can maintain an
+up-to-date list of nodes who are capable and willing to tunnel connections, so
+they can respond accurately to <code>FIND_TUNNEL</code> messages from private nodes.</p>
+<h3>Establishing a Tunnel</h3><p>After a private node has discovered some willing tunnels using the <code>FIND_TUNNEL</code>
+RPC message defined in the <a href="tutorial-protocol-spec.html">Protocol Specification</a>, it can now begin the
+handshake to establish the tunnel. This begins by sending the <code>OPEN_TUNNEL</code> RPC
+message to the desired tunneler node. The recipient of <code>OPEN_TUNNEL</code> will
+check:</p>
+<ul>
+<li>Do I have enough remaining tunnels? (based on arbitrary limit set by node)</li>
+<li>Am I already tunneling for this nodeID?</li>
+<li>Has a payment channel been opened? (<strong>future spec</strong>)</li>
+</ul>
+<p>If the tunneling node has enough tunnels, is not already tunneling the node,
+and (in a future spec) if a payment channel has been opened for bandwidth, then
+the tunneling node opens a new dedicated HTTP/WS server on an available port
+that will be used by the requester as it's &quot;contact&quot; information included in
+RPC messages.</p>
+<p>Before responding to the <code>OPEN_TUNNEL</code> RPC, the tunneler must also generate a
+unique authorization token that will be appended to the query string of it's
+tunnel entry point and provided back to the requester.</p>
+<pre class="prettyprint source"><code>{
+  &quot;result&quot;: {
+    &quot;tunnel&quot;: &quot;ws://10.0.0.3:1337/tun?token=2bfb23f98e72&quot;,
+    &quot;alias&quot;: {
+      &quot;address&quot;: &quot;10.0.0.3&quot;,
+      &quot;port&quot;: 1338
+    },
+    &quot;contact&quot;: {
+      &quot;address&quot;: &quot;10.0.0.3&quot;,
+      &quot;port&quot;: 1337,
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+      &quot;protocol&quot;: &quot;0.6.0&quot;
+    },
+    &quot;nonce&quot;: 1455216323786,
+    &quot;signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+  },
+  &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
+}</code></pre><p>Now the private node can connect to the <code>tunnel</code> URI provided and receive any
+messages sent to the <code>alias</code> contact information.</p>
+<h3>Connecting to a Tunnel</h3><p>Once the <code>OPEN_TUNNEL</code> handshake is completed, the private node can establish
+a WebSocket connection to the tunneler, providing the <code>token</code> in the request's
+query string.</p>
+<h4>Example (browser-based)</h4><pre class="prettyprint source"><code>var tunnel = new WebSocket('ws://10.0.0.3:1337/tun?token=2bfb23f98e72');
+
+tunnel.addEventListener('open', function() {
+  console.log('Tunnel established!');
+});
+
+tunnel.addEventListener('message', function(e) {
+  console.log('Received tunneled message:', e.data);
+  // Handle tunneled message here...
+});</code></pre><h3>Handling Tunneled Messages</h3><p>Once the WebSocket tunnel has been opened and authorized, both the private node
+and the tunneling node have a bidirectional communication channel. RPC messages
+received by the tunnel to the dedicated entry point will be written to the
+tunnel and must be handled by the private node. RPC messages are sent with the
+WebSocket opcode <code>0x2</code> (binary) and must be parsed by the private node and
+then handled as if it were received directly.</p>
+<p>The binary chunk representing the RPC message must be prefixed with a special
+opcode (<code>0x0c</code>) indicating that it should be demuxed and handled as an RPC
+message.</p>
+<p>Once the tunneled message has been appropriately handled, the private node can
+instruct the tunnel to respond to the request by simply writing it's response
+message back to the tunnel using the same WebSocket opcode <code>0x2</code> (binary) with
+the appropriate <code>0x0c</code> prefix. The tunneling node must parse the message and
+issue a response back to the originator of the message.</p>
+<h3>Tunneled Shard Transfer</h3><p>Transferring file shards through a tunnel is also carried out transparently
+from the perspective of the remote node. The remote node will negotiate a data
+channel via the appropriate RPC messages sent to the destination through the
+tunnel and use the resulting <code>token</code> and <code>hash</code> to open a data channel with the
+tunneler. The tunneler will use the existing WebSocket tunnel to it's private
+node to indicate the intent to establish a data channel by sending a special
+message called a <strong>&quot;signal&quot;</strong>.</p>
+<p>The <code>SIGNAL</code> message indicates to the private node's tunnel client that the
+tunnel server has established a data channel on it's behalf and will begin
+sending the received frames to the tunnel client. The <code>SIGNAL</code> message will
+simply include a unique identifier for the client to use for mux/demuxing
+subsequent frames in the case of multiple concurrent tunneled data channels.</p>
+<p>A <code>SIGNAL</code> message uses the WebSocket opcode <code>0x2</code> (binary), and prefixes the
+contained data with it's own opcode <code>0x0d</code>. The prefix is followed by the
+WebSocket opcode sent by the originator to the tunnel server, which is followed
+by a quasi-unique 6 byte identifier assigned to the originator. For example, a
+tunnel client might receive a chunk of data that says &quot;hello world&quot; as part of
+a <code>CONSIGN</code> data channel:</p>
+<pre class="prettyprint source"><code>&lt;Buffer 0d 02 9d b4 a0 58 5f 31 68 65 6c 6c 6f 20 77 6f 72 6c 64></code></pre><p>In the above byte array, <code>0d</code> indicates that this is a data channel signal,
+<code>02</code> indicates that the originator sent this data to the tunnel as binary,
+<code>9d b4 a0 58 5f 31</code> is the quasi-unique identifier for the originator so the
+client can demux the stream, and <code>68 65 6c 6c 6f 20 77 6f 72 6c 64</code> is the
+binary payload (in this case, &quot;hello world&quot;).</p>
+<p>When a tunnel client receives a <code>SIGNAL</code> message like this, it should check to
+see if it has already opened a local WebSocket connection to it's own data
+channel server. If it has not, it must open one using the quasi-unique
+identifier to track it, and writing any data in the signal to the socket using
+the WebSocket opcode included in the signal.</p>
+<p>The data channel server will also write back to the local WebSocket opened by
+the tunnel client, which is responsible for converting the data into the
+appropriate signal format and write the result back to the tunnel server. The
+tunnel server must then use the signal metadata to multiplex the streams out to
+their respective data channel originators.</p>
+<h3>Reference</h3><ul>
+<li><a href="TunnelClient.html">TunnelClient</a></li>
+<li><a href="TunnelServer.html">TunnelServer</a></li>
+<li><a href="TunnelMuxer.html">TunnelMuxer</a></li>
+<li><a href="TunnelDemuxer.html">TunnelDemuxer</a></li>
+<li><a href="DataChannelClient.html">DataChannelClient</a></li>
+<li><a href="DataChannelServer.html">DataChannelServer</a></li>
+</ul>
+</article>
+
+</section>
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+<div class="modal fade" id="searchResults">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Search results</h4>
+      </div>
+      <div class="modal-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div>
+
+<footer>
+
+
+	<span class="copyright">
+	Copyright 2016 Storj Labs
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a>
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+<script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : false,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			var id = $( heading ).attr( "id" );
+			return id && id.replace(/\~/g, '-inner-').replace(/\./g, '-static-') || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		SearcherDisplay.init();
+	});
+</script>
+
+</body>
+</html>

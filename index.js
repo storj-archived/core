@@ -4,6 +4,8 @@
 
 'use strict';
 
+require('./lib/patches')(); // NB: Apply any monkey patches
+
 module.exports.version = require('./lib/version');
 
 /** {@link Network} */

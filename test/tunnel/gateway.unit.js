@@ -133,6 +133,15 @@ describe('TunnelGateway', function() {
       gw.open();
     });
 
+    it('should open the gateway on the given port', function(done) {
+      var gw = new TunnelGateway({}, 50000);
+      gw.on('open', function(token, alias) {
+        expect(alias.port).to.equal(50000);
+        done();
+      });
+      gw.open();
+    });
+
     it('should accept a callback if supplied', function(done) {
       var gw = new TunnelGateway();
       gw.open(function(token, alias) {

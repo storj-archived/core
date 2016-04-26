@@ -37,6 +37,24 @@ describe('TunnelServer', function() {
       });
     });
 
+    it('should only open within the specified port range', function(done) {
+      var ts = new TunnelServer({
+        port: 0,
+        maxTunnels: 3,
+        portRange: { min: 55000, max: 55002 }
+      });
+      ts.createGateway(function(err, gw1) {
+        expect(gw1.getEntranceAddress().port).to.equal(55000);
+        ts.createGateway(function(err, gw2) {
+          expect(gw2.getEntranceAddress().port).to.equal(55001);
+          ts.createGateway(function(err, gw3) {
+            expect(gw3.getEntranceAddress().port).to.equal(55002);
+            done();
+          });
+        });
+      });
+    });
+
   });
 
   describe('#_verifyClient', function() {

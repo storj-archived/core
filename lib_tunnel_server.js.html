@@ -109,6 +109,9 @@ var inherits = require('util').inherits;
  * @param {http.Server} options.server - Transport adapter to bind to
  * @param {Number}      options.port - Port to bind if no server provided
  * @param {Number}      options.maxTunnels - Maximum number of gateways to open
+ * @param {Object}      options.portRange
+ * @param {Number}      options.portRange.min - Starting port to allow gateways
+ * @param {Number}      options.portRange.max - Ending port to allow gateways
  */
 function TunnelServer(options) {
   if (!(this instanceof TunnelServer)) {
@@ -130,6 +133,7 @@ function TunnelServer(options) {
 
   this._gateways = {}; // NB: {@link TunnelGateway}s keyed by their token
   this._authorized = []; // NB: List of authorized tokens
+  this._usedPorts = [];
 
   this._server.on('connection', this._handleClient.bind(this));
   events.EventEmitter.call(this);
@@ -150,7 +154,11 @@ inherits(TunnelServer, events.EventEmitter);
 TunnelServer.DEFAULTS = {
   port: 0,
   server: null,
-  maxTunnels: 3
+  maxTunnels: 3,
+  portRange: {
+    min: 0, // NB: 0 means use any port
+    max: 0  // NB: 0 means use any port
+  }
 };
 
 /**
@@ -164,16 +172,22 @@ TunnelServer.prototype.createGateway = function(callback) {
 
   var self = this;
   var authID = null;
-  var gateway = new TunnelGateway(); // TODO: Pass in SSL options here
+  var usedPort = null;
+  // TODO: Pass in SSL options into first arg if provided
+  var gateway = new TunnelGateway({}, this._getAvailablePort());
 
   gateway.on('close', function() {
     delete self._gateways[authID];
+    self._usedPorts.splice(usedPort, 1);
     self.emit('unlocked');
   });
 
   gateway.on('open', function(token) {
     authID = token;
     self._gateways[authID] = gateway;
+    usedPort = gateway.getEntranceAddress().port;
+
+    self._usedPorts.push(usedPort);
 
     if (Object.keys(self._gateways).length === self._options.maxTunnels) {
       self.emit('locked');
@@ -219,6 +233,27 @@ TunnelServer.prototype._verifyClient = function(info, callback) {
   this._authorized.splice(this._authorized.indexOf(token), 1);
 
   callback(true);
+};
+
+/**
+ * Returns an available port, suitable for opening a gateway
+ * @private
+ */
+TunnelServer.prototype._getAvailablePort = function() {
+  if (!this._options.portRange.min) {
+    return 0;
+  }
+
+  var start = this._options.portRange.min;
+  var end = this._options.portRange.max;
+
+  while (start &lt;= end) {
+    if (this._usedPorts.indexOf(start) === -1) {
+      return start;
+    }
+
+    start++;
+  }
 };
 
 /**

@@ -8,7 +8,6 @@ var async = require('async');
 var os = require('os');
 var fs = require('fs');
 var path = require('path');
-var sinon = require('sinon');
 var storj = require('../../');
 var kad = require('kad');
 var ms = require('ms');

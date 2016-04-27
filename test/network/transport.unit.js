@@ -62,7 +62,7 @@ describe('Network/Transport', function() {
         nodeID: KeyPair().getNodeID()
       }));
       transport.on('ready', function() {
-        expect(transport._portMapped).to.equal(false);
+        expect(transport._isPublic).to.equal(false);
         transport._forwardPort(function(err) {
           expect(err.message).to.equal('No map');
           done();
@@ -87,7 +87,7 @@ describe('Network/Transport', function() {
         nodeID: KeyPair().getNodeID()
       }));
       transport.on('ready', function() {
-        expect(transport._portMapped).to.equal(false);
+        expect(transport._isPublic).to.equal(false);
         transport._forwardPort(function(err) {
           expect(err.message).to.equal('No IP');
           done();
@@ -112,7 +112,7 @@ describe('Network/Transport', function() {
         nodeID: KeyPair().getNodeID()
       }));
       transport.on('ready', function() {
-        expect(transport._portMapped).to.equal(true);
+        expect(transport._isPublic).to.equal(true);
         transport._forwardPort(function(err, ip) {
           expect(err).to.equal(null);
           expect(ip).to.equal('my.ip.address');

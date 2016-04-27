@@ -10,8 +10,8 @@
   },
   "scripts": {
     "test": "npm run testsuite && npm run linter",
-    "testsuite": "./node_modules/.bin/mocha test/** --recursive",
-    "coverage": "./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha -- --recursive",
+    "testsuite": "STORJ_ALLOW_LOOPBACK=1 ./node_modules/.bin/mocha test/** --recursive",
+    "coverage": "STORJ_ALLOW_LOOPBACK=1 ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha -- --recursive",
     "linter": "./node_modules/.bin/jshint --config .jshintrc ./index.js ./lib ./test",
     "build": "./node_modules/.bin/browserify index.js -s storj -o dist/storj.browser.js",
     "make-docs": "./node_modules/.bin/jsdoc index.js lib -r -R README.md -u ./doc -c .jsdoc.json --verbose -d ./jsdoc",

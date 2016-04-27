@@ -57,19 +57,6 @@ function createFarmer() {
   return createNode(['0f01010202']);
 }
 
-var _forwardPort;
-
-before(function() {
-  _forwardPort = sinon.stub(
-    storj.Transport.prototype,
-    '_forwardPort'
-  ).callsArg(0);
-});
-
-after(function() {
-  _forwardPort.restore();
-});
-
 describe('Interfaces/Farmer+Renter/Integration', function() {
 
   var data = new Buffer('ALL THE SHARDS');

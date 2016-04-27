@@ -13,7 +13,7 @@ var ms = require('ms');
 var NODE_LIST = [];
 var STARTING_PORT = 64535;
 
-function createNode(opcodes) {
+function createNode(opcodes, tunnels) {
   var node = null;
   var kp = new storj.KeyPair();
   var manager = new storj.Manager(new storj.RAMStorageAdapter());
@@ -25,12 +25,13 @@ function createNode(opcodes) {
   var options = {
     keypair: kp,
     manager: manager,
-    logger: kad.Logger(1),
+    logger: kad.Logger(0),
     seeds: NODE_LIST.length ? [NODE_LIST[0]] : NODE_LIST,
     address: '127.0.0.1',
     port: port,
     opcodes: opcodes,
-    noforward: true
+    noforward: true,
+    tunnels: tunnels
   };
 
   if (opcodes.length) {
@@ -47,11 +48,11 @@ function createNode(opcodes) {
 }
 
 function createRenter() {
-  return createNode([]);
+  return createNode([], 3);
 }
 
 function createFarmer() {
-  return createNode(['0f01010202']);
+  return createNode(['0f01010202'], 0);
 }
 
 describe('Network/Integration/Tunnelling', function() {
@@ -67,12 +68,13 @@ describe('Network/Integration/Tunnelling', function() {
   });
 
   before(function(done) {
+    this.timeout(12000);
     sinon.stub(farmers[0], '_requestProbe').callsArgWith(
       1, new Error('Probe failed')
     ); // NB: Force tunneling
 
-    async.eachSeries(renters, function(node, done) {
-      node.join(done);
+    async.eachSeries(renters, function(node, next) {
+      node.join(next);
     }, function() {
       farmers[0].join(done);
     });
@@ -93,7 +95,6 @@ describe('Network/Integration/Tunnelling', function() {
 
   });
 
-
   describe('#retrieve (tunneled)', function() {
 
     it('should fetch the file from a tunneled farmer', function(done) {
@@ -113,7 +114,6 @@ describe('Network/Integration/Tunnelling', function() {
 
   });
 
-
   describe('#audit (tunneled)', function() {
 
     it('should successfully audit the stored data via tunnel', function(done) {
@@ -121,6 +121,23 @@ describe('Network/Integration/Tunnelling', function() {
       renter.audit(hash, function(err, result) {
         expect(err).to.equal(null);
         expect(result[0]).to.equal(result[1]);
+        done();
+      });
+    });
+
+  });
+
+  describe('Protocol#FIND_TUNNEL', function() {
+
+    it('should ask neighbors for tunnels if not offering any', function(done) {
+      var renter = renters[renters.length - 1];
+      var farmer = farmers[0];
+      renter._transport.send(farmer._contact, kad.Message({
+        method: 'FIND_TUNNEL',
+        params: { contact: renter._contact }
+      }), function(err, response) {
+        expect(err).to.equal(null);
+        expect(response.result.tunnels).to.have.lengthOf(2);
         done();
       });
     });

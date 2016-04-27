@@ -8,7 +8,6 @@ var async = require('async');
 var os = require('os');
 var fs = require('fs');
 var path = require('path');
-var sinon = require('sinon');
 var storj = require('../../');
 var kad = require('kad');
 var ms = require('ms');
@@ -57,19 +56,6 @@ function createFarmer() {
   return createNode(['0f01010202']);
 }
 
-var _forwardPort;
-
-before(function() {
-  _forwardPort = sinon.stub(
-    storj.Transport.prototype,
-    '_forwardPort'
-  ).callsArg(0);
-});
-
-after(function() {
-  _forwardPort.restore();
-});
-
 describe('Interfaces/Farmer+Renter/Integration', function() {
 
   var data = new Buffer('ALL THE SHARDS');
@@ -85,6 +71,7 @@ describe('Interfaces/Farmer+Renter/Integration', function() {
   describe('#join', function() {
 
     it('should connect all the nodes together', function(done) {
+      this.timeout(5000);
       farmers[0].join(function() {
         farmers.shift();
         async.eachSeries(farmers.concat(renters), function(node, done) {

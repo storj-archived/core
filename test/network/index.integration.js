@@ -25,7 +25,7 @@ function createNode(opcodes) {
   var options = {
     keypair: kp,
     manager: manager,
-    logger: kad.Logger(1),
+    logger: kad.Logger(0),
     seeds: NODE_LIST.length ? [NODE_LIST[0]] : NODE_LIST,
     address: '127.0.0.1',
     port: port,
@@ -67,12 +67,13 @@ describe('Network/Integration/Tunnelling', function() {
   });
 
   before(function(done) {
+    this.timeout(12000);
     sinon.stub(farmers[0], '_requestProbe').callsArgWith(
       1, new Error('Probe failed')
     ); // NB: Force tunneling
 
-    async.eachSeries(renters, function(node, done) {
-      node.join(done);
+    async.eachSeries(renters, function(node, next) {
+      node.join(next);
     }, function() {
       farmers[0].join(done);
     });

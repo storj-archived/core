@@ -85,6 +85,7 @@ describe('Interfaces/Farmer+Renter/Integration', function() {
   describe('#join', function() {
 
     it('should connect all the nodes together', function(done) {
+      this.timeout(5000);
       farmers[0].join(function() {
         farmers.shift();
         async.eachSeries(farmers.concat(renters), function(node, done) {

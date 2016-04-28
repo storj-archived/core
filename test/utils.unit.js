@@ -43,4 +43,50 @@ describe('utils', function() {
 
   });
 
+  describe('#isValidContact', function() {
+
+    it('should allow loopback iface if enabled', function() {
+      expect(utils.isValidContact({
+        address: '127.0.0.1',
+        port: 1337
+      }, true)).to.equal(true);
+    });
+
+    it('should not allow loopback iface if disabled', function() {
+      expect(utils.isValidContact({
+        address: '127.0.0.1',
+        port: 1337
+      })).to.equal(false);
+    });
+
+    it('should allow valid public address', function() {
+      expect(utils.isValidContact({
+        address: '104.200.143.243',
+        port: 1337
+      })).to.equal(true);
+    });
+
+    it('should allow valid public hostname', function() {
+      expect(utils.isValidContact({
+        address: 'some.domain.name',
+        port: 1337
+      })).to.equal(true);
+    });
+
+    it('should allow valid port', function() {
+      expect(utils.isValidContact({
+        address: 'some.domain.name',
+        port: 80
+      })).to.equal(true);
+    });
+
+    it('should not allow invalid port', function() {
+      expect(utils.isValidContact({
+        address: 'some.domain.name',
+        port: 0
+      })).to.equal(false);
+    });
+
+  });
+
 });

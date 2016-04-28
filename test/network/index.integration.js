@@ -30,7 +30,7 @@ function createNode(opcodes, tunnels) {
     address: '127.0.0.1',
     port: port,
     opcodes: opcodes,
-    noforward: true,
+    noforward: !!tunnels,
     tunnels: tunnels
   };
 
@@ -76,6 +76,7 @@ describe('Network/Integration/Tunnelling', function() {
     async.eachSeries(renters, function(node, next) {
       node.join(next);
     }, function() {
+      farmers[0]._transport._isPublic = false;
       farmers[0].join(done);
     });
   });

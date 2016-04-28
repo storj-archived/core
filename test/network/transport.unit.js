@@ -6,6 +6,7 @@ var Transport = require('../../lib/network/transport');
 var Contact = require('../../lib/network/contact');
 var KeyPair = require('../../lib/keypair');
 var proxyquire = require('proxyquire');
+var kad = require('kad');
 
 describe('Network/Transport', function() {
 
@@ -118,6 +119,23 @@ describe('Network/Transport', function() {
           expect(ip).to.equal('my.ip.address');
           done();
         });
+      });
+    });
+
+  });
+
+  describe('#send', function() {
+
+    it('should callback with error if contact is not valid', function(done) {
+      Transport.prototype.send({
+        address: '127.0.0.1',
+        port: 0
+      }, kad.Message({
+        method: 'PING',
+        params: {}
+      }), function(err) {
+        expect(err.message).to.equal('Invalid or forbidden contact address');
+        done();
       });
     });
 

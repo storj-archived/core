@@ -36,7 +36,6 @@ function createNode(opcodes, tunnels) {
 
   if (opcodes.length) {
     node = storj.FarmerInterface(options);
-    node._transport._isPublic = false;
   } else {
     node = storj.RenterInterface(options);
   }
@@ -77,6 +76,7 @@ describe('Network/Integration/Tunnelling', function() {
     async.eachSeries(renters, function(node, next) {
       node.join(next);
     }, function() {
+      farmers[0]._transport._isPublic = false;
       farmers[0].join(done);
     });
   });

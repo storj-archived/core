@@ -30,12 +30,13 @@ function createNode(opcodes, tunnels) {
     address: '127.0.0.1',
     port: port,
     opcodes: opcodes,
-    noforward: true,
+    noforward: !!tunnels,
     tunnels: tunnels
   };
 
   if (opcodes.length) {
     node = storj.FarmerInterface(options);
+    node._transport._isPublic = false;
   } else {
     node = storj.RenterInterface(options);
   }

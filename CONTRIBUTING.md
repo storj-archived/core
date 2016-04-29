@@ -8,6 +8,13 @@ This document outlines general patterns and conventions for contributing
 to the project. For in-depth documentation on StorjCORE, [read the
 documentation](http://storj.github.io/core).
 
+Reporting Issues
+----------------
+
+When submitting an issue, please take care to follow the
+`ISSUE_TEMPLATE.md` and include as much information as possible. Bonus points
+for a corresponding pull request that fixes the issue.
+
 Style & Conventions
 -------------------
 

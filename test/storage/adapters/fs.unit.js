@@ -6,6 +6,7 @@ var expect = require('chai').expect;
 var utils = require('../../../lib/utils');
 var Contract = require('../../../lib/contract');
 var Audit = require('../../../lib/audit');
+var proxyquire = require('proxyquire');
 
 function tmpdir() {
   return require('os').tmpdir() + '/' + Date.now();
@@ -58,7 +59,50 @@ describe('FSStorageAdapter', function() {
 
   describe('#_keys', function() {
 
-    
+    it('should filter out any invalid dirnames', function(done) {
+      var BadStorageAdapter = proxyquire('../../../lib/storage/adapters/fs', {
+        fs: {
+          existsSync: function() {
+            return true;
+          },
+          readdir: function(path, cb) {
+            cb(null, [
+              '1315fb9624340229e723a046b0214acd33747b6a',
+              '1315fb9624340229e723a046b0214acd33747b6b',
+              '.DS_Store',
+              'Thumbs.db',
+              '1315fb9624340229e723a046b0214acd33747b6c',
+              '1315fb9624340229e723a046b0214acd33747b6e'
+            ]);
+          }
+        }
+      });
+      var adapter = new BadStorageAdapter(tmpdir());
+      adapter._keys(function(err, keys) {
+        expect(keys).to.have.lengthOf(4);
+        expect(keys.indexOf('.DS_Store')).to.equal(-1);
+        expect(keys.indexOf('Thumbs.db')).to.equal(-1);
+        done();
+      });
+    });
+
+    it('should bubble error from fs.readdir', function(done) {
+      var BadStorageAdapter = proxyquire('../../../lib/storage/adapters/fs', {
+        fs: {
+          existsSync: function() {
+            return true;
+          },
+          readdir: function(path, cb) {
+            cb(new Error('teh filez are \'sploded'));
+          }
+        }
+      });
+      var adapter = new BadStorageAdapter(tmpdir());
+      adapter._keys(function(err) {
+        expect(err.message).to.equal('teh filez are \'sploded');
+        done();
+      });
+    });
 
   });
 

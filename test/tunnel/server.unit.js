@@ -44,13 +44,18 @@ describe('TunnelServer', function() {
         maxTunnels: 3,
         portRange: { min: 55000, max: 55002 }
       });
+      var options = [55000, 55001, 55002];
       ts.createGateway(function(err, gw1) {
-        expect(gw1.getEntranceAddress().port).to.equal(55000);
+        options.splice(options.indexOf(gw1.getEntranceAddress().port), 1);
         ts.createGateway(function(err, gw2) {
-          expect(gw2.getEntranceAddress().port).to.equal(55001);
+          options.splice(options.indexOf(gw2.getEntranceAddress().port), 1);
           ts.createGateway(function(err, gw3) {
-            expect(gw3.getEntranceAddress().port).to.equal(55002);
-            done();
+            options.splice(options.indexOf(gw3.getEntranceAddress().port), 1);
+            expect(options).to.have.lengthOf(0);
+            ts.createGateway(function(err) {
+              expect(err).to.not.equal(null);
+              done();
+            });
           });
         });
       });

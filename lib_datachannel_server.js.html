@@ -94,7 +94,6 @@
 var ws = require('ws');
 var PassThrough = require('stream').PassThrough;
 var assert = require('assert');
-var Transport = require('../network/transport');
 var Manager = require('../manager');
 var events = require('events');
 var inherits = require('util').inherits;
@@ -106,7 +105,7 @@ var utils = require('../utils');
  * Creates a data channel server for sending and receiving consigned file shards
  * @constructor
  * @param {Object} options
- * @param {Transport} options.transport - Transport adapter from {@link Network}
+ * @param {http.Server} options.server - A http(s).Server instance
  * @param {Manager} options.manager - The Manager from {@link Network}
  * @param {kad.Logger} options.logger - Logger to use from {@link Network}
  * @param {Number} options.ttl - Close after idle for this length of time
@@ -119,11 +118,11 @@ function DataChannelServer(options) {
   this._checkOptions(options);
   events.EventEmitter.call(this);
 
-  this._transport = options.transport;
+  this._server = options.server;
   this._manager = options.manager;
   this._log = options.logger;
   this._ttl = options.ttl || ms('2m');
-  this._server = new ws.Server({ server: this._transport._server });
+  this._server = new ws.Server({ server: this._server });
   this._allowed = {};
 
   this._server.on('connection', this._handleConnection.bind(this));
@@ -151,13 +150,15 @@ DataChannelServer.prototype.accept = function(token, filehash) {
 DataChannelServer.prototype.reject = function(token) {
   assert(typeof token === 'string', 'Invalid token supplied');
 
-  if (this._allowed[token]) {
-    if (this._allowed[token].client) {
+  if (this._allowed[token] &amp;&amp; this._allowed[token].client) {
+    var client = this._allowed[token].client;
+
+    if ([ws.CONNECTING, ws.OPEN].indexOf(client.readyState) !== -1) {
       this._allowed[token].client.close();
     }
-
-    delete this._allowed[token];
   }
+
+  delete this._allowed[token];
 };
 
 /**
@@ -173,7 +174,6 @@ DataChannelServer.prototype.close = function() {
  */
 DataChannelServer.prototype._checkOptions = function(options) {
   assert.ok(options, 'No options were supplied to constructor');
-  assert(options.transport instanceof Transport, 'Invalid transport adapter');
   assert(options.manager instanceof Manager, 'Invalid manager supplied');
   assert.ok(options.logger, 'Invalid logger supplied');
 };
@@ -192,21 +192,14 @@ DataChannelServer.prototype._handleConnection = function(socket) {
 
   socket.on('error', function(err) {
     self._log.error('data channel connection error: %s', err.message);
-    socket.send(JSON.stringify({ code: 500, message: err.message }));
+    socket.close(500, err.message);
   });
 
   socket.on('message', function(data) {
-    if (self._allowed[token] &amp;&amp; self._allowed[token].client !== null) {
-      return;
-    }
-
     try {
       data = JSON.parse(data);
     } catch (err) {
-      return socket.send(JSON.stringify({
-        code: 400,
-        message: 'Failed to parse message'
-      })).terminate();
+      return socket.close(400, 'Failed to parse message');
     }
 
     token = data.token;
@@ -214,12 +207,12 @@ DataChannelServer.prototype._handleConnection = function(socket) {
     try {
       self._authorize(token, data.hash);
     } catch (err) {
-      return socket.send(JSON.stringify({
-        code: 400, message: err.message
-      })).terminate();
+      return socket.close(401, err.message);
     }
 
     self._allowed[token].client = socket;
+
+    socket.removeAllListeners('message');
 
     switch (data.operation) {
       case 'PUSH':
@@ -268,7 +261,7 @@ DataChannelServer.prototype._handleConsignStream = function(socket, token) {
 
   this._manager.load(hash, function(err, item) {
     if (err) {
-      socket.send(JSON.stringify({ code: 500, message: err.message }));
+      socket.close(500, err.message );
       return self.reject(token);
     }
 
@@ -298,10 +291,7 @@ DataChannelServer.prototype._handleConsignStream = function(socket, token) {
 
     passthrough.on('end', function() {
       if (utils.rmd160(hasher.digest('hex')) !== hash) {
-        socket.send(JSON.stringify({
-          code: 400,
-          message: 'Calculated hash does not match the expected result'
-        }));
+        socket.close(400, 'Calculated hash does not match the expected result');
         return self.reject(token);
       }
 
@@ -328,7 +318,7 @@ DataChannelServer.prototype._handleRetrieveStream = function(socket, token) {
 
   this._manager.load(hash, function(err, item) {
     if (err) {
-      socket.send(JSON.stringify({ code: 500, message: err.message }));
+      socket.close(500, err.message);
       return self.reject(token);
     }
 
@@ -358,10 +348,7 @@ DataChannelServer.prototype._handleRetrieveStream = function(socket, token) {
 DataChannelServer.prototype._handleUnknownStream = function(stream, token) {
   var client = this._allowed[token].client;
 
-  client.send({
-    code: 400,
-    message: 'Failed to handle the defined operation'
-  });
+  client.close(400, 'Failed to handle the defined operation');
 
   this.reject(token);
 };

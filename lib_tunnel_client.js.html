@@ -200,6 +200,9 @@ TunnelClient.prototype.close = function() {
 
   var states = [WebSocketClient.CONNECTING, WebSocketClient.OPEN];
 
+  this._muxer.removeAllListeners();
+  this._demuxer.removeAllListeners();
+
   if (states.indexOf(this._tunnel.readyState) !== -1) {
     this._tunnel.close();
   }

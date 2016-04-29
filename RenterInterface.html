@@ -219,7 +219,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="store"><span class="type-signature"></span>store(data, duration, callback)</h4>
+    <h4 class="name" id="retrieve"><span class="type-signature"></span>retrieve(hash, callback)</h4>
     
     
 </dt>
@@ -227,10 +227,9 @@
 
     
     <div class="description">
-        Create a contract from the data and options supplied and publish it
-on the network. Keep track of the pending contract until it becomes
-fulfilled by an OFFER, then issue a CONSIGN RPC to the offerer and
-callback when the data is stored.
+        Look up the storage contract by the hash to find the node who has
+the shard, then execute a RETRIEVE RPC to the node and return the
+data as a buffer.
     </div>
     
 
@@ -265,13 +264,13 @@ callback when the data is stored.
 
         <tr>
             
-                <td class="name"><code>data</code></td>
+                <td class="name"><code>hash</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Buffer</span>
+<span class="param-type">String</span>
 
 
 
@@ -282,31 +281,7 @@ callback when the data is stored.
 
             
 
-            <td class="description last">Raw binary blob to store</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>duration</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Number</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Time in milliseconds for storage contract</td>
+            <td class="description last">RIPEMD-160 SHA-256 hash of the file to retrieve</td>
         </tr>
 
     
@@ -330,7 +305,7 @@ callback when the data is stored.
 
             
 
-            <td class="description last">Called on successful store</td>
+            <td class="description last">Called with an error or the file buffer</td>
         </tr>
 
     
@@ -571,7 +546,7 @@ otherwise, invalidate the contract.
             
 <hr>
 <dt>
-    <h4 class="name" id="retrieve"><span class="type-signature"></span>retrieve(hash, callback)</h4>
+    <h4 class="name" id="store"><span class="type-signature"></span>store(data, duration, callback)</h4>
     
     
 </dt>
@@ -579,9 +554,10 @@ otherwise, invalidate the contract.
 
     
     <div class="description">
-        Look up the storage contract by the hash to find the node who has
-the shard, then execute a RETRIEVE RPC to the node and return the
-data as a buffer.
+        Create a contract from the data and options supplied and publish it
+on the network. Keep track of the pending contract until it becomes
+fulfilled by an OFFER, then issue a CONSIGN RPC to the offerer and
+callback when the data is stored.
     </div>
     
 
@@ -616,13 +592,13 @@ data as a buffer.
 
         <tr>
             
-                <td class="name"><code>hash</code></td>
+                <td class="name"><code>data</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">Buffer</span>
 
 
 
@@ -633,7 +609,31 @@ data as a buffer.
 
             
 
-            <td class="description last">RIPEMD-160 SHA-256 hash of the file to retrieve</td>
+            <td class="description last">Raw binary blob to store</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>duration</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Time in milliseconds for storage contract</td>
         </tr>
 
     
@@ -657,7 +657,7 @@ data as a buffer.
 
             
 
-            <td class="description last">Called with an error or the file buffer</td>
+            <td class="description last">Called on successful store</td>
         </tr>
 
     
@@ -685,6 +685,15 @@ data as a buffer.
     
 
 	
+	<dt class="important tag-deprecated method-doc-label method-doc-details-label">Deprecated:</dt>
+	
+    <dd>
+        <ul class="dummy">
+            <li>Since v0.6.4 - TODO: Explain alternative solution</li>
+        </ul>
+    </dd>
+    
+    
 
 	
 

@@ -96,6 +96,8 @@ var kad = require('kad');
 var natupnp = require('nat-upnp').createClient();
 var ip = require('ip');
 var TunnelServer = require('../tunnel/server');
+var merge = require('merge');
+var utils = require('../utils');
 
 /**
  * Custom HTTP transport adapter
@@ -116,6 +118,8 @@ function Transport(contact, options) {
     return new Transport(contact, options);
   }
 
+  options = merge(Object.create(Transport.DEFAULTS), options);
+
   this._maxTunnels = options.tunnels;
   this._tunport = options.tunport || 0;
   this._noforward = options.noforward;
@@ -124,6 +128,13 @@ function Transport(contact, options) {
   kad.transports.HTTP.call(this, contact, options);
   this._bindTunnelServer();
 }
+
+Transport.DEFAULTS = {
+  maxTunnels: 3,
+  tunport: 0,
+  noforward: false,
+  gateways: { min: 0, max: 0 }
+};
 
 inherits(Transport, kad.transports.HTTP);
 
@@ -137,6 +148,7 @@ Transport.prototype._open = function(callback) {
   var self = this;
 
   if (ip.isPublic(self._contact.address) || self._noforward) {
+    self._isPublic = true;
     return kad.transports.HTTP.prototype._open.call(self, callback);
   }
 
@@ -144,6 +156,7 @@ Transport.prototype._open = function(callback) {
     'you are not bound to a public address, trying traversal strategies...'
   );
   self._forwardPort(function(err, ip) {
+    self._isPublic = !err;
     kad.transports.HTTP.prototype._open.call(self, callback);
     self._contact.address = ip || self._contact.address;
   });
@@ -193,6 +206,22 @@ Transport.prototype._bindTunnelServer = function() {
     port: this._tunport,
     portRange: this._gateways
   });
+};
+
+/**
+ * Validates the supplied contact
+ * @private
+ */
+Transport.prototype.send = function(contact, message, callback) {
+  if (kad.Message.isResponse(message)) {
+    return kad.transports.HTTP.prototype.send.apply(this, arguments);
+  }
+
+  if (!utils.isValidContact(contact, !!process.env.STORJ_ALLOW_LOOPBACK)) {
+    return callback(new Error('Invalid or forbidden contact address'));
+  }
+
+  kad.transports.HTTP.prototype.send.apply(this, arguments);
 };
 
 module.exports = Transport;

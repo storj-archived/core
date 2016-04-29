@@ -171,14 +171,14 @@ TunnelServer.prototype.createGateway = function(callback) {
   }
 
   var self = this;
-  var authID = null;
-  var usedPort = null;
   // TODO: Pass in SSL options into first arg if provided
   var gateway = new TunnelGateway({}, this._getAvailablePort());
+  var authID = gateway.getEntranceToken();
+  var usedPort = null;
 
   gateway.on('close', function() {
     delete self._gateways[authID];
-    self._usedPorts.splice(usedPort, 1);
+    self._usedPorts.splice(self._usedPorts.indexOf(usedPort), 1);
     self.emit('unlocked');
   });
 
@@ -246,14 +246,19 @@ TunnelServer.prototype._getAvailablePort = function() {
 
   var start = this._options.portRange.min;
   var end = this._options.portRange.max;
+  var available = [];
 
   while (start &lt;= end) {
-    if (this._usedPorts.indexOf(start) === -1) {
-      return start;
-    }
-
-    start++;
+    available.push(++start);
   }
+
+  for (var i = 0; i &lt; this._usedPorts.length; i++) {
+    if (available.indexOf(this._usedPorts[i]) !== -1) {
+      available.splice(available.indexOf(this._usedPorts[i]), 1);
+    }
+  }
+    
+  return available[Math.floor(Math.random() * available.length)];
 };
 
 /**
@@ -285,34 +290,42 @@ TunnelServer.prototype._handleClient = function(client) {
   var muxer = new TunnelMuxer();
   var demuxer = new TunnelDemuxer();
 
-  demuxer.on('error', function(err) {
-    client.close(400, { error: err.message });
-  });
+  function cleanup() {
+    gateway.close();
+    demuxer.removeAllListeners();
+    muxer.removeAllListeners();
+  }
 
-  demuxer.on('data', function(object) {
-    switch (object.type) {
-      case 'rpc':
-        return gateway.respond(object.data);
-      case 'datachannel':
-        return gateway.transfer(object.flags.quid, object.data);
-      default:
-        // NOOP
-    }
-  });
+  demuxer
+    .on('error', function(err) {
+      client.close(400, { error: err.message });
+    })
+    .on('data', function(object) {
+      switch (object.type) {
+        case 'rpc':
+          return gateway.respond(object.data);
+        case 'datachannel':
+          return gateway.transfer(object.flags.quid, object.data);
+        default:
+          // NOOP
+      }
+    });
 
-  muxer.on('error', function(err) {
-    client.close(400, { error: err.message });
-  });
+  muxer
+    .on('error', function(err) {
+      client.close(400, { error: err.message });
+    })
+    .on('data', function(data) {
+      client.send(data, { binary: true });
+    })
+    .source(gateway);
 
-  muxer.on('data', function(data) {
-    client.send(data, { binary: true });
-  });
-
-  muxer.source(gateway);
-
-  client.on('message', function(data) {
-    demuxer.write(data);
-  });
+  client
+    .on('message', function(data) {
+      demuxer.write(data);
+    })
+    .on('close', cleanup)
+    .on('error', cleanup);
 };
 
 module.exports = TunnelServer;

@@ -121,10 +121,6 @@ function FarmerInterface(options) {
   options.manager = new Manager(new FSStorageAdapter(options.storage.path));
 
   Network.call(this, options);
-  this._transport.on(
-    'ready',
-    this._listenForContracts.bind(this, options.opcodes)
-  );
 }
 
 inherits(FarmerInterface, Network);
@@ -139,11 +135,29 @@ FarmerInterface.DEFAULTS = {
 };
 
 /**
+ * Wraps the super call to {@link Network#join} to listen for contract after
+ * successfully establishing a connection to the network
+ * @param {Function} callback - Called on successful join
+ */
+FarmerInterface.prototype.join = function(callback) {
+  var self = this;
+
+  Network.prototype.join.call(this, function(err) {
+    if (err) {
+      return callback(err);
+    }
+
+    self._listenForContracts(self._options.opcodes);
+    callback();
+  });
+};
+
+/**
  * Handles a received contract and negotiates storage
  * @private
  * @param {Contract} contract
  */
-Network.prototype._negotiateContract = function(contract) {
+FarmerInterface.prototype._negotiateContract = function(contract) {
   var self = this;
 
   // TODO: Refactor all of this.

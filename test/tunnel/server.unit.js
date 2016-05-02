@@ -2,6 +2,7 @@
 
 var expect = require('chai').expect;
 var TunnelServer = require('../../lib/tunnel/server');
+var EventEmitter = require('events').EventEmitter;
 
 describe('TunnelServer', function() {
 
@@ -43,13 +44,18 @@ describe('TunnelServer', function() {
         maxTunnels: 3,
         portRange: { min: 55000, max: 55002 }
       });
+      var options = [55000, 55001, 55002];
       ts.createGateway(function(err, gw1) {
-        expect(gw1.getEntranceAddress().port).to.equal(55000);
+        options.splice(options.indexOf(gw1.getEntranceAddress().port), 1);
         ts.createGateway(function(err, gw2) {
-          expect(gw2.getEntranceAddress().port).to.equal(55001);
+          options.splice(options.indexOf(gw2.getEntranceAddress().port), 1);
           ts.createGateway(function(err, gw3) {
-            expect(gw3.getEntranceAddress().port).to.equal(55002);
-            done();
+            options.splice(options.indexOf(gw3.getEntranceAddress().port), 1);
+            expect(options).to.have.lengthOf(0);
+            ts.createGateway(function(err) {
+              expect(err).to.not.equal(null);
+              done();
+            });
           });
         });
       });
@@ -85,6 +91,24 @@ describe('TunnelServer', function() {
           expect(result.error).to.equal('Gateway no longer open');
           done();
         }
+      });
+    });
+
+    it('should glose the gateway if client disconnects', function(done) {
+      var ts = new TunnelServer({ port: 0 });
+      var client = new EventEmitter();
+      ts.createGateway(function(err, gateway) {
+        client.upgradeReq = {
+          url: 'ws://127.0.0.1:' + gateway.getEntranceAddress().port +
+               '/tun?token=' + gateway.getEntranceToken()
+        };
+        ts._handleClient(client);
+        client.emit('close');
+        setImmediate(function() {
+          expect(Object.keys(ts._gateways)).to.have.lengthOf(0);
+          expect(ts._usedPorts).to.have.lengthOf(0);
+          done();
+        });
       });
     });
 

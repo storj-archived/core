@@ -5,7 +5,7 @@ var Network = require('../../lib/network');
 var Manager = require('../../lib/manager');
 var KeyPair = require('../../lib/keypair');
 var RAMStorageAdapter = require('../../lib/storage/adapters/ram');
-var Logger = require('kad').Logger;
+var kad = require('kad');
 
 describe('Network', function() {
 
@@ -15,7 +15,7 @@ describe('Network', function() {
       expect(Network({
         keypair: KeyPair(),
         manager: Manager(RAMStorageAdapter()),
-        logger: Logger(0),
+        logger: kad.Logger(0),
         seeds: [],
         address: '127.0.0.1',
         port: 0,

@@ -4,6 +4,7 @@ var expect = require('chai').expect;
 var Contract = require('../../lib/contract');
 var KeyPair = require('../../lib/keypair');
 var FarmerInterface = require('../../lib/interfaces/farmer');
+var kad = require('kad');
 
 describe('FarmerInterface', function() {
 
@@ -16,7 +17,8 @@ describe('FarmerInterface', function() {
         noforward: true,
         negotiator: function() {
           return false;
-        }
+        },
+        logger: kad.Logger(0)
       });
       expect(farmer._negotiateContract(Contract({}))).to.equal(false);
     });

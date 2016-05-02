@@ -123,6 +123,7 @@ describe('Interfaces/Farmer+Renter/Integration', function() {
   describe('#getConsignToken', function() {
 
     it('should be issued an consign token from the farmer', function(done) {
+      this.timeout(6000);
       renter.getConsignToken(farmer, contract, audit, function(err, token) {
         expect(err).to.equal(null);
         expect(typeof token).to.equal('string');
@@ -146,6 +147,7 @@ describe('Interfaces/Farmer+Renter/Integration', function() {
   describe('#getRetrieveToken', function() {
 
     it('should be issued an retrieve token from the farmer', function(done) {
+      this.timeout(6000);
       renter.getRetrieveToken(farmer, contract, function(err, token) {
         expect(err).to.equal(null);
         expect(typeof token).to.equal('string');
@@ -170,6 +172,7 @@ describe('Interfaces/Farmer+Renter/Integration', function() {
   describe('#getStorageProof', function() {
 
     it('should get the proof response from the farmer', function(done) {
+      this.timeout(6000);
       var itemdata = {
         shard: shard,
         hash: utils.rmd160sha256(shard),

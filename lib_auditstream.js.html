@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>StorjCORE Source: lib/tunnel/demultiplexer.js</title>
+	<title>StorjCORE Source: lib/auditstream.js</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -84,86 +84,154 @@
 		<div id="main">
 			
 
-		<h1 class="page-title">Source: lib/tunnel/demultiplexer.js</h1>
+		<h1 class="page-title">Source: lib/auditstream.js</h1>
     
 <section>
     <article>
         <pre
             class="sunlight-highlight-javascript ">'use strict';
 
+var assert = require('assert');
+var crypto = require('crypto');
+var constants = require('./constants');
+var MerkleTree = require('mtree');
+var utils = require('./utils');
 var stream = require('readable-stream');
-var kad = require('kad');
 var inherits = require('util').inherits;
-var constants = require('../constants');
 
 /**
- * Demultiplexes a multiplexed tunnel stream
+ * Represents a streaming audit challenge generator
  * @constructor
+ * @param {Number} audits - Total number of challenges to generate
+ * @emits AuditStream#finish
  */
-function TunnelDemuxer() {
-  if (!(this instanceof TunnelDemuxer)) {
-    return new TunnelDemuxer();
+function AuditStream(audits) {
+  if (!(this instanceof AuditStream)) {
+    return new AuditStream(audits);
   }
 
-  stream.Transform.call(this, { objectMode: true });
+  assert(typeof audits === 'number', 'Invalid number of audits supplied');
+  assert(!Number.isNaN(audits), 'Invalid number of audits supplied');
+  assert(Number.isFinite(audits), 'Invalid number of audits supplied');
+
+  this._audits = audits;
+  this._finished = false;
+  this._challenges = [];
+  this._inputs = this._prepareChallenges();
+
+  stream.Writable.call(this);
+  this.on('finish', this._generateTree.bind(this));
 }
 
-inherits(TunnelDemuxer, stream.Transform);
+/**
+ * Triggered when the stream has ended
+ * @event AuditStream#finish
+ */
+
+inherits(AuditStream, stream.Writable);
 
 /**
- * Parses and demultiplexes RPC messages
- * @private
- * @param {Buffer} buffer - The RPC data to demux
- * @param {Function} callback
+ * Returns the bottom leaves of the merkle tree for sending to farmer
+ * @returns {Array} leaves - Bottom merkle leaves of audit tree
  */
-TunnelDemuxer.prototype._demuxRPC = function(buffer, callback) {
-  callback(null, {
-    type: 'rpc',
-    data: kad.Message.fromBuffer(buffer.slice(1)),
-    flags: {}
-  });
+AuditStream.prototype.getPublicRecord = function() {
+  assert(this._finished, 'Challenge generation is not finished');
+
+  return this._tree.level(this._tree.levels() - 1);
 };
 
 /**
- * Parses and demultiplexes datachannel messages
- * @private
- * @param {Buffer} buffer - The datachannel data to demux
- * @param {Function} callback
+ * Returns the challenges, the tree depth, and merkle root
+ * @returns {Object} challenge - Private audit record with challenges
  */
-TunnelDemuxer.prototype._demuxDataChannel = function(buffer, callback) {
-  if ([0x01, 0x02].indexOf(buffer[1]) === -1) {
-    return callback(new Error('Invalid frame type opcode supplied'));
-  }
+AuditStream.prototype.getPrivateRecord = function() {
+  assert(this._finished, 'Challenge generation is not finished');
 
-  var binary = buffer[1] === 0x02; // NB: WebSocket opcode for frame type
-  var data = buffer.slice(8);
+  return {
+    root: this._tree.root(),
+    depth: this._tree.levels(),
+    challenges: this._challenges
+  };
+};
 
-  callback(null, {
-    type: 'datachannel',
-    data: binary ? data : data.toString(),
-    flags: {
-      binary: binary,
-      quid: buffer.slice(2, 8).toString('hex')
+/**
+ * Implements the underlying write method
+ * @private
+ */
+AuditStream.prototype._write = function(bytes, encoding, next) {
+  var self = this;
+
+  this._inputs.forEach(function(input, i) {
+    if (i &lt; self._audits) {
+      input.update(bytes.toString('hex'));
     }
   });
+  next();
 };
 
 /**
- * Input transformer
+ * Prepares the challenge hasher instances
  * @private
  */
-TunnelDemuxer.prototype._transform = function(buffer, encoding, callback) {
-  switch (buffer[0]) {
-    case constants.OPCODE_TUNRPC_PREFIX:
-      return this._demuxRPC(buffer, callback);
-    case constants.OPCODE_TUNDCX_PREFIX:
-      return this._demuxDataChannel(buffer, callback);
-    default:
-      return callback(new Error('Invalid input for tunnel demuxing'));
+AuditStream.prototype._prepareChallenges = function() {
+  var iterations = 0;
+  var inputs = [];
+
+  while (iterations &lt; this._audits) {
+    var challenge = this._generateChallenge();
+    var input = this._createResponseInput(challenge);
+
+    this._challenges.push(challenge);
+    inputs.push(input);
+
+    iterations++;
   }
+
+  while (iterations &lt; utils.getNextPowerOfTwo(this._audits)) {
+    inputs.push(utils.rmd160sha256(''));
+    iterations++;
+  }
+
+  return inputs;
 };
 
-module.exports = TunnelDemuxer;
+/**
+ * Generate the audit merkle tree from a series of challenges
+ * @private
+ * @returns {Audit} self
+ */
+AuditStream.prototype._generateTree = function() {
+  var self = this;
+
+  this._finished = true;
+
+  this._tree = new MerkleTree(this._inputs.map(function(input, i) {
+    if (i >= self._audits) {
+      return input;
+    } else {
+      return utils.rmd160sha256(utils.rmd160(input.digest('hex')));
+    }
+  }), utils.rmd160sha256);
+};
+
+/**
+ * Generate a random challenge buffer
+ * @private
+ * @returns {String} Hex encoded random bytes
+ */
+AuditStream.prototype._generateChallenge = function() {
+  return crypto.randomBytes(constants.AUDIT_BYTES).toString('hex');
+};
+
+/**
+ * Create a challenge response input to merkle tree
+ * @private
+ */
+AuditStream.prototype._createResponseInput = function(challenge) {
+  return crypto.createHash('sha256').update(challenge);
+};
+
+module.exports = AuditStream;
 </pre>
     </article>
 </section>

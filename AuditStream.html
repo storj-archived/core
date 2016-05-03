@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>StorjCORE Source: lib/tunnel/demultiplexer.js</title>
+	<title>StorjCORE Class: AuditStream</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -79,95 +79,508 @@
 <div class="row">
 
 	
-	<div class="col-md-12">
+	<div class="col-md-8">
 	
 		<div id="main">
 			
 
-		<h1 class="page-title">Source: lib/tunnel/demultiplexer.js</h1>
-    
+	<h1 class="page-title">Class: AuditStream</h1>
 <section>
-    <article>
-        <pre
-            class="sunlight-highlight-javascript ">'use strict';
 
-var stream = require('readable-stream');
-var kad = require('kad');
-var inherits = require('util').inherits;
-var constants = require('../constants');
+<header>
+    
+        <h2>
+        AuditStream
+        </h2>
+        
+    
+</header>
 
-/**
- * Demultiplexes a multiplexed tunnel stream
- * @constructor
- */
-function TunnelDemuxer() {
-  if (!(this instanceof TunnelDemuxer)) {
-    return new TunnelDemuxer();
-  }
 
-  stream.Transform.call(this, { objectMode: true });
-}
+<article>
+    <div class="container-overview">
+    
+        
+<hr>
+<dt>
+    <h4 class="name" id="AuditStream"><span class="type-signature"></span>new AuditStream(audits)</h4>
+    
+    
+</dt>
+<dd>
 
-inherits(TunnelDemuxer, stream.Transform);
+    
+    <div class="description">
+        Represents a streaming audit challenge generator
+    </div>
+    
 
-/**
- * Parses and demultiplexes RPC messages
- * @private
- * @param {Buffer} buffer - The RPC data to demux
- * @param {Function} callback
- */
-TunnelDemuxer.prototype._demuxRPC = function(buffer, callback) {
-  callback(null, {
-    type: 'rpc',
-    data: kad.Message.fromBuffer(buffer.slice(1)),
-    flags: {}
-  });
-};
+    
 
-/**
- * Parses and demultiplexes datachannel messages
- * @private
- * @param {Buffer} buffer - The datachannel data to demux
- * @param {Function} callback
- */
-TunnelDemuxer.prototype._demuxDataChannel = function(buffer, callback) {
-  if ([0x01, 0x02].indexOf(buffer[1]) === -1) {
-    return callback(new Error('Invalid frame type opcode supplied'));
-  }
+    
 
-  var binary = buffer[1] === 0x02; // NB: WebSocket opcode for frame type
-  var data = buffer.slice(8);
+    
+    
+        <h5>Parameters:</h5>
+        
 
-  callback(null, {
-    type: 'datachannel',
-    data: binary ? data : data.toString(),
-    flags: {
-      binary: binary,
-      quid: buffer.slice(2, 8).toString('hex')
-    }
-  });
-};
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
 
-/**
- * Input transformer
- * @private
- */
-TunnelDemuxer.prototype._transform = function(buffer, encoding, callback) {
-  switch (buffer[0]) {
-    case constants.OPCODE_TUNRPC_PREFIX:
-      return this._demuxRPC(buffer, callback);
-    case constants.OPCODE_TUNDCX_PREFIX:
-      return this._demuxDataChannel(buffer, callback);
-    default:
-      return callback(new Error('Invalid input for tunnel demuxing'));
-  }
-};
+        <th>Type</th>
 
-module.exports = TunnelDemuxer;
-</pre>
-    </article>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>audits</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Total number of challenges to generate</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_auditstream.js.html">lib/auditstream.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+    <h5>Fires:</h5>
+    <ul>
+        <li><a href="AuditStream.html#event:finish">AuditStream#event:finish</a></li>
+    </ul>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        <dl>
+            
+<hr>
+<dt>
+    <h4 class="name" id="getPrivateRecord"><span class="type-signature"></span>getPrivateRecord()</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Returns the challenges, the tree depth, and merkle root
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_auditstream.js.html">lib/auditstream.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    challenge - Private audit record with challenges
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getPublicRecord"><span class="type-signature"></span>getPublicRecord()</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Returns the bottom leaves of the merkle tree for sending to farmer
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_auditstream.js.html">lib/auditstream.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    leaves - Bottom merkle leaves of audit tree
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        </dl>
+    
+
+    
+
+    
+        <h3 class="subsection-title">Events</h3>
+
+        <dl>
+            
+<hr>
+<dt>
+    <h4 class="name" id="event:finish">finish</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Triggered when the stream has ended
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_auditstream.js.html">lib/auditstream.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        </dl>
+    
+</article>
+
 </section>
-
 
 
 
@@ -177,6 +590,10 @@ module.exports = TunnelDemuxer;
 
 	<div class="clearfix"></div>
 
+	
+		<div class="col-md-3">
+			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
+		</div>
 	
 
 </div>

@@ -152,6 +152,7 @@ auditGenerator.on('finish', function() {
     if (err) {
       return console.error(err);
     }
+    
     // CONTINUED IN NEXT EXAMPLE...
   });
 });

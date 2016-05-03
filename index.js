@@ -56,6 +56,9 @@ module.exports.Contract = require('./lib/contract');
 /** {@link Audit} */
 module.exports.Audit = require('./lib/audit');
 
+/** {@link AuditStream} */
+module.exports.AuditStream = require('./lib/auditstream');
+
 /** {@link Proof} */
 module.exports.Proof = require('./lib/proof');
 

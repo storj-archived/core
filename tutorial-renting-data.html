@@ -278,17 +278,23 @@ renter.getStorageProof(farmer, item, function(err, proof) {
 can later retrieve it when needed. The process for doing this is very similar
 to the process for storing the shard, only this time we'll be asking for a
 retrieval token and we will be receiving data over the data channel instead of
-sending.</p>
+sending. We'll also be using:</p>
+<ul>
+<li><a href="DecryptStream.html">DecryptStream</a> - for decrypting the shard stream</li>
+</ul>
 <pre class="prettyprint source"><code>renter.getRetrieveToken(farmer, contract, function(err, token) {
   if (err) {
     return console.error(err);
   }
 
   var client = new storj.DataChannelClient(farmer);
+  var decrypter = new storj.DecryptStream(keypair);
   var fileDestination = fs.createWriteStream('/path/to/download/shard');
 
   client.on('open', function() {
-    client.createReadStream(token, hash).pipe(fileDestination);
+    var download = client.createReadStream(token, hash);
+
+    download.pipe(decrypter).pipe(fileDestination);
   });
 
   fileDestination.on('finish', function() {

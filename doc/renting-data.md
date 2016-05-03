@@ -106,7 +106,7 @@ demuxer.on('shard', function(shardStream) {
 
 When each shard is finished being encrypted and we know it's size and hash, it
 is time to create a {@link Contract} and offer it to the network. The example
-below is continued from inside the {@link EncryptStream#event:end} in the
+below is continued from inside the `tmpFile.on('finish', callback)` in the
 example above:
 
 ```
@@ -140,7 +140,7 @@ and generating the challenges and merkle tree and saving a copy of the contract
 and associated challenges:
 
 ```
-var item = new StorageItem({ hash: hash });
+var item = new storj.StorageItem({ hash: hash });
 var auditGenerator = new storj.AuditStream(12);
 var encryptedShard = fs.createReadStream(tmpName);
 

@@ -37,7 +37,7 @@ function createNode(opcodes, tunnels) {
     address: '127.0.0.1',
     port: port,
     opcodes: opcodes,
-    noforward: !!tunnels,
+    noforward: true,
     tunnels: tunnels
   };
 
@@ -86,7 +86,7 @@ before(function(done) {
   });
 });
 
-describe('Interfaces/Farmer+Renter/Integration', function() {
+describe('Network/Integration/Tunnelling', function() {
 
   var renter = renters[renters.length - 1];
   var contract = null;

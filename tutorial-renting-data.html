@@ -172,7 +172,7 @@ demuxer.on('shard', function(shardStream) {
   shardStream.pipe(encrypter).pipe(tmpFile);
 });</code></pre><h3>Contract Negotiation</h3><p>When each shard is finished being encrypted and we know it's size and hash, it
 is time to create a <a href="Contract.html">Contract</a> and offer it to the network. The example
-below is continued from inside the <a href="EncryptStream.html#event:end">EncryptStream#event:end</a> in the
+below is continued from inside the <code>tmpFile.on('finish', callback)</code> in the
 example above:</p>
 <pre class="prettyprint source"><code>var hash = utils.rmd160sha256(hasher.digest());
 var contract = new storj.Contract({
@@ -199,7 +199,7 @@ information they will need in the future. We will be using:</p>
 <p>Let's continue by reading the encrypted shard temporary file we just created
 and generating the challenges and merkle tree and saving a copy of the contract
 and associated challenges:</p>
-<pre class="prettyprint source"><code>var item = new StorageItem({ hash: hash });
+<pre class="prettyprint source"><code>var item = new storj.StorageItem({ hash: hash });
 var auditGenerator = new storj.AuditStream(12);
 var encryptedShard = fs.createReadStream(tmpName);
 

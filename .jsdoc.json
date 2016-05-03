@@ -10,11 +10,11 @@
     "theme": "cosmo",
     "linenums": false,
     "collapseSymbols": false,
-    "inverseNav": true,
+    "inverseNav": false,
     "outputSourceFiles": true,
     "outputSourcePath": true,
     "dateFormat": "",
-    "syntaxTheme": "default",
-    "sort": "true"
+    "syntaxTheme": "dark",
+    "sort": "longname"
   }
 }

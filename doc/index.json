@@ -13,5 +13,8 @@
   },
   "tunnel-connections": {
     "title": "Tunnelling Connections"
+  },
+  "renting-data": {
+    "title": "Renting Data to the Network"
   }
 }

@@ -9,6 +9,13 @@ var sinon = require('sinon');
 var storj = require('../../');
 var kad = require('kad');
 var ms = require('ms');
+var Contract = require('../../lib/contract');
+var Audit = require('../../lib/audit');
+var Contact = require('../../lib/network/contact');
+var utils = require('../../lib/utils');
+var DataChannelClient = require('../../lib/datachannel/client');
+var StorageItem = require('../../lib/storage/item');
+var Verification = require('../../lib/verification');
 
 var NODE_LIST = [];
 var STARTING_PORT = 64535;
@@ -55,33 +62,139 @@ function createFarmer() {
   return createNode(['0f01010202'], 0);
 }
 
-describe('Network/Integration/Tunnelling', function() {
+var data = new Buffer('ALL THE SHARDS');
+var hash = storj.utils.rmd160sha256(data);
 
-  var data = new Buffer('ALL THE SHARDS');
-  var hash = storj.utils.rmd160sha256(data);
+var renters = Array.apply(null, Array(2)).map(function() {
+  return createRenter();
+});
+var farmers = Array.apply(null, Array(1)).map(function() {
+  return createFarmer();
+});
 
-  var renters = Array.apply(null, Array(2)).map(function() {
-    return createRenter();
+before(function(done) {
+  this.timeout(12000);
+  sinon.stub(farmers[0], '_requestProbe').callsArgWith(
+    1, new Error('Probe failed')
+  ); // NB: Force tunneling
+
+  async.eachSeries(renters, function(node, next) {
+    node.join(next);
+  }, function() {
+    farmers[0]._transport._isPublic = false;
+    farmers[0].join(done);
   });
-  var farmers = Array.apply(null, Array(1)).map(function() {
-    return createFarmer();
-  });
+});
 
-  before(function(done) {
-    this.timeout(12000);
-    sinon.stub(farmers[0], '_requestProbe').callsArgWith(
-      1, new Error('Probe failed')
-    ); // NB: Force tunneling
+describe('Interfaces/Farmer+Renter/Integration', function() {
 
-    async.eachSeries(renters, function(node, next) {
-      node.join(next);
-    }, function() {
-      farmers[0]._transport._isPublic = false;
-      farmers[0].join(done);
+  var renter = renters[renters.length - 1];
+  var contract = null;
+  var farmer = null;
+  var shard = new Buffer('hello storj');
+  var audit = new Audit({ audits: 12, shard: shard });
+  var ctoken = null;
+  var rtoken = null;
+
+  describe('#getStorageOffer', function() {
+
+    it('should receive an offer for the published contract', function(done) {
+      this.timeout(12000);
+      contract = new Contract({
+        renter_id: renter._keypair.getNodeID(),
+        data_size: shard.length,
+        data_hash: utils.rmd160sha256(shard),
+        store_begin: Date.now(),
+        store_end: Date.now() + 10000,
+        audit_count: 12
+      });
+      renter.getStorageOffer(contract, function(_farmer, _contract) {
+        expect(_farmer).to.be.instanceOf(Contact);
+        expect(_contract).to.be.instanceOf(Contract);
+        contract = _contract;
+        farmer = _farmer;
+        done();
+      });
     });
+
   });
 
-  describe('#store (tunneled)', function() {
+  describe('#getConsignToken', function() {
+
+    it('should be issued an consign token from the farmer', function(done) {
+      renter.getConsignToken(farmer, contract, audit, function(err, token) {
+        expect(err).to.equal(null);
+        expect(typeof token).to.equal('string');
+        ctoken = token;
+        done();
+      });
+    });
+
+    after(function(done) {
+      var dcx = DataChannelClient(farmer);
+      dcx.on('open', function() {
+        var stream = dcx.createWriteStream(ctoken, utils.rmd160sha256(shard));
+        stream.on('finish', done);
+        stream.write(shard);
+        stream.end();
+      });
+    });
+
+  });
+
+  describe('#getRetrieveToken', function() {
+
+    it('should be issued an retrieve token from the farmer', function(done) {
+      renter.getRetrieveToken(farmer, contract, function(err, token) {
+        expect(err).to.equal(null);
+        expect(typeof token).to.equal('string');
+        rtoken = token;
+        done();
+      });
+    });
+
+    after(function(done) {
+      var dcx = DataChannelClient(farmer);
+      dcx.on('open', function() {
+        var stream = dcx.createReadStream(rtoken, utils.rmd160sha256(shard));
+        stream.on('end', done);
+        stream.on('data', function(chunk) {
+          expect(Buffer.compare(chunk, shard)).to.equal(0);
+        });
+      });
+    });
+
+  });
+
+  describe('#getStorageProof', function() {
+
+    it('should get the proof response from the farmer', function(done) {
+      var itemdata = {
+        shard: shard,
+        hash: utils.rmd160sha256(shard),
+        contracts: {},
+        challenges: {}
+      };
+      itemdata.contracts[farmer.nodeID] = contract.toObject();
+      itemdata.challenges[farmer.nodeID] = audit.getPrivateRecord();
+      var item = new StorageItem(itemdata);
+      renter.getStorageProof(farmer, item, function(err, proof) {
+        var v = Verification(proof).verify(
+          audit.getPrivateRecord().root,
+          audit.getPrivateRecord().depth
+        );
+        expect(v[0]).to.equal(v[1]);
+        done();
+      });
+    });
+
+  });
+
+});
+
+describe('Network/Integration/Tunnelling (deprecated)', function() {
+
+  describe('#store (tunneled) (deprecated)', function() {
 
     it('should negotiate contract with a tunneled farmer', function(done) {
       this.timeout(12000);
@@ -96,7 +209,7 @@ describe('Network/Integration/Tunnelling', function() {
 
   });
 
-  describe('#retrieve (tunneled)', function() {
+  describe('#retrieve (tunneled) (deprecated)', function() {
 
     it('should fetch the file from a tunneled farmer', function(done) {
       var renter = renters[renters.length - 1];
@@ -115,7 +228,7 @@ describe('Network/Integration/Tunnelling', function() {
 
   });
 
-  describe('#audit (tunneled)', function() {
+  describe('#audit (tunneled) (deprecated)', function() {
 
     it('should successfully audit the stored data via tunnel', function(done) {
       var renter = renters[renters.length - 1];

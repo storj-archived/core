@@ -7,6 +7,7 @@ var utils = require('../../../lib/utils');
 var Contract = require('../../../lib/contract');
 var Audit = require('../../../lib/audit');
 var proxyquire = require('proxyquire');
+var sinon = require('sinon');
 
 function tmpdir() {
   return require('os').tmpdir() + '/' + Date.now();
@@ -51,6 +52,74 @@ describe('FSStorageAdapter', function() {
       store._get(hash, function(err, item) {
         expect(err).to.equal(null);
         expect(item).to.be.instanceOf(StorageItem);
+        done();
+      });
+    });
+
+    it('should return error if the data is not found', function(done) {
+      var BadStorageAdapter = proxyquire('../../../lib/storage/adapters/fs', {
+        fs: {
+          exists: function(path, callback) {
+            callback(false);
+          },
+          existsSync: function() {
+            return true;
+          }
+        }
+      });
+      var adapter = new BadStorageAdapter(tmpdir());
+      adapter._get(hash, function(err) {
+        expect(err.message).to.equal('Shard data not found');
+        done();
+      });
+    });
+
+    it('should return error if the data cannot be loaded', function(done) {
+      var __fromdir = sinon.stub(store, '__fromDirectory', function(a, done) {
+        done(new Error('Failed to load something'));
+      });
+      store._get(hash, function(err) {
+        expect(err.message).to.equal('Failed to load something');
+        __fromdir.restore();
+        done();
+      });
+    });
+
+  });
+
+  describe('#_del', function() {
+
+    it('should callback null if shard does not exists', function(done) {
+      var StubStorageAdapter = proxyquire('../../../lib/storage/adapters/fs', {
+        fs: {
+          exists: function(path, callback) {
+            callback(false);
+          }
+        }
+      });
+      StubStorageAdapter.prototype._del.call({
+        _sharddir: ''
+      }, 'key', function(err) {
+        expect(err).to.equal(null);
+        done();
+      });
+    });
+
+    it('should unlink the shard if it exists', function(done) {
+      var _unlink = sinon.stub().callsArgWith(1, null);
+      var StubStorageAdapter = proxyquire('../../../lib/storage/adapters/fs', {
+        fs: {
+          exists: function(path, callback) {
+            callback(true);
+          },
+          unlink: _unlink
+        }
+      });
+      StubStorageAdapter.prototype._del.call({
+        _sharddir: ''
+      }, 'key', function(err) {
+        expect(err).to.equal(null);
+        expect(_unlink.called).to.equal(true);
         done();
       });
     });

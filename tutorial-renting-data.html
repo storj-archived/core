@@ -267,7 +267,7 @@ renter.getStorageProof(farmer, item, function(err, proof) {
     return console.error('The proof is not valid');
   }
 
-  item.save(function(err) {
+  manager.save(item, function(err) {
     if (err) {
       return console.error(err);
     }

@@ -38,7 +38,7 @@
   ],
   "license": "AGPL-3.0",
   "engines": {
-    "node": "4.x.x"
+    "node": "4.4.3"
   },
   "dependencies": {
     "async": "^1.5.2",

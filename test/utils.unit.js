@@ -4,6 +4,7 @@ var expect = require('chai').expect;
 var utils = require('../lib/utils');
 var semver = require('semver');
 var version = require('../lib/version');
+var KeyPair = require('../lib/keypair');
 
 describe('utils', function() {
 
@@ -85,6 +86,26 @@ describe('utils', function() {
         address: 'some.domain.name',
         port: 0
       })).to.equal(false);
+    });
+
+  });
+
+  describe('#createEciesCipher', function() {
+
+    it('should encrypt the message to the given key', function() {
+      var bob = new KeyPair();
+      var alice = new KeyPair();
+      var incipher = utils.createEciesCipher(
+        bob.getPrivateKey(),
+        alice.getPublicKey()
+      );
+      var encmessage = incipher.encrypt('HELLO STORJ');
+      var outcipher = utils.createEciesCipher(
+        alice.getPrivateKey(),
+        bob.getPublicKey()
+      );
+      var decmessage = outcipher.decrypt(encmessage);
+      expect(decmessage.toString()).to.equal('HELLO STORJ');
     });
 
   });

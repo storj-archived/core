@@ -89,9 +89,6 @@ module.exports.RenterInterface = require('./lib/interfaces/renter');
 /** {@link FarmerInterface} */
 module.exports.FarmerInterface = require('./lib/interfaces/farmer');
 
-/** {@link TelemetryReporter} */
-module.exports.TelemetryReporter = require('./lib/extensions/telemetry');
-
 /** {@link constants} */
 module.exports.constants = require('./lib/constants');
 

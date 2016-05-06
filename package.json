@@ -53,7 +53,7 @@
     "merge": "^1.2.0",
     "ms": "^0.7.1",
     "mtree": "^0.0.1",
-    "nat-upnp": "^1.0.0",
+    "nat-upnp": "littleskunk/node-nat-upnp",
     "readable-stream": "^2.0.6",
     "request": "^2.70.0",
     "semver": "^5.1.0",

@@ -82,6 +82,40 @@ describe('AuditStream', function() {
 
 });
 
+describe('AuditStream#fromRecords', function() {
+
+  it('should return the same result when created from record', function(done) {
+    var audit1 = new AuditStream(12);
+    audit1.on('finish', function() {
+      var tree1 = audit1.getPublicRecord();
+      var challenges1 = audit1.getPrivateRecord().challenges;
+      var audit2 = AuditStream.fromRecords(challenges1, tree1);
+      var tree2 = audit2.getPublicRecord();
+      var challenges2 = audit2.getPrivateRecord().challenges;
+      challenges2.forEach(function(c, i) {
+        expect(c).to.equal(challenges1[i]);
+      });
+      tree2.forEach(function(l, i) {
+        expect(l).to.equal(tree1[i]);
+      });
+      expect(
+        audit1.getPrivateRecord().depth
+      ).to.equal(
+        audit2.getPrivateRecord().depth
+      );
+      expect(
+        audit1.getPrivateRecord().root
+      ).to.equal(
+        audit2.getPrivateRecord().root
+      );
+      done();
+    });
+    audit1.write(SHARD);
+    audit1.end();
+  });
+
+});
+
 describe('Audit+AuditStream/Compatibility', function() {
 
   it('should return the same structures given the same input', function(done) {

@@ -120,6 +120,54 @@ describe('FileMuxer', function() {
 
     });
 
+    it('should error if shards is missing', function() {
+      expect(function() {
+        FileMuxer({ length: 128 });
+      }).to.throw(Error, 'You must supply a shards parameter');
+    });
+
+    it('should error if shards is not number', function() {
+      expect(function() {
+        FileMuxer({ shards: '2', length: 128 });
+      }).to.throw(Error, 'You must supply a shards parameter');
+    });
+
+    it('should error if shards is zero', function() {
+      expect(function() {
+        FileMuxer({ shards: 0, length: 128 });
+      }).to.throw(Error, 'Cannot multiplex a 0 shard stream');
+    });
+
+    it('should error if shards is negativ', function() {
+      expect(function() {
+        FileMuxer({ shards: -1, length: 128 });
+      }).to.throw(Error, 'Cannot multiplex a 0 shard stream');
+    });
+
+    it('should error if length is missing', function() {
+      expect(function() {
+        FileMuxer({ shards: 2 });
+      }).to.throw(Error, 'You must supply a length parameter');
+    });
+
+    it('should error if length is not number', function() {
+      expect(function() {
+        FileMuxer({ shards: 2, length: '128' });
+      }).to.throw(Error, 'You must supply a length parameter');
+    });
+
+    it('should error if lenght is zero', function() {
+      expect(function() {
+        FileMuxer({ shards: 2, length: 0 });
+      }).to.throw(Error, 'Cannot multiplex a 0 length stream');
+    });
+
+    it('should error if lenght is negativ', function() {
+      expect(function() {
+        FileMuxer({ shards: 2, length: -1 });
+      }).to.throw(Error, 'Cannot multiplex a 0 length stream');
+    });
+
     it('should error if input length exceeds declared length', function(done) {
       var chunks = [0x01, 0x02, 0x03];
       FileMuxer({ shards: 1, length: 2 }).on('error', function(err) {

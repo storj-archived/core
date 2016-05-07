@@ -78,4 +78,32 @@ describe('Audit', function() {
 
   });
 
+  describe('#validation', function() {
+
+    it('should error if audits is zero', function() {
+      expect(function() {
+        Audit({ shard: SHARD, audits: 0 });
+      }).to.throw(Error, 'Must supply an even audits value greater than 0');
+    });
+
+    it('should error if audits is negativ', function() {
+      expect(function() {
+        Audit({ shard: SHARD, audits: -2 });
+      }).to.throw(Error, 'Must supply an even audits value greater than 0');
+    });
+
+    it('should error if audits modulos 2 != 0', function() {
+      expect(function() {
+        Audit({ shard: SHARD, audits: 3 });
+      }).to.throw(Error, 'Must supply an even audits value greater than 0');
+    });
+
+    it('should error if shards is not buffer', function() {
+      expect(function() {
+        Audit({ shard: 'shard', audits: 2 });
+      }).to.throw(Error, 'Invalid shard supplied');
+    });
+
+  });
+
 });

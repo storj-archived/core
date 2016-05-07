@@ -97,6 +97,55 @@ describe('FileDemuxer', function() {
       randomio.pipe(dmx);
     });
 
+    it('should error if shards is missing', function() {
+      expect(function() {
+        FileDemuxer({ length: 128 });
+      }).to.throw(Error, 'You must supply a shards parameter');
+    });
+
+    it('should error if shards is not number', function() {
+      expect(function() {
+        FileDemuxer({ shards: '2', length: 128 });
+      }).to.throw(Error, 'You must supply a shards parameter');
+    });
+
+    it('should error if shards is zero', function() {
+      expect(function() {
+        FileDemuxer({ shards: 0, length: 128 });
+      }).to.throw(Error, 'Cannot demux a 0 shard stream');
+    });
+
+    it('should error if shards is negativ', function() {
+      expect(function() {
+        FileDemuxer({ shards: -1, length: 128 });
+      }).to.throw(Error, 'Cannot demux a 0 shard stream');
+    });
+
+    it('should error if length is missing', function() {
+      expect(function() {
+        FileDemuxer({ shards: 2 });
+      }).to.throw(Error, 'You must supply a length parameter');
+    });
+
+    it('should error if length is not number', function() {
+      expect(function() {
+        FileDemuxer({ shards: 2, length: '128' });
+      }).to.throw(Error, 'You must supply a length parameter');
+    });
+
+    it('should error if lenght is zero', function() {
+      expect(function() {
+        FileDemuxer({ shards: 2, length: 0 });
+      }).to.throw(Error, 'Cannot demux a 0 length stream');
+    });
+
+    it('should error if lenght is negativ', function() {
+      expect(function() {
+        FileDemuxer({ shards: 2, length: -1 });
+      }).to.throw(Error, 'Cannot demux a 0 length stream');
+    });
+
+
   });
 
 });

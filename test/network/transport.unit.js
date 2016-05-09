@@ -30,7 +30,7 @@ describe('Network/Transport', function() {
       var _forwardPort = sinon.stub(
         Transport.prototype,
         '_forwardPort'
-      ).callsArg(1);
+      ).callsArg(0);
       var transport = new Transport(Contact({
         address: '127.0.0.1',
         port: 0,
@@ -64,7 +64,7 @@ describe('Network/Transport', function() {
       }));
       transport.on('ready', function() {
         expect(transport._isPublic).to.equal(false);
-        transport._forwardPort(transport.port, function(err) {
+        transport._forwardPort(function(err) {
           expect(err.message).to.equal('No map');
           done();
         });
@@ -89,8 +89,30 @@ describe('Network/Transport', function() {
       }));
       transport.on('ready', function() {
         expect(transport._isPublic).to.equal(false);
-        transport._forwardPort(transport.port, function(err) {
+        transport._forwardPort(function(err) {
           expect(err.message).to.equal('No IP');
+          done();
+        });
+      });
+    });
+
+    it('should bubble portfinder error', function(done) {
+      var BadPortFinder = proxyquire('../../lib/network/transport', {
+        portfinder: {
+          getPort: function(callback) {
+            callback(new Error('No Port'));
+          }
+        }
+      });
+      var transport = new BadPortFinder(Contact({
+        address: '127.0.0.1',
+        port: 0,
+        nodeID: KeyPair().getNodeID()
+      }));
+      transport.on('ready', function() {
+        expect(transport._isPublic).to.equal(false);
+        transport._forwardPort(function(err) {
+          expect(err.message).to.equal('No Port');
           done();
         });
       });
@@ -109,12 +131,39 @@ describe('Network/Transport', function() {
       });
       var transport = new GoodTransport(Contact({
         address: '127.0.0.1',
+        port: 4000,
+        nodeID: KeyPair().getNodeID()
+      }));
+      transport.on('ready', function() {
+        expect(transport._isPublic).to.equal(true);
+        transport._forwardPort(function(err, ip, port) {
+          expect(err).to.equal(null);
+          expect(ip).to.equal('my.ip.address');
+          expect(port).to.equal(4000);
+          done();
+        });
+      });
+    });
+
+    it('should callback with random port', function(done) {
+      var GoodTransport = proxyquire('../../lib/network/transport', {
+        'nat-upnp': {
+          createClient: function() {
+            return {
+              portMapping: sinon.stub().callsArg(1),
+              externalIp: sinon.stub().callsArgWith(0, null, 'my.ip.address')
+            };
+          }
+        }
+      });
+      var transport = new GoodTransport(Contact({
+        address: '127.0.0.1',
         port: 0,
         nodeID: KeyPair().getNodeID()
       }));
       transport.on('ready', function() {
         expect(transport._isPublic).to.equal(true);
-        transport._forwardPort(transport.port, function(err, ip, port) {
+        transport._forwardPort(function(err, ip, port) {
           expect(err).to.equal(null);
           expect(ip).to.equal('my.ip.address');
           expect(port).to.be.at.least(1024);

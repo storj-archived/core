@@ -18,6 +18,7 @@ var utils = require('../../lib/utils');
 var DataChannelClient = require('../../lib/datachannel/client');
 var StorageItem = require('../../lib/storage/item');
 var Verification = require('../../lib/verification');
+var memdown = require('memdown');
 
 var NODE_LIST = [];
 var STARTING_PORT = 65535;
@@ -25,7 +26,9 @@ var STARTING_PORT = 65535;
 function createNode(opcodes) {
   var node = null;
   var kp = new storj.KeyPair();
-  var manager = new storj.Manager(new storj.RAMStorageAdapter());
+  var manager = new storj.Manager(new storj.LevelDBStorageAdapter(
+    os.tmpdir(), memdown
+  ));
   var datadir = path.join(os.tmpdir(), kp.getNodeID());
   var port = STARTING_PORT--;
 

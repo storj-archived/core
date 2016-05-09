@@ -4,40 +4,55 @@ var expect = require('chai').expect;
 var FileDemuxer = require('../lib/filedemuxer');
 var stream = require('readable-stream');
 var noisegen = require('noisegen');
+var os = require('os');
+var fs = require('fs');
+var path = require('path');
+var filePathEven = path.join(os.tmpdir(), 'storjfiledmxtest-even.data');
+var filePathOdd = path.join(os.tmpdir(), 'storjfiledmxtest-odd.data');
+
+before(function(done) {
+  this.timeout(6000);
+  
+  if (fs.existsSync(filePathEven)) {
+    fs.unlinkSync(filePathEven);
+  }
+
+  var randomEven = noisegen({ length: 1024 * 1024 * 16 });
+  var tmpfile = fs.createWriteStream(filePathEven);
+
+  tmpfile.on('finish', function() {
+    if (fs.existsSync(filePathOdd)) {
+      fs.unlinkSync(filePathOdd);
+    }
+
+    var randomOdd = noisegen({ length: (1024 * 1024 * 8) + 512 });
+    var tmpfile = fs.createWriteStream(filePathOdd);
+
+    tmpfile.on('finish', done);
+    randomOdd.pipe(tmpfile);
+  });
+  randomEven.pipe(tmpfile);
+});
 
 describe('FileDemuxer', function() {
 
   describe('@constructor', function() {
 
     it('should create an instance with the new keyword', function() {
-      expect(new FileDemuxer({
-        shards: 2,
-        length: 10
-      })).to.be.instanceOf(FileDemuxer);
-      expect(new FileDemuxer({
-        shards: 2,
-        length: 10
-      })).to.be.instanceOf(stream.Writable);
+      expect(new FileDemuxer(filePathEven)).to.be.instanceOf(FileDemuxer);
     });
 
     it('should create an instance without the new keyword', function() {
-      expect(FileDemuxer({
-        shards: 2,
-        length: 10
-      })).to.be.instanceOf(FileDemuxer);
-      expect(FileDemuxer({
-        shards: 2,
-        length: 10
-      })).to.be.instanceOf(stream.Writable);
+      expect(FileDemuxer(filePathEven)).to.be.instanceOf(FileDemuxer);
     });
 
   });
 
-  describe('#write', function() {
+  describe('#event:shard', function() {
 
     it('should correctly demux the even file stream', function(done) {
-      var randomio = noisegen({ length: 4096 });
-      var dmx = new FileDemuxer({ shards: 8, length: 4096 });
+      this.timeout(6000);
+      var dmx = new FileDemuxer(filePathEven);
       var shards = 0;
 
       dmx.on('shard', function(shard) {
@@ -48,21 +63,17 @@ describe('FileDemuxer', function() {
           bytes += data.length;
         });
         shard.on('end', function() {
-          expect(bytes).to.equal(512);
+          expect(bytes).to.equal(FileDemuxer.DEFAULTS.shardSize);
+          if (shards === 2) {
+            done();
+          }
         });
       });
-
-      dmx.on('finish', function() {
-        expect(shards).to.equal(8);
-        done();
-      });
-
-      randomio.pipe(dmx);
     });
 
     it('should correctly demux the odd file stream', function(done) {
-      var randomio = noisegen({ length: 2512 });
-      var dmx = new FileDemuxer({ shards: 11, length: 2512 });
+      this.timeout(6000);
+      var dmx = new FileDemuxer(filePathOdd);
       var shards = 0;
 
       dmx.on('shard', function(shard) {
@@ -73,28 +84,12 @@ describe('FileDemuxer', function() {
           bytes += data.length;
         });
         shard.on('end', function() {
-          expect(bytes).to.equal(251);
+          expect(bytes).to.equal(FileDemuxer.DEFAULTS.shardSize);
+          if (shards === 2) {
+            done();
+          }
         });
       });
-
-      dmx.on('finish', function() {
-        expect(shards).to.equal(11);
-        done();
-      });
-
-      randomio.pipe(dmx);
-    });
-
-    it('should error if more data than declared is written', function(done) {
-      var randomio = noisegen({ length: 256 });
-      var dmx = new FileDemuxer({ shards: 4, length: 128 });
-
-      dmx.on('error', function(err) {
-        expect(err.message).to.equal('Write amount exceeds the length');
-        done();
-      });
-
-      randomio.pipe(dmx);
     });
 
   });

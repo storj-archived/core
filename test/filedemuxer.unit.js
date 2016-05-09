@@ -12,7 +12,7 @@ var filePathOdd = path.join(os.tmpdir(), 'storjfiledmxtest-odd.data');
 
 before(function(done) {
   this.timeout(6000);
-  
+
   if (fs.existsSync(filePathEven)) {
     fs.unlinkSync(filePathEven);
   }
@@ -84,8 +84,10 @@ describe('FileDemuxer', function() {
           bytes += data.length;
         });
         shard.on('end', function() {
-          expect(bytes).to.equal(FileDemuxer.DEFAULTS.shardSize);
-          if (shards === 2) {
+          if (shards === 1) {
+            expect(bytes).to.equal(FileDemuxer.DEFAULTS.shardSize);
+          } else if (shards === 2) {
+            expect(bytes).to.equal(512);
             done();
           }
         });

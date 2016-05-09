@@ -50,6 +50,12 @@ module.exports.FileMuxer = require('./lib/filemuxer');
 /** {@link FileDemuxer} */
 module.exports.FileDemuxer = require('./lib/filedemuxer');
 
+/** {@link Padder} */
+module.exports.Padder = require('./lib/padder');
+
+/** {@link Unpadder} */
+module.exports.Unpadder = require('./lib/unpadder');
+
 /** {@link Contract} */
 module.exports.Contract = require('./lib/contract');
 

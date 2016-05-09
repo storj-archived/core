@@ -31,20 +31,31 @@ describe('KeyRing', function() {
 
   });
 
-  describe('#generateKey', function() {
+  describe('#generate', function() {
 
     it('should generate a keypair and return it', function() {
       var kr = new KeyRing(tmpfile1);
-      expect(kr.generateKey('test')).to.be.instanceOf(KeyPair);
+      expect(kr.generate('test')).to.be.instanceOf(KeyPair);
     });
 
   });
 
-  describe('#loadKey', function() {
+  describe('#get', function() {
 
     it('should return null if no key for the given ID', function() {
       var kr = new KeyRing(tmpfile1);
-      expect(kr.loadKey('wrong')).to.equal(null);
+      expect(kr.get('wrong')).to.equal(null);
+    });
+
+  });
+
+  describe('#set', function() {
+
+    it('should set the key for the given id', function() {
+      var kr = new KeyRing(tmpfile1);
+      var kp = KeyPair();
+      kr.set('test', kp);
+      expect(kr._keys.test).to.equal(kp.getPrivateKey());
     });
 
   });

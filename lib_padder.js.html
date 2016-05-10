@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>StorjCORE Class: TunnelClient</title>
+	<title>StorjCORE Source: lib/padder.js</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -79,566 +79,75 @@
 <div class="row">
 
 	
-	<div class="col-md-8">
+	<div class="col-md-12">
 	
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: TunnelClient</h1>
+		<h1 class="page-title">Source: lib/padder.js</h1>
+    
 <section>
-
-<header>
-    
-        <h2>
-        TunnelClient
-        </h2>
-        
-    
-</header>
-
-
-<article>
-    <div class="container-overview">
-    
-        
-<hr>
-<dt>
-    <h4 class="name" id="TunnelClient"><span class="type-signature"></span>new TunnelClient(tunnel, target)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Creates a tunnel connection to a <a href="TunnelServer.html">TunnelServer</a>
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>tunnel</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">URI for remote tunnel</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>target</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Local address/port for forwarding tunneled messages</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_tunnel_client.js.html">lib/tunnel/client.js</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        <dl>
-            
-<hr>
-<dt>
-    <h4 class="name" id="close"><span class="type-signature"></span>close()</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Closes the tunnel connection
-    </div>
-    
-
-    
-
-    
-
-    
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_tunnel_client.js.html">lib/tunnel/client.js</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="open"><span class="type-signature"></span>open()</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Opens the tunnel connection
-    </div>
-    
-
-    
-
-    
-
-    
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_tunnel_client.js.html">lib/tunnel/client.js</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-        </dl>
-    
-
-    
-
-    
-        <h3 class="subsection-title">Events</h3>
-
-        <dl>
-            
-<hr>
-<dt>
-    <h4 class="name" id="event:close">close</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Triggered when the tunnel is closed
-    </div>
-    
-
-    
-
-    
-
-    
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_tunnel_client.js.html">lib/tunnel/client.js</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="event:open">open</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Triggered when the tunnel is opened
-    </div>
-    
-
-    
-
-    
-
-    
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_tunnel_client.js.html">lib/tunnel/client.js</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-        </dl>
-    
-</article>
-
+    <article>
+        <pre
+            class="sunlight-highlight-javascript ">'use strict';
+
+var stream = require('readable-stream');
+var inherits = require('util').inherits;
+
+/**
+ * Takes an input stream and pads the tail with zeroes to the next byte mulitple
+ * @constructor
+ */
+function Padder() {
+  if (!(this instanceof Padder)) {
+    return new Padder();
+  }
+
+  this._bytesRead = 0;
+
+  stream.Transform.call(this);
+}
+
+inherits(Padder, stream.Transform);
+
+Padder.DEFAULTS = {
+  multiple: 1024 * 1024 * 8
+};
+
+/**
+ * Implements a simple passthrough while tracking number of bytes
+ * @private
+ */
+Padder.prototype._transform = function(chunk, enc, callback) {
+  this._bytesRead += chunk.length;
+
+  this.push(chunk);
+  callback(null);
+};
+
+/**
+ * Pads the tail of the stream with zeroes
+ * @private
+ */
+Padder.prototype._flush = function(callback) {
+  var remainder = this._bytesRead - Padder.DEFAULTS.multiple;
+
+  if (this._bytesRead &lt; Padder.DEFAULTS.multiple) {
+    this.push(Buffer(Padder.DEFAULTS.multiple - this._bytesRead).fill(0));
+    return callback(null);
+  }
+
+  if (remainder) {
+    this.push(Buffer(Padder.DEFAULTS.multiple - remainder).fill(0));
+    return callback(null);
+  }
+};
+
+module.exports = Padder;
+</pre>
+    </article>
 </section>
+
 
 
 
@@ -648,10 +157,6 @@
 
 	<div class="clearfix"></div>
 
-	
-		<div class="col-md-3">
-			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
-		</div>
 	
 
 </div>

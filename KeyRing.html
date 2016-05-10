@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>StorjCORE Class: TunnelClient</title>
+	<title>StorjCORE Class: KeyRing</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -84,13 +84,13 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: TunnelClient</h1>
+	<h1 class="page-title">Class: KeyRing</h1>
 <section>
 
 <header>
     
         <h2>
-        TunnelClient
+        KeyRing
         </h2>
         
     
@@ -103,7 +103,7 @@
         
 <hr>
 <dt>
-    <h4 class="name" id="TunnelClient"><span class="type-signature"></span>new TunnelClient(tunnel, target)</h4>
+    <h4 class="name" id="KeyRing"><span class="type-signature"></span>new KeyRing(filePath, passPhrase)</h4>
     
     
 </dt>
@@ -111,7 +111,7 @@
 
     
     <div class="description">
-        Creates a tunnel connection to a <a href="TunnelServer.html">TunnelServer</a>
+        A <a href="KeyPair.html">KeyPair</a> factory with file system persistence
     </div>
     
 
@@ -146,7 +146,7 @@
 
         <tr>
             
-                <td class="name"><code>tunnel</code></td>
+                <td class="name"><code>filePath</code></td>
             
 
             <td class="type">
@@ -163,14 +163,14 @@
 
             
 
-            <td class="description last">URI for remote tunnel</td>
+            <td class="description last">Path to store keyring file</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>target</code></td>
+                <td class="name"><code>passPhrase</code></td>
             
 
             <td class="type">
@@ -187,7 +187,7 @@
 
             
 
-            <td class="description last">Local address/port for forwarding tunneled messages</td>
+            <td class="description last">Passphrase to encrypt/decrypt keyring</td>
         </tr>
 
     
@@ -231,7 +231,7 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_tunnel_client.js.html">lib/tunnel/client.js</a>
+				<a href="lib_keyring.js.html">lib/keyring.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -282,7 +282,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="close"><span class="type-signature"></span>close()</h4>
+    <h4 class="name" id="generate"><span class="type-signature"></span>generate(id)</h4>
     
     
 </dt>
@@ -290,7 +290,7 @@
 
     
     <div class="description">
-        Closes the tunnel connection
+        Returns the stored <a href="KeyPair.html">KeyPair</a> for the given id
     </div>
     
 
@@ -299,6 +299,56 @@
     
 
     
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Generate a key for use with the given ID</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
     
 
     
@@ -336,7 +386,7 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_tunnel_client.js.html">lib/tunnel/client.js</a>
+				<a href="lib_keyring.js.html">lib/keyring.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -361,6 +411,26 @@
     
 
     
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="KeyPair.html">KeyPair</a></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
 
     
 </dd>
@@ -369,7 +439,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="open"><span class="type-signature"></span>open()</h4>
+    <h4 class="name" id="get"><span class="type-signature"></span>get(id)</h4>
     
     
 </dt>
@@ -377,7 +447,7 @@
 
     
     <div class="description">
-        Opens the tunnel connection
+        Returns the stored <a href="KeyPair.html">KeyPair</a> for the given id
     </div>
     
 
@@ -386,6 +456,56 @@
     
 
     
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Arbitrary key ID to load</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
     
 
     
@@ -423,7 +543,191 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_tunnel_client.js.html">lib/tunnel/client.js</a>
+				<a href="lib_keyring.js.html">lib/keyring.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="KeyPair.html">KeyPair</a></span>
+|
+
+<span class="param-type">null</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="set"><span class="type-signature"></span>set(id, keypair)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Returns the stored <a href="KeyPair.html">KeyPair</a> for the given id
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Arbitrary key ID to load</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>keypair</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="KeyPair.html">KeyPair</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">KeyPair instance to set</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_keyring.js.html">lib/keyring.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -457,184 +761,6 @@
 
     
 
-    
-        <h3 class="subsection-title">Events</h3>
-
-        <dl>
-            
-<hr>
-<dt>
-    <h4 class="name" id="event:close">close</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Triggered when the tunnel is closed
-    </div>
-    
-
-    
-
-    
-
-    
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_tunnel_client.js.html">lib/tunnel/client.js</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="event:open">open</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Triggered when the tunnel is opened
-    </div>
-    
-
-    
-
-    
-
-    
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_tunnel_client.js.html">lib/tunnel/client.js</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-        </dl>
     
 </article>
 

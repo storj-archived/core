@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>StorjCORE Class: TunnelClient</title>
+	<title>StorjCORE Class: Unpadder</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -84,13 +84,13 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: TunnelClient</h1>
+	<h1 class="page-title">Class: Unpadder</h1>
 <section>
 
 <header>
     
         <h2>
-        TunnelClient
+        Unpadder
         </h2>
         
     
@@ -103,7 +103,7 @@
         
 <hr>
 <dt>
-    <h4 class="name" id="TunnelClient"><span class="type-signature"></span>new TunnelClient(tunnel, target)</h4>
+    <h4 class="name" id="Unpadder"><span class="type-signature"></span>new Unpadder()</h4>
     
     
 </dt>
@@ -111,186 +111,7 @@
 
     
     <div class="description">
-        Creates a tunnel connection to a <a href="TunnelServer.html">TunnelServer</a>
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>tunnel</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">URI for remote tunnel</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>target</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Local address/port for forwarding tunneled messages</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_tunnel_client.js.html">lib/tunnel/client.js</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        <dl>
-            
-<hr>
-<dt>
-    <h4 class="name" id="close"><span class="type-signature"></span>close()</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Closes the tunnel connection
+        Takes an input stream and removes padded zeroes from the tail
     </div>
     
 
@@ -336,7 +157,7 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_tunnel_client.js.html">lib/tunnel/client.js</a>
+				<a href="lib_unpadder.js.html">lib/unpadder.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -365,77 +186,8 @@
     
 </dd>
 
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="open"><span class="type-signature"></span>open()</h4>
     
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Opens the tunnel connection
     </div>
-    
-
-    
-
-    
-
-    
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_tunnel_client.js.html">lib/tunnel/client.js</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
 
     
 
@@ -450,191 +202,9 @@
     
 
     
-</dd>
-
-        </dl>
-    
 
     
 
-    
-        <h3 class="subsection-title">Events</h3>
-
-        <dl>
-            
-<hr>
-<dt>
-    <h4 class="name" id="event:close">close</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Triggered when the tunnel is closed
-    </div>
-    
-
-    
-
-    
-
-    
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_tunnel_client.js.html">lib/tunnel/client.js</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="event:open">open</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Triggered when the tunnel is opened
-    </div>
-    
-
-    
-
-    
-
-    
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_tunnel_client.js.html">lib/tunnel/client.js</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-        </dl>
     
 </article>
 

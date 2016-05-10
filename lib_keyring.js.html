@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>StorjCORE Class: TunnelClient</title>
+	<title>StorjCORE Source: lib/keyring.js</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -79,566 +79,135 @@
 <div class="row">
 
 	
-	<div class="col-md-8">
+	<div class="col-md-12">
 	
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: TunnelClient</h1>
+		<h1 class="page-title">Source: lib/keyring.js</h1>
+    
 <section>
-
-<header>
-    
-        <h2>
-        TunnelClient
-        </h2>
-        
-    
-</header>
-
-
-<article>
-    <div class="container-overview">
-    
-        
-<hr>
-<dt>
-    <h4 class="name" id="TunnelClient"><span class="type-signature"></span>new TunnelClient(tunnel, target)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Creates a tunnel connection to a <a href="TunnelServer.html">TunnelServer</a>
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>tunnel</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">URI for remote tunnel</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>target</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Local address/port for forwarding tunneled messages</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_tunnel_client.js.html">lib/tunnel/client.js</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        <dl>
-            
-<hr>
-<dt>
-    <h4 class="name" id="close"><span class="type-signature"></span>close()</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Closes the tunnel connection
-    </div>
-    
-
-    
-
-    
-
-    
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_tunnel_client.js.html">lib/tunnel/client.js</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="open"><span class="type-signature"></span>open()</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Opens the tunnel connection
-    </div>
-    
-
-    
-
-    
-
-    
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_tunnel_client.js.html">lib/tunnel/client.js</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-        </dl>
-    
-
-    
-
-    
-        <h3 class="subsection-title">Events</h3>
-
-        <dl>
-            
-<hr>
-<dt>
-    <h4 class="name" id="event:close">close</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Triggered when the tunnel is closed
-    </div>
-    
-
-    
-
-    
-
-    
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_tunnel_client.js.html">lib/tunnel/client.js</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="event:open">open</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Triggered when the tunnel is opened
-    </div>
-    
-
-    
-
-    
-
-    
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_tunnel_client.js.html">lib/tunnel/client.js</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-        </dl>
-    
-</article>
-
+    <article>
+        <pre
+            class="sunlight-highlight-javascript ">'use strict';
+
+var assert = require('assert');
+var fs = require('fs');
+var KeyPair = require('./keypair');
+var crypto = require('crypto');
+
+/**
+ * A {@link KeyPair} factory with file system persistence
+ * @constructor
+ * @param {String} filePath - Path to store keyring file
+ * @param {String} passPhrase - Passphrase to encrypt/decrypt keyring
+ */
+function KeyRing(filePath, passPhrase) {
+  if (!(this instanceof KeyRing)) {
+    return new KeyRing(filePath, passPhrase);
+  }
+
+  assert(typeof filePath === 'string', 'Invalid path supplied to keyring');
+
+  this._path = filePath;
+  this._pass = passPhrase || '';
+  this._keys = this._loadKeyRingFromDisk();
+}
+
+KeyRing.DEFAULTS = {
+  algorithm: 'aes-256-ctr'
+};
+
+/**
+ * Returns the stored {@link KeyPair} for the given id
+ * @param {String} id - Arbitrary key ID to load
+ * @returns {KeyPair|null}
+ */
+KeyRing.prototype.get = function(id) {
+  if (!this._keys[id]) {
+    return null;
+  }
+
+  return new KeyPair(this._keys[id]);
+};
+
+/**
+ * Returns the stored {@link KeyPair} for the given id
+ * @param {String} id - Arbitrary key ID to load
+ * @param {KeyPair} keypair - KeyPair instance to set
+ */
+KeyRing.prototype.set = function(id, keypair) {
+  this._keys[id] = keypair.getPrivateKey();
+  this._saveKeyRingToDisk();
+
+  return keypair;
+};
+
+/**
+ * Returns the stored {@link KeyPair} for the given id
+ * @param {String} id - Generate a key for use with the given ID
+ * @returns {KeyPair}
+ */
+KeyRing.prototype.generate = function(id) {
+  return this.set(id, KeyPair());
+};
+
+/**
+ * Loads or creates the keyring file
+ * @private
+ */
+KeyRing.prototype._loadKeyRingFromDisk = function() {
+  if (!fs.existsSync(this._path)) {
+    fs.writeFileSync(this._path, this._encrypt(JSON.stringify({})));
+  }
+
+  return JSON.parse(this._decrypt(fs.readFileSync(this._path).toString()));
+};
+
+/**
+ * Saves the keyring file to disk
+ * @private
+ */
+KeyRing.prototype._saveKeyRingToDisk = function() {
+  return fs.writeFileSync(
+    this._path,
+    this._encrypt(JSON.stringify(this._keys))
+  );
+};
+
+/**
+ * Encrypts the data with the passphrase
+ * @private
+ * @param {String} data - Data to encrypt
+ */
+KeyRing.prototype._encrypt = function(data) {
+  var cipher = crypto.createCipher(KeyRing.DEFAULTS.algorithm, this._pass);
+  var enc = cipher.update(data, 'utf8', 'hex');
+
+  enc += cipher.final('hex');
+
+  return enc;
+};
+
+/**
+ * Decrypts the data with the passphrase
+ * @private
+ * @param {String|Buffer} data - Data to encrypt
+ */
+KeyRing.prototype._decrypt = function(data) {
+  var decipher = crypto.createDecipher(KeyRing.DEFAULTS.algorithm, this._pass);
+  var dec = decipher.update(data, 'hex', 'utf8');
+
+  dec += decipher.final('utf8');
+
+  return dec;
+};
+
+module.exports = KeyRing;
+</pre>
+    </article>
 </section>
+
 
 
 
@@ -648,10 +217,6 @@
 
 	<div class="clearfix"></div>
 
-	
-		<div class="col-md-3">
-			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
-		</div>
 	
 
 </div>

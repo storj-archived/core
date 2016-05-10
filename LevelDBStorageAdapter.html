@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>StorjCORE Class: TunnelClient</title>
+	<title>StorjCORE Class: LevelDBStorageAdapter</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -84,13 +84,13 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: TunnelClient</h1>
+	<h1 class="page-title">Class: LevelDBStorageAdapter</h1>
 <section>
 
 <header>
     
         <h2>
-        TunnelClient
+        LevelDBStorageAdapter
         </h2>
         
     
@@ -103,7 +103,7 @@
         
 <hr>
 <dt>
-    <h4 class="name" id="TunnelClient"><span class="type-signature"></span>new TunnelClient(tunnel, target)</h4>
+    <h4 class="name" id="LevelDBStorageAdapter"><span class="type-signature"></span>new LevelDBStorageAdapter(path, backend)</h4>
     
     
 </dt>
@@ -111,7 +111,7 @@
 
     
     <div class="description">
-        Creates a tunnel connection to a <a href="TunnelServer.html">TunnelServer</a>
+        Implements an LevelDB storage adapter interface
     </div>
     
 
@@ -146,7 +146,7 @@
 
         <tr>
             
-                <td class="name"><code>tunnel</code></td>
+                <td class="name"><code>path</code></td>
             
 
             <td class="type">
@@ -163,20 +163,20 @@
 
             
 
-            <td class="description last">URI for remote tunnel</td>
+            <td class="description last">Path to store the level db</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>target</code></td>
+                <td class="name"><code>backend</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">function</span>
 
 
 
@@ -187,7 +187,7 @@
 
             
 
-            <td class="description last">Local address/port for forwarding tunneled messages</td>
+            <td class="description last">Optional backend override for levelup</td>
         </tr>
 
     
@@ -231,7 +231,7 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_tunnel_client.js.html">lib/tunnel/client.js</a>
+				<a href="lib_storage_adapters_level.js.html">lib/storage/adapters/level.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -262,6 +262,17 @@
 
     
     </div>
+
+    
+        <h3 class="subsection-title">Extends</h3>
+
+        
+
+
+    <ul>
+        <li><a href="StorageAdapter.html">StorageAdapter</a></li>
+    </ul>
+
 
     
 
@@ -282,7 +293,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="close"><span class="type-signature"></span>close()</h4>
+    <h4 class="name" id="createReadStream"><span class="type-signature"></span>createReadStream()</h4>
     
     
 </dt>
@@ -290,7 +301,8 @@
 
     
     <div class="description">
-        Closes the tunnel connection
+        Calls the implemented <a href="StorageAdapter.html#_keys">StorageAdapter#_keys</a> and returns a readable
+stream containing each stored item
     </div>
     
 
@@ -309,6 +321,15 @@
 
 	
 
+	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="StorageAdapter.html#createReadStream">StorageAdapter#createReadStream</a>
+			</li>
+		</ul>
+	</dd>
 	
 
     
@@ -336,7 +357,197 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_tunnel_client.js.html">lib/tunnel/client.js</a>
+				<a href="lib_storage_adapter.js.html">lib/storage/adapter.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">ReadableStream</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="del"><span class="type-signature"></span>del(key, callback)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Calls the implemented <a href="StorageAdapter.html#_del">StorageAdapter#_del</a>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>key</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Shard hash to delete the data for</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Called with error or <a href="StorageItem.html">StorageItem</a></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="StorageAdapter.html#del">StorageAdapter#del</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_storage_adapter.js.html">lib/storage/adapter.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -369,7 +580,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="open"><span class="type-signature"></span>open()</h4>
+    <h4 class="name" id="get"><span class="type-signature"></span>get(key, callback)</h4>
     
     
 </dt>
@@ -377,7 +588,7 @@
 
     
     <div class="description">
-        Opens the tunnel connection
+        Calls the implemented <a href="StorageAdapter.html#_get">StorageAdapter#_get</a> and validates the result
     </div>
     
 
@@ -386,6 +597,80 @@
     
 
     
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>key</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Shard hash to get metadata for</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Called with error or <a href="StorageItem.html">StorageItem</a></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
     
 
     
@@ -396,6 +681,15 @@
 
 	
 
+	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="StorageAdapter.html#get">StorageAdapter#get</a>
+			</li>
+		</ul>
+	</dd>
 	
 
     
@@ -423,7 +717,177 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_tunnel_client.js.html">lib/tunnel/client.js</a>
+				<a href="lib_storage_adapter.js.html">lib/storage/adapter.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="put"><span class="type-signature"></span>put(item, callback)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Calls the implemented <a href="StorageAdapter.html#_put">StorageAdapter#_put</a> and validates the input
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>item</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="StorageItem.html">StorageItem</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Item to write to storage</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Called on complete write</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="StorageAdapter.html#put">StorageAdapter#put</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_storage_adapter.js.html">lib/storage/adapter.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -457,184 +921,6 @@
 
     
 
-    
-        <h3 class="subsection-title">Events</h3>
-
-        <dl>
-            
-<hr>
-<dt>
-    <h4 class="name" id="event:close">close</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Triggered when the tunnel is closed
-    </div>
-    
-
-    
-
-    
-
-    
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_tunnel_client.js.html">lib/tunnel/client.js</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="event:open">open</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Triggered when the tunnel is opened
-    </div>
-    
-
-    
-
-    
-
-    
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_tunnel_client.js.html">lib/tunnel/client.js</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-        </dl>
     
 </article>
 

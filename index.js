@@ -50,6 +50,12 @@ module.exports.FileMuxer = require('./lib/filemuxer');
 /** {@link FileDemuxer} */
 module.exports.FileDemuxer = require('./lib/filedemuxer');
 
+/** {@link Padder} */
+module.exports.Padder = require('./lib/padder');
+
+/** {@link Unpadder} */
+module.exports.Unpadder = require('./lib/unpadder');
+
 /** {@link Contract} */
 module.exports.Contract = require('./lib/contract');
 
@@ -74,6 +80,9 @@ module.exports.StorageAdapter = require('./lib/storage/adapter');
 /** {@link FSStorageAdapter} */
 module.exports.FSStorageAdapter = require('./lib/storage/adapters/fs');
 
+/** {@link LevelDBStorageAdapter} */
+module.exports.LevelDBStorageAdapter = require('./lib/storage/adapters/level');
+
 /** {@link RAMStorageAdapter} */
 module.exports.RAMStorageAdapter = require('./lib/storage/adapters/ram');
 
@@ -82,6 +91,9 @@ module.exports.StorageItem = require('./lib/storage/item');
 
 /** {@link KeyPair} */
 module.exports.KeyPair = require('./lib/keypair');
+
+/** {@link KeyRing} */
+module.exports.KeyRing = require('./lib/keyring');
 
 /** {@link RenterInterface} */
 module.exports.RenterInterface = require('./lib/interfaces/renter');

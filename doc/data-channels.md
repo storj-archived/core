@@ -27,7 +27,7 @@ channel must contain the `token` provided from a previous `CONSIGN` or
 > Authorization message frames must use opcode `0x1` (textual).
 
 The receiving farmer must check that she issued the received `token` within a
-reasonable amount of time (recommend 2 minutes) and that the supplied `hash` is
+reasonable amount of time (recommend 10 minutes) and that the supplied `hash` is
 associated with that token before sending or receiving any other data.
 
 If the authorization fails, the farmer must close the data channel, optionally

@@ -88,6 +88,10 @@ describe('utils', function() {
       })).to.equal(false);
     });
 
+    it('should return false if no contact is supplied', function() {
+      expect(utils.isValidContact(null)).to.equal(false);
+    });
+
   });
 
   describe('#createEciesCipher', function() {

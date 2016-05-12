@@ -2,9 +2,6 @@
 
 var expect = require('chai').expect;
 var async = require('async');
-var os = require('os');
-var fs = require('fs');
-var path = require('path');
 var sinon = require('sinon');
 var storj = require('../../');
 var kad = require('kad');
@@ -16,6 +13,7 @@ var utils = require('../../lib/utils');
 var DataChannelClient = require('../../lib/datachannel/client');
 var StorageItem = require('../../lib/storage/item');
 var Verification = require('../../lib/verification');
+var memdown = require('memdown');
 
 var NODE_LIST = [];
 var STARTING_PORT = 64535;
@@ -23,11 +21,10 @@ var STARTING_PORT = 64535;
 function createNode(opcodes, tunnels) {
   var node = null;
   var kp = new storj.KeyPair();
-  var manager = new storj.Manager(new storj.RAMStorageAdapter());
-  var datadir = path.join(os.tmpdir(), kp.getNodeID());
+  var manager = new storj.Manager(new storj.LevelDBStorageAdapter(
+    (Math.floor(Math.random() * 24)).toString(), memdown
+  ));
   var port = STARTING_PORT--;
-
-  fs.mkdirSync(datadir);
 
   var options = {
     keypair: kp,
@@ -38,7 +35,8 @@ function createNode(opcodes, tunnels) {
     port: port,
     opcodes: opcodes,
     noforward: true,
-    tunnels: tunnels
+    tunnels: tunnels,
+    backend: memdown
   };
 
   if (opcodes.length) {
@@ -134,7 +132,7 @@ describe('Network/Integration/Tunnelling', function() {
       var dcx = DataChannelClient(farmer);
       dcx.on('open', function() {
         var stream = dcx.createWriteStream(ctoken, utils.rmd160sha256(shard));
-        stream.on('finish', done);
+        stream.on('finish', done).on('error', done);
         stream.write(shard);
         stream.end();
       });
@@ -144,7 +142,7 @@ describe('Network/Integration/Tunnelling', function() {
 
   describe('#getRetrieveToken', function() {
 
-    it('should be issued an retrieve token from the farmer', function(done) {
+    it('should be issued a retrieve token from the farmer', function(done) {
       renter.getRetrieveToken(farmer, contract, function(err, token) {
         expect(err).to.equal(null);
         expect(typeof token).to.equal('string');
@@ -157,7 +155,7 @@ describe('Network/Integration/Tunnelling', function() {
       var dcx = DataChannelClient(farmer);
       dcx.on('open', function() {
         var stream = dcx.createReadStream(rtoken, utils.rmd160sha256(shard));
-        stream.on('end', done);
+        stream.on('end', done).on('error', done);
         stream.on('data', function(chunk) {
           expect(Buffer.compare(chunk, shard)).to.equal(0);
         });
@@ -170,7 +168,7 @@ describe('Network/Integration/Tunnelling', function() {
 
     it('should get the proof response from the farmer', function(done) {
       var itemdata = {
-        shard: shard,
+        shard: null,
         hash: utils.rmd160sha256(shard),
         contracts: {},
         challenges: {}

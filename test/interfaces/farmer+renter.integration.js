@@ -5,9 +5,6 @@
 
 var expect = require('chai').expect;
 var async = require('async');
-var os = require('os');
-var fs = require('fs');
-var path = require('path');
 var storj = require('../../');
 var kad = require('kad');
 var ms = require('ms');
@@ -27,12 +24,9 @@ function createNode(opcodes) {
   var node = null;
   var kp = new storj.KeyPair();
   var manager = new storj.Manager(new storj.LevelDBStorageAdapter(
-    os.tmpdir(), memdown
+    (Math.floor(Math.random() * 24)).toString(), memdown
   ));
-  var datadir = path.join(os.tmpdir(), kp.getNodeID());
   var port = STARTING_PORT--;
-
-  fs.mkdirSync(datadir);
 
   var options = {
     keypair: kp,
@@ -42,7 +36,8 @@ function createNode(opcodes) {
     address: '127.0.0.1',
     port: port,
     opcodes: opcodes,
-    noforward: true
+    noforward: true,
+    backend: memdown
   };
 
   if (opcodes.length) {

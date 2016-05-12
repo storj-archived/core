@@ -60,24 +60,12 @@ describe('LevelDBStorageAdapter', function() {
 
     it('should return error if the data is not found', function(done) {
       var _dbget = sinon.stub(store._db, 'get').callsArgWith(
-        1,
+        2,
         new Error('Not found')
       );
       store._get(hash, function(err) {
         expect(err.message).to.equal('Not found');
         _dbget.restore();
-        done();
-      });
-    });
-
-    it('should return error if the data cannot be loaded', function(done) {
-      var _storeexists = sinon.stub(store._fs, 'exists').callsArgWith(
-        1,
-        new Error('Failed')
-      );
-      store._get(hash, function(err) {
-        expect(err.message).to.equal('Failed');
-        _storeexists.restore();
         done();
       });
     });

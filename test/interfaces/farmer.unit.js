@@ -18,7 +18,8 @@ describe('FarmerInterface', function() {
         negotiator: function() {
           return false;
         },
-        logger: kad.Logger(0)
+        logger: kad.Logger(0),
+        backend: require('memdown')
       });
       expect(farmer._negotiateContract(Contract({}))).to.equal(false);
     });

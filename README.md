@@ -40,12 +40,13 @@ network.join(/* callback */);
 License
 -------
 
+```
 Storj Core - Implementation of the Storj protocol for Node.js
 Copyright (C) 2016  Storj Labs, Inc
 
 This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
+it under the terms of the GNU Affero General Public License as published
+by the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
@@ -54,5 +55,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see
-[http://www.gnu.org/licenses/](http://www.gnu.org/licenses/).
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+

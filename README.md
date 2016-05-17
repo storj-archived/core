@@ -30,7 +30,7 @@ var network = storj.Network({
   address: 'ip.or.hostname',
   port: 4000,
   seeds: [
-    'storj://api.storj.io:8443/593844dc7f0076a1aeda9a6b9788af17e67c1052'
+    'storj://api.storj.io:8443/78cfca0e01235db817728aec056d007672ffac63'
   ]
 });
 

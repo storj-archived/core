@@ -250,7 +250,6 @@ describe('DataChannelServer', function() {
       item.shard = {};
       var _load = sinon.stub(manager, 'load').callsArgWith(1, null, item);
       var socket = new EventEmitter();
-      socket.close = sinon.stub();
       socket.resume = sinon.stub();
       socket.readyState = 1;
       dcs._allowed.token = { hash: 'somehash' };

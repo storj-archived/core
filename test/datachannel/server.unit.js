@@ -8,6 +8,7 @@ var DataChannelServer = require('../../lib/datachannel/server');
 var sinon = require('sinon');
 var EventEmitter = require('events').EventEmitter;
 var http = require('http');
+var StorageItem = require('../../lib/storage/item');
 
 describe('DataChannelServer', function() {
 
@@ -149,6 +150,119 @@ describe('DataChannelServer', function() {
         done();
       });
       dcs._server.emit('error', new Error('BOOM'));
+    });
+
+  });
+
+  describe('#_handleConsignStream', function() {
+
+    it('should close the socket if manager fails', function(done) {
+      var manager = Manager(RAMStorageAdapter());
+      var dcs = DataChannelServer({
+        server: http.createServer(function noop() {}),
+        manager: manager,
+        logger: Logger(0)
+      });
+      var _load = sinon.stub(manager, 'load').callsArgWith(
+        1,
+        new Error('Failed to load shard data')
+      );
+      var socket = new EventEmitter();
+      socket.close = sinon.stub();
+      dcs._allowed.token = { hash: 'hash' };
+      dcs._handleConsignStream(socket, 'token');
+      setImmediate(function() {
+        expect(socket.close.called).to.equal(true);
+        _load.restore();
+        expect(dcs._allowed.token).to.equal(undefined);
+        done();
+      });
+    });
+
+    it('should reject token and return if socket is closed', function(done) {
+      var manager = Manager(RAMStorageAdapter());
+      var dcs = DataChannelServer({
+        server: http.createServer(function noop() {}),
+        manager: manager,
+        logger: Logger(0)
+      });
+      var _load = sinon.stub(manager, 'load').callsArgWith(
+        1,
+        null,
+        StorageItem({
+          hash: 'somehash',
+          contracts: {
+            nodeid2: {
+              renter_id: 'dd2f8bdfb1769ccafb943c7c29a1bcc13a850b8f',
+              data_size: 10,
+              data_hash: '7a728a8c27fa378cafbd300c1e38639362f87ee8',
+              store_begin: Date.now(),
+              store_end: Date.now() + 2500,
+              audit_count: 2,
+              renter_signature: 'signaturegoeshere',
+              farmer_id: '4da1b82394f83847ee9a412af9d01b05dea54a0b',
+              farmer_signature: 'signaturegoeshere',
+              payment_storage_price: 0,
+              payment_download_price: 0,
+              payment_destination: '12PzSwsCT5LBT3nhW6GoCJQpAJAZ7CkpBg'
+            }
+          }
+        })
+      );
+      var socket = new EventEmitter();
+      socket.close = sinon.stub();
+      socket.readyState = 0;
+      dcs._allowed.token = { hash: 'somehash' };
+      dcs._handleConsignStream(socket, 'token');
+      setImmediate(function() {
+        _load.restore();
+        expect(dcs._allowed.token).to.equal(undefined);
+        done();
+      });
+    });
+
+    it('should close socket with success if not writable', function(done) {
+      var manager = Manager(RAMStorageAdapter());
+      var dcs = DataChannelServer({
+        server: http.createServer(function noop() {}),
+        manager: manager,
+        logger: Logger(0)
+      });
+      var item = StorageItem({
+        hash: 'somehash',
+        contracts: {
+          nodeid2: {
+            renter_id: 'dd2f8bdfb1769ccafb943c7c29a1bcc13a850b8f',
+            data_size: 10,
+            data_hash: '7a728a8c27fa378cafbd300c1e38639362f87ee8',
+            store_begin: Date.now(),
+            store_end: Date.now() + 2500,
+            audit_count: 2,
+            renter_signature: 'signaturegoeshere',
+            farmer_id: '4da1b82394f83847ee9a412af9d01b05dea54a0b',
+            farmer_signature: 'signaturegoeshere',
+            payment_storage_price: 0,
+            payment_download_price: 0,
+            payment_destination: '12PzSwsCT5LBT3nhW6GoCJQpAJAZ7CkpBg'
+          }
+        }
+      });
+      item.shard = {};
+      var _load = sinon.stub(manager, 'load').callsArgWith(1, null, item);
+      var socket = new EventEmitter();
+      socket.resume = sinon.stub();
+      socket.readyState = 1;
+      dcs._allowed.token = { hash: 'somehash' };
+      var _closeSocketSuccess = sinon.stub(dcs, '_closeSocketSuccess');
+      dcs._handleConsignStream(socket, 'token');
+      setImmediate(function() {
+        setImmediate(function() {
+          _load.restore();
+          expect(_closeSocketSuccess.called).to.equal(true);
+          _closeSocketSuccess.restore();
+          done();
+        });
+      });
     });
 
   });

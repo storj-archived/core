@@ -43,7 +43,7 @@ describe('Manager', function() {
 
   describe('#clean', function() {
 
-    it('should clean the expired contracts', function(done) {
+    it('should clean the expired or incomplete contracts', function(done) {
       var adapter = new RAMStorageAdapter();
       var man = new Manager(adapter);
       man.save(new StorageItem({
@@ -63,8 +63,22 @@ describe('Manager', function() {
             data_hash: '7a728a8c27fa378cafbd300c1e38639362f87ee8',
             store_begin: Date.now(),
             store_end: Date.now() + 2500,
+            audit_count: 2,
+            renter_signature: 'signaturegoeshere',
+            farmer_id: '4da1b82394f83847ee9a412af9d01b05dea54a0b',
+            farmer_signature: 'signaturegoeshere',
+            payment_storage_price: 0,
+            payment_download_price: 0,
+            payment_destination: '12PzSwsCT5LBT3nhW6GoCJQpAJAZ7CkpBg'
+          },
+          nodeid3: {
+            renter_id: '4da1b82394f83847ee9a412af9d01b05dea54a0b',
+            data_size: 10,
+            data_hash: '7a728a8c27fa378cafbd300c1e38639362f87ee8',
+            store_begin: Date.now(),
+            store_end: Date.now() + 2500,
             audit_count: 2
-          }
+          },
         }
       }), function() {
         man.save(new StorageItem({

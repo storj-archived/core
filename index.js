@@ -77,6 +77,9 @@ module.exports.Manager = require('./lib/manager');
 /** {@link StorageAdapter} */
 module.exports.StorageAdapter = require('./lib/storage/adapter');
 
+/** {@link StorageMigration} */
+module.exports.StorageMigration = require('./lib/storage/migration');
+
 /** {@link FSStorageAdapter} */
 module.exports.FSStorageAdapter = require('./lib/storage/adapters/fs');
 

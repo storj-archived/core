@@ -46,6 +46,18 @@ describe('LevelDBStorageAdapter', function() {
       });
     });
 
+    it('should bubble error if the underlying db#put fails', function(done) {
+      var _put = sinon.stub(store._db, 'put').callsArgWith(
+        3,
+        new Error('Failed')
+      );
+      store._put(hash, item, function(err) {
+        expect(err.message).equal('Failed');
+        _put.restore();
+        done();
+      });
+    });
+
   });
 
   describe('#_get', function() {

@@ -192,10 +192,10 @@ describe('Contract (private)', function() {
 
   });
 
-  describe('#_complete', function() {
+  describe('#isComplete', function() {
 
     it('should return false if fields are null', function() {
-      expect(Contract()._complete()).to.equal(false);
+      expect(Contract().isComplete()).to.equal(false);
     });
 
     it('should return true if fields are not null', function() {
@@ -210,7 +210,7 @@ describe('Contract (private)', function() {
       });
       contract.sign('renter', kp1.getPrivateKey());
       contract.sign('farmer', kp2.getPrivateKey());
-      expect(contract._complete()).to.equal(true);
+      expect(contract.isComplete()).to.equal(true);
     });
 
   });

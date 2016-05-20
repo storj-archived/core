@@ -40,7 +40,7 @@
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="Audit.html">Audit</a></li><li><a href="AuditStream.html">AuditStream</a></li><li><a href="Contact.html">Contact</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="DecryptStream.html">DecryptStream</a></li><li><a href="EncryptStream.html">EncryptStream</a></li><li><a href="FarmerInterface.html">FarmerInterface</a></li><li><a href="FileDemuxer.html">FileDemuxer</a></li><li><a href="FileMuxer.html">FileMuxer</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="KeyRing.html">KeyRing</a></li><li><a href="LevelDBStorageAdapter.html">LevelDBStorageAdapter</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Padder.html">Padder</a></li><li><a href="Proof.html">Proof</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="RenterInterface.html">RenterInterface</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="Transport.html">Transport</a></li><li><a href="TunnelClient.html">TunnelClient</a></li><li><a href="TunnelDemuxer.html">TunnelDemuxer</a></li><li><a href="TunnelGateway.html">TunnelGateway</a></li><li><a href="TunnelMuxer.html">TunnelMuxer</a></li><li><a href="TunnelServer.html">TunnelServer</a></li><li><a href="Unpadder.html">Unpadder</a></li><li><a href="Verification.html">Verification</a></li>
+					<li><a href="Audit.html">Audit</a></li><li><a href="AuditStream.html">AuditStream</a></li><li><a href="Contact.html">Contact</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="DecryptStream.html">DecryptStream</a></li><li><a href="EncryptStream.html">EncryptStream</a></li><li><a href="FarmerInterface.html">FarmerInterface</a></li><li><a href="FileDemuxer.html">FileDemuxer</a></li><li><a href="FileMuxer.html">FileMuxer</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="KeyRing.html">KeyRing</a></li><li><a href="LevelDBFileStore.html">LevelDBFileStore</a></li><li><a href="LevelDBStorageAdapter.html">LevelDBStorageAdapter</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Padder.html">Padder</a></li><li><a href="Proof.html">Proof</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="RenterInterface.html">RenterInterface</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="StorageMigration.html">StorageMigration</a></li><li><a href="Transport.html">Transport</a></li><li><a href="TunnelClient.html">TunnelClient</a></li><li><a href="TunnelDemuxer.html">TunnelDemuxer</a></li><li><a href="TunnelGateway.html">TunnelGateway</a></li><li><a href="TunnelMuxer.html">TunnelMuxer</a></li><li><a href="TunnelServer.html">TunnelServer</a></li><li><a href="Unpadder.html">Unpadder</a></li><li><a href="Verification.html">Verification</a></li>
 				</ul>
 			</li>
 			
@@ -54,7 +54,7 @@
 			<li class="dropdown">
 				<a href="tutorials.list.html" class="dropdown-toggle" data-toggle="dropdown">Tutorials<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="tutorial-contract-topics.html">Publishing Storage Contracts</a></li><li><a href="tutorial-data-channels.html">Transferring File Shards</a></li><li><a href="tutorial-private-testnet.html">Running a Test Network</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li><li><a href="tutorial-renting-data.html">Renting Data to the Network</a></li><li><a href="tutorial-tunnel-connections.html">Tunnelling Connections</a></li>
+					<li><a href="tutorial-tunneling-diagram.html">tunneling-diagram</a></li><li><a href="tutorial-contract-topics.html">Publishing Storage Contracts</a></li><li><a href="tutorial-data-channels.html">Transferring File Shards</a></li><li><a href="tutorial-private-testnet.html">Running a Test Network</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li><li><a href="tutorial-renting-data.html">Renting Data to the Network</a></li><li><a href="tutorial-tunnel-connections.html">Tunnelling Connections</a></li>
 				</ul>
 			</li>
 			
@@ -91,6 +91,7 @@
         <pre
             class="sunlight-highlight-javascript ">'use strict';
 
+var path = require('path');
 var kad = require('kad');
 var Network = require('../network');
 var inherits = require('util').inherits;
@@ -98,18 +99,19 @@ var StorageItem = require('../storage/item');
 var Contract = require('../contract');
 var merge = require('merge');
 var Manager = require('../manager');
-var FSStorageAdapter = require('../storage/adapters/fs');
+var LevelDBStorageAdapter = require('../storage/adapters/level');
 
 /**
  * Creates and a new farmer interface
  * @constructor
  * @extends {Network}
- * @param {Object} options
- * @param {Object} options.storage
- * @param {String} options.storage.path - File system path to store data
- * @param {Number} options.storage.size - Storage size to allocate
- * @param {String} options.storage.unit - Storage size unit (MB|GB|TB)
- * @param {Array}  options.opcodes - Optional contract opcodes to farm
+ * @param {Object}   options
+ * @param {Object}   options.storage
+ * @param {String}   options.storage.path - File system path to store data
+ * @param {Number}   options.storage.size - Storage size to allocate
+ * @param {String}   options.storage.unit - Storage size unit (MB|GB|TB)
+ * @param {Array}    options.opcodes - Optional contract opcodes to farm
+ * @param {Function} options.backend - Optional levelup backend db
  * @param {FarmerInterface~negotiator} options.negotiator - Negotiation rules
  */
 function FarmerInterface(options) {
@@ -119,7 +121,10 @@ function FarmerInterface(options) {
 
   // TODO: Handle storage.size and storage.unit
   options = merge(Object.create(FarmerInterface.DEFAULTS), options);
-  options.manager = new Manager(new FSStorageAdapter(options.storage.path));
+  options.manager = new Manager(new LevelDBStorageAdapter(
+    path.join(options.storage.path, 'farmer.db'),
+    options.backend
+  ));
 
   this._negotiator = options.negotiator;
 
@@ -168,6 +173,37 @@ FarmerInterface.prototype.join = function(callback) {
 };
 
 /**
+ * Sends the given contract as an offer to the specified renter
+ * @private
+ * @param {Contract} contract - The contract to include in offer
+ * @param {Contact} renter - The renter who originally published the contract
+ */
+FarmerInterface.prototype._sendOfferForContract = function(contract, contact) {
+  var self = this;
+  var message = new kad.Message({
+    method: 'OFFER',
+    params: {
+      contract: contract.toObject(),
+      contact: self._contact
+    }
+  });
+
+  self._transport.send(contact, message, function(err, response) {
+    if (err) {
+      return self._logger.error(err.message);
+    }
+
+    if (response.error || !response.result.contract) {
+      return self._logger.error(
+        response.error ? response.error.message : 'Renter refused to sign'
+      );
+    }
+
+    self._handleOfferRes(response, contract, contact);
+  });
+};
+
+/**
  * Handles a received contract and negotiates storage
  * @private
  * @param {Contract} contract
@@ -195,6 +231,13 @@ FarmerInterface.prototype._negotiateContract = function(contract) {
       return self._logger.error(err.message);
     }
 
+    if (self._router.getContactByNodeID(renterId)) {
+      return self._sendOfferForContract(
+        contract,
+        self._router.getContactByNodeID(renterId)
+      );
+    }
+
     self._router.findNode(renterId, function(err, nodes) {
       if (err) {
         return self._logger.error(err.message);
@@ -208,27 +251,7 @@ FarmerInterface.prototype._negotiateContract = function(contract) {
         return self._logger.error('Could not locate renter for offer');
       }
 
-      var message = new kad.Message({
-        method: 'OFFER',
-        params: {
-          contract: contract.toObject(),
-          contact: self._contact
-        }
-      });
-
-      self._transport.send(renter, message, function(err, response) {
-        if (err) {
-          return self._logger.error(err.message);
-        }
-
-        if (response.error || !response.result.contract) {
-          return self._logger.error(
-            response.error ? response.error.message : 'Renter refused to sign'
-          );
-        }
-
-        self._handleOfferRes(response, contract, renter);
-      });
+      self._sendOfferForContract(contract, renter);
     });
   });
 

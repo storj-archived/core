@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>StorjCORE Source: lib/storage/adapters/level.js</title>
+	<title>StorjCORE Source: lib/storage/migration.js</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -40,7 +40,7 @@
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="Audit.html">Audit</a></li><li><a href="AuditStream.html">AuditStream</a></li><li><a href="Contact.html">Contact</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="DecryptStream.html">DecryptStream</a></li><li><a href="EncryptStream.html">EncryptStream</a></li><li><a href="FarmerInterface.html">FarmerInterface</a></li><li><a href="FileDemuxer.html">FileDemuxer</a></li><li><a href="FileMuxer.html">FileMuxer</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="KeyRing.html">KeyRing</a></li><li><a href="LevelDBStorageAdapter.html">LevelDBStorageAdapter</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Padder.html">Padder</a></li><li><a href="Proof.html">Proof</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="RenterInterface.html">RenterInterface</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="Transport.html">Transport</a></li><li><a href="TunnelClient.html">TunnelClient</a></li><li><a href="TunnelDemuxer.html">TunnelDemuxer</a></li><li><a href="TunnelGateway.html">TunnelGateway</a></li><li><a href="TunnelMuxer.html">TunnelMuxer</a></li><li><a href="TunnelServer.html">TunnelServer</a></li><li><a href="Unpadder.html">Unpadder</a></li><li><a href="Verification.html">Verification</a></li>
+					<li><a href="Audit.html">Audit</a></li><li><a href="AuditStream.html">AuditStream</a></li><li><a href="Contact.html">Contact</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="DecryptStream.html">DecryptStream</a></li><li><a href="EncryptStream.html">EncryptStream</a></li><li><a href="FarmerInterface.html">FarmerInterface</a></li><li><a href="FileDemuxer.html">FileDemuxer</a></li><li><a href="FileMuxer.html">FileMuxer</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="KeyRing.html">KeyRing</a></li><li><a href="LevelDBFileStore.html">LevelDBFileStore</a></li><li><a href="LevelDBStorageAdapter.html">LevelDBStorageAdapter</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Padder.html">Padder</a></li><li><a href="Proof.html">Proof</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="RenterInterface.html">RenterInterface</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="StorageMigration.html">StorageMigration</a></li><li><a href="Transport.html">Transport</a></li><li><a href="TunnelClient.html">TunnelClient</a></li><li><a href="TunnelDemuxer.html">TunnelDemuxer</a></li><li><a href="TunnelGateway.html">TunnelGateway</a></li><li><a href="TunnelMuxer.html">TunnelMuxer</a></li><li><a href="TunnelServer.html">TunnelServer</a></li><li><a href="Unpadder.html">Unpadder</a></li><li><a href="Verification.html">Verification</a></li>
 				</ul>
 			</li>
 			
@@ -54,7 +54,7 @@
 			<li class="dropdown">
 				<a href="tutorials.list.html" class="dropdown-toggle" data-toggle="dropdown">Tutorials<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="tutorial-contract-topics.html">Publishing Storage Contracts</a></li><li><a href="tutorial-data-channels.html">Transferring File Shards</a></li><li><a href="tutorial-private-testnet.html">Running a Test Network</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li><li><a href="tutorial-renting-data.html">Renting Data to the Network</a></li><li><a href="tutorial-tunnel-connections.html">Tunnelling Connections</a></li>
+					<li><a href="tutorial-tunneling-diagram.html">tunneling-diagram</a></li><li><a href="tutorial-contract-topics.html">Publishing Storage Contracts</a></li><li><a href="tutorial-data-channels.html">Transferring File Shards</a></li><li><a href="tutorial-private-testnet.html">Running a Test Network</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li><li><a href="tutorial-renting-data.html">Renting Data to the Network</a></li><li><a href="tutorial-tunnel-connections.html">Tunnelling Connections</a></li>
 				</ul>
 			</li>
 			
@@ -84,143 +84,135 @@
 		<div id="main">
 			
 
-		<h1 class="page-title">Source: lib/storage/adapters/level.js</h1>
+		<h1 class="page-title">Source: lib/storage/migration.js</h1>
     
 <section>
     <article>
         <pre
             class="sunlight-highlight-javascript ">'use strict';
 
+var assert = require('assert');
+var StorageAdapter = require('./adapter');
 var inherits = require('util').inherits;
-var StorageAdapter = require('../adapter');
-var StorageItem = require('../item');
-var levelup = require('levelup');
-var FileStore = require('level-store');
-var patchWriteStream = require('level-ws');
+var EventEmitter = require('events').EventEmitter;
+var StorageItem = require('./item');
 
 /**
- * Implements an LevelDB storage adapter interface
- * @extends {StorageAdapter}
- * @param {String} path - Path to store the level db
- * @param {Function} backend - Optional backend override for levelup
+ * Migrates data stored with one {@link StorageAdapter} to another
  * @constructor
+ * @param {StorageAdapter} source - The source adapter
+ * @param {StorageAdapter} target - The migration destination
  */
-function LevelDBStorageAdapter(path, backend) {
-  if (!(this instanceof LevelDBStorageAdapter)) {
-    return new LevelDBStorageAdapter(path, backend);
+function StorageMigration(source, target) {
+  if (!(this instanceof StorageMigration)) {
+    return new StorageMigration(source, target);
   }
 
-  // NB: `patchWriteStream` is used to bring back write streams to levelup
-  // NB: https://github.com/Level/levelup#what-happened-to-dbcreatewritestream
-  this._db = patchWriteStream(levelup(path, backend ? { db: backend } : {}));
-  this._fs = FileStore(this._db);
+  assert(source instanceof StorageAdapter, 'Invalid storage adapter supplied');
+  assert(target instanceof StorageAdapter, 'Invalid storage adapter supplied');
+
+  this.source = source;
+  this.target = target;
+  this.readyState = StorageMigration.STOPPED;
+
+  EventEmitter.call(this);
 }
 
-inherits(LevelDBStorageAdapter, StorageAdapter);
+inherits(StorageMigration, EventEmitter);
+
+StorageMigration.STOPPED = 0;
+StorageMigration.STARTED = 1;
 
 /**
- * Implements the abstract {@link StorageAdapter#_get}
- * @private
- * @param {String} key
- * @param {Function} callback
+ * Starts the migration process
  */
-LevelDBStorageAdapter.prototype._get = function(key, callback) {
+StorageMigration.prototype.start = function() {
+  assert(
+    this.readyState === StorageMigration.STOPPED,
+    'Migration has already started'
+  );
+
+  this.readyState = StorageMigration.STARTED;
+  this._sourceStream = this.source.createReadStream();
+
+  this._sourceStream.on('data', this._handleSourceObject.bind(this));
+  this._sourceStream.on('end', this._handleSourceFinished.bind(this));
+  this._sourceStream.on('error', this._handleSourceError.bind(this));
+
+  return this._sourceStream;
+};
+
+/**
+ * Stops the migration process
+ */
+StorageMigration.prototype.stop = function() {
+  assert(
+    this.readyState === StorageMigration.STARTED,
+    'Migration has already stopped'
+  );
+
+  this._sourceStream.removeAllListeners();
+
+  this.readyState = StorageMigration.STOPPED;
+  this._sourceStream = null;
+};
+
+/**
+ * Handles a data event from the source read stream and inserts it into the
+ * the target adapter
+ * @private
+ * @param {StorageItem} sourceItem - Storage item from the source read stream
+ */
+StorageMigration.prototype._handleSourceObject = function(sourceItem) {
   var self = this;
 
-  this._db.get(key + '.info', function(err, value) {
+  self._sourceStream.pause();
+
+  self.target.put(StorageItem(sourceItem), function(err) {
     if (err) {
-      return callback(err);
+      return self.emit('error', err);
     }
 
-    var result = new StorageItem(JSON.parse(value));
-
-    self._fs.exists(key + '.data', function(err, exists) {
+    self.target.get(sourceItem.hash, function(err, targetItem) {
       if (err) {
-        return callback(err);
+        return self.emit('error', err);
       }
 
-      if (exists) {
-        result.shard = self._fs.createReadStream(key + '.data');
-      } else {
-        result.shard = self._fs.createWriteStream(key + '.data');
+      if (typeof sourceItem.shard.read === 'function') {
+        return sourceItem.shard.pipe(targetItem.shard)
+          .on('error', self._handleSourceError.bind(this))
+          .on('finish', self._sourceStream.resume.bind(self._sourceStream));
       }
 
-      callback(null, result);
+      self._sourceStream.resume();
     });
   });
 };
 
 /**
- * Implements the abstract {@link StorageAdapter#_put}
+ * Handles the completion of the source stream read
  * @private
- * @param {String} key
- * @param {StorageItem} item
- * @param {Function} callback
  */
-LevelDBStorageAdapter.prototype._put = function(key, item, callback) {
-  // NB: Don't store any shard data here
-  item.shard = null;
+StorageMigration.prototype._handleSourceFinished = function() {
+  this.readyState = StorageMigration.STOPPED;
+  this._sourceStream = null;
 
-  this._db.put(key + '.info', JSON.stringify(item), function(err) {
-    if (err) {
-      return callback(err);
-    }
-
-    callback(null);
-  });
+  this.emit('finish');
 };
 
 /**
- * Implements the abstract {@link StorageAdapter#_del}
+ * Handles errors received from the underyling source stream
  * @private
- * @param {String} key
- * @param {Function} callback
+ * @param {Error} error
  */
-LevelDBStorageAdapter.prototype._del = function(key, callback) {
-  var self = this;
+StorageMigration.prototype._handleSourceError = function(err) {
+  this.readyState = StorageMigration.STOPPED;
+  this._sourceStream = null;
 
-  this._db.del(key + '.info', function(err) {
-    if (err) {
-      return callback(err);
-    }
-
-    self._fs.reset(key + '.data', function(err) {
-      if (err) {
-        return callback(err);
-      }
-
-      callback(null);
-    });
-  });
+  this.emit('error', err);
 };
 
-/**
- * Implements the abstract {@link StorageAdapter#_keys}
- * @private
- * @param {Function} callback
- */
-LevelDBStorageAdapter.prototype._keys = function(callback) {
-  var keys = [];
-  var stream = this._db.createKeyStream();
-
-  stream.on('data', function(key) {
-    var parts = key.split('.');
-    var name = parts[0];
-    var ext = parts[1];
-
-    if (ext === 'info') {
-      keys.push(name);
-    }
-  });
-
-  stream.on('end', function() {
-    callback(null, keys);
-  });
-
-  stream.on('error', callback);
-};
-
-module.exports = LevelDBStorageAdapter;
+module.exports = StorageMigration;
 </pre>
     </article>
 </section>

@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>StorjCORE Source: lib/constants.js</title>
+	<title>StorjCORE Source: lib/storage/adapters/level/index.js</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -84,47 +84,149 @@
 		<div id="main">
 			
 
-		<h1 class="page-title">Source: lib/constants.js</h1>
+		<h1 class="page-title">Source: lib/storage/adapters/level/index.js</h1>
     
 <section>
     <article>
         <pre
-            class="sunlight-highlight-javascript ">/**
- * @module storj/constants
+            class="sunlight-highlight-javascript ">'use strict';
+
+var inherits = require('util').inherits;
+var StorageAdapter = require('../../adapter');
+var StorageItem = require('../../item');
+var levelup = require('levelup');
+var LevelDBFileStore = require('./filestore');
+var merge = require('merge');
+
+/**
+ * Implements an LevelDB storage adapter interface
+ * @extends {StorageAdapter}
+ * @param {String} path - Path to store the level db
+ * @param {Function} backend - Optional backend override for levelup
+ * @constructor
  */
+function LevelDBStorageAdapter(path, backend) {
+  if (!(this instanceof LevelDBStorageAdapter)) {
+    return new LevelDBStorageAdapter(path, backend);
+  }
 
-'use strict';
+  this._db = levelup(path, backend ? { db: backend } : {});
+  this._fs = new LevelDBFileStore(this._db);
+}
 
-module.exports = {
-  /** @constant {String} CIPHER_ALG - Cipher/Decipher algorithm */
-  CIPHER_ALG: 'aes-256-cbc',
-  /** @constant {Number} PREFIX - NodeID prefix (same as bitcoin) */
-  PREFIX: 0x00,
-  /** @constant {Number} NONCE_EXPIRE - Time to honor a signed message */
-  NONCE_EXPIRE: 10000,
-  /** @constant {Number} AUDIT_BYTES - Number of bytes for audit challenge */
-  AUDIT_BYTES: 32,
-  /** @constant {Number} CLEAN_INTERVAL - Interval for reaping stale shards */
-  CLEAN_INTERVAL: 3600000,
-  /** @constant {Number} TUNNEL_ANNOUNCE_INTERVAL - Announce tunnel state */
-  TUNNEL_ANNOUNCE_INTERVAL: 900000,
-  /** @constant {Number} OPCODE_TUNRPC_PREFIX - Opcode for tunnel rpc message */
-  OPCODE_TUNRPC_PREFIX: 0x0c,
-  /** @constant {Number} OPCODE_TUNDCX_PREFIX - Opcode for tunnel datachannel */
-  OPCODE_TUNDCX_PREFIX: 0x0d,
-  /** @constant {Number} OPCODE_TUNNELER_PREFIX - Prefix opcode for tunneler */
-  OPCODE_TUNNELER_PREFIX: 0x0e,
-  /** @constant {Number} OPCODE_CONTRACT_PREFIX - Prefix opcode for contracts */
-  OPCODE_CONTRACT_PREFIX: 0x0f,
-  /** @constant {Number} OPCODE_DEG_NULL - Opcode for null criteria degree */
-  OPCODE_DEG_NULL: 0x00,
-  /** @constant {Number} OPCODE_DEG_LOW - Opcode for low criteria degree */
-  OPCODE_DEG_LOW: 0x01,
-  /** @constant {Number} OPCODE_DEG_MED - Opcode for medium criteria degree */
-  OPCODE_DEG_MED: 0x02,
-  /** @constant {Number} OPCODE_DEG_HIGH - Opcode for medium criteria degree */
-  OPCODE_DEG_HIGH: 0x03
+inherits(LevelDBStorageAdapter, StorageAdapter);
+
+/**
+ * Implements the abstract {@link StorageAdapter#_get}
+ * @private
+ * @param {String} key
+ * @param {Function} callback
+ */
+LevelDBStorageAdapter.prototype._get = function(key, callback) {
+  var self = this;
+
+  this._db.get(key + '.info', { fillCache: false }, function(err, value) {
+    if (err) {
+      return callback(err);
+    }
+
+    var result = new StorageItem(JSON.parse(value));
+
+    self._fs.exists(key + '.data', function(exists) {
+      if (exists) {
+        result.shard = self._fs.createReadStream(key + '.data');
+      } else {
+        result.shard = self._fs.createWriteStream(key + '.data');
+      }
+
+      callback(null, result);
+    });
+  });
 };
+
+/**
+ * Implements the abstract {@link StorageAdapter#_put}
+ * @private
+ * @param {String} key
+ * @param {StorageItem} item
+ * @param {Function} callback
+ */
+LevelDBStorageAdapter.prototype._put = function(key, item, callback) {
+  var self = this;
+
+  item.shard = null; // NB: Don't store any shard data here
+
+  this._db.get(key + '.info', { fillCache: false }, function(err, existing) {
+    if (err) {
+      existing = JSON.stringify({});
+    }
+
+    var plain = JSON.parse(JSON.stringify(item));
+    var value = merge.recursive(JSON.parse(existing), plain);
+
+    self._db.put(key + '.info', JSON.stringify(value), {
+      sync: true
+    }, function(err) {
+      if (err) {
+        return callback(err);
+      }
+
+      callback(null);
+    });
+  });
+};
+
+/**
+ * Implements the abstract {@link StorageAdapter#_del}
+ * @private
+ * @param {String} key
+ * @param {Function} callback
+ */
+LevelDBStorageAdapter.prototype._del = function(key, callback) {
+  var self = this;
+
+  this._db.del(key + '.info', function(err) {
+    if (err) {
+      return callback(err);
+    }
+
+    self._fs.reset(key + '.data', function(err) {
+      if (err) {
+        return callback(err);
+      }
+
+      callback(null);
+    });
+  });
+};
+
+/**
+ * Implements the abstract {@link StorageAdapter#_keys}
+ * @private
+ * @param {Function} callback
+ */
+LevelDBStorageAdapter.prototype._keys = function(callback) {
+  var keys = [];
+  var stream = this._db.createKeyStream();
+
+  stream.on('data', function(key) {
+    var parts = key.split('.');
+    var name = parts[0];
+    var ext = parts[1];
+
+    if (ext === 'info') {
+      keys.push(name);
+    }
+  });
+
+  stream.on('end', function() {
+    callback(null, keys);
+  });
+
+  stream.on('error', callback);
+};
+
+module.exports = LevelDBStorageAdapter;
 </pre>
     </article>
 </section>

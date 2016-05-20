@@ -40,7 +40,7 @@
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="Audit.html">Audit</a></li><li><a href="AuditStream.html">AuditStream</a></li><li><a href="Contact.html">Contact</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="DecryptStream.html">DecryptStream</a></li><li><a href="EncryptStream.html">EncryptStream</a></li><li><a href="FarmerInterface.html">FarmerInterface</a></li><li><a href="FileDemuxer.html">FileDemuxer</a></li><li><a href="FileMuxer.html">FileMuxer</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="KeyRing.html">KeyRing</a></li><li><a href="LevelDBStorageAdapter.html">LevelDBStorageAdapter</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Padder.html">Padder</a></li><li><a href="Proof.html">Proof</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="RenterInterface.html">RenterInterface</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="Transport.html">Transport</a></li><li><a href="TunnelClient.html">TunnelClient</a></li><li><a href="TunnelDemuxer.html">TunnelDemuxer</a></li><li><a href="TunnelGateway.html">TunnelGateway</a></li><li><a href="TunnelMuxer.html">TunnelMuxer</a></li><li><a href="TunnelServer.html">TunnelServer</a></li><li><a href="Unpadder.html">Unpadder</a></li><li><a href="Verification.html">Verification</a></li>
+					<li><a href="Audit.html">Audit</a></li><li><a href="AuditStream.html">AuditStream</a></li><li><a href="Contact.html">Contact</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="DecryptStream.html">DecryptStream</a></li><li><a href="EncryptStream.html">EncryptStream</a></li><li><a href="FarmerInterface.html">FarmerInterface</a></li><li><a href="FileDemuxer.html">FileDemuxer</a></li><li><a href="FileMuxer.html">FileMuxer</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="KeyRing.html">KeyRing</a></li><li><a href="LevelDBFileStore.html">LevelDBFileStore</a></li><li><a href="LevelDBStorageAdapter.html">LevelDBStorageAdapter</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Padder.html">Padder</a></li><li><a href="Proof.html">Proof</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="RenterInterface.html">RenterInterface</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="StorageMigration.html">StorageMigration</a></li><li><a href="Transport.html">Transport</a></li><li><a href="TunnelClient.html">TunnelClient</a></li><li><a href="TunnelDemuxer.html">TunnelDemuxer</a></li><li><a href="TunnelGateway.html">TunnelGateway</a></li><li><a href="TunnelMuxer.html">TunnelMuxer</a></li><li><a href="TunnelServer.html">TunnelServer</a></li><li><a href="Unpadder.html">Unpadder</a></li><li><a href="Verification.html">Verification</a></li>
 				</ul>
 			</li>
 			
@@ -54,7 +54,7 @@
 			<li class="dropdown">
 				<a href="tutorials.list.html" class="dropdown-toggle" data-toggle="dropdown">Tutorials<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="tutorial-contract-topics.html">Publishing Storage Contracts</a></li><li><a href="tutorial-data-channels.html">Transferring File Shards</a></li><li><a href="tutorial-private-testnet.html">Running a Test Network</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li><li><a href="tutorial-renting-data.html">Renting Data to the Network</a></li><li><a href="tutorial-tunnel-connections.html">Tunnelling Connections</a></li>
+					<li><a href="tutorial-tunneling-diagram.html">tunneling-diagram</a></li><li><a href="tutorial-contract-topics.html">Publishing Storage Contracts</a></li><li><a href="tutorial-data-channels.html">Transferring File Shards</a></li><li><a href="tutorial-private-testnet.html">Running a Test Network</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li><li><a href="tutorial-renting-data.html">Renting Data to the Network</a></li><li><a href="tutorial-tunnel-connections.html">Tunnelling Connections</a></li>
 				</ul>
 			</li>
 			
@@ -261,23 +261,23 @@ DataChannelServer.prototype._handleConsignStream = function(socket, token) {
 
   this._manager.load(hash, function(err, item) {
     if (err) {
-      socket.close(500, err.message );
+      socket.close(500, err.message);
       return self.reject(token);
     }
 
     var contract = Object.keys(item.contracts)[0];
     var shardsize = item.contracts[contract].get('data_size');
 
+    if (socket.readyState !== ws.OPEN) {
+      return self.reject(token);
+    }
+
     socket.resume();
 
     // If the shard is not writable, it means we already have it, so let's
     // just respond with a success message
     if (typeof item.shard.write !== 'function') {
-      socket.send(JSON.stringify({
-        code: 200,
-        message: 'Consignment completed successfully'
-      }));
-      return self.reject(token);
+      return self._closeSocketSuccess(socket, 'Consignment completed', token);
     }
 
     passthrough.on('data', function(chunk) {
@@ -296,12 +296,7 @@ DataChannelServer.prototype._handleConsignStream = function(socket, token) {
       }
 
       item.shard.end();
-      socket.send(JSON.stringify({
-        code: 200,
-        message: 'Consignment completed successfully'
-      }));
-
-      self.reject(token);
+      self._closeSocketSuccess(socket, 'Consignment completed', token);
     });
   });
 };
@@ -332,9 +327,7 @@ DataChannelServer.prototype._handleRetrieveStream = function(socket, token) {
     });
 
     filestream.on('end', function() {
-      socket.send(JSON.stringify({ code: 200 }), function() {
-        self.reject(token);
-      });
+      self._closeSocketSuccess(socket, 'File transfer complete', token);
     });
   });
 };
@@ -349,7 +342,6 @@ DataChannelServer.prototype._handleUnknownStream = function(stream, token) {
   var client = this._allowed[token].client;
 
   client.close(400, 'Failed to handle the defined operation');
-
   this.reject(token);
 };
 
@@ -361,6 +353,15 @@ DataChannelServer.prototype._handleUnknownStream = function(stream, token) {
 DataChannelServer.prototype._handleError = function(err) {
   this._log.error('data channel server encountered an error: %s', err.message);
   this.emit('error', err);
+};
+
+/**
+ * Sends a success message for operation and rejects the token
+ * @private
+ */
+DataChannelServer.prototype._closeSocketSuccess = function(sock, msg, token) {
+  sock.send(JSON.stringify({ code: 200, message: msg }));
+  this.reject(token);
 };
 
 module.exports = DataChannelServer;

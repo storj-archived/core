@@ -22,6 +22,9 @@ herself to the network using her tunnel's address, instead of her own. Private
 nodes do not need to use the tunnel to contact other nodes on the network, but
 rather only *to be contacted*.
 
+### Tunneling Diagram
+![assets/tunneling.png](assets/tunneling.png)
+
 ### Announcing Willingness
 
 When a node joins the network and is publicly addressable, it has the ability

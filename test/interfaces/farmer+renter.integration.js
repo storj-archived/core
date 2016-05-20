@@ -69,6 +69,18 @@ var renters = Array.apply(null, Array(2)).map(function() {
   return createRenter();
 });
 
+var contract = null;
+var farmer = null;
+var shard = new Buffer('hello storj');
+var audit = new AuditStream(12);
+var ctoken = null;
+var rtoken = null;
+
+before(function(done) {
+  audit.end(shard);
+  setImmediate(done);
+});
+
 describe('Interfaces/Farmer+Renter/Integration', function() {
 
   describe('#join', function() {
@@ -87,14 +99,6 @@ describe('Interfaces/Farmer+Renter/Integration', function() {
   });
 
   var renter = renters[renters.length - 1];
-  var contract = null;
-  var farmer = null;
-  var shard = new Buffer('hello storj');
-  var audit = new AuditStream(12);
-  var ctoken = null;
-  var rtoken = null;
-
-  audit.end(shard);
 
   describe('#getStorageOffer', function() {
 

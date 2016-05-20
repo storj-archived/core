@@ -79,17 +79,21 @@ before(function(done) {
   });
 });
 
+var contract = null;
+var farmer = null;
+var shard = new Buffer('hello storj');
+var audit = new AuditStream(12);
+var ctoken = null;
+var rtoken = null;
+
 describe('Network/Integration/Tunnelling', function() {
 
   var renter = renters[renters.length - 1];
-  var contract = null;
-  var farmer = null;
-  var shard = new Buffer('hello storj');
-  var audit = new AuditStream(12);
-  var ctoken = null;
-  var rtoken = null;
 
-  audit.end(shard);
+  before(function(done) {
+    audit.end(shard);
+    setImmediate(done);
+  });
 
   describe('#getStorageOffer', function() {
 

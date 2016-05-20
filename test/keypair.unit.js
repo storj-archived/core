@@ -4,7 +4,6 @@ var expect = require('chai').expect;
 var KeyPair = require('../lib/keypair');
 var prvk = '4d548b387bed22aff9ca560416d7b13ecbad16f28bc41ef5acaff3019bfa5134';
 var pubk = '02ad47e0d4896cd794f5296a953f897c426b3f9a58f5203b8baace8952a291cf6b';
-var data = new Buffer('some really secret text');
 
 describe('KeyPair', function() {
 

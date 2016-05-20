@@ -23,7 +23,7 @@ nodes do not need to use the tunnel to contact other nodes on the network, but
 rather only *to be contacted*.
 
 ### Tunneling Diagram
-![tunneling.png](tunneling.png)
+![assets/tunneling.png](assets/tunneling.png)
 
 ### Announcing Willingness
 

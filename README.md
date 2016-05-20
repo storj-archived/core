@@ -26,7 +26,7 @@ var storj = require('storj');
 
 var network = storj.Network({
   keypair: storj.KeyPair(/* existing_key */),
-  manager: storj.Manager(storj.FSStorageAdapter('/path/to/datadir')),
+  manager: storj.Manager(storj.LevelDBStorageAdapter('/path/to/datadir')),
   address: 'ip.or.hostname',
   port: 4000,
   seeds: [

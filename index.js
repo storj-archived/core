@@ -104,6 +104,9 @@ module.exports.RenterInterface = require('./lib/interfaces/renter');
 /** {@link FarmerInterface} */
 module.exports.FarmerInterface = require('./lib/interfaces/farmer');
 
+/** {@link TunnelerInterface} */
+module.exports.TunnelerInterface = require('./lib/interfaces/tunneler');
+
 /** {@link constants} */
 module.exports.constants = require('./lib/constants');
 

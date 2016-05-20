@@ -6,7 +6,7 @@ var StorageItem = require('../../../lib/storage/item');
 var expect = require('chai').expect;
 var utils = require('../../../lib/utils');
 var Contract = require('../../../lib/contract');
-var Audit = require('../../../lib/audit');
+var AuditStream = require('../../../lib/auditstream');
 var sinon = require('sinon');
 
 function tmpdir() {
@@ -17,7 +17,8 @@ describe('LevelDBStorageAdapter', function() {
 
   var store = new LevelDBStorageAdapter(tmpdir(), memdown);
   var hash = utils.rmd160('test');
-  var audit = new Audit({ shard: new Buffer('test'), audit: 12 });
+  var audit = new AuditStream(12);
+  audit.end(Buffer('test'));
   var contract = new Contract();
   var item = new StorageItem({
     hash: hash,

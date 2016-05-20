@@ -7,9 +7,8 @@ var expect = require('chai').expect;
 var async = require('async');
 var storj = require('../../');
 var kad = require('kad');
-var ms = require('ms');
 var Contract = require('../../lib/contract');
-var Audit = require('../../lib/audit');
+var AuditStream = require('../../lib/auditstream');
 var Contact = require('../../lib/network/contact');
 var utils = require('../../lib/utils');
 var DataChannelClient = require('../../lib/datachannel/client');
@@ -63,9 +62,6 @@ function createFarmer() {
   return createNode(['0f01010202']);
 }
 
-var data = new Buffer('ALL THE SHARDS');
-var hash = storj.utils.rmd160sha256(data);
-
 var farmers = Array.apply(null, Array(1)).map(function() {
   return createFarmer();
 });
@@ -94,9 +90,11 @@ describe('Interfaces/Farmer+Renter/Integration', function() {
   var contract = null;
   var farmer = null;
   var shard = new Buffer('hello storj');
-  var audit = new Audit({ audits: 12, shard: shard });
+  var audit = new AuditStream(12);
   var ctoken = null;
   var rtoken = null;
+
+  audit.end(shard);
 
   describe('#getStorageOffer', function() {
 
@@ -189,59 +187,6 @@ describe('Interfaces/Farmer+Renter/Integration', function() {
           audit.getPrivateRecord().depth
         );
         expect(v[0]).to.equal(v[1]);
-        done();
-      });
-    });
-
-  });
-
-});
-
-describe('Interfaces/Farmer+Renter/Integration (deprecated)', function() {
-
-  describe('#store (deprecated)', function() {
-
-    it('should negotiate a storage contract with a farmer', function(done) {
-      this.timeout(12000);
-      var renter = renters[renters.length - 1];
-      var duration = ms('20s');
-      renter.store(data, duration, function(err, key) {
-        expect(err).to.equal(null);
-        expect(key).to.equal(hash);
-        done();
-      });
-    });
-
-  });
-
-
-  describe('#retrieve (deprecated)', function() {
-
-    it('should fetch the file from the farmer', function(done) {
-      var renter = renters[renters.length - 1];
-      var buffer = Buffer([]);
-      renter.retrieve(hash, function(err, result) {
-        expect(err).to.equal(null);
-        result.on('end', function() {
-          expect(Buffer.compare(data, buffer)).to.equal(0);
-          done();
-        });
-        result.on('data', function(data) {
-          buffer = Buffer.concat([buffer, data]);
-        });
-      });
-    });
-
-  });
-
-
-  describe('#audit (deprecated)', function() {
-
-    it('should successfully audit the stored data', function(done) {
-      var renter = renters[renters.length - 1];
-      renter.audit(hash, function(err, result) {
-        expect(err).to.equal(null);
-        expect(result[0]).to.equal(result[1]);
         done();
       });
     });

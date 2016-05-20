@@ -59,9 +59,6 @@ module.exports.Unpadder = require('./lib/unpadder');
 /** {@link Contract} */
 module.exports.Contract = require('./lib/contract');
 
-/** {@link Audit} */
-module.exports.Audit = require('./lib/audit');
-
 /** {@link AuditStream} */
 module.exports.AuditStream = require('./lib/auditstream');
 
@@ -80,9 +77,6 @@ module.exports.StorageAdapter = require('./lib/storage/adapter');
 /** {@link StorageMigration} */
 module.exports.StorageMigration = require('./lib/storage/migration');
 
-/** {@link FSStorageAdapter} */
-module.exports.FSStorageAdapter = require('./lib/storage/adapters/fs');
-
 /** {@link LevelDBStorageAdapter} */
 module.exports.LevelDBStorageAdapter = require('./lib/storage/adapters/level');
 
@@ -91,6 +85,9 @@ module.exports.RAMStorageAdapter = require('./lib/storage/adapters/ram');
 
 /** {@link StorageItem} */
 module.exports.StorageItem = require('./lib/storage/item');
+
+/** {@link DataCipherKeyIv} */
+module.exports.DataCipherKeyIv = require('./lib/cipherkeyiv');
 
 /** {@link KeyPair} */
 module.exports.KeyPair = require('./lib/keypair');

@@ -3,9 +3,6 @@
 var crypto = require('crypto');
 var expect = require('chai').expect;
 var AuditStream = require('../lib/auditstream');
-var Audit = require('../lib/audit');
-var sinon = require('sinon');
-var utils = require('../lib/utils');
 
 var SHARD = new Buffer('testshard');
 
@@ -112,58 +109,6 @@ describe('AuditStream#fromRecords', function() {
     });
     audit1.write(SHARD);
     audit1.end();
-  });
-
-});
-
-describe('Audit+AuditStream/Compatibility', function() {
-
-  it('should return the same structures given the same input', function(done) {
-    var counter1 = 0;
-    var counter2 = 0;
-    var _genChal1 = sinon.stub(
-      Audit.prototype,
-      '_generateChallenge',
-      function() {
-        return utils.rmd160((++counter1).toString());
-      }
-    );
-    var _genChal2 = sinon.stub(
-      AuditStream.prototype,
-      '_generateChallenge',
-      function() {
-        return utils.rmd160((++counter2).toString());
-      }
-    );
-    var audit = new Audit({ audits: 12, shard: SHARD });
-    var auditstream = new AuditStream(12);
-    auditstream.on('finish', function() {
-      audit.getPublicRecord().forEach(function(record, i) {
-        expect(auditstream.getPublicRecord()[i]).to.equal(record);
-      });
-      expect(
-        audit.getPrivateRecord().root
-      ).to.equal(
-        auditstream.getPrivateRecord().root
-      );
-      expect(
-        audit.getPrivateRecord().depth
-      ).to.equal(
-        auditstream.getPrivateRecord().depth
-      );
-      audit.getPrivateRecord().challenges.forEach(function(chal, i) {
-        expect(
-          auditstream.getPrivateRecord().challenges[i]
-        ).to.equal(
-          chal
-        );
-      });
-      _genChal1.restore();
-      _genChal2.restore();
-      done();
-    });
-    auditstream.write(SHARD);
-    auditstream.end();
   });
 
 });

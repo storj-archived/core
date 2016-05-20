@@ -16,7 +16,7 @@ Start by importing the `storj` module and instantiating these objects:
 ```
 var storj = require('storj');
 var keypair = new storj.KeyPair();
-var persistence = new storj.FSStorageAdapter('/path/to/datadir');
+var persistence = new storj.LevelDBStorageAdapter('/path/to/datadir');
 var manager = new storj.Manager(persistence);
 ```
 

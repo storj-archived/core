@@ -54,23 +54,4 @@ describe('KeyPair', function() {
 
   });
 
-  var cryptokp = new KeyPair(), encrypted;
-
-  describe('#encrypt', function() {
-
-    it('should encrypt the data', function() {
-      encrypted = cryptokp.encrypt(data);
-      expect(encrypted).to.not.equal(data);
-    });
-
-  });
-
-  describe('#decrypt', function() {
-
-    it('should decrypt the data', function() {
-      expect(Buffer.compare(cryptokp.decrypt(encrypted), data)).to.equal(0);
-    });
-
-  });
-
 });

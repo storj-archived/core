@@ -15,6 +15,8 @@ var StorageItem = require('../../lib/storage/item');
 var Verification = require('../../lib/verification');
 var memdown = require('memdown');
 
+kad.constants.T_RESPONSETIMEOUT = 2000;
+
 var NODE_LIST = [];
 var STARTING_PORT = 64535;
 
@@ -63,21 +65,18 @@ function createFarmer() {
 var data = new Buffer('ALL THE SHARDS');
 var hash = storj.utils.rmd160sha256(data);
 
-var renters = Array.apply(null, Array(2)).map(function() {
-  return createRenter();
-});
-var farmers = Array.apply(null, Array(1)).map(function() {
-  return createFarmer();
-});
+var renters = [createRenter(), createRenter()];
+var farmers = [createFarmer()];
 
 before(function(done) {
-  this.timeout(12000);
+  this.timeout(35000);
   sinon.stub(farmers[0], '_requestProbe').callsArgWith(
     1, new Error('Probe failed')
   ); // NB: Force tunneling
 
-  async.eachSeries(renters, function(node, next) {
-    node.join(next);
+  async.each(renters, function(node, next) {
+    node.join(function noop() {});
+    next();
   }, function() {
     farmers[0]._transport._isPublic = false;
     farmers[0].join(done);

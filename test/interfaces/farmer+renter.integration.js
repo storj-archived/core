@@ -17,6 +17,8 @@ var StorageItem = require('../../lib/storage/item');
 var Verification = require('../../lib/verification');
 var memdown = require('memdown');
 
+kad.constants.T_RESPONSETIMEOUT = 2000;
+
 var NODE_LIST = [];
 var STARTING_PORT = 65535;
 
@@ -76,11 +78,12 @@ describe('Interfaces/Farmer+Renter/Integration', function() {
   describe('#join', function() {
 
     it('should connect all the nodes together', function(done) {
-      this.timeout(5000);
+      this.timeout(35000);
       farmers[0].join(function() {
         farmers.shift();
-        async.eachSeries(farmers.concat(renters), function(node, done) {
-          node.join(done);
+        async.each(farmers.concat(renters), function(node, done) {
+          node.join(function noop() {});
+          done();
         }, done);
       });
     });

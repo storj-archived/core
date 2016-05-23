@@ -11,7 +11,7 @@ var utils = require('../../lib/utils');
 
 describe('FarmerInterface', function() {
 
-  describe('#_negotiateContract', function() {
+  describe('#_handleContractPublication', function() {
 
     it('should not send an offer if the negotiator returns false', function() {
       var farmer = new FarmerInterface({
@@ -24,8 +24,27 @@ describe('FarmerInterface', function() {
         logger: kad.Logger(0),
         backend: require('memdown')
       });
-      expect(farmer._negotiateContract(Contract({}))).to.equal(false);
+      expect(farmer._handleContractPublication(Contract({}))).to.equal(false);
     });
+
+    it('should not send an offer if concurrency is exceeded', function() {
+      var farmer = new FarmerInterface({
+        keypair: KeyPair(),
+        port: 0,
+        noforward: true,
+        negotiator: function() {
+          return true;
+        },
+        logger: kad.Logger(0),
+        backend: require('memdown'),
+        concurrency: 0
+      });
+      expect(farmer._handleContractPublication(Contract({}))).to.equal(false);
+    });
+
+  });
+
+  describe('#_negotiateContract', function() {
 
     it('should ask network for renter if not locally known', function(done) {
       var kp1 = KeyPair();

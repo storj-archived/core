@@ -25,7 +25,7 @@ describe('utils', function() {
   describe('#isCompatibleVersion', function() {
 
     it('should be compatible (same version)', function() {
-      expect(utils.isCompatibleVersion(version)).to.equal(true);
+      expect(utils.isCompatibleVersion(version.protocol)).to.equal(true);
     });
 
     it('should not be compatible (different major)', function() {
@@ -34,12 +34,14 @@ describe('utils', function() {
 
     it('should be compatible (different patch)', function() {
       expect(
-        utils.isCompatibleVersion(semver.inc(version, 'patch'))
+        utils.isCompatibleVersion(semver.inc(version.protocol, 'patch'))
       ).to.equal(true);
     });
 
     it('should not be compatible (different build tag)', function() {
-      expect(utils.isCompatibleVersion(version + '-buildtag')).to.equal(false);
+      expect(
+        utils.isCompatibleVersion(version.protocol + '-buildtag')
+      ).to.equal(false);
     });
 
   });

@@ -2,7 +2,7 @@
 
 var expect = require('chai').expect;
 var AuditStream = require('../lib/auditstream');
-var Proof = require('../lib/proof');
+var ProofStream = require('../lib/proofstream');
 var Verification = require('../lib/verification');
 var utils = require('../lib/utils');
 
@@ -44,11 +44,14 @@ describe('Verification', function() {
       setImmediate(function() {
         var secret = audit.getPrivateRecord();
         var request = audit.getPublicRecord();
-        var proof = new Proof({ shard: SHARD, leaves: request });
-        var response = proof.prove(secret.challenges[1]);
-        var verification = new Verification(response);
-        var result = verification.verify(secret.root, secret.depth);
-        expect(result[0]).to.equal(result[1]);
+        var proof = new ProofStream(request, secret.challenges[1]);
+        proof.end(SHARD);
+        setImmediate(function() {
+          var response = proof.getProofResult();
+          var verification = new Verification(response);
+          var result = verification.verify(secret.root, secret.depth);
+          expect(result[0]).to.equal(result[1]);
+        });
       });
     });
 

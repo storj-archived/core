@@ -62,8 +62,8 @@ module.exports.Contract = require('./lib/contract');
 /** {@link AuditStream} */
 module.exports.AuditStream = require('./lib/auditstream');
 
-/** {@link Proof} */
-module.exports.Proof = require('./lib/proof');
+/** {@link ProofStream} */
+module.exports.ProofStream = require('./lib/proofstream');
 
 /** {@link Verification} */
 module.exports.Verification = require('./lib/verification');

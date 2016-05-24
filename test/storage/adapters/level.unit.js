@@ -1,7 +1,9 @@
 'use strict';
 
+var crypto = require('crypto');
 var memdown = require('memdown');
 var LevelDBStorageAdapter = require('../../../lib/storage/adapters/level');
+var LevelDBFileStore = require('../../../lib/storage/adapters/level/filestore');
 var StorageItem = require('../../../lib/storage/item');
 var expect = require('chai').expect;
 var utils = require('../../../lib/utils');
@@ -126,6 +128,109 @@ describe('LevelDBStorageAdapter', function() {
         expect(err).to.equal(null);
         done();
       });
+    });
+
+  });
+
+});
+
+describe('LevelDBFileStore', function() {
+
+  var store = new LevelDBStorageAdapter('filestore', memdown)._db;
+  var sample = crypto.randomBytes(8);
+
+  describe('@constructor', function() {
+
+    it('should create instance without the new keyword', function() {
+      expect(LevelDBFileStore(store)).to.be.instanceOf(LevelDBFileStore);
+    });
+
+    it('should create instance with the new keyword', function() {
+      expect(new LevelDBFileStore(store)).to.be.instanceOf(LevelDBFileStore);
+    });
+
+  });
+
+  describe('#createReadStream/#createWriteStream', function() {
+
+    it('should work with hex encoding', function(done) {
+      var data = Buffer(sample.toString('hex'), 'hex');
+      var fs = new LevelDBFileStore(store);
+      var ws = fs.createWriteStream('hex');
+      ws.on('finish', function() {
+        var result = Buffer([]);
+        var rs = fs.createReadStream('hex');
+        rs.on('data', function(data) {
+          result = Buffer.concat([result, data]);
+        }).on('end', function() {
+          expect(Buffer.compare(sample, result)).to.equal(0);
+          done();
+        });
+      }).end(data);
+    });
+
+    it('should work with base64 encoding', function(done) {
+      var data = Buffer(sample.toString('base64'), 'base64');
+      var fs = new LevelDBFileStore(store);
+      var ws = fs.createWriteStream('base64');
+      ws.on('finish', function() {
+        var result = Buffer([]);
+        var rs = fs.createReadStream('base64');
+        rs.on('data', function(data) {
+          result = Buffer.concat([result, data]);
+        }).on('end', function() {
+          expect(Buffer.compare(sample, result)).to.equal(0);
+          done();
+        });
+      }).end(data);
+    });
+
+    it('should work with utf8 encoding', function(done) {
+      var data = Buffer(sample);
+      var fs = new LevelDBFileStore(store);
+      var ws = fs.createWriteStream('utf8');
+      ws.on('finish', function() {
+        var result = Buffer([]);
+        var rs = fs.createReadStream('utf8');
+        rs.on('data', function(data) {
+          result = Buffer.concat([result, data]);
+        }).on('end', function() {
+          expect(Buffer.compare(sample, result)).to.equal(0);
+          done();
+        });
+      }).end(data);
+    });
+
+    it('should work with binary encoding', function(done) {
+      var data = Buffer(sample.toString('binary'), 'binary');
+      var fs = new LevelDBFileStore(store);
+      var ws = fs.createWriteStream('binary');
+      ws.on('finish', function() {
+        var result = Buffer([]);
+        var rs = fs.createReadStream('binary');
+        rs.on('data', function(data) {
+          result = Buffer.concat([result, data]);
+        }).on('end', function() {
+          expect(Buffer.compare(sample, result)).to.equal(0);
+          done();
+        });
+      }).end(data);
+    });
+
+    it('should work with utf16le encoding', function(done) {
+      var data = Buffer(sample.toString('utf16le'), 'utf16le');
+      var fs = new LevelDBFileStore(store);
+      var ws = fs.createWriteStream('utf16le');
+      ws.on('finish', function() {
+        var result = Buffer([]);
+        var rs = fs.createReadStream('utf16le');
+        rs.on('data', function(data) {
+          result = Buffer.concat([result, data]);
+        }).on('end', function() {
+          expect(Buffer.compare(sample, result)).to.equal(0);
+          done();
+        });
+      }).end(data);
     });
 
   });

@@ -1,16 +1,17 @@
 ### Package Versions
 
-Replace the values below using the output from `npm list storj`.
+Replace the values below using the output from `npm list -g storj`.
 
 ```
-storj-bridge@0.6.5 /home/gordon/Code/storj-bridge
-└── storj@0.6.5  -> /home/gordon/Code/storj-core
+/usr/local/lib
+└─┬ storjshare-cli@3.0.5
+  └── storj@0.6.16
 ```
 
 Replace the values below using the output from `node --version`.
 
 ```
-v4.2.3
+v4.4.4
 ```
 
 ### Expected Behavior

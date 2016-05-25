@@ -1,8 +1,11 @@
 'use strict';
 
+var http = require('http');
 var expect = require('chai').expect;
 var TunnelServer = require('../../lib/tunnel/server');
 var EventEmitter = require('events').EventEmitter;
+var proxyquire = require('proxyquire');
+var sinon = require('sinon');
 
 describe('TunnelServer', function() {
 
@@ -10,6 +13,13 @@ describe('TunnelServer', function() {
 
     it('should create an instance without the new keyword', function() {
       expect(TunnelServer({ port: 0 })).to.be.instanceOf(TunnelServer);
+    });
+
+    it('should use the http server we give it', function() {
+      var server = new http.Server();
+      expect(TunnelServer({
+        server: server
+      })._server._server).to.equal(server);
     });
 
   });
@@ -110,6 +120,80 @@ describe('TunnelServer', function() {
           done();
         });
       });
+    });
+
+    it('should close the client if muxer error', function(done) {
+      var badMuxer = new EventEmitter();
+      badMuxer.source = sinon.stub();
+      var BadMuxTunServer = proxyquire('../../lib/tunnel/server', {
+        './multiplexer': function() {
+          return badMuxer;
+        }
+      });
+      var client = new EventEmitter();
+      client.upgradeReq = { url: 'ws://127.0.0.1:1337/tun?token=sometoken' };
+      client.close = function(code, result) {
+        expect(code).to.equal(400);
+        expect(result.error).to.equal('Muxer error');
+        done();
+      };
+      var ts = new BadMuxTunServer({ server: http.Server() });
+      ts._gateways.sometoken = new EventEmitter();
+      ts._handleClient(client);
+      badMuxer.emit('error', new Error('Muxer error'));
+    });
+
+    it('should close the client if demuxer error', function(done) {
+      var badDemuxer = new EventEmitter();
+      var BadDemuxTunServer = proxyquire('../../lib/tunnel/server', {
+        './demultiplexer': function() {
+          return badDemuxer;
+        }
+      });
+      var client = new EventEmitter();
+      client.upgradeReq = { url: 'ws://127.0.0.1:1337/tun?token=sometoken' };
+      client.close = function(code, result) {
+        expect(code).to.equal(400);
+        expect(result.error).to.equal('Demuxer error');
+        done();
+      };
+      var ts = new BadDemuxTunServer({ server: http.Server() });
+      ts._gateways.sometoken = new EventEmitter();
+      ts._handleClient(client);
+      badDemuxer.emit('error', new Error('Demuxer error'));
+    });
+
+    it('should close the client if unhandled demux type', function(done) {
+      var badDemuxer = new EventEmitter();
+      var BadDemuxTunServer = proxyquire('../../lib/tunnel/server', {
+        './demultiplexer': function() {
+          return badDemuxer;
+        }
+      });
+      var client = new EventEmitter();
+      client.upgradeReq = { url: 'ws://127.0.0.1:1337/tun?token=sometoken' };
+      client.close = function(code, result) {
+        expect(code).to.equal(400);
+        expect(result.error).to.equal('Cannot handle tunnel frame type');
+        done();
+      };
+      var ts = new BadDemuxTunServer({ server: http.Server() });
+      ts._gateways.sometoken = new EventEmitter();
+      ts._handleClient(client);
+      badDemuxer.emit('data', { type: 'invalid' });
+    });
+
+  });
+
+  describe('#_getAvailablePort', function() {
+
+    it('should not remove an incorrect available port', function() {
+      var ts = new TunnelServer({
+        server: http.Server(),
+        portRange: { min: 5000, max: 5000 }
+      });
+      ts._usedPorts.push(5001);
+      expect(ts._getAvailablePort()).to.equal(5000);
     });
 
   });

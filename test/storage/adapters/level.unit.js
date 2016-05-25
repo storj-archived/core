@@ -152,6 +152,40 @@ describe('LevelDBFileStore', function() {
 
   });
 
+  describe('#createReadStream', function() {
+
+    it('should emit an error event if operation fails', function(done) {
+      var _get = sinon.stub(store, 'get').callsArgWith(2, new Error('FAIL'));
+      var rs = LevelDBFileStore(store).createReadStream('testkey');
+      rs.on('error', function(err) {
+        _get.restore();
+        expect(err.message).to.equal('FAIL');
+        done();
+      });
+      setImmediate(function() {
+        rs.read();
+      });
+    });
+
+  });
+
+  describe('#createWriteStream', function() {
+
+    it('should emit an error event if operation fails', function(done) {
+      var _put = sinon.stub(store, 'put').callsArgWith(3, new Error('FAIL'));
+      var ws = LevelDBFileStore(store).createWriteStream('testkey');
+      ws.on('error', function(err) {
+        _put.restore();
+        expect(err.message).to.equal('FAIL');
+        done();
+      });
+      setImmediate(function() {
+        ws.write(Buffer('test'));
+      });
+    });
+
+  });
+
   describe('#createReadStream/#createWriteStream', function() {
 
     it('should work with hex encoding', function(done) {

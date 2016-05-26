@@ -1,6 +1,7 @@
 'use strict';
 
 var expect = require('chai').expect;
+var proxyquire = require('proxyquire');
 var EventEmitter = require('events').EventEmitter;
 var Network = require('../../lib/network');
 var Manager = require('../../lib/manager');
@@ -488,7 +489,130 @@ describe('Network (private)', function() {
 
   describe('#_establishTunnel', function() {
 
+    it('should callback with error if no tunnels supplied', function(done) {
+      var net = Network({
+        keypair: KeyPair(),
+        manager: Manager(RAMStorageAdapter()),
+        logger: kad.Logger(0),
+        seeds: [],
+        address: '127.0.0.1',
+        port: 0,
+        noforward: true
+      });
+      net._establishTunnel([], function(err) {
+        expect(err.message).to.equal(
+          'Failed to establish tunnel, reason: No tunnelers were returned'
+        );
+        done();
+      });
+    });
 
+    it('should callback with error if the tunnel fails', function(done) {
+      var net = Network({
+        keypair: KeyPair(),
+        manager: Manager(RAMStorageAdapter()),
+        logger: kad.Logger(0),
+        seeds: [],
+        address: '127.0.0.1',
+        port: 0,
+        noforward: true
+      });
+      var _send = sinon.stub(net._transport, 'send').callsArgWith(
+        2,
+        new Error('Failed')
+      );
+      net._establishTunnel([{
+        address: '127.0.0.1',
+        port: 1337,
+        nodeID: utils.rmd160('nodeid')
+      }], function(err) {
+        _send.restore();
+        expect(err.message).to.equal(
+          'Failed to establish tunnel, reason: No tunnelers were returned'
+        );
+        done();
+      });
+    });
+
+    it('should try to re-establish tunnel on close', function(done) {
+      var emitter = new EventEmitter();
+      emitter.open = function() {
+        emitter.emit('open');
+      };
+      var TunClientStubNetwork = proxyquire('../../lib/network', {
+        '../tunnel/client': function() {
+          return emitter;
+        }
+      });
+      var net = TunClientStubNetwork({
+        keypair: KeyPair(),
+        manager: Manager(RAMStorageAdapter()),
+        logger: kad.Logger(0),
+        seeds: [],
+        address: '127.0.0.1',
+        port: 0,
+        noforward: true
+      });
+      var _send = sinon.stub(net._transport, 'send').callsArgWith(
+        2,
+        null,
+        { result: { tunnel: true, alias: true } }
+      );
+      net._establishTunnel([{
+        address: '127.0.0.1',
+        port: 1337,
+        nodeID: utils.rmd160('nodeid')
+      }], function() {
+        _send.restore();
+        var _establishTunnel = sinon.stub(net, '_establishTunnel');
+        emitter.emit('close');
+        setImmediate(function() {
+          _establishTunnel.restore();
+          expect(_establishTunnel.called).to.equal(true);
+          done();
+        });
+      });
+    });
+
+    it('should try to re-establish tunnel on error', function(done) {
+      var emitter = new EventEmitter();
+      emitter.open = function() {
+        emitter.emit('open');
+      };
+      var TunClientStubNetwork = proxyquire('../../lib/network', {
+        '../tunnel/client': function() {
+          return emitter;
+        }
+      });
+      var net = TunClientStubNetwork({
+        keypair: KeyPair(),
+        manager: Manager(RAMStorageAdapter()),
+        logger: kad.Logger(0),
+        seeds: [],
+        address: '127.0.0.1',
+        port: 0,
+        noforward: true
+      });
+      var _send = sinon.stub(net._transport, 'send').callsArgWith(
+        2,
+        null,
+        { result: { tunnel: true, alias: true } }
+      );
+      net._establishTunnel([{
+        address: '127.0.0.1',
+        port: 1337,
+        nodeID: utils.rmd160('nodeid')
+      }], function() {
+        _send.restore();
+        var _establishTunnel = sinon.stub(net, '_establishTunnel');
+        emitter.emit('error', new Error('Failed'));
+        setImmediate(function() {
+          _establishTunnel.restore();
+          expect(_establishTunnel.called).to.equal(true);
+          done();
+        });
+      });
+    });
 
   });
 

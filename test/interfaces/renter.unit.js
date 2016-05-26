@@ -6,10 +6,12 @@ var KeyPair = require('../../lib/keypair');
 var RenterInterface = require('../../lib/interfaces/renter');
 var kad = require('kad');
 var sinon = require('sinon');
+var utils = require('../../lib/utils');
 var Contact = require('../../lib/network/contact');
 var StorageItem = require('../../lib/storage/item');
 var RAMStorageAdapter = require('../../lib/storage/adapters/ram');
 var Manager = require('../../lib/manager');
+var AuditStream = require('../../lib/auditstream');
 
 describe('RenterInterface', function() {
 
@@ -183,6 +185,116 @@ describe('RenterInterface', function() {
       renter.getStorageProof(farmer, item, function(err) {
         expect(err.message).to.equal('Invalid proof returned');
         _send.restore();
+        done();
+      });
+    });
+
+  });
+
+  describe('#getConsignToken', function() {
+
+    it('should callback error if transport send fails', function(done) {
+      var renter = new RenterInterface({
+        keypair: KeyPair(),
+        port: 0,
+        noforward: true,
+        logger: kad.Logger(0),
+        manager: Manager(RAMStorageAdapter())
+      });
+      var _send = sinon.stub(renter._transport, 'send').callsArgWith(
+        2,
+        new Error('Send failed')
+      );
+      var audit = new AuditStream(1);
+      audit.end(Buffer('data'));
+      setImmediate(function() {
+        renter.getConsignToken(Contact({
+          address: '0.0.0.0',
+          port: 0,
+          nodeID: utils.rmd160('contact')
+        }), Contract({}), audit, function(err) {
+          _send.restore();
+          expect(err.message).to.equal('Send failed');
+          done();
+        });
+      });
+    });
+
+    it('should callback error if contract responds with one', function(done) {
+      var renter = new RenterInterface({
+        keypair: KeyPair(),
+        port: 0,
+        noforward: true,
+        logger: kad.Logger(0),
+        manager: Manager(RAMStorageAdapter())
+      });
+      var _send = sinon.stub(renter._transport, 'send').callsArgWith(
+        2,
+        null,
+        { error: { message: 'FAILED' } }
+      );
+      var audit = new AuditStream(1);
+      audit.end(Buffer('data'));
+      setImmediate(function() {
+        renter.getConsignToken(Contact({
+          address: '0.0.0.0',
+          port: 0,
+          nodeID: utils.rmd160('contact')
+        }), Contract({}), audit, function(err) {
+          _send.restore();
+          expect(err.message).to.equal('FAILED');
+          done();
+        });
+      });
+    });
+
+  });
+
+  describe('#getRetrieveToken', function() {
+
+    it('should callback error if transport send fails', function(done) {
+      var renter = new RenterInterface({
+        keypair: KeyPair(),
+        port: 0,
+        noforward: true,
+        logger: kad.Logger(0),
+        manager: Manager(RAMStorageAdapter())
+      });
+      var _send = sinon.stub(renter._transport, 'send').callsArgWith(
+        2,
+        new Error('Send failed')
+      );
+      renter.getRetrieveToken(Contact({
+        address: '0.0.0.0',
+        port: 0,
+        nodeID: utils.rmd160('contact')
+      }), Contract({}), function(err) {
+        _send.restore();
+        expect(err.message).to.equal('Send failed');
+        done();
+      });
+    });
+
+    it('should callback error if contract responds with one', function(done) {
+      var renter = new RenterInterface({
+        keypair: KeyPair(),
+        port: 0,
+        noforward: true,
+        logger: kad.Logger(0),
+        manager: Manager(RAMStorageAdapter())
+      });
+      var _send = sinon.stub(renter._transport, 'send').callsArgWith(
+        2,
+        null,
+        { error: { message: 'FAILED' } }
+      );
+      renter.getRetrieveToken(Contact({
+        address: '0.0.0.0',
+        port: 0,
+        nodeID: utils.rmd160('contact')
+      }), Contract({}), function(err) {
+        _send.restore();
+        expect(err.message).to.equal('FAILED');
         done();
       });
     });

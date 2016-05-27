@@ -201,6 +201,7 @@ maintain a record of known nodes that are willing to tunnel, by subscribing to
 {
   "method": "FIND_TUNNEL",
   "params": {
+    "relayers": [],
     "contact": {
       "address": "10.0.0.3",
       "port": 1337,

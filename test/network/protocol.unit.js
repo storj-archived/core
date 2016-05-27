@@ -365,6 +365,69 @@ describe('Protocol', function() {
 
   });
 
+  describe('#_handleFindTunnel', function() {
+
+    it('should ask neighbors for tunnels if none known', function(done) {
+      var proto = new Protocol({
+        network: {
+          _logger: Logger(0),
+          _router: {
+            getNearestContacts: sinon.stub().returns([{}])
+          },
+          _contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
+          _transport: {
+            _tunserver: {
+              hasTunnelAvailable: sinon.stub().returns(false)
+            }
+          },
+          _tunnelers: {
+            getContactList: sinon.stub().returns([])
+          }
+        }
+      });
+      var _ask = sinon.stub(proto, '_askNeighborsForTunnels').callsArg(1);
+      proto._handleFindTunnel({
+        contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
+        relayers: []
+      }, function() {
+        _ask.restore();
+        expect(_ask.called).to.equal(true);
+        done();
+      });
+    });
+
+    it('should not ask neighbors if max relays reached', function(done) {
+      var proto = new Protocol({
+        network: {
+          _logger: Logger(0),
+          _router: {
+            getNearestContacts: sinon.stub().returns([{}])
+          },
+          _contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
+          _transport: {
+            _tunserver: {
+              hasTunnelAvailable: sinon.stub().returns(false)
+            }
+          },
+          _tunnelers: {
+            getContactList: sinon.stub().returns([])
+          }
+        }
+      });
+      proto._handleFindTunnel({
+        contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
+        relayers: [
+          'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc',
+          'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc'
+        ]
+      }, function(err, result) {
+        expect(result.tunnels).to.have.lengthOf(0);
+        done();
+      });
+    });
+
+  });
+
   describe('#_askNeighborsForTunnels', function() {
 
     it('should skip adding tunnels if error response', function(done) {
@@ -388,7 +451,7 @@ describe('Protocol', function() {
           }
         }
       });
-      proto._askNeighborsForTunnels(function() {
+      proto._askNeighborsForTunnels([], function() {
         expect(_forEach.called).to.equal(false);
         done();
       });
@@ -415,7 +478,7 @@ describe('Protocol', function() {
           }
         }
       });
-      proto._askNeighborsForTunnels(function() {
+      proto._askNeighborsForTunnels([], function() {
         expect(_forEach.called).to.equal(false);
         done();
       });
@@ -446,8 +509,71 @@ describe('Protocol', function() {
           }
         }
       });
-      proto._askNeighborsForTunnels(function() {
+      proto._askNeighborsForTunnels([], function() {
         expect(_addContact.called).to.equal(false);
+        done();
+      });
+    });
+
+    it('should adding tunnels if bucket is not full', function(done) {
+      var _addContact = sinon.stub();
+      var proto = new Protocol({
+        network: {
+          _logger: Logger(0),
+          _router: {
+            getNearestContacts: sinon.stub().returns([{}])
+          },
+          _contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
+          _transport: {
+            _createContact: sinon.stub(),
+            send: sinon.stub().callsArgWith(2, null, {
+              result: {
+                tunnels: [
+                  { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' }
+                ]
+              }
+            })
+          },
+          _tunnelers: {
+            addContact: _addContact,
+            getContactList: sinon.stub().returns([]),
+            getSize: sinon.stub().returns(19)
+          }
+        }
+      });
+      proto._askNeighborsForTunnels([], function() {
+        expect(_addContact.called).to.equal(true);
+        done();
+      });
+    });
+
+    it('should respond with no tunnels if none found', function(done) {
+      var _addContact = sinon.stub();
+      var proto = new Protocol({
+        network: {
+          _logger: Logger(0),
+          _router: {
+            getNearestContacts: sinon.stub().returns([{}])
+          },
+          _contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
+          _transport: {
+            _createContact: sinon.stub(),
+            send: sinon.stub().callsArgWith(2, null, {
+              result: {
+                tunnels: []
+              }
+            })
+          },
+          _tunnelers: {
+            addContact: _addContact,
+            getContactList: sinon.stub().returns([]),
+            getSize: sinon.stub().returns(19)
+          }
+        }
+      });
+      proto._askNeighborsForTunnels([], function(err, result) {
+        expect(_addContact.called).to.equal(false);
+        expect(result.tunnels).to.have.lengthOf(0);
         done();
       });
     });

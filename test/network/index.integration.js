@@ -199,7 +199,7 @@ describe('Network/Integration/Tunnelling', function() {
         params: { contact: renter._contact }
       }), function(err, response) {
         expect(err).to.equal(null);
-        expect(response.result.tunnels).to.have.lengthOf(2);
+        expect(response.result.tunnels).to.have.lengthOf(1);
         done();
       });
     });

@@ -87,6 +87,30 @@ describe('LevelDBStorageAdapter', function() {
 
   });
 
+  describe('#_peek', function() {
+
+    it('should return the stored item', function(done) {
+      store._peek(hash, function(err, item) {
+        expect(err).to.equal(null);
+        expect(item).to.be.instanceOf(StorageItem);
+        done();
+      });
+    });
+
+    it('should return error if the data is not found', function(done) {
+      var _dbpeek = sinon.stub(store._db, 'get').callsArgWith(
+        2,
+        new Error('Not found')
+      );
+      store._peek(hash, function(err) {
+        expect(err.message).to.equal('Not found');
+        _dbpeek.restore();
+        done();
+      });
+    });
+
+  });
+
   describe('#_keys', function() {
 
     it('should return all of the keys', function(done) {

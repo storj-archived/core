@@ -131,6 +131,7 @@ describe('TunnelGateway', function() {
         done();
       });
       gw.open();
+      after(gw.close.bind(gw));
     });
 
     it('should open the gateway on the given port', function(done) {
@@ -140,6 +141,7 @@ describe('TunnelGateway', function() {
         done();
       });
       gw.open();
+      after(gw.close.bind(gw));
     });
 
     it('should accept a callback if supplied', function(done) {
@@ -150,6 +152,7 @@ describe('TunnelGateway', function() {
         expect(typeof alias.port).to.equal('number');
         done();
       });
+      after(gw.close.bind(gw));
     });
 
   });
@@ -210,6 +213,7 @@ describe('TunnelGateway', function() {
         expect(gw.getEntranceAddress().port).to.equal(alias.port);
         done();
       });
+      after(gw.close.bind(gw));
     });
 
   });
@@ -234,6 +238,7 @@ describe('TunnelGateway/events', function() {
           method: 'POST'
         }).end(message.serialize());
       });
+      after(gateway.close.bind(gateway));
     });
 
   });
@@ -255,6 +260,7 @@ describe('TunnelGateway/events', function() {
           sock.send(Buffer('hello world'), { binary: true });
         });
       });
+      after(gateway.close.bind(gateway));
     });
 
   });
@@ -289,6 +295,7 @@ describe('TunnelGateway/events', function() {
           });
         }).end(message.serialize());
       });
+      after(gateway.close.bind(gateway));
     });
 
   });
@@ -320,6 +327,7 @@ describe('TunnelGateway/events', function() {
           done();
         });
       });
+      after(gateway.close.bind(gateway));
     });
 
   });

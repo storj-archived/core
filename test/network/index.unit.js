@@ -52,6 +52,29 @@ describe('Network (public)', function() {
       });
     });
 
+    it('should callback with error if tunnel setup fails', function(done) {
+      var net = Network({
+        keypair: KeyPair(),
+        manager: Manager(RAMStorageAdapter()),
+        logger: kad.Logger(0),
+        seeds: [],
+        address: '127.0.0.1',
+        port: 0,
+        noforward: true
+      });
+      var _setupTunnel = sinon.stub(net, '_setupTunnelClient').callsArgWith(
+        0,
+        new Error('Failed')
+      );
+      var _enterOverlay = sinon.stub(net, '_enterOverlay').callsArg(0);
+      net.join(function() {
+        _setupTunnel.restore();
+        _enterOverlay.restore();
+        expect(_enterOverlay.called).to.equal(false);
+        done();
+      });
+    });
+
   });
 
   describe('#leave', function() {
@@ -356,6 +379,7 @@ describe('Network (private)', function() {
         port: 0,
         noforward: true
       });
+      net._transport._isPublic = false;
       net._setupTunnelClient(function(err) {
         expect(err.message).to.equal(
           'Could not find a neighbor to query for probe'
@@ -376,6 +400,7 @@ describe('Network (private)', function() {
         port: 0,
         noforward: true
       });
+      net._transport._isPublic = false;
       var _send = sinon.stub(net._transport, 'send').callsArgWith(
         2,
         null,
@@ -402,6 +427,7 @@ describe('Network (private)', function() {
         port: 0,
         noforward: true
       });
+      net._transport._isPublic = false;
       var _send = sinon.stub(net._transport, 'send').callsArgWith(
         2,
         null,

@@ -63,6 +63,16 @@ describe('StorageAdapter', function() {
 
   });
 
+  describe('#_size', function() {
+
+    it('should throw a not implemented error', function() {
+      expect(function() {
+        StorageAdapter()._size();
+      }).to.throw(Error, 'Method not implemented');
+    });
+
+  });
+
   describe('#createReadStream', function() {
 
     it('should emit an error if _keys fails', function(done) {

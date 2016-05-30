@@ -10,22 +10,26 @@ var utils = require('../../../lib/utils');
 var Contract = require('../../../lib/contract');
 var AuditStream = require('../../../lib/auditstream');
 var sinon = require('sinon');
+var proxyquire = require('proxyquire');
 
 function tmpdir() {
   return require('os').tmpdir() + '/test-' + Date.now() + '.db';
 }
 
-describe('LevelDBStorageAdapter', function() {
+var store = new LevelDBStorageAdapter(tmpdir(), memdown);
+var hash = utils.rmd160('test');
+var audit = new AuditStream(12);
+var contract = new Contract();
+var item = new StorageItem({
+  hash: hash,
+  shard: new Buffer('test')
+});
 
-  var store = new LevelDBStorageAdapter(tmpdir(), memdown);
-  var hash = utils.rmd160('test');
-  var audit = new AuditStream(12);
+before(function() {
   audit.end(Buffer('test'));
-  var contract = new Contract();
-  var item = new StorageItem({
-    hash: hash,
-    shard: new Buffer('test')
-  });
+});
+
+describe('LevelDBStorageAdapter', function() {
 
   describe('@constructor', function() {
 
@@ -151,6 +155,47 @@ describe('LevelDBStorageAdapter', function() {
     it('should delete the shard if it exists', function(done) {
       store._del(hash, function(err) {
         expect(err).to.equal(null);
+        done();
+      });
+    });
+
+  });
+
+  describe('#_size', function() {
+
+    it('should bubble errors from size calculation', function(done) {
+      var BadStore = proxyquire('../../../lib/storage/adapters/level', {
+        fs: {
+          readdirSync: sinon.stub().throws(new Error('Failed'))
+        }
+      });
+      var store = new BadStore(tmpdir(), memdown);
+      store._isUsingDefaultBackend = true;
+      store._size(function(err) {
+        expect(err.message).to.equal('Failed');
+        done();
+      });
+    });
+
+    it('should return the size of the store on disk', function(done) {
+      var GoodStore = proxyquire('../../../lib/storage/adapters/level', {
+        fs: {
+          readdirSync: sinon.stub().returns([
+            '000035.ldb',
+            '000038.ldb',
+            '000055.log',
+            'CURRENT',
+            'LOCK',
+            'LOG',
+            'MANIFEST-000054'
+          ]),
+          statSync: sinon.stub().returns({ size: 1024 })
+        }
+      });
+      var store = new GoodStore(tmpdir(), memdown);
+      store._isUsingDefaultBackend = true;
+      store._size(function(err, size) {
+        expect(size).to.equal(7 * 1024);
         done();
       });
     });

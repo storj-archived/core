@@ -10,6 +10,7 @@ var kad = require('kad');
 var Contact = require('../../lib/network/contact');
 var utils = require('../../lib/utils');
 var StorageItem = require('../../lib/storage/item');
+var EventEmitter = require('events').EventEmitter;
 
 describe('FarmerInterface', function() {
 
@@ -355,6 +356,66 @@ describe('FarmerInterface', function() {
         _save.restore();
         _verify.restore();
         expect(_save.args[0][0]).to.be.instanceOf(StorageItem);
+        done();
+      });
+    });
+
+  });
+
+  describe('#_listenForCapacityChanges', function() {
+
+    it('should set the free space to true', function(done) {
+      var farmer = new FarmerInterface({
+        keypair: KeyPair(),
+        port: 0,
+        noforward: true,
+        logger: kad.Logger(0),
+        backend: require('memdown'),
+        storage: { path: 'test' }
+      });
+      var manager = new EventEmitter();
+      farmer._listenForCapacityChanges(manager);
+      manager.emit('unlocked');
+      setImmediate(function() {
+        expect(farmer._hasFreeSpace).to.equal(true);
+        done();
+      });
+    });
+
+    it('should set the free space to true', function(done) {
+      var farmer = new FarmerInterface({
+        keypair: KeyPair(),
+        port: 0,
+        noforward: true,
+        logger: kad.Logger(0),
+        backend: require('memdown'),
+        storage: { path: 'test' }
+      });
+      var manager = new EventEmitter();
+      farmer._listenForCapacityChanges(manager);
+      manager.emit('locked');
+      setImmediate(function() {
+        expect(farmer._hasFreeSpace).to.equal(false);
+        done();
+      });
+    });
+
+    it('should log the error', function(done) {
+      var logger = kad.Logger(0);
+      var _error = sinon.stub(logger, 'error');
+      var farmer = new FarmerInterface({
+        keypair: KeyPair(),
+        port: 0,
+        noforward: true,
+        logger: logger,
+        backend: require('memdown'),
+        storage: { path: 'test' }
+      });
+      var manager = new EventEmitter();
+      farmer._listenForCapacityChanges(manager);
+      manager.emit('error', new Error('Failed'));
+      setImmediate(function() {
+        expect(_error.called).to.equal(true);
         done();
       });
     });

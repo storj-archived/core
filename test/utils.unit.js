@@ -116,4 +116,26 @@ describe('utils', function() {
 
   });
 
+  describe('#toNumberBytes', function() {
+
+    it('should convert from megabytes', function() {
+      expect(utils.toNumberBytes('250', 'MB')).to.equal(262144000);
+    });
+
+    it('should convert from gigabytes', function() {
+      expect(utils.toNumberBytes('500', 'GB')).to.equal(536870912000);
+    });
+
+    it('should convert from terabytes', function() {
+      expect(utils.toNumberBytes('2', 'TB')).to.equal(2199023255552);
+    });
+
+    it('should throw if bad unit', function() {
+      expect(function() {
+        utils.toNumberBytes('1024', 'KB');
+      }).to.throw(Error, 'Unit must be one of TB, GB, or MB');
+    });
+
+  });
+
 });

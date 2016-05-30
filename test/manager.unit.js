@@ -15,6 +15,19 @@ describe('Manager', function() {
       expect(Manager(new RAMStorageAdapter())).to.be.instanceOf(Manager);
     });
 
+    it('should not start the reaper if disabled', function(done) {
+      var _clean = sinon.stub(Manager.prototype, 'clean');
+      var man = new Manager(RAMStorageAdapter(), {
+        disableReaper: true
+      });
+      setImmediate(function() {
+        _clean.restore();
+        expect(man._options.disableReaper).to.equal(true);
+        expect(_clean.called).to.equal(false);
+        done();
+      });
+    });
+
   });
 
   describe('#load', function() {

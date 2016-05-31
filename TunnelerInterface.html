@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>StorjCORE Class: Network</title>
+	<title>StorjCORE Class: TunnelerInterface</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -84,13 +84,13 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: Network</h1>
+	<h1 class="page-title">Class: TunnelerInterface</h1>
 <section>
 
 <header>
     
         <h2>
-        Network
+        TunnelerInterface
         </h2>
         
     
@@ -103,7 +103,7 @@
         
 <hr>
 <dt>
-    <h4 class="name" id="Network"><span class="type-signature"></span>new Network(options)</h4>
+    <h4 class="name" id="TunnelerInterface"><span class="type-signature"></span>new TunnelerInterface(options)</h4>
     
     
 </dt>
@@ -111,7 +111,9 @@
 
     
     <div class="description">
-        Storj network interface
+        Creates a new tunneler interface (a passive non-renter/non-farmer node) and
+is just a <a href="Network.html">Network</a> instance, with more appropriate default options
+including an in-memory storage adapter.
     </div>
     
 
@@ -213,30 +215,6 @@
 
         <tr>
             
-                <td class="name"><code>manager</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="Manager.html">Manager</a></span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Persistence management interface</td>
-        </tr>
-
-    
-
-        <tr>
-            
                 <td class="name"><code>logger</code></td>
             
 
@@ -254,7 +232,7 @@
 
             
 
-            <td class="description last">Logger instance</td>
+            <td class="description last">Optional logger override</td>
         </tr>
 
     
@@ -500,30 +478,6 @@
         </tr>
 
     
-
-        <tr>
-            
-                <td class="name"><code>limiter</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Options to pass to <a href="RateLimiter.html">RateLimiter</a></td>
-        </tr>
-
-    
     </tbody>
 </table>
 
@@ -571,7 +525,7 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_network_index.js.html">lib/network/index.js</a>
+				<a href="lib_interfaces_tunneler.js.html">lib/interfaces/tunneler.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -588,11 +542,6 @@
     
 
     
-    <h5>Fires:</h5>
-    <ul>
-        <li><a href="Network.html#event:ready">Network#event:ready</a></li>
-    </ul>
-    
 
     
 
@@ -607,6 +556,17 @@
 
     
     </div>
+
+    
+        <h3 class="subsection-title">Extends</h3>
+
+        
+
+
+    <ul>
+        <li><a href="Network.html">Network</a></li>
+    </ul>
+
 
     
 
@@ -728,6 +688,15 @@
 
 	
 
+	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="Network.html#connect">Network#connect</a>
+			</li>
+		</ul>
+	</dd>
 	
 
     
@@ -866,6 +835,15 @@
 	
 
 	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="Network.html#join">Network#join</a>
+			</li>
+		</ul>
+	</dd>
+	
 
     
 
@@ -1002,6 +980,15 @@
 
 	
 
+	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="Network.html#leave">Network#leave</a>
+			</li>
+		</ul>
+	</dd>
 	
 
     
@@ -1164,6 +1151,15 @@
 	
 
 	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="Network.html#publish">Network#publish</a>
+			</li>
+		</ul>
+	</dd>
+	
 
     
 
@@ -1325,6 +1321,15 @@
 	
 
 	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="Network.html#subscribe">Network#subscribe</a>
+			</li>
+		</ul>
+	</dd>
+	
 
     
 
@@ -1419,6 +1424,15 @@
 
 	
 
+	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="Network.html#event:ready">Network#event:ready</a>
+			</li>
+		</ul>
+	</dd>
 	
 
     

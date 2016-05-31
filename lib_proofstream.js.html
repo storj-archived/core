@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>StorjCORE Class: Protocol</title>
+	<title>StorjCORE Source: lib/proofstream.js</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -79,352 +79,121 @@
 <div class="row">
 
 	
-	<div class="col-md-8">
+	<div class="col-md-12">
 	
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: Protocol</h1>
+		<h1 class="page-title">Source: lib/proofstream.js</h1>
+    
 <section>
-
-<header>
-    
-        <h2>
-        Protocol
-        </h2>
-        
-    
-</header>
-
-
-<article>
-    <div class="container-overview">
-    
-        
-<hr>
-<dt>
-    <h4 class="name" id="Protocol"><span class="type-signature"></span>new Protocol(options)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Defines the Storj protocol methods and mounts on a <a href="Network.html">Network</a> instance
-to handle Storj protocol messages
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>options</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <h6 class="method-params-label method-subparams-label">Properties</h6>
-                
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>network</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="Network.html">Network</a></span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Network instance to bind to</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-            </td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_network_protocol.js.html">lib/network/protocol.js</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        <dl>
-            
-<hr>
-<dt>
-    <h4 class="name" id="handlers"><span class="type-signature"></span>handlers()</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Returns bound references to the protocol handlers
-    </div>
-    
-
-    
-
-    
-
-    
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_network_protocol.js.html">lib/network/protocol.js</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    handlers
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Object</span>
-
-
-
-    </dd>
-</dl>
-
-
-        
-
-    
-</dd>
-
-        </dl>
-    
-
-    
-
-    
-</article>
-
+    <article>
+        <pre
+            class="sunlight-highlight-javascript ">'use strict';
+
+var assert = require('assert');
+var MerkleTree = require('mtree');
+var utils = require('./utils');
+var inherits = require('util').inherits;
+var stream = require('readable-stream');
+var crypto = require('crypto');
+
+/**
+ * Provides interface for proving possession of a file for an
+ * {@link AuditStream}
+ * @constructor
+ * @param {Array} leaves - Bottom leaves of the audit merkle tree
+ * @param {String} challenge - The challenge data in hex to prepend to shard
+ */
+function ProofStream(leaves, challenge) {
+  if (!(this instanceof ProofStream)) {
+    return new ProofStream(leaves, challenge);
+  }
+
+  assert(Array.isArray(leaves), 'Merkle leaves must be an array');
+  assert.ok(challenge, 'Invalid challenge supplied');
+
+  this._tree = new MerkleTree(this._generateLeaves(leaves), utils.rmd160sha256);
+  this._challenge = challenge;
+  this._hasher = crypto.createHash('sha256').update(this._challenge);
+  this._proof = null;
+
+  stream.Writable.call(this);
+  this.on('finish', this._generateProof.bind(this));
+}
+
+inherits(ProofStream, stream.Writable);
+
+/**
+ * Returns the generated proof structure
+ * @return {Array}
+ */
+ProofStream.prototype.getProofResult = function() {
+  assert(Array.isArray(this._proof), 'Proof generation is not complete');
+
+  return this._proof;
+};
+
+/**
+ * Handles writing the shard data to the proof stream
+ * @private
+ */
+ProofStream.prototype._write = function(chunk, encoding, next) {
+  this._hasher.update(chunk.toString('hex'));
+  next();
+};
+
+/**
+ * Calculate audit response
+ * @private
+ * @param {String} challenge - Challenge string sent by auditor
+ * @returns {Array} result - Challenge response
+ */
+ProofStream.prototype._generateProof = function() {
+  var response = utils.rmd160(this._hasher.digest('hex'));
+  var leaves = this._tree.level(this._tree.levels() - 1);
+  var challengenum = leaves.indexOf(utils.rmd160sha256(response));
+
+  assert(challengenum !== -1, 'Failed to generate proof');
+
+  var branches = [response];
+
+  for (var i = (this._tree.levels() - 1); i > 0; i--) {
+    var level = this._tree.level(i);
+
+    if (challengenum % 2 === 0) {
+      branches = [branches, level[challengenum + 1]];
+    } else {
+      branches = [level[challengenum - 1], branches];
+    }
+
+    challengenum = Math.floor(challengenum / 2);
+  }
+
+  this._proof = branches;
+};
+
+/**
+ * Generates the bottom leaves of the tree to the next power of two
+ * @private
+ * @param {Array} leaves
+ */
+ProofStream.prototype._generateLeaves = function(leaves) {
+  var numEmpty = utils.getNextPowerOfTwo(leaves.length) - leaves.length;
+  var emptyLeaves = [];
+
+  for (var i = 0; i &lt; numEmpty; i++) {
+    emptyLeaves.push(utils.rmd160sha256(''));
+  }
+
+  return leaves.concat(emptyLeaves);
+};
+
+module.exports = ProofStream;
+</pre>
+    </article>
 </section>
+
 
 
 
@@ -434,10 +203,6 @@ to handle Storj protocol messages
 
 	<div class="clearfix"></div>
 
-	
-		<div class="col-md-3">
-			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
-		</div>
 	
 
 </div>

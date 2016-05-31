@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>StorjCORE Class: Protocol</title>
+	<title>StorjCORE Source: lib/interfaces/tunneler.js</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -79,352 +79,70 @@
 <div class="row">
 
 	
-	<div class="col-md-8">
+	<div class="col-md-12">
 	
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: Protocol</h1>
+		<h1 class="page-title">Source: lib/interfaces/tunneler.js</h1>
+    
 <section>
-
-<header>
-    
-        <h2>
-        Protocol
-        </h2>
-        
-    
-</header>
-
-
-<article>
-    <div class="container-overview">
-    
-        
-<hr>
-<dt>
-    <h4 class="name" id="Protocol"><span class="type-signature"></span>new Protocol(options)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Defines the Storj protocol methods and mounts on a <a href="Network.html">Network</a> instance
-to handle Storj protocol messages
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>options</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <h6 class="method-params-label method-subparams-label">Properties</h6>
-                
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>network</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="Network.html">Network</a></span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Network instance to bind to</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-            </td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_network_protocol.js.html">lib/network/protocol.js</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        <dl>
-            
-<hr>
-<dt>
-    <h4 class="name" id="handlers"><span class="type-signature"></span>handlers()</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Returns bound references to the protocol handlers
-    </div>
-    
-
-    
-
-    
-
-    
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_network_protocol.js.html">lib/network/protocol.js</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    handlers
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Object</span>
-
-
-
-    </dd>
-</dl>
-
-
-        
-
-    
-</dd>
-
-        </dl>
-    
-
-    
-
-    
-</article>
-
+    <article>
+        <pre
+            class="sunlight-highlight-javascript ">'use strict';
+
+var Network = require('../network');
+var inherits = require('util').inherits;
+var merge = require('merge');
+var Manager = require('../manager');
+var RAMStorageAdapter = require('../storage/adapters/ram');
+
+/**
+ * Creates a new tunneler interface (a passive non-renter/non-farmer node) and
+ * is just a {@link Network} instance, with more appropriate default options
+ * including an in-memory storage adapter.
+ * @constructor
+ * @extends {Network}
+ * @param {Object}  options
+ * @param {KeyPair} options.keypair - Node's cryptographic identity
+ * @param {Object}  options.logger - Optional logger override
+ * @param {Array}   options.seeds - List of seed URIs to join
+ * @param {String}  options.address - Public node IP or hostname
+ * @param {Number}  options.port - Listening port for RPC
+ * @param {Boolean} options.noforward - Flag for skipping traversal strategies
+ * @param {Number}  options.tunnels - Max number of tunnels to provide
+ * @param {Number}  options.tunport - Port for tunnel server to use
+ * @param {Object}  options.gateways
+ * @param {Number}  options.gateways.min - Min port for gateway binding
+ * @param {Number}  options.gateways.max - Max port for gateway binding
+ */
+function TunnelerInterface(options) {
+  if (!(this instanceof TunnelerInterface)) {
+    return new TunnelerInterface(options);
+  }
+
+  options = merge(Object.create(TunnelerInterface.DEFAULTS), options);
+
+  Network.call(this, merge(options, {
+    manager: new Manager(new RAMStorageAdapter())
+  }));
+}
+
+inherits(TunnelerInterface, Network);
+
+TunnelerInterface.DEFAULTS = merge(Object.create(Network.DEFAULTS), {
+  tunnels: 24,
+  port: 8080,
+  tunport: 8081,
+  gatways: { min: 0, max: 0 },
+  noforward: true // NB: Tunnelers generally should be public already
+});
+
+module.exports = TunnelerInterface;
+</pre>
+    </article>
 </section>
+
 
 
 
@@ -434,10 +152,6 @@ to handle Storj protocol messages
 
 	<div class="clearfix"></div>
 
-	
-		<div class="col-md-3">
-			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
-		</div>
 	
 
 </div>

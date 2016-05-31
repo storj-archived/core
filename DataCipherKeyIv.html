@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>StorjCORE Class: Proof</title>
+	<title>StorjCORE Class: DataCipherKeyIv</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -40,14 +40,14 @@
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="Audit.html">Audit</a></li><li><a href="AuditStream.html">AuditStream</a></li><li><a href="Contact.html">Contact</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="DecryptStream.html">DecryptStream</a></li><li><a href="EncryptStream.html">EncryptStream</a></li><li><a href="FarmerInterface.html">FarmerInterface</a></li><li><a href="FileDemuxer.html">FileDemuxer</a></li><li><a href="FileMuxer.html">FileMuxer</a></li><li><a href="FSStorageAdapter.html">FSStorageAdapter</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="KeyRing.html">KeyRing</a></li><li><a href="LevelDBFileStore.html">LevelDBFileStore</a></li><li><a href="LevelDBStorageAdapter.html">LevelDBStorageAdapter</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Padder.html">Padder</a></li><li><a href="Proof.html">Proof</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="RenterInterface.html">RenterInterface</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="StorageMigration.html">StorageMigration</a></li><li><a href="Transport.html">Transport</a></li><li><a href="TunnelClient.html">TunnelClient</a></li><li><a href="TunnelDemuxer.html">TunnelDemuxer</a></li><li><a href="TunnelGateway.html">TunnelGateway</a></li><li><a href="TunnelMuxer.html">TunnelMuxer</a></li><li><a href="TunnelServer.html">TunnelServer</a></li><li><a href="Unpadder.html">Unpadder</a></li><li><a href="Verification.html">Verification</a></li>
+					<li><a href="AuditStream.html">AuditStream</a></li><li><a href="Contact.html">Contact</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="DataCipherKeyIv.html">DataCipherKeyIv</a></li><li><a href="DecryptStream.html">DecryptStream</a></li><li><a href="EncryptStream.html">EncryptStream</a></li><li><a href="FarmerInterface.html">FarmerInterface</a></li><li><a href="FileDemuxer.html">FileDemuxer</a></li><li><a href="FileMuxer.html">FileMuxer</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="KeyRing.html">KeyRing</a></li><li><a href="LevelDBFileStore.html">LevelDBFileStore</a></li><li><a href="LevelDBStorageAdapter.html">LevelDBStorageAdapter</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Padder.html">Padder</a></li><li><a href="ProofStream.html">ProofStream</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="RateLimiter.html">RateLimiter</a></li><li><a href="RenterInterface.html">RenterInterface</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="StorageMigration.html">StorageMigration</a></li><li><a href="Transport.html">Transport</a></li><li><a href="TunnelClient.html">TunnelClient</a></li><li><a href="TunnelDemuxer.html">TunnelDemuxer</a></li><li><a href="TunnelerInterface.html">TunnelerInterface</a></li><li><a href="TunnelGateway.html">TunnelGateway</a></li><li><a href="TunnelMuxer.html">TunnelMuxer</a></li><li><a href="TunnelServer.html">TunnelServer</a></li><li><a href="Unpadder.html">Unpadder</a></li><li><a href="Verification.html">Verification</a></li>
 				</ul>
 			</li>
 			
 			<li class="dropdown">
 				<a href="events.list.html" class="dropdown-toggle" data-toggle="dropdown">Events<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="AuditStream.html#event:finish">AuditStream#event:finish</a></li><li><a href="DecryptStream.html#event:data">DecryptStream#event:data</a></li><li><a href="DecryptStream.html#event:end">DecryptStream#event:end</a></li><li><a href="EncryptStream.html#event:data">EncryptStream#event:data</a></li><li><a href="EncryptStream.html#event:end">EncryptStream#event:end</a></li><li><a href="FarmerInterface.html#event:ready">FarmerInterface#event:ready</a></li><li><a href="FileDemuxer.html#event:finish">FileDemuxer#event:finish</a></li><li><a href="FileDemuxer.html#event:shard">FileDemuxer#event:shard</a></li><li><a href="FileMuxer.html#event:drain">FileMuxer#event:drain</a></li><li><a href="Network.html#event:ready">Network#event:ready</a></li><li><a href="RenterInterface.html#event:ready">RenterInterface#event:ready</a></li><li><a href="TunnelClient.html#event:close">TunnelClient#event:close</a></li><li><a href="TunnelClient.html#event:open">TunnelClient#event:open</a></li><li><a href="TunnelGateway.html#event:close">TunnelGateway#event:close</a></li><li><a href="TunnelGateway.html#event:message/datachannel">TunnelGateway#event:message/datachannel</a></li><li><a href="TunnelGateway.html#event:message/rpc">TunnelGateway#event:message/rpc</a></li><li><a href="TunnelGateway.html#event:open">TunnelGateway#event:open</a></li><li><a href="TunnelServer.html#event:locked">TunnelServer#event:locked</a></li><li><a href="TunnelServer.html#event:unlocked">TunnelServer#event:unlocked</a></li>
+					<li><a href="AuditStream.html#event:finish">AuditStream#event:finish</a></li><li><a href="DecryptStream.html#event:data">DecryptStream#event:data</a></li><li><a href="DecryptStream.html#event:end">DecryptStream#event:end</a></li><li><a href="EncryptStream.html#event:data">EncryptStream#event:data</a></li><li><a href="EncryptStream.html#event:end">EncryptStream#event:end</a></li><li><a href="FarmerInterface.html#event:ready">FarmerInterface#event:ready</a></li><li><a href="FileDemuxer.html#event:finish">FileDemuxer#event:finish</a></li><li><a href="FileDemuxer.html#event:shard">FileDemuxer#event:shard</a></li><li><a href="FileMuxer.html#event:drain">FileMuxer#event:drain</a></li><li><a href="Manager.html#event:locked">Manager#event:locked</a></li><li><a href="Manager.html#event:unlocked">Manager#event:unlocked</a></li><li><a href="Network.html#event:ready">Network#event:ready</a></li><li><a href="RenterInterface.html#event:ready">RenterInterface#event:ready</a></li><li><a href="TunnelClient.html#event:close">TunnelClient#event:close</a></li><li><a href="TunnelClient.html#event:open">TunnelClient#event:open</a></li><li><a href="TunnelerInterface.html#event:ready">TunnelerInterface#event:ready</a></li><li><a href="TunnelGateway.html#event:close">TunnelGateway#event:close</a></li><li><a href="TunnelGateway.html#event:message/datachannel">TunnelGateway#event:message/datachannel</a></li><li><a href="TunnelGateway.html#event:message/rpc">TunnelGateway#event:message/rpc</a></li><li><a href="TunnelGateway.html#event:open">TunnelGateway#event:open</a></li><li><a href="TunnelServer.html#event:locked">TunnelServer#event:locked</a></li><li><a href="TunnelServer.html#event:ready">TunnelServer#event:ready</a></li><li><a href="TunnelServer.html#event:unlocked">TunnelServer#event:unlocked</a></li>
 				</ul>
 			</li>
 			
@@ -84,13 +84,13 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: Proof</h1>
+	<h1 class="page-title">Class: DataCipherKeyIv</h1>
 <section>
 
 <header>
     
         <h2>
-        Proof
+        DataCipherKeyIv
         </h2>
         
     
@@ -103,7 +103,7 @@
         
 <hr>
 <dt>
-    <h4 class="name" id="Proof"><span class="type-signature"></span>new Proof(options)</h4>
+    <h4 class="name" id="DataCipherKeyIv"><span class="type-signature"></span>new DataCipherKeyIv(password, salt)</h4>
     
     
 </dt>
@@ -111,7 +111,7 @@
 
     
     <div class="description">
-        Provides interface for proving possession of a file for an <a href="Audit.html">Audit</a>
+        Create a new random cipher key and initialization vector
     </div>
     
 
@@ -146,79 +146,15 @@
 
         <tr>
             
-                <td class="name"><code>options</code></td>
+                <td class="name"><code>password</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Object</span>
+<span class="param-type">String</span>
+|
 
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">
-                <h6 class="method-params-label method-subparams-label">Properties</h6>
-                
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>leaves</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Bottom leaves of the audit merkle tree</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>shard</code></td>
-            
-
-            <td class="type">
-            
-                
 <span class="param-type">Buffer</span>
 
 
@@ -230,14 +166,34 @@
 
             
 
-            <td class="description last">Binary shard data</td>
+            <td class="description last">The unique cipher password</td>
         </tr>
 
     
-    </tbody>
-</table>
 
+        <tr>
+            
+                <td class="name"><code>salt</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+|
+
+<span class="param-type">Buffer</span>
+
+
+
+            
             </td>
+
+            
+
+            
+
+            <td class="description last">The unique salt</td>
         </tr>
 
     
@@ -281,7 +237,7 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_proof.js.html">lib/proof.js</a>
+				<a href="lib_cipherkeyiv.js.html">lib/cipherkeyiv.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -332,7 +288,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="prove"><span class="type-signature"></span>prove(challenge)</h4>
+    <h4 class="name" id=".fromObject"><span class="type-signature">&lt;static> </span>fromObject(object)</h4>
     
     
 </dt>
@@ -340,7 +296,7 @@
 
     
     <div class="description">
-        Calculate audit response
+        Returns the a <a href="DataCipherKeyIv.html">DataCipherKeyIv</a> from an object
     </div>
     
 
@@ -375,12 +331,58 @@
 
         <tr>
             
-                <td class="name"><code>challenge</code></td>
+                <td class="name"><code>object</code></td>
             
 
             <td class="type">
             
                 
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">
+                <h6 class="method-params-label method-subparams-label">Properties</h6>
+                
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>pass</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Buffer</span>
+|
+
 <span class="param-type">String</span>
 
 
@@ -392,7 +394,41 @@
 
             
 
-            <td class="description last">Challenge string sent by auditor</td>
+            <td class="description last">The unique password</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>salt</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Buffer</span>
+|
+
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The unique salt</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
         </tr>
 
     
@@ -436,7 +472,7 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_proof.js.html">lib/proof.js</a>
+				<a href="lib_cipherkeyiv.js.html">lib/cipherkeyiv.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -464,10 +500,220 @@
     <h5>Returns:</h5>
     
             
-<div class="param-desc">
-    result - Challenge response
-</div>
 
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="DataCipherKeyIv.html">DataCipherKeyIv</a></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getCipherKeyIv"><span class="type-signature"></span>getCipherKeyIv()</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Returns the cipher key and iv in an array
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_cipherkeyiv.js.html">lib/cipherkeyiv.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="toObject"><span class="type-signature"></span>toObject()</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Returns the key and iv as an array
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_cipherkeyiv.js.html">lib/cipherkeyiv.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
 
 
 <dl>

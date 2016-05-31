@@ -56,6 +56,7 @@ To get this information we need to process the file using a few more of the
 core components:
 
 * {@link FileDemuxer} - for breaking the file into shards
+* {@link DataCipherKeyIv} - for generating encryption key
 * {@link EncryptStream} - for encrypting the shards
 * {@link Contract} - for constructing the terms of the storage
 
@@ -85,7 +86,8 @@ var path = require('path');
 demuxer.on('shard', function(shardStream) {
   var tmpName = path.join(tmpdir, crypto.randomBytes(6).toString('hex'));
   var tmpFile = fs.createWriteStream(tmpName);
-  var encrypter = new storj.EncryptStream(keypair);
+  var key = new storj.DataCipherKeyIv('password', 'salt');
+  var encrypter = new storj.EncryptStream(key);
   var hasher = crypto.createHash('sha256');
   var size = 0;
 

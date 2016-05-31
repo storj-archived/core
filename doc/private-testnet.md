@@ -57,10 +57,12 @@ storj.version.protocol = '1.5.0-widgetsltd';
 ```
 
 If you are running "vanilla" Storj software, you can change the protocol
-version by setting the `STORJ_PROTOCOL` environment variable:
+version by setting the `STORJ_NETWORK` environment variable. This will add a
+postfix to the protocol version, which will partition the network to nodes
+that are running that *exact* version:
 
 ```
-STORJ_PROTOCOL=0.6.0-testnet storjshare --datadir /path/to/shards
+STORJ_NETWORK=testnet storjshare --datadir /path/to/shards
 ```
 
 This concept applies broadly to deploying a custom Storj network for any

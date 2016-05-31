@@ -28,7 +28,7 @@ guides & documentation does.
 - Make 10x pull requests, and you get a job interview with James + other swag
 
 If we miss a milestones (probably because we are working hard), just let
-us know so we can get you your swag. 
+us know so we can get you your swag.
 
 Style & Conventions
 -------------------
@@ -41,7 +41,6 @@ Please take the time to review the style guide and take care to follow it.
 
 ### Project Structure
 
-* `bin/` - Command line programs and utilities
 * `dist/` - Placeholder for browser bundles generated with `npm run build`
 * `doc/` - Markdown documentation on various topics not covered by JSDoc
 * `lib/` - All core classes and modules

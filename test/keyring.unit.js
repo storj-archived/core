@@ -1,7 +1,7 @@
 'use strict';
 
 var KeyRing = require('../lib/keyring');
-var KeyPair = require('../lib/keypair');
+var DataCipherKeyIv = require('../lib/cipherkeyiv');
 var expect = require('chai').expect;
 var path = require('path');
 
@@ -35,7 +35,7 @@ describe('KeyRing', function() {
 
     it('should generate a keypair and return it', function() {
       var kr = new KeyRing(tmpfile1);
-      expect(kr.generate('test')).to.be.instanceOf(KeyPair);
+      expect(kr.generate('test')).to.be.instanceOf(DataCipherKeyIv);
     });
 
   });
@@ -53,9 +53,10 @@ describe('KeyRing', function() {
 
     it('should set the key for the given id', function() {
       var kr = new KeyRing(tmpfile1);
-      var kp = KeyPair();
-      kr.set('test', kp);
-      expect(kr._keys.test).to.equal(kp.getPrivateKey());
+      var keyiv = DataCipherKeyIv();
+      kr.set('test', keyiv);
+      expect(kr.get('test').toObject().pass).to.equal(keyiv.toObject().pass);
+      expect(kr.get('test').toObject().salt).to.equal(keyiv.toObject().salt);
     });
 
   });

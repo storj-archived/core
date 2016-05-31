@@ -33,6 +33,16 @@ describe('StorageAdapter', function() {
 
   });
 
+  describe('#_peek', function() {
+
+    it('should throw a not implemented error', function() {
+      expect(function() {
+        StorageAdapter()._peek();
+      }).to.throw(Error, 'Method not implemented');
+    });
+
+  });
+
   describe('#_put', function() {
 
     it('should throw a not implemented error', function() {
@@ -53,6 +63,16 @@ describe('StorageAdapter', function() {
 
   });
 
+  describe('#_size', function() {
+
+    it('should throw a not implemented error', function() {
+      expect(function() {
+        StorageAdapter()._size();
+      }).to.throw(Error, 'Method not implemented');
+    });
+
+  });
+
   describe('#createReadStream', function() {
 
     it('should emit an error if _keys fails', function(done) {
@@ -67,7 +87,7 @@ describe('StorageAdapter', function() {
       }).read();
     });
 
-    it('should emit an error if get fails', function(done) {
+    it('should emit an error if peek fails', function(done) {
       var a = new StorageAdapter();
       var s = a.createReadStream();
       a._keys = function(callback) {
@@ -76,7 +96,7 @@ describe('StorageAdapter', function() {
           '5968d0cec66aefb9f4c7ffa5b2637152db1059cf'
         ]);
       };
-      a.get = function(key, callback) {
+      a.peek = function(key, callback) {
         callback(new Error('Shard data not found'));
       };
       s.on('error', function(err) {
@@ -85,7 +105,7 @@ describe('StorageAdapter', function() {
       }).read();
     });
 
-    it('should emit an error if get fails later', function(done) {
+    it('should emit an error if peek fails later', function(done) {
       var a = new StorageAdapter();
       var s = a.createReadStream();
       a._keys = function(callback) {
@@ -94,7 +114,7 @@ describe('StorageAdapter', function() {
           '5968d0cec66aefb9f4c7ffa5b2637152db1059cf'
         ]);
       };
-      a.get = function(key, callback) {
+      a.peek = function(key, callback) {
         if (key === '5968d0cec66aefb9f4c7ffa5b2637152db1059cf') {
           callback(new Error('Shard data not found'));
         } else {

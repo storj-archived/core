@@ -7,6 +7,18 @@ var RAMStorageAdapter = require('../../../lib/storage/adapters/ram');
 
 describe('RAMStorageAdapter', function() {
 
+  describe('#_peek', function() {
+
+    it('should return an error if contract data not found', function(done) {
+      var store = new RAMStorageAdapter();
+      store.peek('c527900223f9d08e0776d695f13a95cd6ac0e471', function(err) {
+        expect(err.message).to.equal('Shard data not found');
+        done();
+      });
+    });
+
+  });
+
   describe('#_get', function() {
 
     it('should return an error if shard data not found', function(done) {

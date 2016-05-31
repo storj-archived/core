@@ -1,8 +1,8 @@
 'use strict';
 
 var expect = require('chai').expect;
-var Audit = require('../lib/audit');
-var Proof = require('../lib/proof');
+var AuditStream = require('../lib/auditstream');
+var ProofStream = require('../lib/proofstream');
 var Verification = require('../lib/verification');
 var utils = require('../lib/utils');
 
@@ -39,14 +39,20 @@ describe('Verification', function() {
   describe('#verify', function() {
 
     it('should verify the proof response', function() {
-      var audit = new Audit({ shard: SHARD, audits: 12 });
-      var secret = audit.getPrivateRecord();
-      var request = audit.getPublicRecord();
-      var proof = new Proof({ shard: SHARD, leaves: request });
-      var response = proof.prove(secret.challenges[1]);
-      var verification = new Verification(response);
-      var result = verification.verify(secret.root, secret.depth);
-      expect(result[0]).to.equal(result[1]);
+      var audit = new AuditStream(12);
+      audit.end(SHARD);
+      setImmediate(function() {
+        var secret = audit.getPrivateRecord();
+        var request = audit.getPublicRecord();
+        var proof = new ProofStream(request, secret.challenges[1]);
+        proof.end(SHARD);
+        setImmediate(function() {
+          var response = proof.getProofResult();
+          var verification = new Verification(response);
+          var result = verification.verify(secret.root, secret.depth);
+          expect(result[0]).to.equal(result[1]);
+        });
+      });
     });
 
   });

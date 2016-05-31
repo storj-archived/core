@@ -96,4 +96,26 @@ describe('FileDemuxer', function() {
 
   });
 
+  describe('#_closeFinalShard', function() {
+
+    it('should close the current output if null is passed', function(done) {
+      var dmx = new FileDemuxer(filePathEven);
+      dmx.on('finish', done);
+      dmx._closeFinalShard(null);
+    });
+
+  });
+
+  describe('#_checkShardPosition', function() {
+
+    it('should do nothing if size not equal to position', function() {
+      var dmx = new FileDemuxer(filePathEven);
+      dmx._shardPosition = 1;
+      dmx._shardSize = 2;
+      dmx._checkShardPosition();
+      expect(dmx._shardPosition).to.equal(1);
+    });
+
+  });
+
 });

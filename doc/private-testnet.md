@@ -51,16 +51,18 @@ import the module and change the identifier like so:
 var storj = require('storj');
 
 // Modify protocol version
-storj.version = '1.5.0-widgetsltd';
+storj.version.protocol = '1.5.0-widgetsltd';
 
 // Get on with your stuff...
 ```
 
 If you are running "vanilla" Storj software, you can change the protocol
-version by setting the `STORJ_PROTOCOL` environment variable:
+version by setting the `STORJ_NETWORK` environment variable. This will add a
+postfix to the protocol version, which will partition the network to nodes
+that are running that *exact* version:
 
 ```
-STORJ_PROTOCOL=0.6.0-testnet storjfarm --datadir /path/to/shards
+STORJ_NETWORK=testnet storjshare --datadir /path/to/shards
 ```
 
 This concept applies broadly to deploying a custom Storj network for any

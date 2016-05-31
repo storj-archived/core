@@ -201,6 +201,7 @@ maintain a record of known nodes that are willing to tunnel, by subscribing to
 {
   "method": "FIND_TUNNEL",
   "params": {
+    "relayers": [],
     "contact": {
       "address": "10.0.0.3",
       "port": 1337,
@@ -832,8 +833,12 @@ secret pre-calculated challenges:
 {
   "method": "AUDIT",
   "params": {
-    "data_hash": "4efc1c36d3349189fb3486d2914f56e05d3e66f8",
-    "challenge": "6290bb9e1766bf3fc00eea3bb14146925611026d453e1aa95c32973f8baa5c98",
+    "audits": [
+      {
+        "data_hash": "4efc1c36d3349189fb3486d2914f56e05d3e66f8",
+        "challenge": "6290bb9e1766bf3fc00eea3bb14146925611026d453e1aa95c32973f8baa5c98"
+      }
+    ],
     "contact": {
       "address": "10.0.0.2",
       "port": 1337,
@@ -862,20 +867,13 @@ of nested JSON arrays:
 ```
 {
   "result": {
-    "proof": [
-      [
-        [
-          [
-            [
-              "6a2f02144c461e178dc4496c263313e64d7a56ab"
-            ],
-            "efb0dfa48813e3289ba8d16e9e23cf1efa1a99fd"
-          ],
-          "dfb8877b84e7a7496a4b08b2aef6ffd02ccbfccc"
-        ],
-        "82c60f546bcaaabeb908c911b1fadb816e039409"
-      ],
-      "5e265b0256cd471c6af22bd66b59ed9242067654"
+    "proofs": [
+      [[[
+      [["6a2f02144c461e178dc4496c263313e64d7a56ab"
+      ],"efb0dfa48813e3289ba8d16e9e23cf1efa1a99fd"
+      ],"dfb8877b84e7a7496a4b08b2aef6ffd02ccbfccc"
+      ],"82c60f546bcaaabeb908c911b1fadb816e039409"
+      ],"5e265b0256cd471c6af22bd66b59ed9242067654"]
     ],
     "contact": {
       "address": "10.0.0.2",

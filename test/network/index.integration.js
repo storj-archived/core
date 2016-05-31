@@ -5,9 +5,8 @@ var async = require('async');
 var sinon = require('sinon');
 var storj = require('../../');
 var kad = require('kad');
-var ms = require('ms');
 var Contract = require('../../lib/contract');
-var Audit = require('../../lib/audit');
+var AuditStream = require('../../lib/auditstream');
 var Contact = require('../../lib/network/contact');
 var utils = require('../../lib/utils');
 var DataChannelClient = require('../../lib/datachannel/client');
@@ -62,9 +61,6 @@ function createFarmer() {
   return createNode(['0f01010202'], 0);
 }
 
-var data = new Buffer('ALL THE SHARDS');
-var hash = storj.utils.rmd160sha256(data);
-
 var renters = [createRenter(), createRenter()];
 var farmers = [createFarmer()];
 
@@ -83,15 +79,21 @@ before(function(done) {
   });
 });
 
+var contract = null;
+var farmer = null;
+var shard = new Buffer('hello storj');
+var audit = new AuditStream(12);
+var ctoken = null;
+var rtoken = null;
+
 describe('Network/Integration/Tunnelling', function() {
 
   var renter = renters[renters.length - 1];
-  var contract = null;
-  var farmer = null;
-  var shard = new Buffer('hello storj');
-  var audit = new Audit({ audits: 12, shard: shard });
-  var ctoken = null;
-  var rtoken = null;
+
+  before(function(done) {
+    audit.end(shard);
+    setImmediate(done);
+  });
 
   describe('#getStorageOffer', function() {
 
@@ -181,74 +183,6 @@ describe('Network/Integration/Tunnelling', function() {
           audit.getPrivateRecord().depth
         );
         expect(v[0]).to.equal(v[1]);
-        done();
-      });
-    });
-
-  });
-
-});
-
-describe('Network/Integration/Tunnelling (deprecated)', function() {
-
-  describe('#store (tunneled) (deprecated)', function() {
-
-    it('should negotiate contract with a tunneled farmer', function(done) {
-      this.timeout(12000);
-      var renter = renters[renters.length - 1];
-      var duration = ms('20s');
-      renter.store(data, duration, function(err, key) {
-        expect(err).to.equal(null);
-        expect(key).to.equal(hash);
-        done();
-      });
-    });
-
-  });
-
-  describe('#retrieve (tunneled) (deprecated)', function() {
-
-    it('should fetch the file from a tunneled farmer', function(done) {
-      var renter = renters[renters.length - 1];
-      var buffer = Buffer([]);
-      renter.retrieve(hash, function(err, result) {
-        expect(err).to.equal(null);
-        result.on('end', function() {
-          expect(Buffer.compare(data, buffer)).to.equal(0);
-          done();
-        });
-        result.on('data', function(data) {
-          buffer = Buffer.concat([buffer, data]);
-        });
-      });
-    });
-
-  });
-
-  describe('#audit (tunneled) (deprecated)', function() {
-
-    it('should successfully audit the stored data via tunnel', function(done) {
-      var renter = renters[renters.length - 1];
-      renter.audit(hash, function(err, result) {
-        expect(err).to.equal(null);
-        expect(result[0]).to.equal(result[1]);
-        done();
-      });
-    });
-
-  });
-
-  describe('Protocol#FIND_TUNNEL', function() {
-
-    it('should ask neighbors for tunnels if not offering any', function(done) {
-      var renter = renters[renters.length - 1];
-      var farmer = farmers[0];
-      renter._transport.send(farmer._contact, kad.Message({
-        method: 'FIND_TUNNEL',
-        params: { contact: renter._contact }
-      }), function(err, response) {
-        expect(err).to.equal(null);
-        expect(response.result.tunnels).to.have.lengthOf(2);
         done();
       });
     });

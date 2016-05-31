@@ -25,7 +25,7 @@ describe('utils', function() {
   describe('#isCompatibleVersion', function() {
 
     it('should be compatible (same version)', function() {
-      expect(utils.isCompatibleVersion(version)).to.equal(true);
+      expect(utils.isCompatibleVersion(version.protocol)).to.equal(true);
     });
 
     it('should not be compatible (different major)', function() {
@@ -34,12 +34,14 @@ describe('utils', function() {
 
     it('should be compatible (different patch)', function() {
       expect(
-        utils.isCompatibleVersion(semver.inc(version, 'patch'))
+        utils.isCompatibleVersion(semver.inc(version.protocol, 'patch'))
       ).to.equal(true);
     });
 
     it('should not be compatible (different build tag)', function() {
-      expect(utils.isCompatibleVersion(version + '-buildtag')).to.equal(false);
+      expect(
+        utils.isCompatibleVersion(version.protocol + '-buildtag')
+      ).to.equal(false);
     });
 
   });
@@ -110,6 +112,28 @@ describe('utils', function() {
       );
       var decmessage = outcipher.decrypt(encmessage);
       expect(decmessage.toString()).to.equal('HELLO STORJ');
+    });
+
+  });
+
+  describe('#toNumberBytes', function() {
+
+    it('should convert from megabytes', function() {
+      expect(utils.toNumberBytes('250', 'MB')).to.equal(262144000);
+    });
+
+    it('should convert from gigabytes', function() {
+      expect(utils.toNumberBytes('500', 'GB')).to.equal(536870912000);
+    });
+
+    it('should convert from terabytes', function() {
+      expect(utils.toNumberBytes('2', 'TB')).to.equal(2199023255552);
+    });
+
+    it('should throw if bad unit', function() {
+      expect(function() {
+        utils.toNumberBytes('1024', 'KB');
+      }).to.throw(Error, 'Unit must be one of TB, GB, or MB');
     });
 
   });

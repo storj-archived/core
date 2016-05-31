@@ -2,7 +2,6 @@
 
 var expect = require('chai').expect;
 var StorageItem = require('../../lib/storage/item');
-var Audit = require('../../lib/audit');
 var AuditStream = require('../../lib/auditstream');
 var Contact = require('../../lib/network/contact');
 var Contract = require('../../lib/contract');
@@ -51,18 +50,21 @@ describe('StorageItem', function() {
         nodeID: KeyPair().getNodeID()
       });
       var item = new StorageItem();
-      var audit = new Audit({ shard: Buffer('test'), audits: 6 });
-      item.addAuditRecords(contact, audit);
-      expect(
-        JSON.stringify(item.trees[contact.nodeID])
-      ).to.equal(
-        JSON.stringify(audit.getPublicRecord())
-      );
-      expect(
-        JSON.stringify(item.challenges[contact.nodeID])
-      ).to.equal(
-        JSON.stringify(audit.getPrivateRecord())
-      );
+      var audit = new AuditStream(6);
+      audit.end(Buffer('test'));
+      setImmediate(function() {
+        item.addAuditRecords(contact, audit);
+        expect(
+          JSON.stringify(item.trees[contact.nodeID])
+        ).to.equal(
+          JSON.stringify(audit.getPublicRecord())
+        );
+        expect(
+          JSON.stringify(item.challenges[contact.nodeID])
+        ).to.equal(
+          JSON.stringify(audit.getPrivateRecord())
+        );
+      });
     });
 
     it('should add the audit stream data at the nodeID', function(done) {

@@ -151,6 +151,9 @@ describe('StorageMigration', function() {
       var target = new LevelDBStorageAdapter('t12', memdown);
       var _sourcePut = sinon.stub(source, 'put').callsArg(1);
       var _targetGet = sinon.stub(target, 'get').callsArg(1);
+      var _sourceGet = sinon.stub(source, 'get').callsArgWith(1, null, {
+        shard: {}
+      });
       var migration = new StorageMigration(source, target);
       var item = StorageItem({
         hash: utils.rmd160('item three')
@@ -163,14 +166,45 @@ describe('StorageMigration', function() {
       migration._handleSourceObject(item);
       setImmediate(function() { // NB: Wait for migration#_handleSourceObject
         setImmediate(function() { // NB: Wait for target#put
-          setImmediate(function() { // NB: Wait for source#get
-            expect(migration._sourceStream.resume.called).to.equal(true);
-            _sourcePut.restore();
-            _targetGet.restore();
-            done();
+          setImmediate(function() { // NB: Wait for target#get
+            setImmediate(function() { // NB: Wait for source#get
+              _sourcePut.restore();
+              _targetGet.restore();
+              _sourceGet.restore();
+              expect(migration._sourceStream.resume.called).to.equal(true);
+              done();
+            });
           });
         });
       });
+    });
+
+    it('should emit error if source#get fails', function(done) {
+      var source = new LevelDBStorageAdapter('t11', memdown);
+      var target = new LevelDBStorageAdapter('t12', memdown);
+      var _sourcePut = sinon.stub(source, 'put').callsArg(1);
+      var _targetGet = sinon.stub(target, 'get').callsArg(1);
+      var _sourceGet = sinon.stub(source, 'get').callsArgWith(
+        1,
+        new Error('Failed')
+      );
+      var migration = new StorageMigration(source, target);
+      var item = StorageItem({
+        hash: utils.rmd160('item three')
+      });
+      item.shard = {};
+      migration._sourceStream = {
+        pause: sinon.stub(),
+        resume: sinon.stub()
+      };
+      migration.once('error', function(err) {
+        _sourcePut.restore();
+        _targetGet.restore();
+        _sourceGet.restore();
+        expect(err.message).to.equal('Failed');
+        done();
+      });
+      migration._handleSourceObject(item);
     });
 
   });

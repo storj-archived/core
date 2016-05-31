@@ -4,7 +4,7 @@
 [![Build Status](https://img.shields.io/travis/Storj/core.svg?style=flat-square)](https://travis-ci.org/Storj/core)
 [![Coverage Status](https://img.shields.io/coveralls/Storj/core.svg?style=flat-square)](https://coveralls.io/r/Storj/core)
 [![NPM](https://img.shields.io/npm/v/storj.svg?style=flat-square)](https://www.npmjs.com/package/storj)
-[![GitHub license](https://img.shields.io/badge/license-AGPLv3-blue.svg?style=flat-square)](https://raw.githubusercontent.com/Storj/core/master/LICENSE)
+[![License](https://img.shields.io/badge/license-AGPL3.0-blue.svg?style=flat-square)](https://raw.githubusercontent.com/Storj/core/master/LICENSE)
 
 This package exposes a module that provides all of the tools needed to
 integrate with the Storj network. [Complete documentation can be found here](http://storj.github.io/core).
@@ -26,12 +26,9 @@ var storj = require('storj');
 
 var network = storj.Network({
   keypair: storj.KeyPair(/* existing_key */),
-  manager: storj.Manager(storj.FSStorageAdapter('/path/to/datadir')),
+  manager: storj.Manager(storj.LevelDBStorageAdapter('/path/to/datadir')),
   address: 'ip.or.hostname',
-  port: 4000,
-  seeds: [
-    'storj://api.storj.io:8443/78cfca0e01235db817728aec056d007672ffac63'
-  ]
+  port: 4000
 });
 
 network.join(/* callback */);

@@ -15,6 +15,19 @@ describe('Manager', function() {
       expect(Manager(new RAMStorageAdapter())).to.be.instanceOf(Manager);
     });
 
+    it('should not start the reaper if disabled', function(done) {
+      var _clean = sinon.stub(Manager.prototype, 'clean');
+      var man = new Manager(RAMStorageAdapter(), {
+        disableReaper: true
+      });
+      setImmediate(function() {
+        _clean.restore();
+        expect(man._options.disableReaper).to.equal(true);
+        expect(_clean.called).to.equal(false);
+        done();
+      });
+    });
+
   });
 
   describe('#load', function() {
@@ -103,6 +116,70 @@ describe('Manager', function() {
             done();
           });
         });
+      });
+    });
+
+  });
+
+  describe('#_checkCapacity', function() {
+
+    it('should emit an error if size fails', function(done) {
+      var db = new RAMStorageAdapter();
+      var _size = sinon.stub(db, '_size', function(callback) {
+        setTimeout(function() {
+          callback(new Error('Failed'));
+        }, 10);
+      });
+      var man = new Manager(db);
+      man.on('error', function(err) {
+        _size.restore();
+        expect(err.message).to.equal('Failed');
+        done();
+      });
+    });
+
+    it('should emit locked if the status changes', function(done) {
+      var db = new RAMStorageAdapter();
+      var _size = sinon.stub(db, '_size').callsArgWith(0, null, 1);
+      var man = new Manager(db, { maxCapacity: 0 });
+      man.on('locked', function() {
+        _size.restore();
+        done();
+      });
+    });
+
+    it('should emit unlocked if the status changes', function(done) {
+      var db = new RAMStorageAdapter();
+      var _size = sinon.stub(db, '_size').callsArgWith(0, null, 5);
+      var man = new Manager(db, { maxCapacity: 10 });
+      man._capacityReached = true;
+      man.on('unlocked', function() {
+        _size.restore();
+        done();
+      });
+    });
+
+  });
+
+  describe('#save', function() {
+
+    it('should return error if capacity reached', function(done) {
+      var man = new Manager(new RAMStorageAdapter());
+      man._capacityReached = true;
+      man.save(StorageItem(), function(err) {
+        expect(err.message).to.equal('Storage capacity reached');
+        done();
+      });
+    });
+
+    it('should bubble error from underlying db', function(done) {
+      var db = new RAMStorageAdapter();
+      var man = new Manager(db);
+      var _put = sinon.stub(db, '_put').callsArgWith(2, new Error('Failed'));
+      man.save(StorageItem(), function(err) {
+        _put.restore();
+        expect(err.message).to.equal('Failed');
+        done();
       });
     });
 

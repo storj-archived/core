@@ -8,23 +8,28 @@ var StorageItem = require('../../../lib/storage/item');
 var expect = require('chai').expect;
 var utils = require('../../../lib/utils');
 var Contract = require('../../../lib/contract');
-var Audit = require('../../../lib/audit');
+var AuditStream = require('../../../lib/auditstream');
 var sinon = require('sinon');
+var proxyquire = require('proxyquire');
 
 function tmpdir() {
   return require('os').tmpdir() + '/test-' + Date.now() + '.db';
 }
 
-describe('LevelDBStorageAdapter', function() {
+var store = new LevelDBStorageAdapter(tmpdir(), memdown);
+var hash = utils.rmd160('test');
+var audit = new AuditStream(12);
+var contract = new Contract();
+var item = new StorageItem({
+  hash: hash,
+  shard: new Buffer('test')
+});
 
-  var store = new LevelDBStorageAdapter(tmpdir(), memdown);
-  var hash = utils.rmd160('test');
-  var audit = new Audit({ shard: new Buffer('test'), audit: 12 });
-  var contract = new Contract();
-  var item = new StorageItem({
-    hash: hash,
-    shard: new Buffer('test')
-  });
+before(function() {
+  audit.end(Buffer('test'));
+});
+
+describe('LevelDBStorageAdapter', function() {
 
   describe('@constructor', function() {
 
@@ -86,6 +91,30 @@ describe('LevelDBStorageAdapter', function() {
 
   });
 
+  describe('#_peek', function() {
+
+    it('should return the stored item', function(done) {
+      store._peek(hash, function(err, item) {
+        expect(err).to.equal(null);
+        expect(item).to.be.instanceOf(StorageItem);
+        done();
+      });
+    });
+
+    it('should return error if the data is not found', function(done) {
+      var _dbpeek = sinon.stub(store._db, 'get').callsArgWith(
+        2,
+        new Error('Not found')
+      );
+      store._peek(hash, function(err) {
+        expect(err.message).to.equal('Not found');
+        _dbpeek.restore();
+        done();
+      });
+    });
+
+  });
+
   describe('#_keys', function() {
 
     it('should return all of the keys', function(done) {
@@ -132,6 +161,47 @@ describe('LevelDBStorageAdapter', function() {
 
   });
 
+  describe('#_size', function() {
+
+    it('should bubble errors from size calculation', function(done) {
+      var BadStore = proxyquire('../../../lib/storage/adapters/level', {
+        fs: {
+          readdirSync: sinon.stub().throws(new Error('Failed'))
+        }
+      });
+      var store = new BadStore(tmpdir(), memdown);
+      store._isUsingDefaultBackend = true;
+      store._size(function(err) {
+        expect(err.message).to.equal('Failed');
+        done();
+      });
+    });
+
+    it('should return the size of the store on disk', function(done) {
+      var GoodStore = proxyquire('../../../lib/storage/adapters/level', {
+        fs: {
+          readdirSync: sinon.stub().returns([
+            '000035.ldb',
+            '000038.ldb',
+            '000055.log',
+            'CURRENT',
+            'LOCK',
+            'LOG',
+            'MANIFEST-000054'
+          ]),
+          statSync: sinon.stub().returns({ size: 1024 })
+        }
+      });
+      var store = new GoodStore(tmpdir(), memdown);
+      store._isUsingDefaultBackend = true;
+      store._size(function(err, size) {
+        expect(size).to.equal(7 * 1024);
+        done();
+      });
+    });
+
+  });
+
 });
 
 describe('LevelDBFileStore', function() {
@@ -147,6 +217,40 @@ describe('LevelDBFileStore', function() {
 
     it('should create instance with the new keyword', function() {
       expect(new LevelDBFileStore(store)).to.be.instanceOf(LevelDBFileStore);
+    });
+
+  });
+
+  describe('#createReadStream', function() {
+
+    it('should emit an error event if operation fails', function(done) {
+      var _get = sinon.stub(store, 'get').callsArgWith(2, new Error('FAIL'));
+      var rs = LevelDBFileStore(store).createReadStream('testkey');
+      rs.on('error', function(err) {
+        _get.restore();
+        expect(err.message).to.equal('FAIL');
+        done();
+      });
+      setImmediate(function() {
+        rs.read();
+      });
+    });
+
+  });
+
+  describe('#createWriteStream', function() {
+
+    it('should emit an error event if operation fails', function(done) {
+      var _put = sinon.stub(store, 'put').callsArgWith(3, new Error('FAIL'));
+      var ws = LevelDBFileStore(store).createWriteStream('testkey');
+      ws.on('error', function(err) {
+        _put.restore();
+        expect(err.message).to.equal('FAIL');
+        done();
+      });
+      setImmediate(function() {
+        ws.write(Buffer('test'));
+      });
     });
 
   });

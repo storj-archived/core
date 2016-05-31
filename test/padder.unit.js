@@ -1,6 +1,7 @@
 'use strict';
 
 var expect = require('chai').expect;
+var sinon = require('sinon');
 var Padder = require('../lib/padder');
 
 describe('Padder', function() {
@@ -31,6 +32,30 @@ describe('Padder', function() {
         done();
       });
       padder.end(buffer);
+    });
+
+  });
+
+  describe('#_flush', function() {
+
+    it('should pad the remainder if it exists', function(done) {
+      var padder = new Padder();
+      padder._bytesRead = (Padder.DEFAULTS.multiple * 2) - 8;
+      padder.on('data', function(data) {
+        expect(data.length).to.equal(8);
+        done();
+      });
+      padder._flush(function() {});
+    });
+
+    it('should not pad if the bytes read is a multiple', function(done) {
+      var padder = new Padder();
+      var _push = sinon.stub(padder, 'push');
+      padder._bytesRead = (Padder.DEFAULTS.multiple * 2);
+      padder._flush(function() {
+        expect(_push.called).to.equal(false);
+        done();
+      });
     });
 
   });

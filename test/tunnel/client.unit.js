@@ -36,6 +36,25 @@ describe('TunnelClient', function() {
       });
     });
 
+    it('should emit an error if demuxer give bad frame', function(done) {
+      var badDemuxer = new EventEmitter();
+      var BadDemuxTunClient = proxyquire('../../lib/tunnel/client', {
+        './demultiplexer': function() {
+          return badDemuxer;
+        },
+        ws: EventEmitter
+      });
+      var client = new BadDemuxTunClient('', '');
+      client.on('error', function(err) {
+        expect(err.message).to.equal('Cannot handle tunnel frame type');
+        done();
+      });
+      client.open();
+      setImmediate(function() {
+        client._demuxer.emit('data', { type: 'invalid' });
+      });
+    });
+
     it('should bubble muxer error', function(done) {
       var emitter = new EventEmitter();
       var StubbedTunnelClient = proxyquire('../../lib/tunnel/client', {
@@ -195,6 +214,22 @@ describe('TunnelClient', function() {
         flags: { quid: 'test' }
       });
       expect(client._channels.test.send.called).to.equal(true);
+    });
+
+    it('should wait for socket to open before sending data', function(done) {
+      var client = new TunnelClient('', '');
+      client._channels.test = new EventEmitter();
+      client._channels.test.readyState = 0;
+      client._channels.test.send = sinon.stub();
+      client._sendToExistingSocket({
+        flags: { quid: 'test' }
+      });
+      expect(client._channels.test.send.called).to.equal(false);
+      client._channels.test.emit('open');
+      setImmediate(function() {
+        expect(client._channels.test.send.called).to.equal(true);
+        done();
+      });
     });
 
   });

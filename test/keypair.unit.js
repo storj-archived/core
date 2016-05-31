@@ -4,7 +4,6 @@ var expect = require('chai').expect;
 var KeyPair = require('../lib/keypair');
 var prvk = '4d548b387bed22aff9ca560416d7b13ecbad16f28bc41ef5acaff3019bfa5134';
 var pubk = '02ad47e0d4896cd794f5296a953f897c426b3f9a58f5203b8baace8952a291cf6b';
-var data = new Buffer('some really secret text');
 
 describe('KeyPair', function() {
 
@@ -50,25 +49,6 @@ describe('KeyPair', function() {
       expect(addr.length).to.be.lte(35);
       expect(addr.length).to.be.gte(26);
       expect(['1', '3']).to.include(addr.charAt(0));
-    });
-
-  });
-
-  var cryptokp = new KeyPair(), encrypted;
-
-  describe('#encrypt', function() {
-
-    it('should encrypt the data', function() {
-      encrypted = cryptokp.encrypt(data);
-      expect(encrypted).to.not.equal(data);
-    });
-
-  });
-
-  describe('#decrypt', function() {
-
-    it('should decrypt the data', function() {
-      expect(Buffer.compare(cryptokp.decrypt(encrypted), data)).to.equal(0);
     });
 
   });

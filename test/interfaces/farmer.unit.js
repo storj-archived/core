@@ -195,6 +195,43 @@ describe('FarmerInterface', function() {
       });
     });
 
+    it('should send offer directly to renter if locally known', function(done) {
+      var kp1 = KeyPair();
+      var kp2 = KeyPair();
+      var contract = new Contract({
+        renter_id: kp1.getNodeID(),
+        farmer_id: kp2.getNodeID(),
+        payment_source: kp1.getAddress(),
+        payment_destination: kp2.getAddress(),
+        data_hash: utils.rmd160('test')
+      });
+      contract.sign('renter', kp1.getPrivateKey());
+      contract.sign('farmer', kp2.getPrivateKey());
+      expect(contract.isComplete()).to.equal(true);
+      var farmer = new FarmerInterface({
+        keypair: KeyPair(),
+        port: 0,
+        noforward: true,
+        logger: kad.Logger(0),
+        backend: require('memdown'),
+        storage: { path: 'test' }
+      });
+      var _getContactByNodeID = sinon.stub(
+        farmer._router,
+        'getContactByNodeID'
+      ).returns({});
+      var _findNode = sinon.stub(farmer._router, 'findNode');
+      var _save = sinon.stub(farmer._manager, 'save').callsArg(1);
+      farmer._sendOfferForContract = function() {
+        expect(_findNode.called).to.equal(false);
+        _getContactByNodeID.restore();
+        _findNode.restore();
+        _save.restore();
+        done();
+      };
+      farmer._negotiateContract(contract);
+    });
+
   });
 
   describe('#join', function() {

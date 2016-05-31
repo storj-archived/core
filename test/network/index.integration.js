@@ -189,21 +189,4 @@ describe('Network/Integration/Tunnelling', function() {
 
   });
 
-  describe('Protocol#FIND_TUNNEL', function() {
-
-    it('should ask neighbors for tunnels if not offering any', function(done) {
-      var renter = renters[renters.length - 1];
-      var farmer = farmers[0];
-      renter._transport.send(farmer._contact, kad.Message({
-        method: 'FIND_TUNNEL',
-        params: { contact: renter._contact }
-      }), function(err, response) {
-        expect(err).to.equal(null);
-        expect(response.result.tunnels).to.have.lengthOf(1);
-        done();
-      });
-    });
-
-  });
-
 });

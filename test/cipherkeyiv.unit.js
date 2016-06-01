@@ -15,6 +15,12 @@ describe('DataCipherKeyIv', function() {
       expect(new DataCipherKeyIv()).to.be.instanceOf(DataCipherKeyIv);
     });
 
+    it('should create the same pbkdf2 data', function() {
+      var c1 = new DataCipherKeyIv();
+      var c2 = DataCipherKeyIv.fromObject(c1.toObject());
+      expect(Buffer.compare(c1._pbkdf2, c2._pbkdf2)).to.equal(0);
+    });
+
   });
 
   describe('#toObject', function() {

@@ -6,6 +6,9 @@ var sinon = require('sinon');
 var expect = require('chai').expect;
 var KeyPair = require('../lib/keypair');
 var utils = require('../lib/utils');
+var EventEmitter = require('events').EventEmitter;
+var stream = require('readable-stream');
+var FileMuxer = require('../lib/filemuxer');
 
 describe('BridgeClient', function() {
 
@@ -541,7 +544,46 @@ describe('BridgeClient', function() {
 
     describe('#resolveFileFromPointers', function() {
 
-
+      it('should return a readable stream as a file muxer', function(done) {
+        var emitters = [new EventEmitter(), new EventEmitter()];
+        var count = 0;
+        var StubbedClient = proxyquire('../lib/bridgeclient', {
+          './datachannel/client': function() {
+            emitters[count++].createReadStream = function() {
+              return new stream.Readable({ read: function() {} });
+            };
+            return emitters[count - 1];
+          }
+        });
+        var client = new StubbedClient();
+        client.resolveFileFromPointers([
+          {
+            size: 512,
+            farmer: {
+              address: '127.0.0.1',
+              port: 8080,
+              nodeID: utils.rmd160('nodeid')
+            }
+          },
+          {
+            size: 512,
+            farmer: {
+              address: '127.0.0.1',
+              port: 8080,
+              nodeID: utils.rmd160('nodeid')
+            }
+          }
+        ], function(err, stream) {
+          expect(stream).to.be.instanceOf(FileMuxer);
+          done();
+        });
+        setImmediate(function() {
+          emitters[0].emit('open');
+          setImmediate(function() {
+            emitters[1].emit('open');
+          });
+        });
+      });
 
     });
 

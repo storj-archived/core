@@ -1,11 +1,7 @@
 'use strict';
 
-// TODO: Replace (or supplement) these integration tests with unit tests
-// TODO: when we have more time to do so.
-
 var expect = require('chai').expect;
 var async = require('async');
-var storj = require('../../');
 var kad = require('kad');
 var Contract = require('../../lib/contract');
 var AuditStream = require('../../lib/auditstream');
@@ -15,6 +11,11 @@ var DataChannelClient = require('../../lib/datachannel/client');
 var StorageItem = require('../../lib/storage/item');
 var Verification = require('../../lib/verification');
 var memdown = require('memdown');
+var KeyPair = require('../../lib/keypair');
+var Manager = require('../../lib/manager');
+var LevelDBStorageAdapter = require('../../lib/storage/adapters/level');
+var FarmerInterface = require('../../lib/interfaces/farmer');
+var RenterInterface = require('../../lib/interfaces/renter');
 
 kad.constants.T_RESPONSETIMEOUT = 2000;
 
@@ -23,8 +24,8 @@ var STARTING_PORT = 65535;
 
 function createNode(opcodes) {
   var node = null;
-  var kp = new storj.KeyPair();
-  var manager = new storj.Manager(new storj.LevelDBStorageAdapter(
+  var kp = new KeyPair();
+  var manager = new Manager(new LevelDBStorageAdapter(
     (Math.floor(Math.random() * 24)).toString(), memdown
   ));
   var port = STARTING_PORT--;
@@ -42,9 +43,9 @@ function createNode(opcodes) {
   };
 
   if (opcodes.length) {
-    node = storj.FarmerInterface(options);
+    node = FarmerInterface(options);
   } else {
-    node = storj.RenterInterface(options);
+    node = RenterInterface(options);
   }
 
   NODE_LIST.push([

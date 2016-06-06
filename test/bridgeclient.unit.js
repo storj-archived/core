@@ -7,6 +7,6 @@ var expect = require('chai').expect;
 
 describe('BridgeClient', function() {
 
-  
+
 
 });

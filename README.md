@@ -26,7 +26,7 @@ curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.31.1/install.sh | b
 
 > Detailed NVM installation instructions can be found [here](https://github.com/creationix/nvm#install-script).
 
-After NVM is install, source your `~/.bashrc`, `~/.profile`, or `~/.zshrc`
+After NVM is installed, source your `~/.bashrc`, `~/.profile`, or `~/.zshrc`
 depending on your shell of choice:
 
 ```

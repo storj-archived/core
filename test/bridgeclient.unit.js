@@ -9,6 +9,7 @@ var utils = require('../lib/utils');
 var EventEmitter = require('events').EventEmitter;
 var stream = require('readable-stream');
 var FileMuxer = require('../lib/filemuxer');
+var crypto = require('crypto');
 
 describe('BridgeClient', function() {
 
@@ -364,7 +365,218 @@ describe('BridgeClient', function() {
 
     describe('#storeFileInBucket', function() {
 
+      it('should create frame, stage the shards, and upload', function(done) {
+        var _demuxer = new EventEmitter();
+        var _shard1 = new EventEmitter();
+        var _shard2 = new EventEmitter();
+        var StubbedClient = proxyquire('../lib/bridgeclient', {
+          fs: {
+            statSync: sinon.stub().returns({ size: 64 }),
+            unlinkSync: sinon.stub(),
+            createWriteStream: function() {
+              return new stream.Writable({
+                write: function(data, enc, done) { done(); }
+              });
+            },
+            createReadStream: function() {
+              var called = false;
+              function data() {
+                if (called) {
+                  return null;
+                }
 
+                called = true;
+                return crypto.randomBytes(32);
+              }
+              return new stream.Readable({
+                read: function() {
+                  this.push(data());
+                }
+              });
+            }
+          },
+          './datachannel/client': function() {
+            var emitter = new EventEmitter();
+            emitter.createWriteStream = function() {
+              return new stream.Writable({
+                write: function(c, e, cb) {
+                  cb();
+                }
+              });
+            };
+            setTimeout(function() {
+              emitter.emit('open');
+            }, 20);
+            return emitter;
+          },
+          './filedemuxer': function() {
+            _demuxer.DEFAULTS = { shardSize: 32 };
+            return _demuxer;
+          },
+          request: sinon.stub()
+        });
+        var _createFrame = sinon.stub(
+          StubbedClient.prototype,
+          'createFileStagingFrame',
+          function(callback) {
+            callback(null, { id: 'myframe' });
+            setImmediate(function() {
+              _demuxer.emit('shard', _shard1, 0);
+              setImmediate(function() {
+                _demuxer.emit('shard', _shard2, 1);
+                _shard1.emit('data', crypto.randomBytes(32));
+                setImmediate(function() {
+                  _shard1.emit('end');
+                  _shard2.emit('data', crypto.randomBytes(32));
+                  setImmediate(function() {
+                    _shard2.emit('end');
+                  });
+                });
+              });
+            });
+          }
+        );
+        var _addShard = sinon.stub(
+          StubbedClient.prototype,
+          'addShardToFileStagingFrame'
+        ).callsArgWith(2, null, {
+          farmer: {
+            address: '127.0.0.1',
+            port: 8080,
+            nodeID: utils.rmd160('nodeid')
+          }
+        });
+        var _request = sinon.stub(
+          StubbedClient.prototype,
+          '_request'
+        ).callsArg(3);
+        var client = new StubbedClient();
+        client.storeFileInBucket('bucket', 'token', 'file', function() {
+          _createFrame.restore();
+          _addShard.restore();
+          _request.restore();
+          done();
+        });
+      });
+
+      it('should return error if create frame fails', function(done) {
+        var _demuxer = new EventEmitter();
+        var StubbedClient = proxyquire('../lib/bridgeclient', {
+          fs: {
+            statSync: sinon.stub().returns({ size: 64 }),
+            unlinkSync: sinon.stub()
+          },
+          './filedemuxer': function() {
+            _demuxer.DEFAULTS = { shardSize: 32 };
+            return _demuxer;
+          },
+          request: sinon.stub()
+        });
+        var _request = sinon.stub(
+          StubbedClient.prototype,
+          '_request'
+        );
+        var _createFrame = sinon.stub(
+          StubbedClient.prototype,
+          'createFileStagingFrame'
+        ).callsArgWith(0, new Error('Failed'));
+        var client = new StubbedClient();
+        client.storeFileInBucket('bucket', 'token', 'file', function(err) {
+          _createFrame.restore();
+          _request.restore();
+          expect(err.message).to.equal('Failed');
+          done();
+        });
+      });
+
+      it('should return error if add shard fails', function(done) {
+        var _demuxer = new EventEmitter();
+        var _shard1 = new EventEmitter();
+        var _shard2 = new EventEmitter();
+        var StubbedClient = proxyquire('../lib/bridgeclient', {
+          fs: {
+            statSync: sinon.stub().returns({ size: 64 }),
+            unlinkSync: sinon.stub(),
+            createWriteStream: function() {
+              return new stream.Writable({
+                write: function(data, enc, done) { done(); }
+              });
+            },
+            createReadStream: function() {
+              var called = false;
+              function data() {
+                if (called) {
+                  return null;
+                }
+
+                called = true;
+                return crypto.randomBytes(32);
+              }
+              return new stream.Readable({
+                read: function() {
+                  this.push(data());
+                }
+              });
+            }
+          },
+          './datachannel/client': function() {
+            var emitter = new EventEmitter();
+            emitter.createWriteStream = function() {
+              return new stream.Writable({
+                write: function(c, e, cb) {
+                  cb();
+                }
+              });
+            };
+            setTimeout(function() {
+              emitter.emit('open');
+            }, 20);
+            return emitter;
+          },
+          './filedemuxer': function() {
+            _demuxer.DEFAULTS = { shardSize: 32 };
+            return _demuxer;
+          },
+          request: sinon.stub()
+        });
+        var _createFrame = sinon.stub(
+          StubbedClient.prototype,
+          'createFileStagingFrame',
+          function(callback) {
+            callback(null, { id: 'myframe' });
+            setImmediate(function() {
+              _demuxer.emit('shard', _shard1, 0);
+              setImmediate(function() {
+                _demuxer.emit('shard', _shard2, 1);
+                _shard1.emit('data', crypto.randomBytes(32));
+                setImmediate(function() {
+                  _shard1.emit('end');
+                  _shard2.emit('data', crypto.randomBytes(32));
+                  setImmediate(function() {
+                    _shard2.emit('end');
+                  });
+                });
+              });
+            });
+          }
+        );
+        var _addShard = sinon.stub(
+          StubbedClient.prototype,
+          'addShardToFileStagingFrame'
+        ).callsArgWith(2, new Error('Failed'));
+        var _request = sinon.stub(
+          StubbedClient.prototype,
+          '_request'
+        );
+        var client = new StubbedClient();
+        client.storeFileInBucket('bucket', 'token', 'file', function(err) {
+          _createFrame.restore();
+          _addShard.restore();
+          _request.restore();
+          expect(err.message).to.equal('Failed');
+          done();
+        });
+      });
 
     });
 

@@ -624,7 +624,7 @@ var ACTIONS = {
       if (err) {
         return log('error', err.message);
       }
-      
+
       log('info', 'Contact:   ' + storj.utils.getContactURL(contact));
       log('info', 'Last Seen: ' + contact.lastSeen);
       log('info', 'Protocol:  ' + (contact.protocol || '?'));

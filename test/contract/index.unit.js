@@ -44,7 +44,7 @@ describe('Contract#compare', function() {
 
 });
 
-describe('Contact#MATRIX', function() {
+describe('Contract#MATRIX', function() {
 
   describe('#size', function() {
 

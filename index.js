@@ -107,6 +107,9 @@ module.exports.FarmerInterface = require('./lib/interfaces/farmer');
 /** {@link TunnelerInterface} */
 module.exports.TunnelerInterface = require('./lib/interfaces/tunneler');
 
+/** {@link BridgeClient} */
+module.exports.BridgeClient = require('./lib/bridgeclient');
+
 /** {@link constants} */
 module.exports.constants = require('./lib/constants');
 

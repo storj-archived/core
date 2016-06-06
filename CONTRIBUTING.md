@@ -41,6 +41,7 @@ Please take the time to review the style guide and take care to follow it.
 
 ### Project Structure
 
+* `bin/` - Command line utilities linked during global installation
 * `dist/` - Placeholder for browser bundles generated with `npm run build`
 * `doc/` - Markdown documentation on various topics not covered by JSDoc
 * `lib/` - All core classes and modules

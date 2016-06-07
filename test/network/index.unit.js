@@ -642,4 +642,73 @@ describe('Network (private)', function() {
 
   });
 
+  describe('#_enterOverlay', function() {
+
+    it('should use bridge to get seeds and error if fails', function(done) {
+      var net = Network({
+        keypair: KeyPair(),
+        manager: Manager(RAMStorageAdapter()),
+        logger: kad.Logger(0),
+        seeds: [],
+        address: '127.0.0.1',
+        port: 0,
+        noforward: true
+      });
+      var _setupTunnel = sinon.stub(net, '_setupTunnelClient').callsArg(0);
+      var _getContactList = sinon.stub(
+        net._bridge,
+        'getContactList'
+      ).callsArgWith(1, new Error('connection refused'));
+      net.join(function(err) {
+        _setupTunnel.restore();
+        _getContactList.restore();
+        expect(err.message).to.equal(
+          'Failed to discover seeds from bridge: connection refused'
+        );
+        done();
+      });
+    });
+
+    it('should use bridge to get seeds and use them', function(done) {
+      var net = Network({
+        keypair: KeyPair(),
+        manager: Manager(RAMStorageAdapter()),
+        logger: kad.Logger(0),
+        seeds: [],
+        address: '127.0.0.1',
+        port: 0,
+        noforward: true
+      });
+      var _setupTunnel = sinon.stub(net, '_setupTunnelClient').callsArg(0);
+      var _getContactList = sinon.stub(
+        net._bridge,
+        'getContactList'
+      ).callsArgWith(1, null, []);
+      net.join(function() {
+        _setupTunnel.restore();
+        _getContactList.restore();
+        done();
+      });
+    });
+
+    it('should do nothing if no seeds or bridge', function(done) {
+      var net = Network({
+        keypair: KeyPair(),
+        manager: Manager(RAMStorageAdapter()),
+        logger: kad.Logger(0),
+        seeds: [],
+        bridge: false,
+        address: '127.0.0.1',
+        port: 0,
+        noforward: true
+      });
+      var _setupTunnel = sinon.stub(net, '_setupTunnelClient').callsArg(0);
+      net.join(function() {
+        _setupTunnel.restore();
+        done();
+      });
+    });
+
+  });
+
 });

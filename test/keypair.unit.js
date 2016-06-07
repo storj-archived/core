@@ -53,4 +53,37 @@ describe('KeyPair', function() {
 
   });
 
+  describe('#sign', function() {
+
+    var k = 'd1b1d083ddbcf92aa665a77379a0e32ef7cc5a4ccfc4b2a30214ebcdfd34d846';
+    var m = 'a test message';
+
+    it('should return a bitcoin-style compact signature', function() {
+      var keypair = new KeyPair(k);
+      var signature = keypair.sign(m, { compact: true });
+      expect(signature).to.have.lengthOf(88);
+    });
+
+    it('should return a regular hex signature from string', function() {
+      var keypair = new KeyPair(k);
+      var signature = keypair.sign(m, { compact: false });
+      expect(signature).to.equal(
+        '3045022100fc2cc9dcfa01fef0c8c78942f057f6d2930e9308bd5e43072c56098' +
+        '34d938cad022007f1179aace5810c9c4ba0461980aa2bcdfac6a40a900443b018' +
+        'b09e5ced5e1f'
+      );
+    });
+
+    it('should return a regular hex signature from buffer', function() {
+      var keypair = new KeyPair(k);
+      var signature = keypair.sign(Buffer(m), { compact: false });
+      expect(signature).to.equal(
+        '3045022100fc2cc9dcfa01fef0c8c78942f057f6d2930e9308bd5e43072c56098' +
+        '34d938cad022007f1179aace5810c9c4ba0461980aa2bcdfac6a40a900443b018' +
+        'b09e5ced5e1f'
+      );
+    });
+
+  });
+
 });

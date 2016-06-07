@@ -691,6 +691,24 @@ describe('Network (private)', function() {
       });
     });
 
+    it('should do nothing if no seeds or bridge', function(done) {
+      var net = Network({
+        keypair: KeyPair(),
+        manager: Manager(RAMStorageAdapter()),
+        logger: kad.Logger(0),
+        seeds: [],
+        bridge: false,
+        address: '127.0.0.1',
+        port: 0,
+        noforward: true
+      });
+      var _setupTunnel = sinon.stub(net, '_setupTunnelClient').callsArg(0);
+      net.join(function() {
+        _setupTunnel.restore();
+        done();
+      });
+    });
+
   });
 
 });

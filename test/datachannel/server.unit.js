@@ -181,6 +181,36 @@ describe('DataChannelServer', function() {
       });
     });
 
+    it('should not send data if the connection closes', function(done) {
+      var shard = new EventEmitter();
+      var socket = new EventEmitter();
+      socket.readyState = 3;
+      shard.pause = sinon.stub();
+      shard.removeAllListeners = sinon.stub();
+      var manager = Manager(RAMStorageAdapter());
+      var dcs = DataChannelServer({
+        server: http.createServer(function noop() {}),
+        manager: manager,
+        logger: Logger(0)
+      });
+      var _load = sinon.stub(manager, 'load').callsArgWith(
+        1,
+        null,
+        { shard: shard }
+      );
+      dcs._allowed.token = { hash: 'hash' };
+      dcs._handleRetrieveStream(socket, 'token');
+      setImmediate(function() {
+        _load.restore();
+        shard.emit('data', new Buffer('ohai'));
+        setImmediate(function() {
+          expect(shard.removeAllListeners.called).to.equal(true);
+          expect(dcs._allowed.token).to.equal(undefined);
+          done();
+        });
+      });
+    });
+
   });
 
   describe('#_handleConsignStream', function() {

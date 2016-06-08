@@ -1,6 +1,6 @@
 {
   "name": "storj",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "implementation of the storj protocol for node.js and the browser",
   "main": "index.js",
   "directories": {
@@ -10,7 +10,7 @@
     "bin": "bin"
   },
   "bin": {
-    "storj": "bin/bridgecli.js"
+    "storj": "bin/storj.js"
   },
   "scripts": {
     "test": "npm run testsuite && npm run linter",

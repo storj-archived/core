@@ -16,5 +16,8 @@
   },
   "renting-data": {
     "title": "Renting Data to the Network"
+  },
+  "command-line-interface": {
+    "title": "Using the Command Line Tools"
   }
 }

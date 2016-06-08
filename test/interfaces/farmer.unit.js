@@ -47,6 +47,22 @@ describe('FarmerInterface', function() {
 
   });
 
+  describe('#_addContractToPendingList', function() {
+
+    it('should not add duplicates to the list', function() {
+      var ctx = { _pendingOffers: [] };
+      var _test = FarmerInterface.prototype._addContractToPendingList.bind(ctx);
+      var fakeContract = {
+        get: sinon.stub().returns('test')
+      };
+      _test(fakeContract);
+      expect(ctx._pendingOffers).to.have.lengthOf(1);
+      _test(fakeContract);
+      expect(ctx._pendingOffers).to.have.lengthOf(1);
+    });
+
+  });
+
   describe('#_negotiateContract', function() {
 
     it('should ask network for renter if not locally known', function(done) {

@@ -1,4 +1,4 @@
-[![Storj](https://avatars3.githubusercontent.com/u/6308081?v=3&s=200)](http://storj.github.io/core)
+[![Storj](https://nodei.co/npm/storj.png?downloads=true)](http://storj.github.io/core)
 ==============
 
 [![Build Status](https://img.shields.io/travis/Storj/core.svg?style=flat-square)](https://travis-ci.org/Storj/core)

@@ -31,6 +31,13 @@ describe('BridgeClient', function() {
       expect(client).to.be.instanceOf(BridgeClient);
     });
 
+    it('should use the environment variable to set default url', function() {
+      process.env.STORJ_BRIDGE = 'https://staging.api.storj.io';
+      var client = BridgeClient();
+      expect(client._options.baseURI).to.equal('https://staging.api.storj.io');
+      process.env.STORJ_BRIDGE = '';
+    });
+
   });
 
   describe('BridgeClient/Public', function() {

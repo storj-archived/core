@@ -103,13 +103,19 @@ describe('Network (private)', function() {
   describe('#_verifyMessage', function() {
 
     it('should fail if incompatible version', function(done) {
-      var verify = Network.prototype._verifyMessage;
+      var _removeContact = sinon.stub();
+      var verify = Network.prototype._verifyMessage.bind({
+        _router: {
+          removeContact: _removeContact
+        }
+      });
 
       verify({}, {
         protocol: '0.0.0',
         address: '127.0.0.1',
         port: 6000
       }, function(err) {
+        expect(_removeContact.called).to.equal(true);
         expect(err.message).to.equal('Protocol version is incompatible');
         done();
       });

@@ -54,7 +54,7 @@
 			<li class="dropdown">
 				<a href="tutorials.list.html" class="dropdown-toggle" data-toggle="dropdown">Tutorials<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="tutorial-contract-topics.html">Publishing Storage Contracts</a></li><li><a href="tutorial-data-channels.html">Transferring File Shards</a></li><li><a href="tutorial-private-testnet.html">Running a Test Network</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li><li><a href="tutorial-renting-data.html">Renting Data to the Network</a></li><li><a href="tutorial-tunnel-connections.html">Tunnelling Connections</a></li>
+					<li><a href="tutorial-command-line-interface.html">Using the Command Line Tools</a></li><li><a href="tutorial-contract-topics.html">Publishing Storage Contracts</a></li><li><a href="tutorial-data-channels.html">Transferring File Shards</a></li><li><a href="tutorial-environment-variables.html">Environment Variables</a></li><li><a href="tutorial-private-testnet.html">Running a Test Network</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li><li><a href="tutorial-renting-data.html">Renting Data to the Network</a></li><li><a href="tutorial-tunnel-connections.html">Tunnelling Connections</a></li>
 				</ul>
 			</li>
 			
@@ -285,9 +285,13 @@ FarmerInterface.prototype._shouldSendOffer = function(contract) {
  * @param {Contract} contract - The contract being negotiated
  */
 FarmerInterface.prototype._addContractToPendingList = function(contract) {
-  this._pendingOffers.push(
-    contract.get('data_hash') + contract.get('renter_id')
-  );
+  var id = contract.get('data_hash') + contract.get('renter_id');
+
+  if (this._pendingOffers.indexOf(id) !== -1) {
+    return 0;
+  }
+
+  return this._pendingOffers.push(id);
 };
 
 /**

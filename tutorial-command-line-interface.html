@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>StorjCORE Source: lib/storage/adapters/level/index.js</title>
+	<title>StorjCORE Tutorial: Using the Command Line Tools</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -82,209 +82,72 @@
 	<div class="col-md-12">
 	
 		<div id="main">
-			
+			<section class="tutorial-section">
 
-		<h1 class="page-title">Source: lib/storage/adapters/level/index.js</h1>
+<header>
     
-<section>
-    <article>
-        <pre
-            class="sunlight-highlight-javascript ">'use strict';
 
-var inherits = require('util').inherits;
-var StorageAdapter = require('../../adapter');
-var StorageItem = require('../../item');
-var levelup = require('levelup');
-var LevelDBFileStore = require('./filestore');
-var merge = require('merge');
-var fs = require('fs');
-var path = require('path');
+    <h2>Using the Command Line Tools</h2>
+</header>
 
-/**
- * Implements an LevelDB storage adapter interface
- * @extends {StorageAdapter}
- * @param {String} path - Path to store the level db
- * @param {Function} backend - Optional backend override for levelup
- * @constructor
- */
-function LevelDBStorageAdapter(path, backend) {
-  if (!(this instanceof LevelDBStorageAdapter)) {
-    return new LevelDBStorageAdapter(path, backend);
-  }
+<article>
+    <p>This package comes equipped with a command line interface for performing a
+number of useful operations on the Storj network. The CLI program is generally
+focused on interacting with a remote <a href="https://github.com/Storj/bridge">Bridge</a>
+service and makes use of the library's <a href="BridgeClient.html">BridgeClient</a> class to do so. In
+addition to interacting with a bridge node, the tool also exposes some general
+purpose utilities.</p>
+<p>To use the CLI, follow the instructions in the README to install the module
+<strong>globally</strong> or if you are working from within the git repository, you can use:</p>
+<pre class="prettyprint source"><code>npm link</code></pre><h3>Communicating with a Bridge</h3><p>Once you have access to the <code>storj</code> command, register and authenticate with the
+bridge:</p>
+<pre class="prettyprint source"><code>> $ storj register
+ [...]  > Enter your email address  >  gordon@storj.io
+ [...]  > Enter your password  >  *************
 
-  this._db = levelup(path, { db: backend });
-  this._fs = new LevelDBFileStore(this._db);
-  this._isUsingDefaultBackend = !backend;
-  this._path = path;
-}
+ [info]   Registered! Check your email to activate your account.</code></pre><p>Follow the activation link you receive via email and come back to the CLI to
+pair with your account:</p>
+<pre class="prettyprint source"><code>> $ storj login
+ [...]  > Enter your email address  >  gordon@storj.io
+ [...]  > Enter your password  >  *************
 
-inherits(LevelDBStorageAdapter, StorageAdapter);
+ [info]   This device has been successfully paired.</code></pre><p>Now you can create buckets, transfer files, and manage your bridge account.</p>
+<h3>Audits, Proofs, and Verifications</h3><p>The CLI also includes some utility commands for generating file possession
+audits, proving possession, and verifying proofs. You can generate a challenge
+set and merkle tree for a file easily:</p>
+<pre class="prettyprint source"><code>> $ storj prepare-audits 2 CONTRIBUTING.md
+ [info]   Generating challenges and merkle tree...
+ [info]
+ [info]   Merke Root
+ [info]   ----------
+ [info]   9c8c37935f58d46e3301efe4f44724b8785a81a5
+ [info]
+ [info]   Challenges
+ [info]   ----------
+ [info]   c8573773616e072230d40131e7ce8537d384825e337e5903ff7367ddea798c52
+ [info]   7c4d4f57f40d5c95f962e7cd72347e4077e1885aaffd8c1ccbbd02c8d7c48dce
+ [info]
+ [info]   Merkle Leaves
+ [info]   -------------
+ [info]   aaf42766d87a37e6dffbae7172fd0073006bf5f3
+ [info]   ccee086dbc8a16b93b79912cb37f3b037bbf8269</code></pre><p>A farmer can use parts of this data to prove possession of a file shard:</p>
+<pre class="prettyprint source"><code>> $ storj prove-file aaf42766d87a37e6dffbae7172fd0073006bf5f3,ccee086dbc8a16b93b79912cb37f3b037bbf8269 c8573773616e072230d40131e7ce8537d384825e337e5903ff7367ddea798c52 CONTRIBUTING.md
+ [info]   Generating proof of possession...
+ [info]
+ [info]   Challenge Response
+ [info]   ------------------
+ [info]   [[&quot;153a0d4b1d228043992fec585cadb51974b053f7&quot;],&quot;ccee086dbc8a16b93b79912cb37f3b037bbf8269&quot;]</code></pre><p>The result of this operation can be used by the original renter to verify the
+the proof and confirm that the farmer still has possession of the file:</p>
+<pre class="prettyprint source"><code>> $ storj verify-proof 9c8c37935f58d46e3301efe4f44724b8785a81a5 2 '[[&quot;153a0d4b1d228043992fec585cadb51974b053f7&quot;],&quot;ccee086dbc8a16b93b79912cb37f3b037bbf8269&quot;]'
+ [info]
+ [info]   Expected: 9c8c37935f58d46e3301efe4f44724b8785a81a5
+ [info]   Actual:   9c8c37935f58d46e3301efe4f44724b8785a81a5
+ [info]
+ [info]   The proof response is valid</code></pre><p>For more detailed usage information of the command line interface, run
+<code>storj --help</code>.</p>
+</article>
 
-/**
- * Implements the abstract {@link StorageAdapter#_get}
- * @private
- * @param {String} key
- * @param {Function} callback
- */
-LevelDBStorageAdapter.prototype._get = function(key, callback) {
-  var self = this;
-
-  this._db.get(key + '.info', { fillCache: false }, function(err, value) {
-    if (err) {
-      return callback(err);
-    }
-
-    var result = new StorageItem(JSON.parse(value));
-
-    self._fs.exists(key + '.data', function(exists) {
-      if (exists) {
-        result.shard = self._fs.createReadStream(key + '.data');
-      } else {
-        result.shard = self._fs.createWriteStream(key + '.data');
-      }
-
-      callback(null, result);
-    });
-  });
-};
-
-/**
- * Implements the abstract {@link StorageAdapter#_peek}
- * @private
- * @param {String} key
- * @param {Function} callback
- */
-LevelDBStorageAdapter.prototype._peek = function(key, callback) {
-  this._db.get(key + '.info', { fillCache: false }, function(err, value) {
-    if (err) {
-      return callback(err);
-    }
-
-    callback(null, new StorageItem(JSON.parse(value)));
-  });
-};
-
-/**
- * Implements the abstract {@link StorageAdapter#_put}
- * @private
- * @param {String} key
- * @param {StorageItem} item
- * @param {Function} callback
- */
-LevelDBStorageAdapter.prototype._put = function(key, item, callback) {
-  var self = this;
-
-  item.shard = null; // NB: Don't store any shard data here
-
-  this._db.get(key + '.info', { fillCache: false }, function(err, existing) {
-    if (err) {
-      existing = JSON.stringify({});
-    }
-
-    var plain = JSON.parse(JSON.stringify(item));
-    var value = merge.recursive(JSON.parse(existing), plain);
-
-    self._db.put(key + '.info', JSON.stringify(value), {
-      sync: true
-    }, function(err) {
-      if (err) {
-        return callback(err);
-      }
-
-      callback(null);
-    });
-  });
-};
-
-/**
- * Implements the abstract {@link StorageAdapter#_del}
- * @private
- * @param {String} key
- * @param {Function} callback
- */
-LevelDBStorageAdapter.prototype._del = function(key, callback) {
-  var self = this;
-
-  this._db.del(key + '.info', function(err) {
-    if (err) {
-      return callback(err);
-    }
-
-    self._fs.reset(key + '.data', function(err) {
-      if (err) {
-        return callback(err);
-      }
-
-      callback(null);
-    });
-  });
-};
-
-/**
- * Implements the abstract {@link StorageAdapter#_size}
- * @private
- * @param {Function} callback
- */
-LevelDBStorageAdapter.prototype._size = function(callback) {
-  var self = this;
-  var size = 0;
-
-  if (!this._isUsingDefaultBackend) {
-    // NB: We can't calculate for every possible backend, so return 0 and
-    // NB: let implementors extend this class to provide the real value.
-    return callback(null, size);
-  }
-
-  // NB: This operation is actually synchronous, but given that LevelDB compacts
-  // NB: files into levels, the cost of executing `stat` on just a handful of
-  // NB: files should be negligble.
-  try {
-    size = fs.readdirSync(this._path).map(function(filePath) {
-      return fs.statSync(path.join(self._path, filePath));
-    }).reduce(function(statsA, statsB) {
-      return { size: statsA.size + statsB.size };
-    }, { size: 0 }).size;
-  } catch (err) {
-    return callback(err);
-  }
-
-  callback(null, size);
-};
-
-/**
- * Implements the abstract {@link StorageAdapter#_keys}
- * @private
- * @param {Function} callback
- */
-LevelDBStorageAdapter.prototype._keys = function(callback) {
-  var keys = [];
-  var stream = this._db.createKeyStream();
-
-  stream.on('data', function(key) {
-    var parts = key.split('.');
-    var name = parts[0];
-    var ext = parts[1];
-
-    if (ext === 'info') {
-      keys.push(name);
-    }
-  });
-
-  stream.on('end', function() {
-    callback(null, keys);
-  });
-
-  stream.on('error', callback);
-};
-
-module.exports = LevelDBStorageAdapter;
-</pre>
-    </article>
 </section>
-
-
-
-
 
 		</div>
 	</div>

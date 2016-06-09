@@ -54,7 +54,7 @@
 			<li class="dropdown">
 				<a href="tutorials.list.html" class="dropdown-toggle" data-toggle="dropdown">Tutorials<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="tutorial-contract-topics.html">Publishing Storage Contracts</a></li><li><a href="tutorial-data-channels.html">Transferring File Shards</a></li><li><a href="tutorial-private-testnet.html">Running a Test Network</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li><li><a href="tutorial-renting-data.html">Renting Data to the Network</a></li><li><a href="tutorial-tunnel-connections.html">Tunnelling Connections</a></li>
+					<li><a href="tutorial-command-line-interface.html">Using the Command Line Tools</a></li><li><a href="tutorial-contract-topics.html">Publishing Storage Contracts</a></li><li><a href="tutorial-data-channels.html">Transferring File Shards</a></li><li><a href="tutorial-environment-variables.html">Environment Variables</a></li><li><a href="tutorial-private-testnet.html">Running a Test Network</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li><li><a href="tutorial-renting-data.html">Renting Data to the Network</a></li><li><a href="tutorial-tunnel-connections.html">Tunnelling Connections</a></li>
 				</ul>
 			</li>
 			
@@ -972,7 +972,7 @@ successfully establishing a connection to the network
             
 <hr>
 <dt>
-    <h4 class="name" id="publish"><span class="type-signature"></span>publish(topic, contents)</h4>
+    <h4 class="name" id="publish"><span class="type-signature"></span>publish(topic, contents, options)</h4>
     
     
 </dt>
@@ -1057,6 +1057,30 @@ successfully establishing a connection to the network
             
 
             <td class="description last">Arbitrary publication contents</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Options to pass to kad-quasar</td>
         </tr>
 
     

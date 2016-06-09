@@ -54,7 +54,7 @@
 			<li class="dropdown">
 				<a href="tutorials.list.html" class="dropdown-toggle" data-toggle="dropdown">Tutorials<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="tutorial-contract-topics.html">Publishing Storage Contracts</a></li><li><a href="tutorial-data-channels.html">Transferring File Shards</a></li><li><a href="tutorial-private-testnet.html">Running a Test Network</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li><li><a href="tutorial-renting-data.html">Renting Data to the Network</a></li><li><a href="tutorial-tunnel-connections.html">Tunnelling Connections</a></li>
+					<li><a href="tutorial-command-line-interface.html">Using the Command Line Tools</a></li><li><a href="tutorial-contract-topics.html">Publishing Storage Contracts</a></li><li><a href="tutorial-data-channels.html">Transferring File Shards</a></li><li><a href="tutorial-environment-variables.html">Environment Variables</a></li><li><a href="tutorial-private-testnet.html">Running a Test Network</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li><li><a href="tutorial-renting-data.html">Renting Data to the Network</a></li><li><a href="tutorial-tunnel-connections.html">Tunnelling Connections</a></li>
 				</ul>
 			</li>
 			
@@ -290,9 +290,10 @@ Network.prototype.leave = function(callback) {
  * Publishes a topic with content to the network
  * @param {String} topic - The serialized opcode topic
  * @param {Object} contents - Arbitrary publication contents
+ * @param {Object} options - Options to pass to kad-quasar
  */
-Network.prototype.publish = function(topic, contents) {
-  return this._pubsub.publish(topic, contents);
+Network.prototype.publish = function(topic, contents, options) {
+  return this._pubsub.publish(topic, contents, options);
 };
 
 /**
@@ -431,6 +432,7 @@ Network.prototype._signMessage = function(message, callback) {
  */
 Network.prototype._verifyMessage = function(message, contact, callback) {
   if (!utils.isCompatibleVersion(contact.protocol)) {
+    this._router.removeContact(contact);
     return callback(new Error('Protocol version is incompatible'));
   }
 

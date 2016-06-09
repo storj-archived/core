@@ -338,7 +338,7 @@ var ACTIONS = {
 
     var secret = new storj.DataCipherKeyIv();
     var encrypter = new storj.EncryptStream(secret);
-    var tmppath = path.join(os.tmpdir(), path.basename(filepath));
+    var tmppath = path.join(os.tmpdir(), path.basename(filepath) + '.crypt');
 
     function cleanup() {
       log('info', 'Cleaning up...');

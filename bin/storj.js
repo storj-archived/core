@@ -674,8 +674,8 @@ var ACTIONS = {
 
     auditgen.on('finish', function() {
       log('info', '');
-      log('info', 'Merke Root');
-      log('info', '----------');
+      log('info', 'Merkle Root');
+      log('info', '-----------');
       log('info', auditgen.getPrivateRecord().root);
       log('info', '');
       log('info', 'Challenges');

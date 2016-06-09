@@ -35,6 +35,9 @@ node_modules
 # Ignore compiled docs, but leave the directory
 jsdoc
 
+# Ignore swp files from the beloved vim
+*.swp
+
 # Ignore browser build, but leave the directory
 dist/**
 !dist/.gitkeep

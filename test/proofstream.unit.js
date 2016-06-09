@@ -4,6 +4,7 @@ var expect = require('chai').expect;
 var AuditStream = require('../lib/auditstream');
 var ProofStream = require('../lib/proofstream');
 var utils = require('../lib/utils');
+var sinon = require('sinon');
 
 describe('Proof', function() {
 
@@ -29,6 +30,22 @@ describe('Proof', function() {
         leaves.splice(12).forEach(function(leaf) {
           expect(leaf).to.equal(utils.rmd160sha256(''));
         });
+      });
+    });
+
+  });
+
+  describe('#_flush', function() {
+
+    it('should emit an error if generate proof fails', function(done) {
+      var proof = ProofStream([], 'challenge');
+      var _generateProof = sinon.stub(proof, '_generateProof').throws(
+        new Error('Failed')
+      );
+      proof._flush(function(err) {
+        _generateProof.restore();
+        expect(err.message).to.equal('Failed');
+        done();
       });
     });
 

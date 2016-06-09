@@ -17,7 +17,7 @@ before(function(done) {
     fs.unlinkSync(filePathEven);
   }
 
-  var randomEven = noisegen({ length: 1024 * 1024 * 16 });
+  var randomEven = noisegen({ length: 1024 * 1024 * 8 });
   var tmpfile = fs.createWriteStream(filePathEven);
 
   tmpfile.on('finish', function() {
@@ -25,7 +25,7 @@ before(function(done) {
       fs.unlinkSync(filePathOdd);
     }
 
-    var randomOdd = noisegen({ length: (1024 * 1024 * 8) + 512 });
+    var randomOdd = noisegen({ length: (1024 * 1024 * 16) + 512 });
     var tmpfile = fs.createWriteStream(filePathOdd);
 
     tmpfile.on('finish', done);
@@ -54,20 +54,19 @@ describe('FileDemuxer', function() {
       this.timeout(6000);
       var dmx = new FileDemuxer(filePathEven);
       var shards = 0;
+      var bytes = 0;
 
       dmx.on('shard', function(shard) {
         shards++;
         expect(shard).to.be.instanceOf(stream.Readable);
-        var bytes = 0;
         shard.on('data', function(data) {
           bytes += data.length;
         });
-        shard.on('end', function() {
-          expect(bytes).to.equal(FileDemuxer.DEFAULTS.shardSize);
-          if (shards === 2) {
-            done();
-          }
-        });
+      });
+
+      dmx.on('finish', function() {
+        expect(bytes).to.equal(1024 * 1024 * 8);
+        done();
       });
     });
 
@@ -77,43 +76,21 @@ describe('FileDemuxer', function() {
       var shards = 0;
 
       dmx.on('shard', function(shard) {
-        shards++;
         expect(shard).to.be.instanceOf(stream.Readable);
         var bytes = 0;
         shard.on('data', function(data) {
           bytes += data.length;
         });
         shard.on('end', function() {
+          shards++;
           if (shards === 1) {
             expect(bytes).to.equal(FileDemuxer.DEFAULTS.shardSize);
-          } else if (shards === 2) {
+          } else if (shards === 3) {
             expect(bytes).to.equal(512);
             done();
           }
         });
       });
-    });
-
-  });
-
-  describe('#_closeFinalShard', function() {
-
-    it('should close the current output if null is passed', function(done) {
-      var dmx = new FileDemuxer(filePathEven);
-      dmx.on('finish', done);
-      dmx._closeFinalShard(null);
-    });
-
-  });
-
-  describe('#_checkShardPosition', function() {
-
-    it('should do nothing if size not equal to position', function() {
-      var dmx = new FileDemuxer(filePathEven);
-      dmx._shardPosition = 1;
-      dmx._shardSize = 2;
-      dmx._checkShardPosition();
-      expect(dmx._shardPosition).to.equal(1);
     });
 
   });

@@ -338,7 +338,7 @@ var ACTIONS = {
 
     var secret = new storj.DataCipherKeyIv();
     var encrypter = new storj.EncryptStream(secret);
-    var tmppath = path.join(os.tmpdir(), path.basename(filepath));
+    var tmppath = path.join(os.tmpdir(), path.basename(filepath) + '.crypt');
 
     function cleanup() {
       log('info', 'Cleaning up...');
@@ -625,10 +625,130 @@ var ACTIONS = {
         return log('error', err.message);
       }
 
-      log('info', 'Contact:   ' + storj.utils.getContactURL(contact));
-      log('info', 'Last Seen: ' + contact.lastSeen);
-      log('info', 'Protocol:  ' + (contact.protocol || '?'));
+      log('info', 'Contact:   %s', [storj.utils.getContactURL(contact)]);
+      log('info', 'Last Seen: %s', [contact.lastSeen]);
+      log('info', 'Protocol:  %s', [(contact.protocol || '?')]);
     });
+  },
+  generatekey: function generatekey() {
+    var keypair = storj.KeyPair();
+
+    log('info', 'Private: %s', [keypair.getPrivateKey()]);
+    log('info', 'Public:  %s', [keypair.getPublicKey()]);
+    log('info', 'NodeID:  %s', [keypair.getNodeID()]);
+    log('info', 'Address: %s', [keypair.getAddress()]);
+  },
+  signmessage: function signmessage(privatekey, message) {
+    var keypair;
+    var signature;
+
+    try {
+      keypair = storj.KeyPair(privatekey);
+    } catch (err) {
+      return log('error', 'Invalid private key supplied');
+    }
+
+    try {
+      signature = keypair.sign(message, { compact: this.compact });
+    } catch (err) {
+      return log('error', 'Failed to sign message, reason: %s', [err.message]);
+    }
+
+    log('info', 'Signature (%s): %s', [
+      this.compact ? 'compact' : 'complete',
+      signature
+    ]);
+  },
+  prepareaudits: function prepareaudits(num, filepath) {
+    var auditgen;
+    var input;
+
+    try {
+      auditgen = storj.AuditStream(Number(num));
+      input = fs.createReadStream(filepath);
+    } catch (err) {
+      return log('error', err.message);
+    }
+
+    log('info', 'Generating challenges and merkle tree...');
+
+    auditgen.on('finish', function() {
+      log('info', '');
+      log('info', 'Merke Root');
+      log('info', '----------');
+      log('info', auditgen.getPrivateRecord().root);
+      log('info', '');
+      log('info', 'Challenges');
+      log('info', '----------');
+      auditgen.getPrivateRecord().challenges.forEach(function(chal) {
+        log('info', chal);
+      });
+      log('info', '');
+      log('info', 'Merkle Leaves');
+      log('info', '-------------');
+      auditgen.getPublicRecord().forEach(function(leaf) {
+        log('info', leaf);
+      });
+    });
+
+    auditgen.on('error', function(err) {
+      log('error', err.message);
+    });
+
+    input.pipe(auditgen);
+  },
+  provefile: function provefile(leaves, challenge, filepath) {
+    var proofgen;
+    var input;
+    var tree = leaves.split(',');
+
+    try {
+      proofgen = storj.ProofStream(tree, challenge);
+      input = fs.createReadStream(filepath);
+    } catch (err) {
+      return log('error', err.message);
+    }
+
+    log('info', 'Generating proof of possession...');
+
+    proofgen.once('data', function(result) {
+      log('info', '');
+      log('info', 'Challenge Response');
+      log('info', '------------------');
+      log('info', JSON.stringify(result));
+    });
+
+    proofgen.on('error', function(err) {
+      log('error', err.message);
+    });
+
+    input.pipe(proofgen);
+  },
+  verifyproof: function verifyproof(root, depth, resp) {
+    var verifier;
+    var result;
+
+    log('info', 'Verfifying proof response...');
+
+    try {
+      verifier = storj.Verification(JSON.parse(resp));
+      result = verifier.verify(root, Number(depth));
+    } catch (err) {
+      return log('error', err.message);
+    }
+
+    (function() {
+      log('info', '');
+      log('info', 'Expected: %s', [result[1]]);
+      log('info', 'Actual:   %s', [result[0]]);
+      log('info', '');
+    })();
+
+    if (result[0] === result[1]) {
+      log('info', 'The proof response is valid');
+    } else {
+      log('error', 'The proof response is not valid');
+    }
   },
   fallthrough: function(command) {
     log(
@@ -641,7 +761,7 @@ var ACTIONS = {
 };
 
 program
-  .command('getinfo')
+  .command('get-info')
   .description('get remote api information')
   .action(ACTIONS.getinfo);
 
@@ -661,115 +781,141 @@ program
   .action(ACTIONS.logout);
 
 program
-  .command('listkeys')
+  .command('list-keys')
   .description('list your registered public keys')
   .action(ACTIONS.listkeys);
 
 program
-  .command('addkey <pubkey>')
+  .command('add-key <pubkey>')
   .description('register the given public key')
   .action(ACTIONS.addkey);
 
 program
-  .command('removekey <pubkey>')
+  .command('remove-key <pubkey>')
   .description('invalidates the registered public key')
   .action(ACTIONS.removekey);
 
 program
-  .command('listbuckets')
+  .command('list-buckets')
   .description('list your storage buckets')
   .action(ACTIONS.listbuckets);
 
 program
-  .command('getbucket <id>')
+  .command('get-bucket <id>')
   .description('get specific storage bucket information')
   .action(ACTIONS.getbucket);
 
 program
-  .command('addbucket [name] [storage] [transfer]')
+  .command('add-bucket [name] [storage] [transfer]')
   .description('create a new storage bucket')
   .action(ACTIONS.addbucket);
 
 program
-  .command('removebucket <id>')
+  .command('remove-bucket <id>')
   .description('destroys a specific storage bucket')
   .action(ACTIONS.removebucket);
 
 program
-  .command('updatebucket <id> [name] [storage] [transfer]')
+  .command('update-bucket <id> [name] [storage] [transfer]')
   .description('updates a specific storage bucket')
   .action(ACTIONS.updatebucket);
 
 program
-  .command('addframe')
+  .command('add-frame')
   .description('creates a new file staging frame')
   .action(ACTIONS.addframe);
 
 program
-  .command('listframes')
+  .command('list-frames')
   .description('lists your file staging frames')
   .action(ACTIONS.listframes);
 
 program
-  .command('getframe <id>')
+  .command('get-frame <id>')
   .description('retreives the file staging frame by id')
   .action(ACTIONS.getframe);
 
 program
-  .command('removeframe <id>')
+  .command('remove-frame <id>')
   .description('removes the file staging frame by id')
   .action(ACTIONS.removeframe);
 
 program
-  .command('listfiles <bucket>')
+  .command('list-files <bucket>')
   .description('list the files in a specific storage bucket')
   .action(ACTIONS.listfiles);
 
 program
-  .command('removefile <bucket> <id>')
+  .command('remove-file <bucket> <id>')
   .description('delete a file pointer from a specific bucket')
   .action(ACTIONS.removefile);
 
 program
-  .command('uploadfile <bucket> <filepath>')
+  .command('upload-file <bucket> <filepath>')
   .description('upload a file to the network and track in a bucket')
   .action(ACTIONS.uploadfile);
 
 program
-  .command('downloadfile <bucket> <id> <filepath>')
+  .command('download-file <bucket> <id> <filepath>')
   .description('download a file from the network with a pointer from a bucket')
   .action(ACTIONS.downloadfile);
 
 program
-  .command('streamfile <bucket> <id>')
+  .command('stream-file <bucket> <id>')
   .description('stream a file from the network and write to stdout')
   .action(ACTIONS.streamfile);
 
 program
-  .command('getpointer <bucket> <id>')
+  .command('get-pointer <bucket> <id>')
   .description('get pointer metadata for a file in a bucket')
   .action(ACTIONS.getpointer);
 
 program
-  .command('createtoken <bucket> <operation>')
+  .command('create-token <bucket> <operation>')
   .description('create a push or pull token for a file')
   .action(ACTIONS.getfile);
 
 program
-  .command('listcontacts [page]')
+  .command('list-contacts [page]')
   .option('-c, --connected', 'limit results to connected nodes')
   .description('list the peers known to the remote bridge')
   .action(ACTIONS.listcontacts);
 
 program
-  .command('getcontact <nodeid>')
+  .command('get-contact <nodeid>')
   .description('get the contact information for a given node id')
   .action(ACTIONS.getcontact);
 
 program
-  .command('resetkeyring')
+  .command('reset-keyring')
   .description('reset the keyring password')
   .action(ACTIONS.resetkeyring);
+
+program
+  .command('generate-key')
+  .description('generate a new ecdsa key pair and print it')
+  .action(ACTIONS.generatekey);
+
+program
+  .command('sign-message <privatekey> <message>')
+  .option('-c, --compact', 'use bitcoin-style compact signature')
+  .description('signs the message using the supplied private key')
+  .action(ACTIONS.signmessage);
+
+program
+  .command('prepare-audits <total> <filepath>')
+  .description('generates a series of challenges used to prove file possession')
+  .action(ACTIONS.prepareaudits);
+
+program
+  .command('prove-file <merkleleaves> <challenge> <filepath>')
+  .description('generates a proof from the comma-delimited tree and challenge')
+  .action(ACTIONS.provefile);
+
+program
+  .command('verify-proof <root> <depth> <proof>')
+  .description('verifies the proof response given the merkle root and depth')
+  .action(ACTIONS.verifyproof);
 
 program
   .command('*')

@@ -5,7 +5,7 @@ behavior of the core library and associated tooling.
 
 This value will be postfixed to your announced protocol version in the network.
 A value of `testnet` would advertise to the network you are running
-`0.7.0-staging`, which will isolate you to other nodes running the same exact
+`0.7.0-testnet`, which will isolate you to other nodes running the same exact
 version. See {@tutorial private-testnet} for more information.
 
 #### `STORJ_ALLOW_LOOPBACK`

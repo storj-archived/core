@@ -557,17 +557,17 @@ var ACTIONS = {
           id,
           function(err, pointer) {
             if (err) {
-              return process.stderr.write(err.message);
+              return console.error(err.message);
             }
 
             PrivateClient().resolveFileFromPointers(
               pointer,
               function(err, stream) {
                 if (err) {
-                  return process.stderr.write(err.message);
+                  return console.error(err.message);
                 }
 
-                stream.pipe(decrypter).pipe(process.stdout);
+                stream.pipe(decrypter).pipe(console.log);
               }
             );
           }

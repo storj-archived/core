@@ -375,7 +375,7 @@ describe('Network (private)', function() {
 
   describe('#_setupTunnelClient', function() {
 
-    it('should callback error if no seed provided', function(done) {
+    it('should callback error if no seed or bridge provided', function(done) {
       var net = Network({
         keypair: KeyPair(),
         manager: Manager(RAMStorageAdapter()),
@@ -383,7 +383,8 @@ describe('Network (private)', function() {
         seeds: [],
         address: '127.0.0.1',
         port: 0,
-        noforward: true
+        noforward: true,
+        bridge: false
       });
       net._transport._isPublic = false;
       net._setupTunnelClient(function(err) {
@@ -393,6 +394,56 @@ describe('Network (private)', function() {
         done();
       });
     });
+
+    it('should use the bridge seed for probe in none provided', function(done) {
+      var net = Network({
+        keypair: KeyPair(),
+        manager: Manager(RAMStorageAdapter()),
+        logger: kad.Logger(0),
+        seeds: [],
+        address: '127.0.0.1',
+        port: 0,
+        noforward: true
+      });
+      var _bridge = sinon.stub(net._bridge, 'getInfo').callsArgWith(0, null, {
+        info: {
+          'x-network-seeds': [
+            'storj://127.0.0.1:8080/' + utils.rmd160('nodeid')
+          ]
+        }
+      });
+      var _probe = sinon.stub(net, '_requestProbe').callsArgWith(1, null, {});
+      net._transport._isPublic = false;
+      net._setupTunnelClient(function() {
+        _bridge.restore();
+        _probe.restore();
+        expect(_probe.called).to.equal(true);
+        done();
+      });
+    });
+
+    it('should use the bridge seed for probe in none provided', function(done) {
+      var net = Network({
+        keypair: KeyPair(),
+        manager: Manager(RAMStorageAdapter()),
+        logger: kad.Logger(0),
+        seeds: [],
+        address: '127.0.0.1',
+        port: 0,
+        noforward: true
+      });
+      var _bridge = sinon.stub(net._bridge, 'getInfo').callsArgWith(
+        0,
+        new Error('Failed')
+      );
+      net._transport._isPublic = false;
+      net._setupTunnelClient(function(err) {
+        _bridge.restore();
+        expect(err.message).to.equal('Failed to get seeds for probe');
+        done();
+      });
+    });
+
 
     it('should try to find a tunnel if probe fails', function(done) {
       var net = Network({

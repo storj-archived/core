@@ -30,6 +30,22 @@ describe('FarmerInterface', function() {
       expect(farmer._handleContractPublication(Contract({}))).to.equal(false);
     });
 
+    it('should not send an offer if the negotiator returns false', function() {
+      var keypair = KeyPair();
+      var farmer = new FarmerInterface({
+        keypair: KeyPair(),
+        port: 0,
+        noforward: true,
+        negotiator: function() {
+          return false;
+        },
+        payment: { address: keypair.getAddress() },
+        logger: kad.Logger(0),
+        backend: require('memdown')
+      });
+      expect(farmer.getPaymentAddress()).to.equal(keypair.getAddress());
+    });
+
     it('should not send an offer if concurrency is exceeded', function() {
       var farmer = new FarmerInterface({
         keypair: KeyPair(),

@@ -113,6 +113,8 @@ var utils = require('../utils');
  * @param {String}   options.storage.path - File system path to store data
  * @param {Number}   options.storage.size - Storage size to allocate
  * @param {String}   options.storage.unit - Storage size unit (MB|GB|TB)
+ * @param {Object}   options.payment
+ * @param {String}   options.payment.address - Optional payment address
  * @param {Array}    options.opcodes - Optional contract opcodes to farm
  * @param {Function} options.backend - Optional levelup backend db
  * @param {Number}   options.concurrency - Max contracts to offer at a time
@@ -157,6 +159,9 @@ FarmerInterface.DEFAULTS = {
     path: '/tmp/storj-farmer',
     size: 5,
     unit: 'MB'
+  },
+  payment: {
+    address: ''
   },
   opcodes: ['0f01020202', '0f02020202', '0f03020202'],
   negotiator: function(/* contract */) {
@@ -217,6 +222,14 @@ FarmerInterface.prototype._sendOfferForContract = function(contract, contact) {
 };
 
 /**
+ * Returns the payment address supplied or the derived one from keypair
+ * @returns {String}
+ */
+FarmerInterface.prototype.getPaymentAddress = function() {
+  return this._options.payment.address || this._keypair.getAddress();
+};
+
+/**
  * Handles a received contract and negotiates storage
  * @private
  * @param {Contract} contract
@@ -225,7 +238,7 @@ FarmerInterface.prototype._negotiateContract = function(contract) {
   var self = this;
 
   contract.set('farmer_id', self._keypair.getNodeID());
-  contract.set('payment_destination', self._keypair.getAddress());
+  contract.set('payment_destination', self.getPaymentAddress());
   contract.sign('farmer', self._keypair.getPrivateKey());
 
   var item = new StorageItem({ hash: contract.get('data_hash') });

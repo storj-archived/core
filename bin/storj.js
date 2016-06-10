@@ -342,7 +342,11 @@ var ACTIONS = {
 
     function cleanup() {
       log('info', 'Cleaning up...');
-      fs.unlinkSync(tmppath);
+      try {
+        fs.unlinkSync(tmppath);
+      } catch (err) {
+        // NOOP
+      }
     }
 
     getKeyRing(function(keyring) {

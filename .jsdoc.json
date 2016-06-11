@@ -3,18 +3,18 @@
     "template": "node_modules/ink-docstrap/template"
   },
   "templates": {
-    "systemName": "StorjCORE",
+    "systemName": "Storj Core",
     "copyright":  "Copyright 2016 Storj Labs",
     "includeDate": false,
     "navType": "vertical",
-    "theme": "cosmo",
+    "theme": "storj",
     "linenums": false,
     "collapseSymbols": false,
     "inverseNav": false,
     "outputSourceFiles": true,
     "outputSourcePath": true,
     "dateFormat": "",
-    "syntaxTheme": "dark",
-    "sort": "longname"
+    "sort": "longname",
+    "syntaxTheme": "default"
   }
 }

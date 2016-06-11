@@ -6923,8 +6923,14 @@ body {
   background-repeat: no-repeat;
   background-position: center center;
   color: transparent !important;
-  margin-right: 20px;
+  margin-right: 30px;
   width: 159px;
+  position: relative;
+  left: 15px;
+}
+.navbar-form {
+  border: 0;
+  padding: 0;
 }
 img.branding-logo {
   max-height: 30px;
@@ -7057,6 +7063,10 @@ blockquote {
   font-size: 12px;
   line-height: 15px;
   padding: 11px 4px !important;
+}
+.hljs {
+  padding: 1em;
+  background: #fff;
 }
 .dropdown-menu {
   overflow-y: auto;

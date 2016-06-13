@@ -351,7 +351,9 @@ describe('FarmerInterface', function() {
 
     it('should return false for invalid contract', function() {
       expect(
-        FarmerInterface.prototype._handleContractPublication({ version: '12' })
+        FarmerInterface.prototype._handleContractPublication.call({
+          _logger: { debug: sinon.stub() }
+        }, { version: '12' })
       ).to.equal(false);
     });
 

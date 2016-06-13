@@ -144,11 +144,7 @@ core components:</p>
 </ul>
 <p>We will start by demultiplexing the file into several shard streams. Let's
 break our file into 6 shards. We will start by creating a <a href="FileDemuxer.html">FileDemuxer</a>:</p>
-<pre class="prettyprint source"><code>var fs = require('fs');
-var demuxer = new storj.FileDemuxer({
-  shards: 6,
-  length: fs.statSync('/path/to/file').size
-});</code></pre><p>Now that we have prepared to shard a file, we need to set up event listeners on
+<pre class="prettyprint source"><code>var demuxer = new storj.FileDemuxer('/path/to/file');</code></pre><p>Now that we have prepared to shard a file, we need to set up event listeners on
 the demuxer for whenever a new shard stream is available. Once a shard stream
 is available, we need to encrypt it and calculate it's hash and size so we can
 create an appropriate <a href="Contract.html">Contract</a> to offer the network. In addition we

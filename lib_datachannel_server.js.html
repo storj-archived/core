@@ -295,9 +295,13 @@ DataChannelServer.prototype._handleConsignStream = function(socket, token) {
 
     passthrough.on('end', function() {
       if (utils.rmd160(hasher.digest('hex')) !== hash) {
+        self._log.warn('Calculated hash does not match the expected result');
+
         socket.close(400, 'Calculated hash does not match the expected result');
         return self.reject(token);
       }
+
+      self._log.debug('Shard upload completed');
 
       item.shard.end();
       self._closeSocketSuccess(socket, 'Consignment completed', token);

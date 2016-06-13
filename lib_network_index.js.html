@@ -340,7 +340,9 @@ Network.prototype._createContact = function(uri) {
 Network.prototype._initNetworkInterface = function() {
   EventEmitter.call(this);
 
-  this._bridge = new BridgeClient(this._options.bridge);
+  this._bridge = new BridgeClient(this._options.bridge, {
+    logger: this._logger
+  });
   this._protocol = new Protocol({ network: this });
   this._contact = new Contact({
     address: this._options.address,

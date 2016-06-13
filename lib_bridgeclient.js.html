@@ -95,6 +95,7 @@
         <pre
             class="sunlight-highlight-javascript ">'use strict';
 
+var assert = require('assert');
 var fs = require('fs');
 var querystring = require('querystring');
 var request = require('request');
@@ -110,6 +111,7 @@ var path = require('path');
 var mime = require('mime');
 var uuid = require('node-uuid');
 var merge = require('merge');
+var kad = require('kad');
 
 /**
  * Represents a client interface to a given bridge server
@@ -118,6 +120,7 @@ var merge = require('merge');
  * @param {String} uri - API base URI ('https://api.storj.io')
  * @param {Object} options
  * @param {KeyPair} options.keypair - KeyPair instance for request signing
+ * @param {Object} options.logger - Logger instance
  * @param {Object} options.basicauth
  * @param {String} options.basicauth.email - Email address for HTTP basic auth
  * @param {String} options.basicauth.password - Password for HTTP basic auth
@@ -127,10 +130,24 @@ function BridgeClient(uri, options) {
     return new BridgeClient(uri, options);
   }
 
-  this._options = merge({
-    baseURI: uri || process.env.STORJ_BRIDGE || 'https://api.storj.io'
-  }, options);
+  this._options = this._checkOptions(uri, options);
+  this._logger = this._options.logger;
 }
+
+/**
+ * Check the options supplied to the constructor
+ * @private
+ */
+BridgeClient.prototype._checkOptions = function(uri, options) {
+  options = merge({
+    baseURI: uri || process.env.STORJ_BRIDGE || 'https://api.storj.io',
+    logger: new kad.Logger(0)
+  }, options);
+
+  assert.ok(utils.validateLogger(options.logger), 'Invalid logger supplied');
+
+  return options;
+};
 
 /**
  * Get the remote Storj Bridge API documentation and version as JSON
@@ -365,6 +382,7 @@ BridgeClient.prototype.storeFileInBucket = function(id, token, file, callback) {
       var hasher = crypto.createHash('sha256');
       var size = 0;
 
+      self._logger.debug('Trying to upload shard %s index %s', tmpName, index);
       cleanMe.push(tmpName);
 
       shardStream.on('data', function(data) {
@@ -379,12 +397,17 @@ BridgeClient.prototype.storeFileInBucket = function(id, token, file, callback) {
 
       tmpFile.on('finish', function() {
         var hash = utils.rmd160(hasher.digest('hex'));
+        self._logger.debug('Hash for this shard is: %s', hash);
+
         var auditGenerator = new AuditStream(3);
         var shardFile = fs.createReadStream(tmpName);
 
         shardFile.pipe(auditGenerator).on('finish', function() {
           var challenges = auditGenerator.getPrivateRecord().challenges;
           var tree = auditGenerator.getPublicRecord();
+
+          self._logger.debug('Audit generation for shard done.');
+          self._logger.debug('Adding shard to file staging frame...');
 
           self.addShardToFileStagingFrame(frame.id, {
             hash: hash,
@@ -394,9 +417,13 @@ BridgeClient.prototype.storeFileInBucket = function(id, token, file, callback) {
             tree: tree
           }, function(err, pointer) {
             if (err) {
+              self._logger.debug('Failed to upload shard...');
               failedToUploadShard = true;
               return callback(err);
             }
+
+            var pointerStr = JSON.stringify(pointer);
+            self._logger.debug('Shard upload done! Pointer: %s', pointerStr);
 
             var shardFile = fs.createReadStream(tmpName);
             var client = new DataChannelClient(Contact(pointer.farmer));

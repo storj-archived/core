@@ -221,6 +221,14 @@ module.exports.createEciesCipher = function(privateKey, publicKey) {
 };
 
 /**
+ * Validates the logger object supplied
+ * @private
+ */
+module.exports.validateLogger = function(logger) {
+  return logger &amp;&amp; logger.debug &amp;&amp; logger.warn &amp;&amp; logger.info &amp;&amp; logger.error;
+};
+
+/**
  * Returns number of bytes from human readable size and unit strings
  * @param {String|Number} size - The size measurement
  * @param {String} unit - The unit of measure (MB|GB|TB)

@@ -157,6 +157,8 @@ Transport.prototype._open = function(callback) {
     return kad.transports.HTTP.prototype._open.call(self, callback);
   }
 
+  self._requiresTraversal = true;
+
   self._log.warn(
     'you are not bound to a public address, trying traversal strategies...'
   );

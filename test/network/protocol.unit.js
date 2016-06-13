@@ -617,7 +617,8 @@ describe('Protocol', function() {
           _logger: Logger(0),
           _contact: {},
           _transport: {
-            _isPublic: false,
+            _requiresTraversal: true,
+            _isPublic: true,
             _tunserver: {
               createGateway: _createGateway,
               getListeningPort: sinon.stub().returns(0)
@@ -652,7 +653,8 @@ describe('Protocol', function() {
           _logger: Logger(0),
           _contact: {},
           _transport: {
-            _isPublic: false,
+            _requiresTraversal: true,
+            _isPublic: true,
             _tunserver: {
               createGateway: _createGateway,
               getListeningPort: sinon.stub().returns(0)

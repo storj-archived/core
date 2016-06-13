@@ -64,11 +64,7 @@ We will start by demultiplexing the file into several shard streams. Let's
 break our file into 6 shards. We will start by creating a {@link FileDemuxer}:
 
 ```
-var fs = require('fs');
-var demuxer = new storj.FileDemuxer({
-  shards: 6,
-  length: fs.statSync('/path/to/file').size
-});
+var demuxer = new storj.FileDemuxer('/path/to/file');
 ```
 
 Now that we have prepared to shard a file, we need to set up event listeners on

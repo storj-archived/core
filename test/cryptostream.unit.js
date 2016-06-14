@@ -19,7 +19,8 @@ describe('node EncryptStream', function() {
     });
 
     it('should create instance without the new keyword', function() {
-      expect(NodeEncryptStream(DataCipherKeyIv())).to.be.instanceOf(NodeEncryptStream);
+      expect(NodeEncryptStream(DataCipherKeyIv()))
+        .to.be.instanceOf(NodeEncryptStream);
     });
 
     it('should throw with an invalid keypair', function() {
@@ -43,7 +44,8 @@ describe('node DecryptStream', function() {
     });
 
     it('should create instance without the new keyword', function() {
-      expect(NodeDecryptStream(DataCipherKeyIv())).to.be.instanceOf(NodeDecryptStream);
+      expect(NodeDecryptStream(DataCipherKeyIv()))
+        .to.be.instanceOf(NodeDecryptStream);
     });
 
     it('should throw with an invalid keypair', function() {

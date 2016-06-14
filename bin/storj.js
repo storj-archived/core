@@ -11,6 +11,7 @@ var colors = require('colors/safe');
 var through = require('through');
 var storj = require('..');
 var os = require('os');
+var tmp = require('tmp');
 
 var HOME = platform !== 'win32' ? process.env.HOME : process.env.USERPROFILE;
 var DATADIR = path.join(HOME, '.storjcli');
@@ -42,6 +43,21 @@ function log(type, message, args) {
   }
 
   console.log.apply(console, [message].concat(args || []));
+}
+
+function makeTempDir(callback) {
+  var opts = {
+    dir: os.tmpdir(),
+    prefix: 'storj-',
+    // 0700.
+    mode: 448,
+    // require manual cleanup.
+    keep: true
+  };
+
+  tmp.dir(opts, function(err, path, cleanupCallback) {
+    callback(err, path, cleanupCallback);
+  });
 }
 
 function loadKeyPair() {
@@ -338,58 +354,70 @@ var ACTIONS = {
 
     var secret = new storj.DataCipherKeyIv();
     var encrypter = new storj.EncryptStream(secret);
-    var tmppath = path.join(os.tmpdir(), path.basename(filepath) + '.crypt');
 
     function cleanup() {
       log('info', 'Cleaning up...');
-      try {
-        fs.unlinkSync(tmppath);
-      } catch (err) {
-        // NOOP
-      }
     }
 
     getKeyRing(function(keyring) {
       log('info', 'Generating encryption key...');
       log('info', 'Encrypting file "%s"', [filepath]);
 
-      fs.createReadStream(filepath)
-        .pipe(encrypter)
-        .pipe(fs.createWriteStream(tmppath)).on('finish', function() {
-          log('info', 'Encryption complete!');
-          log('info', 'Creating storage token...');
-          PrivateClient().createToken(bucket, 'PUSH', function(err, token) {
-            if (err) {
-              log('error', err.message);
-              return cleanup();
-            }
-
-            log('info', 'Storing file, hang tight!');
-
-            PrivateClient().storeFileInBucket(
-              bucket,
-              token.token,
-              tmppath,
-              function(err, file) {
-                if (err) {
-                  log('error', err.message);
-                  return cleanup();
-                }
-
-                keyring.set(file.id, secret);
-                cleanup();
-                log('info', 'Encryption key saved to keyring.');
-                log('info', 'File successfully stored in bucket.');
-                log(
-                  'info',
-                  'Name: %s, Type: %s, Size: %s bytes, ID: %s',
-                  [file.filename, file.mimetype, file.size, file.id]
-                );
-              }
-            );
-          });
+      makeTempDir(function(err, tmpDir, tmpCleanup) {
+        if (err) {
+          return log('error', err.message);
         }
-      );
+
+        var tmppath = path.join(tmpDir, path.basename(filepath) + '.crypt');
+
+        function cleanup() {
+          log('info', 'Cleaning up...');
+          try {
+            fs.unlinkSync(tmppath);
+          } catch (err) {
+            // NOOP
+          }
+          tmpCleanup();
+        }
+
+        fs.createReadStream(filepath)
+          .pipe(encrypter)
+          .pipe(fs.createWriteStream(tmppath)).on('finish', function() {
+            log('info', 'Encryption complete!');
+            log('info', 'Creating storage token...');
+            PrivateClient().createToken(bucket, 'PUSH', function(err, token) {
+              if (err) {
+                log('error', err.message);
+                return cleanup();
+              }
+
+              log('info', 'Storing file, hang tight!');
+
+              PrivateClient().storeFileInBucket(
+                bucket,
+                token.token,
+                tmppath,
+                function(err, file) {
+                  if (err) {
+                    log('error', err.message);
+                    return cleanup();
+                  }
+
+                  keyring.set(file.id, secret);
+                  cleanup();
+                  log('info', 'Encryption key saved to keyring.');
+                  log('info', 'File successfully stored in bucket.');
+                  log(
+                    'info',
+                    'Name: %s, Type: %s, Size: %s bytes, ID: %s',
+                    [file.filename, file.mimetype, file.size, file.id]
+                  );
+                }
+              );
+            });
+          }
+        );
+      });
     });
   },
   getpointer: function getpointer(bucket, id) {

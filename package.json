@@ -42,6 +42,10 @@
     {
       "name": "Philip Hutchins",
       "url": "https://github.com/phutchins"
+    },
+    {
+      "name": "Allen Haim",
+      "url": "https://github.com/misterfish"
     }
   ],
   "license": "AGPL-3.0",
@@ -74,6 +78,7 @@
     "request": "^2.70.0",
     "semver": "^5.1.0",
     "through": "^2.3.8",
+    "tmp": "0.0.28",
     "ws": "^1.0.1"
   },
   "devDependencies": {

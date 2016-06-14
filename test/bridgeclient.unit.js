@@ -124,6 +124,29 @@ describe('BridgeClient', function() {
 
     });
 
+    describe('#destroyUser', function() {
+
+      it('should send the correct args to _request', function(done) {
+        var _request = sinon.stub(BridgeClient.prototype, '_request').callsArg(
+          3,
+          null,
+          {}
+        );
+        var client = new BridgeClient();
+        var data = { email: 'gordon@storj.io' };
+        client.destroyUser(data, function() {
+          _request.restore();
+          expect(_request.calledWithMatch(
+            'DELETE',
+            '/users/gordon@storj.io',
+            { redirect: undefined }
+          )).to.equal(true);
+          done();
+        });
+      });
+
+    });
+
   });
 
   describe('BridgeClient/Keys', function() {

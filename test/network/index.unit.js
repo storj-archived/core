@@ -11,6 +11,7 @@ var kad = require('kad');
 var sinon = require('sinon');
 var version = require('../../lib/version');
 var utils = require('../../lib/utils');
+var version = require('../../lib/version');
 
 describe('Network (public)', function() {
 
@@ -100,6 +101,30 @@ describe('Network (public)', function() {
 
 describe('Network (private)', function() {
 
+  describe('#_validateContact', function() {
+
+
+    it('should return an error if the contact is invalid', function(done) {
+      var _removeContact = sinon.stub();
+      var _validateContact = Network.prototype._validateContact.bind({
+        _router: {
+          removeContact: _removeContact
+        }
+      });
+      _validateContact({
+        address: '127.0.0.1',
+        port: 0,
+        nodeID: utils.rmd160('nodeid'),
+        protocol: version.protocol
+      }, function(err) {
+        expect(err.message).to.equal('Invalid contact data supplied');
+        expect(_removeContact.called).to.equal(true);
+        done();
+      });
+    });
+
+  });
+
   describe('#_verifyMessage', function() {
 
     it('should fail if incompatible version', function(done) {
@@ -107,7 +132,8 @@ describe('Network (private)', function() {
       var verify = Network.prototype._verifyMessage.bind({
         _router: {
           removeContact: _removeContact
-        }
+        },
+        _validateContact: Network.prototype._validateContact
       });
 
       verify({}, {
@@ -122,7 +148,9 @@ describe('Network (private)', function() {
     });
 
     it('should fail if nonce is expired', function(done) {
-      var verify = Network.prototype._verifyMessage;
+      var verify = Network.prototype._verifyMessage.bind({
+        _validateContact: Network.prototype._validateContact
+      });
 
       verify({
         method: 'PING',

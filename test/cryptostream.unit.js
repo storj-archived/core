@@ -2,26 +2,30 @@
 
 var expect = require('chai').expect;
 var DataCipherKeyIv = require('../lib/cipherkeyiv');
-var EncryptStream = require('../lib/cryptostream/encrypt');
-var DecryptStream = require('../lib/cryptostream/decrypt');
+var NodeEncryptStream = require('../lib/cryptostream/node/encrypt');
+var NodeDecryptStream = require('../lib/cryptostream/node/decrypt');
+var BrowserEncryptStream = require('../lib/cryptostream/browser/encrypt');
+var BrowserDecryptStream = require('../lib/cryptostream/browser/decrypt');
+var cryptoStub = require('../lib/cryptostream/browser/crypto_stub');
 
-describe('EncryptStream', function() {
+describe('node EncryptStream', function() {
 
   describe('@constructor', function() {
 
     it('should create instance with the new keyword', function() {
-      expect(new EncryptStream(
+      expect(new NodeEncryptStream(
         DataCipherKeyIv()
-      )).to.be.instanceOf(EncryptStream);
+      )).to.be.instanceOf(NodeEncryptStream);
     });
 
     it('should create instance without the new keyword', function() {
-      expect(EncryptStream(DataCipherKeyIv())).to.be.instanceOf(EncryptStream);
+      expect(NodeEncryptStream(DataCipherKeyIv()))
+        .to.be.instanceOf(NodeEncryptStream);
     });
 
     it('should throw with an invalid keypair', function() {
       expect(function() {
-        EncryptStream(null);
+        NodeEncryptStream(null);
       }).to.throw(Error, 'Invalid cipher object supplied');
     });
 
@@ -29,23 +33,24 @@ describe('EncryptStream', function() {
 
 });
 
-describe('DecryptStream', function() {
+describe('node DecryptStream', function() {
 
   describe('@constructor', function() {
 
     it('should create instance with the new keyword', function() {
       expect(
-        new DecryptStream(DataCipherKeyIv())
-      ).to.be.instanceOf(DecryptStream);
+        new NodeDecryptStream(DataCipherKeyIv())
+      ).to.be.instanceOf(NodeDecryptStream);
     });
 
     it('should create instance without the new keyword', function() {
-      expect(DecryptStream(DataCipherKeyIv())).to.be.instanceOf(DecryptStream);
+      expect(NodeDecryptStream(DataCipherKeyIv()))
+        .to.be.instanceOf(NodeDecryptStream);
     });
 
     it('should throw with an invalid keypair', function() {
       expect(function() {
-        DecryptStream(null);
+        NodeDecryptStream(null);
       }).to.throw(Error, 'Invalid cipher object supplied');
     });
 
@@ -57,8 +62,8 @@ describe('CryptoStream/Integration', function() {
 
   it('should successfully encrypt and decrypt the data', function(done) {
     var keyiv = new DataCipherKeyIv();
-    var encrypter = new EncryptStream(keyiv);
-    var decrypter = new DecryptStream(keyiv);
+    var encrypter = new NodeEncryptStream(keyiv);
+    var decrypter = new NodeDecryptStream(keyiv);
     var input = ['HAY', 'GURL', 'HAY'];
     var output = '';
 
@@ -76,4 +81,42 @@ describe('CryptoStream/Integration', function() {
     encrypter.end();
   });
 
+});
+
+var shouldStubPrototype = function(member){
+  it('should expose a `prototype` property that is a function', function() {
+    expect(typeof(member.prototype)).to.equal('function');
+  });
+
+  it('should expose an `apply` property that is a function', function() {
+    expect(typeof(member.apply)).to.equal('function');
+  });
+};
+
+describe('crypto stub', function(){
+  describe('#Cipheriv', function(){
+    shouldStubPrototype(cryptoStub.Cipheriv);
+  });
+  
+  describe('#Decipheriv', function(){
+    shouldStubPrototype(cryptoStub.Decipheriv);
+  });
+});
+
+describe('browser EncryptStream', function(){
+  it('should not be undefined', function() {
+    var keyiv = new DataCipherKeyIv();
+    var encryptor = new BrowserEncryptStream(keyiv);
+
+    expect(typeof(encryptor)).to.not.equal('undefined');
+  });
+});
+
+describe('browser DecryptStream', function(){
+  it('should not be undefined', function() {
+    var keyiv = new DataCipherKeyIv();
+    var decryptor = new BrowserDecryptStream(keyiv);
+
+    expect(typeof(decryptor)).to.not.equal('undefined');
+  });
 });

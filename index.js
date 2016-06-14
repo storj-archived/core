@@ -4,7 +4,28 @@
 
 'use strict';
 
+var NODE_EXECUTION_CONTEXT = typeof(process) !== 'undefined';
+
 require('./lib/patches')(); // NB: Apply any monkey patches
+
+if (NODE_EXECUTION_CONTEXT) {
+  //-- LOAD NODE COMPATIBLE MODULES
+
+  /** {@link EncryptStream} */
+  module.exports.EncryptStream = require('./lib/cryptostream/node/encrypt');
+
+  /** {@link DecryptStream} */
+  module.exports.DecryptStream = require('./lib/cryptostream/node/decrypt');
+
+} else {
+  //-- LOAD BROWSER COMPATIBLE MODULES
+
+  /** {@link EncryptStream} */
+  module.exports.EncryptStream = require('./lib/cryptostream/browser/encrypt');
+
+  /** {@link DecryptStream} */
+  module.exports.DecryptStream = require('./lib/cryptostream/browser/decrypt');
+}
 
 module.exports.version = require('./lib/version');
 
@@ -40,12 +61,6 @@ module.exports.TunnelDemuxer = require('./lib/tunnel/demultiplexer');
 
 /** {@link TunnelClient} */
 module.exports.TunnelClient = require('./lib/tunnel/client');
-
-/** {@link EncryptStream} */
-module.exports.EncryptStream = require('./lib/cryptostream/encrypt');
-
-/** {@link DecryptStream} */
-module.exports.DecryptStream = require('./lib/cryptostream/decrypt');
 
 /** {@link FileMuxer} */
 module.exports.FileMuxer = require('./lib/filemuxer');

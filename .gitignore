@@ -41,3 +41,6 @@ jsdoc
 # Ignore browser build, but leave the directory
 dist/**
 !dist/.gitkeep
+
+# Jetbrains IDE
+.idea

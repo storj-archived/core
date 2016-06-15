@@ -662,13 +662,32 @@ var ACTIONS = {
       log('info', 'Protocol:  %s', [(contact.protocol || '?')]);
     });
   },
-  generatekey: function generatekey() {
+  generatekey: function generatekey(env) {
     var keypair = storj.KeyPair();
 
     log('info', 'Private: %s', [keypair.getPrivateKey()]);
     log('info', 'Public:  %s', [keypair.getPublicKey()]);
     log('info', 'NodeID:  %s', [keypair.getNodeID()]);
     log('info', 'Address: %s', [keypair.getAddress()]);
+
+    if (env.save) {
+      log('info', '');
+
+      var privkey = keypair.getPrivateKey();
+
+      if (env.encrypt) {
+        privkey = storj.utils.simpleEncrypt(env.encrypt, privkey);
+
+        log('info', 'Key will be encrypted with supplied passphrase');
+      }
+
+      if (fs.existsSync(env.save)) {
+        return log('error', 'Save path already exists, refusing to overwrite');
+      }
+
+      fs.writeFileSync(env.save, privkey);
+      log('info', 'Key saved to %s', [env.save]);
+    }
   },
   signmessage: function signmessage(privatekey, message) {
     var keypair;
@@ -925,6 +944,8 @@ program
 
 program
   .command('generate-key')
+  .option('-s, --save <path>', 'save the generated private key')
+  .option('-e, --encrypt <passphrase>', 'encrypt the generated private key')
   .description('generate a new ecdsa key pair and print it')
   .action(ACTIONS.generatekey);
 

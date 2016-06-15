@@ -138,4 +138,15 @@ describe('utils', function() {
 
   });
 
+  describe('#simpleEncrypt + #simpleDecrypt', function() {
+
+    it('should successfully encrypt and decrypt the data', function() {
+      var data = 'hello world';
+      var enc = utils.simpleEncrypt('password', data);
+      var dec = utils.simpleDecrypt('password', enc);
+      expect(dec).to.equal(data);
+    });
+
+  });
+
 });

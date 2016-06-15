@@ -554,7 +554,7 @@ describe('Network (private)', function() {
 
   describe('#_findTunnel', function() {
 
-    it('should callback error if no neighbor provided', function(done) {
+    it('should callback error if no neighbors provided', function(done) {
       var net = Network({
         keypair: KeyPair(),
         manager: Manager(RAMStorageAdapter()),
@@ -564,7 +564,7 @@ describe('Network (private)', function() {
         port: 0,
         noforward: true
       });
-      net._findTunnel(null, function(err) {
+      net._findTunnel([], function(err) {
         expect(err.message).to.equal(
           'Could not find a neighbor to query for tunnels'
         );
@@ -587,10 +587,10 @@ describe('Network (private)', function() {
         new Error('Not reachable')
       );
       var contact = { address: '127.0.0.1', port: 1337 };
-      net._findTunnel(contact, function(err) {
+      net._findTunnel([contact], function(err) {
         _send.restore();
         expect(err.message).to.equal(
-          'Failed to find tunnels, reason: Not reachable'
+          'Failed to find tunnels from neighbors'
         );
         done();
       });

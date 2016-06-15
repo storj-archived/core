@@ -31,6 +31,9 @@ program.option('-k, --keypass <password>', 'unlock keyring without prompt');
 
 function log(type, message, args) {
   switch (type) {
+    case 'debug':
+      message = colors.bold.magena(' [debug]  ') + message;
+      break;
     case 'info':
       message = colors.bold.cyan(' [info]   ') + message;
       break;
@@ -44,6 +47,19 @@ function log(type, message, args) {
 
   console.log.apply(console, [message].concat(args || []));
 }
+
+log._logger = function() {
+  var type = arguments[0];
+  var message = arguments[1];
+  var values = Array.prototype.slice.call(arguments, 2);
+
+  log(type, message, values);
+};
+
+log.info = log._logger.bind(null, 'info');
+log.debug = log._logger.bind(null, 'debug');
+log.warn = log._logger.bind(null, 'warn');
+log.error = log._logger.bind(null, 'error');
 
 function makeTempDir(callback) {
   var opts = {
@@ -71,12 +87,13 @@ function loadKeyPair() {
 
 function PrivateClient() {
   return storj.BridgeClient(program.url, {
-    keypair: loadKeyPair()
+    keypair: loadKeyPair(),
+    logger: log
   });
 }
 
 function PublicClient() {
-  return storj.BridgeClient(program.url);
+  return storj.BridgeClient(program.url, { logger: log });
 }
 
 function getKeyRing(callback) {

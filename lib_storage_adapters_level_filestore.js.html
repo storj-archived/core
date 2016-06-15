@@ -134,8 +134,9 @@ LevelDBFileStore.prototype.reset = function(key, callback) {
       index++;
 
       if (!err) {
-        self._db.del(itemkey);
-        _del(index, callback);
+        self._db.del(itemkey, function() {
+          _del(index, callback);
+        });
       } else {
         callback();
       }

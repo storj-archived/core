@@ -609,11 +609,13 @@ Network.prototype._setupTunnelClient = function(callback) {
     return callback(null);
   }
 
+  var neighbors = this._options.seeds.map(this._createContact);
+
   function _discoverIfReachable() {
     self._logger.info('requesting probe from nearest neighbor');
-    self._requestProbe(neighbor, function(err, result) {
+    self._requestProbe(neighbors[0], function(err, result) {
       if (err || result.error) {
-        return self._findTunnel(neighbor, callback);
+        return self._findTunnel(neighbors, callback);
       }
 
       self._logger.info(
@@ -624,11 +626,7 @@ Network.prototype._setupTunnelClient = function(callback) {
     });
   }
 
-  var neighbor = this._options.seeds.length ?
-                 this._createContact(this._options.seeds[0]) :
-                 null;
-
-  if (!neighbor) {
+  if (!neighbors.length) {
     if (this._options.bridge === false) {
       return callback(
         new Error('Could not find a neighbor to query for probe')
@@ -640,7 +638,7 @@ Network.prototype._setupTunnelClient = function(callback) {
         return callback(new Error('Failed to get seeds for probe'));
       }
 
-      neighbor = self._createContact(result.info['x-network-seeds'][0]);
+      neighbors = result.info['x-network-seeds'].map(self._createContact);
 
       _discoverIfReachable();
     });
@@ -665,10 +663,12 @@ Network.prototype._requestProbe = function(neighbor, callback) {
 /**
  * Finds a potential tunneler
  * @private
+ * @param {Array} neighbors
  * @param {Function} callback
  */
-Network.prototype._findTunnel = function(neighbor, callback) {
+Network.prototype._findTunnel = function(neighbors, callback) {
   var self = this;
+  var tunnelers = [];
   var message = new kad.Message({
     method: 'FIND_TUNNEL',
     params: {
@@ -681,21 +681,31 @@ Network.prototype._findTunnel = function(neighbor, callback) {
   // NB: connections from other nodes, so let's override our maxTunnels.
   this._transport._tunserver._options.maxTunnels = 0;
 
-  if (!neighbor) {
+  if (!neighbors.length) {
     return callback(
       new Error('Could not find a neighbor to query for tunnels')
     );
   }
 
-  this._logger.info('requesting tunnelers from nearest neighbor');
-  this._transport.send(neighbor, message, function(err, resp) {
-    if (err) {
+  async.detectSeries(neighbors, function(neighbor, callback) {
+    self._logger.info('requesting tunnelers from neighbor');
+    self._transport.send(neighbor, message, function(err, resp) {
+      if (err) {
+        return callback(null, false);
+      }
+
+      tunnelers = tunnelers.concat(resp.result.tunnels);
+
+      callback(null, true);
+    });
+  }, function() {
+    if (!tunnelers.length) {
       return callback(
-        new Error('Failed to find tunnels, reason: ' + err.message)
+        new Error('Failed to find tunnels from neighbors')
       );
     }
 
-    self._establishTunnel(resp.result.tunnels, callback);
+    self._establishTunnel(tunnelers, callback);
   });
 };
 

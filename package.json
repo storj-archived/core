@@ -62,7 +62,7 @@
     "ip": "^1.1.2",
     "jsen": "^0.6.0",
     "json-stable-stringify": "^1.0.1",
-    "kad": "^1.5.12",
+    "kad": "^1.5.13",
     "kad-quasar": "^0.1.3",
     "leveldown": "^1.4.6",
     "levelup": "^1.3.1",

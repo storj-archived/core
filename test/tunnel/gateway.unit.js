@@ -155,6 +155,19 @@ describe('TunnelGateway', function() {
       after(gw.close.bind(gw));
     });
 
+    it('should emit an error if no callback is supplied', function(done) {
+      var gw = new TunnelGateway();
+      var _listen = sinon.stub(gw._server, 'listen', function() {
+        gw._server.emit('error', new Error('EADDRINUSE'));
+      });
+      gw.on('error', function(err) {
+        _listen.restore();
+        expect(err.message).to.equal('Failed to open tunnel gateway');
+        done();
+      });
+      gw.open();
+    });
+
   });
 
   describe('#close', function() {

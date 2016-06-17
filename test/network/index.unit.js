@@ -12,6 +12,8 @@ var sinon = require('sinon');
 var version = require('../../lib/version');
 var utils = require('../../lib/utils');
 var version = require('../../lib/version');
+var Contact = require('../../lib/network/contact');
+var constants = require('../../lib/constants');
 
 describe('Network (public)', function() {
 
@@ -795,5 +797,79 @@ describe('Network (private)', function() {
     });
 
   });
+
+});
+
+describe('Network (private/jobs)', function() {
+
+  describe('#_startRouterCleaner', function() {
+
+    it('should call _cleanRoutingTable', function(done) {
+      constants.ROUTER_CLEAN_INTERVAL = 10;
+      var _cleanRoutingTable = sinon.stub(
+        Network.prototype,
+        '_cleanRoutingTable'
+      ).returns([]);
+      Network({
+        keypair: KeyPair(),
+        manager: Manager(RAMStorageAdapter()),
+        logger: kad.Logger(0),
+        seeds: [],
+        bridge: false,
+        address: '127.0.0.1',
+        port: 0,
+        noforward: true
+      });
+      setTimeout(function() {
+        _cleanRoutingTable.restore();
+        constants.ROUTER_CLEAN_INTERVAL = 60000;
+        expect(_cleanRoutingTable.called).to.equal(true);
+        done();
+      }, 20);
+    });
+
+  });
+
+  describe('#_cleanRoutingTable', function() {
+
+    it('should drop the contacts with bad address or version', function() {
+      var net = Network({
+        keypair: KeyPair(),
+        manager: Manager(RAMStorageAdapter()),
+        logger: kad.Logger(0),
+        seeds: [],
+        bridge: false,
+        address: '127.0.0.1',
+        port: 0,
+        noforward: true
+      });
+      net._router._buckets[0] = new kad.Bucket();
+      net._router._buckets[2] = new kad.Bucket();
+      net._router._buckets[0].addContact(Contact({
+        address: 'some.public.ip',
+        port: 80,
+        nodeID: kad.utils.createID('node1'),
+        protocol: version.protocol
+      }));
+      net._router._buckets[2].addContact(Contact({
+        address: 'some.public.ip',
+        port: 81,
+        nodeID: kad.utils.createID('node2'),
+        protocol: '0.0.0'
+      }));
+      net._router._buckets[2].addContact(Contact({
+        address: '127.0.0.1',
+        port: 0,
+        nodeID: kad.utils.createID('node3'),
+        protocol: version.protocol
+      }));
+      var dropped = net._cleanRoutingTable();
+      expect(dropped).to.have.lengthOf(2);
+      expect(net._router._buckets[0].getSize()).to.equal(1);
+      expect(net._router._buckets[2].getSize()).to.equal(0);
+    });
+
+  });
+
 
 });

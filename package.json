@@ -1,6 +1,6 @@
 {
   "name": "storj",
-  "version": "1.2.6",
+  "version": "1.2.7",
   "description": "implementation of the storj protocol for node.js and the browser",
   "main": "index.js",
   "directories": {

@@ -13,6 +13,7 @@ var version = require('../../lib/version');
 var utils = require('../../lib/utils');
 var version = require('../../lib/version');
 var Contact = require('../../lib/network/contact');
+var constants = require('../../lib/constants');
 
 describe('Network (public)', function() {
 
@@ -797,9 +798,41 @@ describe('Network (private)', function() {
 
   });
 
+});
+
+describe('Network (private/jobs)', function() {
+
+  describe('#_startRouterCleaner', function() {
+
+    it('should call _cleanRoutingTable', function(done) {
+      constants.ROUTER_CLEAN_INTERVAL = 10;
+      var _cleanRoutingTable = sinon.stub(
+        Network.prototype,
+        '_cleanRoutingTable'
+      ).returns([]);
+      Network({
+        keypair: KeyPair(),
+        manager: Manager(RAMStorageAdapter()),
+        logger: kad.Logger(0),
+        seeds: [],
+        bridge: false,
+        address: '127.0.0.1',
+        port: 0,
+        noforward: true
+      });
+      setTimeout(function() {
+        _cleanRoutingTable.restore();
+        constants.ROUTER_CLEAN_INTERVAL = 60000;
+        expect(_cleanRoutingTable.called).to.equal(true);
+        done();
+      }, 20);
+    });
+
+  });
+
   describe('#_cleanRoutingTable', function() {
 
-    it('should drop the contacts with bad address or incompatible version', function() {
+    it('should drop the contacts with bad address or version', function() {
       var net = Network({
         keypair: KeyPair(),
         manager: Manager(RAMStorageAdapter()),
@@ -837,5 +870,6 @@ describe('Network (private)', function() {
     });
 
   });
+
 
 });

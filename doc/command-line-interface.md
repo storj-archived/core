@@ -5,7 +5,7 @@ service and makes use of the library's {@link BridgeClient} class to do so. In
 addition to interacting with a bridge node, the tool also exposes some general
 purpose utilities.
 
-To use the CLI, follow the instructions in the README to install the module
+To use the CLI, follow the instructions in the [README](https://github.com/Storj/core/blob/master/README.md) to install the module
 **globally** or if you are working from within the git repository, you can use:
 
 ```

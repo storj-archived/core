@@ -778,6 +778,42 @@ describe('BridgeClient', function() {
         });
       });
 
+      it('should retry if the request fails', function(done) {
+        var _request = sinon.stub(
+          BridgeClient.prototype,
+          '_request'
+        ).callsArgWith(
+          3,
+          new Error('Request failed')
+        );
+        var client = new BridgeClient();
+        client.addShardToFileStagingFrame('myframe', {
+          meta: 'data'
+        }, function() {
+          _request.restore();
+          expect(_request.callCount).to.equal(4);
+          done();
+        });
+      });
+
+      it('should retry the defined number of retries', function(done) {
+        var _request = sinon.stub(
+          BridgeClient.prototype,
+          '_request'
+        ).callsArgWith(
+          3,
+          new Error('Request failed')
+        );
+        var client = new BridgeClient();
+        client.addShardToFileStagingFrame('myframe', {
+          meta: 'data'
+        }, { retry: 6 }, function() {
+          _request.restore();
+          expect(_request.callCount).to.equal(7);
+          done();
+        });
+      });
+
     });
 
   });

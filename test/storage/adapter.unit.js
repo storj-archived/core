@@ -127,6 +127,17 @@ describe('StorageAdapter', function() {
       }).read();
     });
 
+    it('should end the stream when all keys are read', function(done) {
+      var a = new StorageAdapter();
+      var s = a.createReadStream();
+      a._keys = function(callback) {
+        callback(null, []);
+      };
+      s.on('end', function() {
+        done();
+      }).read();
+    });
+
   });
 
 });

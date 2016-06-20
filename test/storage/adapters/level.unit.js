@@ -339,4 +339,23 @@ describe('LevelDBFileStore', function() {
 
   });
 
+  describe('#reset', function() {
+
+    it('should delete the item if it exists', function(done) {
+      var fs = new LevelDBFileStore(store);
+      var _get = sinon.stub(fs._db, 'get').callsArg(1);
+      var _del = sinon.stub(fs._db, 'del', function(k, cb) {
+        _get.restore();
+        cb();
+      });
+      fs.reset('key', function() {
+        _del.restore();
+        expect(_del.called).to.equal(true);
+        done();
+      });
+
+    });
+
+  });
+
 });

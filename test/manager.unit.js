@@ -135,7 +135,7 @@ describe('Manager', function() {
         _size.restore();
         expect(err.message).to.equal('Failed');
         done();
-      });
+      })._checkCapacity();
     });
 
     it('should emit locked if the status changes', function(done) {
@@ -145,7 +145,7 @@ describe('Manager', function() {
       man.on('locked', function() {
         _size.restore();
         done();
-      });
+      })._checkCapacity();
     });
 
     it('should emit unlocked if the status changes', function(done) {
@@ -156,7 +156,7 @@ describe('Manager', function() {
       man.on('unlocked', function() {
         _size.restore();
         done();
-      });
+      })._checkCapacity();
     });
 
   });

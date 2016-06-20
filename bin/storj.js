@@ -68,7 +68,8 @@ function makeTempDir(callback) {
     // 0700.
     mode: 448,
     // require manual cleanup.
-    keep: true
+    keep: true,
+    unsafeCleanup: true
   };
 
   tmp.dir(opts, function(err, path, cleanupCallback) {
@@ -372,10 +373,6 @@ var ACTIONS = {
     var secret = new storj.DataCipherKeyIv();
     var encrypter = new storj.EncryptStream(secret);
 
-    function cleanup() {
-      log('info', 'Cleaning up...');
-    }
-
     getKeyRing(function(keyring) {
       log('info', 'Generating encryption key...');
       log('info', 'Encrypting file "%s"', [filepath]);
@@ -389,12 +386,8 @@ var ACTIONS = {
 
         function cleanup() {
           log('info', 'Cleaning up...');
-          try {
-            fs.unlinkSync(tmppath);
-          } catch (err) {
-            // NOOP
-          }
           tmpCleanup();
+          log('info', 'Finished cleaning!');
         }
 
         fs.createReadStream(filepath)
@@ -429,6 +422,7 @@ var ACTIONS = {
                     'Name: %s, Type: %s, Size: %s bytes, ID: %s',
                     [file.filename, file.mimetype, file.size, file.id]
                   );
+                  process.exit();
                 }
               );
             });

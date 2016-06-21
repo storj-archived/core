@@ -796,6 +796,35 @@ describe('Network (private)', function() {
       });
     });
 
+    it('should try all seeds before failing to connect', function(done) {
+      var net = Network({
+        keypair: KeyPair(),
+        manager: Manager(RAMStorageAdapter()),
+        logger: kad.Logger(0),
+        seeds: [
+          'storj://127.0.0.1:1337/' + utils.rmd160('nodeid1'),
+          'storj://127.0.0.1:1338/' + utils.rmd160('nodeid2'),
+          'storj://127.0.0.1:1339/' + utils.rmd160('nodeid3')
+        ],
+        bridge: false,
+        address: '127.0.0.1',
+        port: 0,
+        noforward: true
+      });
+      var _connect = sinon.stub(net, 'connect').callsArgWith(
+        1,
+        new Error('Failed')
+      );
+      var _setupTunnel = sinon.stub(net, '_setupTunnelClient').callsArg(0);
+      net.join(function() {
+        _connect.restore();
+        _setupTunnel.restore();
+        expect(_connect.callCount).to.equal(3);
+        done();
+      });
+
+    });
+
   });
 
 });

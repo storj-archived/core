@@ -17,7 +17,7 @@ var LevelDBStorageAdapter = require('../../lib/storage/adapters/level');
 var FarmerInterface = require('../../lib/interfaces/farmer');
 var RenterInterface = require('../../lib/interfaces/renter');
 
-kad.constants.T_RESPONSETIMEOUT = 2000;
+kad.constants.T_RESPONSETIMEOUT = 5000;
 
 var NODE_LIST = [];
 var STARTING_PORT = 65535;
@@ -34,12 +34,13 @@ function createNode(opcodes) {
     keypair: kp,
     manager: manager,
     logger: kad.Logger(0),
-    seeds: NODE_LIST.length ? [NODE_LIST[0]] : NODE_LIST,
+    seeds: NODE_LIST.slice(),
     address: '127.0.0.1',
     port: port,
     opcodes: opcodes,
     noforward: true,
-    backend: memdown
+    backend: memdown,
+    bridge: false
   };
 
   if (opcodes.length) {
@@ -91,9 +92,11 @@ describe('Interfaces/Farmer+Renter/Integration', function() {
       farmers[0].join(function() {
         farmers.shift();
         async.each(farmers.concat(renters), function(node, done) {
-          node.join(function noop() {});
+          node.join(function noop() { });
           done();
-        }, done);
+        }, function() {
+          setTimeout(done, 5000);
+        });
       });
     });
 

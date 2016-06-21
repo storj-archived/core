@@ -10,6 +10,7 @@ var EventEmitter = require('events').EventEmitter;
 var stream = require('readable-stream');
 var FileMuxer = require('../lib/filemuxer');
 var crypto = require('crypto');
+var utils = require('../lib/utils');
 
 describe('BridgeClient', function() {
 
@@ -117,6 +118,29 @@ describe('BridgeClient', function() {
             'POST',
             '/users',
             { email: data.email, password: utils.sha256(data.password) }
+          )).to.equal(true);
+          done();
+        });
+      });
+
+    });
+
+    describe('#resetPassword', function() {
+
+      it('should send the correct args to _request', function(done) {
+        var _request = sinon.stub(BridgeClient.prototype, '_request').callsArg(
+          3,
+          null,
+          {}
+        );
+        var client = new BridgeClient();
+        var data = { email: 'gordon@storj.io', password: 'password' };
+        client.resetPassword(data, function() {
+          _request.restore();
+          expect(_request.calledWithMatch(
+            'PATCH',
+            '/users/gordon@storj.io',
+            { redirect: undefined, password: utils.sha256('password') }
           )).to.equal(true);
           done();
         });

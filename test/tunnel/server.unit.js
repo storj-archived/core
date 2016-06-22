@@ -56,10 +56,13 @@ describe('TunnelServer', function() {
       });
       var options = [55000, 55001, 55002];
       ts.createGateway(function(err, gw1) {
+        expect(err).to.equal(null);
         options.splice(options.indexOf(gw1.getEntranceAddress().port), 1);
         ts.createGateway(function(err, gw2) {
+          expect(err).to.equal(null);
           options.splice(options.indexOf(gw2.getEntranceAddress().port), 1);
           ts.createGateway(function(err, gw3) {
+            expect(err).to.equal(null);
             options.splice(options.indexOf(gw3.getEntranceAddress().port), 1);
             expect(options).to.have.lengthOf(0);
             ts.createGateway(function(err) {

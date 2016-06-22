@@ -1212,7 +1212,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id=".rmd160"><span class="type-signature">&lt;static> </span>rmd160(input)</h4>
+    <h4 class="name" id=".rmd160"><span class="type-signature">&lt;static> </span>rmd160(input, encoding)</h4>
     
     
 </dt>
@@ -1279,152 +1279,16 @@
         </tr>
 
     
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_utils.js.html">lib/utils.js</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">String</span>
-
-
-
-    </dd>
-</dl>
-
-
-        
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id=".rmd160sha256"><span class="type-signature">&lt;static> </span>rmd160sha256(input)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Returns the RIPEMD-160 SHA-256 hash of this input
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
 
         <tr>
             
-                <td class="name"><code>input</code></td>
+                <td class="name"><code>encoding</code></td>
             
 
             <td class="type">
             
                 
 <span class="param-type">String</span>
-|
-
-<span class="param-type">Buffer</span>
 
 
 
@@ -1435,7 +1299,7 @@
 
             
 
-            <td class="description last">Data to hash</td>
+            <td class="description last">The encoding type of the data</td>
         </tr>
 
     
@@ -1532,7 +1396,191 @@
             
 <hr>
 <dt>
-    <h4 class="name" id=".sha256"><span class="type-signature">&lt;static> </span>sha256(input)</h4>
+    <h4 class="name" id=".rmd160sha256"><span class="type-signature">&lt;static> </span>rmd160sha256(input, encoding)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Returns the RIPEMD-160 SHA-256 hash of this input
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>input</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+|
+
+<span class="param-type">Buffer</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Data to hash</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>encoding</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The encoding type of the data</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_utils.js.html">lib/utils.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">String</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id=".sha256"><span class="type-signature">&lt;static> </span>sha256(input, encoding)</h4>
     
     
 </dt>
@@ -1596,6 +1644,30 @@
             
 
             <td class="description last">Data to hash</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>encoding</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The encoding type of the data</td>
         </tr>
 
     

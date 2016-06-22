@@ -186,7 +186,7 @@ BridgeClient.prototype.getContactByNodeId = function(nodeId, callback) {
 BridgeClient.prototype.createUser = function(options, callback) {
   return this._request('POST', '/users', {
     email: options.email,
-    password: utils.sha256(options.password),
+    password: utils.sha256(options.password, 'utf8'),
     redirect: options.redirect,
     pubkey: options.pubkey
   }, callback);
@@ -215,7 +215,7 @@ BridgeClient.prototype.destroyUser = function(options, callback) {
  */
 BridgeClient.prototype.resetPassword = function(options, callback) {
   return this._request('PATCH', '/users/' + options.email, {
-    password: utils.sha256(options.password),
+    password: utils.sha256(options.password, 'utf8'),
     redirect: options.redirect
   }, callback);
 };
@@ -638,7 +638,7 @@ BridgeClient.prototype._authenticate = function(opts) {
   } else if (this._options.basicauth) {
     opts.auth = {
       user: this._options.basicauth.email,
-      pass: utils.sha256(this._options.basicauth.password)
+      pass: utils.sha256(this._options.basicauth.password, 'utf8')
     };
   }
 

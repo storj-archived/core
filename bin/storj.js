@@ -141,6 +141,20 @@ function getKeyRing(callback) {
   });
 }
 
+function getNewPassword(callback) {
+  prompt.start();
+  prompt.get({
+    properties: {
+      password: {
+        description: 'Enter your new desired password',
+        required: true,
+        replace: '*',
+        hidden: true
+      }
+    }
+  }, callback);
+}
+
 function getCredentials(callback) {
   prompt.start();
   prompt.get({
@@ -231,6 +245,22 @@ var ACTIONS = {
 
       fs.unlinkSync(KEYPATH);
       log('info', 'This device has been successfully unpaired.');
+    });
+  },
+  resetpassword: function resetpassword(email) {
+    getNewPassword(function(err, result) {
+      PublicClient().resetPassword({
+        email: email,
+        password: result.password
+      }, function(err) {
+        if (err) {
+          return log('error', 'Failed to request password reset, reason: %s', [
+            err.message
+          ]);
+        }
+
+        log('info', 'Password reset request processed, check you email to continue.');
+      });
     });
   },
   listkeys: function listkeys() {
@@ -841,6 +871,11 @@ program
   .command('logout')
   .description('revoke this device\'s access your storj api account')
   .action(ACTIONS.logout);
+
+program
+  .command('reset-password <email>')
+  .description('request an account password reset email')
+  .action(ACTIONS.resetpassword);
 
 program
   .command('list-keys')

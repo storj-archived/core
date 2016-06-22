@@ -375,7 +375,7 @@ describe('FarmerInterface', function() {
       setImmediate(function() {
         _error.restore();
         expect(
-          _error.calledWith('Renter responded with invalid contract')
+          _error.calledWith('renter responded with invalid contract')
         ).to.equal(true);
         done();
       });
@@ -399,7 +399,7 @@ describe('FarmerInterface', function() {
       setImmediate(function() {
         _error.restore();
         expect(
-          _error.calledWith('Renter signature is invalid')
+          _error.calledWith('renter signature is invalid')
         ).to.equal(true);
         done();
       });

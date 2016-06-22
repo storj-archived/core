@@ -259,7 +259,7 @@ var ACTIONS = {
           ]);
         }
 
-        log('info', 'Password reset request processed, check you email to continue.');
+        log('info', 'Password reset request processed, check your email to continue.');
       });
     });
   },

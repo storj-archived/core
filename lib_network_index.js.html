@@ -113,6 +113,7 @@ var EventEmitter = require('events').EventEmitter;
 var inherits = require('util').inherits;
 var RateLimiter = require('./ratelimiter');
 var ms = require('ms');
+var shuffle = require('knuth-shuffle').knuthShuffle;
 var BridgeClient = require('../bridgeclient');
 
 /**
@@ -177,6 +178,12 @@ Network.DEFAULTS = {
   tunport: 0, // NB: Pick random open port
   gateways: { min: 0, max: 0 } // NB: Port range for gatways - default any
 };
+
+Network.RPC_VALIDATION_EXEMPT = [
+  'PROBE',
+  'FIND_TUNNEL',
+  'OPEN_TUNNEL'
+];
 
 /**
  * Check the options supplied to the constructor
@@ -250,17 +257,23 @@ Network.prototype._enterOverlay = function(callback) {
 
   function _trySeeds() {
     async.detectSeries(self._options.seeds, function(uri, next) {
-      self._logger.info('attemting to join network via %s', uri);
+      self._logger.info('attempting to join network via %s', uri);
       self.connect(uri, function(err) {
         if (err) {
           self._logger.warn('failed to connect to seed %s', uri);
+          next(false);
         } else {
           self._logger.info('connected to the storj network via %s', uri);
+          next(true);
         }
-
-        next(null, !err);
       });
-    }, callback);
+    }, function(result) {
+      if (!result) {
+        return callback(new Error('Failed to join the network'));
+      }
+
+      callback(null);
+    });
   }
 
   if (this._options.seeds.length) {
@@ -280,7 +293,7 @@ Network.prototype._enterOverlay = function(callback) {
       );
     }
 
-    self._options.seeds = seeds.map(utils.getContactURL);
+    self._options.seeds = shuffle(seeds).map(utils.getContactURL);
 
     _trySeeds();
   });
@@ -369,7 +382,9 @@ Network.prototype._initNetworkInterface = function() {
     logger: this._logger
   });
   this._limiter = new RateLimiter(this._options.limiter);
+
   this._transport.after('open', this._onTransportOpen.bind(this));
+  this._startRouterCleaner();
 };
 
 /**
@@ -463,7 +478,7 @@ Network.prototype._verifyMessage = function(message, contact, callback) {
   var self = this;
 
   this._validateContact(contact, function(err) {
-    if (err) {
+    if (err &amp;&amp; Network.RPC_VALIDATION_EXEMPT.indexOf(message.method) === -1) {
       return callback(err);
     }
 
@@ -691,12 +706,12 @@ Network.prototype._findTunnel = function(neighbors, callback) {
     self._logger.info('requesting tunnelers from neighbor');
     self._transport.send(neighbor, message, function(err, resp) {
       if (err) {
-        return callback(null, false);
+        return callback(false);
       }
 
       tunnelers = tunnelers.concat(resp.result.tunnels);
 
-      callback(null, true);
+      callback(true);
     });
   }, function() {
     if (!tunnelers.length) {
@@ -785,6 +800,48 @@ Network.prototype._establishTunnel = function(tunnels, callback) {
 
     tunclient.open();
   });
+};
+
+/**
+ * Cleans invalid contacts from routing table
+ * @private
+ */
+Network.prototype._cleanRoutingTable = function() {
+  var dropped = [];
+
+  for (var k in this._router._buckets) {
+    var bucket = this._router._buckets[k];
+    var bucketList = bucket.getContactList();
+
+    for (var i = 0; i &lt; bucketList.length; i++) {
+      var isValidContact = utils.isValidContact(
+        bucketList[i],
+        process.env.STORJ_ALLOW_LOOPBACK
+      );
+      var isValidProtocol = utils.isCompatibleVersion(bucketList[i].protocol);
+
+      if (!isValidContact || !isValidProtocol) {
+        dropped.push(bucketList[i]);
+        bucket.removeContact(bucketList[i]);
+      }
+    }
+  }
+
+  return dropped;
+};
+
+/**
+ * Cleans the routing table on an interval
+ * @private
+ */
+Network.prototype._startRouterCleaner = function() {
+  var self = this;
+
+  setInterval(function() {
+    self._logger.debug('cleaning bad contacts from routing table');
+    var dropped = self._cleanRoutingTable();
+    self._logger.debug('dropping %s bad contacts from router', dropped.length);
+  }, constants.ROUTER_CLEAN_INTERVAL);
 };
 
 module.exports = Network;

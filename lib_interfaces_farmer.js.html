@@ -399,7 +399,7 @@ FarmerInterface.prototype._listenForCapacityChanges = function(manager) {
   });
 
   manager.on('error', function(err) {
-    self._logger.error('Error is storage manager: %s', err.message);
+    self._logger.error('error in storage manager: %s', err.message);
   });
 };
 
@@ -411,7 +411,7 @@ FarmerInterface.prototype._listenForCapacityChanges = function(manager) {
 FarmerInterface.prototype._handleContractPublication = function(contract) {
   var contractObj;
 
-  this._logger.debug('Received contract offer...');
+  this._logger.debug('received contract offer...');
 
   try {
     contractObj = Contract.fromObject(contract);
@@ -420,7 +420,7 @@ FarmerInterface.prototype._handleContractPublication = function(contract) {
   }
 
   if (!this._shouldSendOffer(contractObj)) {
-    this._logger.debug('Not taking the contract...');
+    this._logger.debug('not sending an offer for the contract');
     return false;
   }
 

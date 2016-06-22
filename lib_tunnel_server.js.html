@@ -204,6 +204,7 @@ TunnelServer.prototype.createGateway = function(callback) {
     callback(null, gateway);
   });
 
+  gateway.on('error', callback);
   gateway.open();
 };
 

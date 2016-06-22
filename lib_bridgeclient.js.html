@@ -206,6 +206,21 @@ BridgeClient.prototype.destroyUser = function(options, callback) {
 };
 
 /**
+ * Requests a password reset
+ * @param {Object} options
+ * @param {String} options.email - Email address of user to reset password
+ * @param {String} options.password - The cleartext password to reset to
+ * @param {String} options.redirect - URL to redirect adter confirmation
+ * @param {Function} callback
+ */
+BridgeClient.prototype.resetPassword = function(options, callback) {
+  return this._request('PATCH', '/users/' + options.email, {
+    password: utils.sha256(options.password),
+    redirect: options.redirect
+  }, callback);
+};
+
+/**
  * Returns list of associated public keys
  * @param {Function} callback
  */
@@ -350,10 +365,35 @@ BridgeClient.prototype.destroyFileStagingFrameById = function(id, callback) {
  * Creates a file staging frame
  * @param {String} id - Unique frame ID
  * @param {Object} shard - The shard metadata
+ * @param {Object} options
+ * @param {Number} options.retry - Retry the request this many times if failed
  * @param {Function} callback
  */
-BridgeClient.prototype.addShardToFileStagingFrame = function(id, shard, cb) {
-  return this._request('PUT', '/frames/' + id, shard, cb);
+BridgeClient.prototype.addShardToFileStagingFrame = function(f, s, opt, cb) {
+  var self = this;
+  var retries = 0;
+
+  if (typeof arguments[2] === 'function') {
+    cb = opt;
+    opt = { retry: 3 };
+  }
+
+  function _addShard() {
+    return self._request('PUT', '/frames/' + f, s, function(err, result) {
+      if (err) {
+        if (opt.retry > retries) {
+          retries++;
+          return _addShard();
+        }
+
+        return cb(err);
+      }
+
+      cb(null, result);
+    });
+  }
+
+  return _addShard();
 };
 
 /**
@@ -371,7 +411,6 @@ BridgeClient.prototype.storeFileInBucket = function(id, token, file, callback) {
   );
   var completed = 0;
   var cleanMe = [];
-  var failedToUploadShard = false;
 
   function cleanup() {
     cleanMe.forEach(function(tmpFilePath) {
@@ -428,7 +467,7 @@ BridgeClient.prototype.storeFileInBucket = function(id, token, file, callback) {
           }, function(err, pointer) {
             if (err) {
               self._logger.warn('Failed to upload shard...');
-              failedToUploadShard = true;
+              cleanup();
               return callback(err);
             }
 
@@ -453,14 +492,17 @@ BridgeClient.prototype.storeFileInBucket = function(id, token, file, callback) {
                   numShards - completed
                 );
 
-                if (completed === numShards &amp;&amp; !failedToUploadShard) {
+                if (completed === numShards) {
                   cleanup();
+
+                  // NB: use the original filename if called from cli
+                  var origFileName = path.basename(file).split('.crypt')[0];
 
                   self._logger.info('Transfer finished, creating entry...');
                   self._request('POST', '/buckets/' + id + '/files', {
                     frame: frame.id,
-                    mimetype: mime.lookup(file),
-                    filename: path.basename(file).split('.crypt')[0]
+                    mimetype: mime.lookup(origFileName),
+                    filename: origFileName
                   }, callback);
                 }
               });
@@ -514,7 +556,7 @@ BridgeClient.prototype.resolveFileFromPointers = function(pointers, callback) {
   var opened = 0;
   var size = pointers.reduce(function(a, b) {
     return { size: a.size + b.size };
-  }).size;
+  }, { size: 0 }).size;
   var muxer = new FileMuxer({
     shards: pointers.length,
     length: size

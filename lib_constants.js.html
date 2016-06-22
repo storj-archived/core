@@ -102,13 +102,17 @@ module.exports = {
   /** @constant {Number} PREFIX - NodeID prefix (same as bitcoin) */
   PREFIX: 0x00,
   /** @constant {Number} NONCE_EXPIRE - Time to honor a signed message */
-  NONCE_EXPIRE: 10000,
+  NONCE_EXPIRE: 30000,
+  /** @constant {Number} RPC_TIMEOUT - Max wait time for a RPC response */
+  RPC_TIMEOUT: 30000,
   /** @constant {Number} AUDIT_BYTES - Number of bytes for audit challenge */
   AUDIT_BYTES: 32,
   /** @constant {Number} CLEAN_INTERVAL - Interval for reaping stale shards */
   CLEAN_INTERVAL: 10800000,
   /** @constant {Number} TUNNEL_ANNOUNCE_INTERVAL - Announce tunnel state */
   TUNNEL_ANNOUNCE_INTERVAL: 900000,
+  /** @constant {Number} ROUTER_CLEAN_INTERVAL - Drop bad contacts */
+  ROUTER_CLEAN_INTERVAL: 60000,
   /** @constant {Number} OPCODE_TUNRPC_PREFIX - Opcode for tunnel rpc message */
   OPCODE_TUNRPC_PREFIX: 0x0c,
   /** @constant {Number} OPCODE_TUNDCX_PREFIX - Opcode for tunnel datachannel */
@@ -126,7 +130,7 @@ module.exports = {
   /** @constant {Number} OPCODE_DEG_HIGH - Opcode for medium criteria degree */
   OPCODE_DEG_HIGH: 0x03,
   /** @constant {Number} MAX_CONCURRENT_OFFERS - Number of concurrent offers */
-  MAX_CONCURRENT_OFFERS: 6,
+  MAX_CONCURRENT_OFFERS: 3,
   /** @constant {Number} MAX_CONCURRENT_AUDITS - Number of concurrent audits */
   MAX_CONCURRENT_AUDITS: 3,
   /** @constant MAX_FIND_TUNNEL_RELAYS - Max times to relay FIND_TUNNEL */

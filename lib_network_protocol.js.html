@@ -419,7 +419,7 @@ Protocol.prototype._askNeighborsForTunnels = function(relayers, callback) {
       }
     }), function(err, response) {
       if (err || !Array.isArray(response.result.tunnels)) {
-        return done(null, false);
+        return done(false);
       }
 
       if (response.result.tunnels &amp;&amp; response.result.tunnels.length) {
@@ -430,10 +430,10 @@ Protocol.prototype._askNeighborsForTunnels = function(relayers, callback) {
             );
           }
         });
-        return done(null, true);
+        return done(true);
       }
 
-      done(null, false);
+      done(false);
     });
   }
 

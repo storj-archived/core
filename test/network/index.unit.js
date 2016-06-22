@@ -336,7 +336,7 @@ describe('Network (private)', function() {
       });
     });
 
-    it('should not add contact when publish received and full', function(done) {
+    it('should remove the oldest tunneler to add the new one', function(done) {
       var net = Network({
         keypair: KeyPair(),
         manager: Manager(RAMStorageAdapter()),
@@ -347,8 +347,24 @@ describe('Network (private)', function() {
         noforward: true,
         tunnels: 0
       });
+      var _acCallCount = 0;
       var _getSize = sinon.stub(net._tunnelers, 'getSize').returns(20);
-      var _addContact = sinon.stub(net._tunnelers, 'addContact');
+      var _addContact = sinon.stub(net._tunnelers, 'addContact', function() {
+        _acCallCount++;
+
+        if (_acCallCount === 1) {
+          return false;
+        }
+
+        return true;
+      });
+      var _removeContact = sinon.stub(net._tunnelers, 'removeContact');
+      var _indexOf = sinon.stub(net._tunnelers, 'getContact').returns(Contact({
+        address: '127.0.0.1',
+        port: 1338,
+        nodeID: utils.rmd160('nodeid1'),
+        protocol: version.protocol
+      }));
       var _subscribe = sinon.stub(net._pubsub, 'subscribe', function(t, cb) {
         if (t === '0e01') {
           cb({
@@ -364,8 +380,9 @@ describe('Network (private)', function() {
         _getSize.restore();
         _addContact.restore();
         _subscribe.restore();
-        expect(_getSize.called).to.equal(true);
-        expect(_addContact.called).to.equal(false);
+        _indexOf.restore();
+        expect(_removeContact.called).to.equal(true);
+        expect(_addContact.callCount).to.equal(2);
         done();
       });
     });
@@ -569,6 +586,32 @@ describe('Network (private)', function() {
       net._findTunnel([], function(err) {
         expect(err.message).to.equal(
           'Could not find a neighbor to query for tunnels'
+        );
+        done();
+      });
+    });
+
+    it('should try all neighbors for tunnel list', function(done) {
+      var net = Network({
+        keypair: KeyPair(),
+        manager: Manager(RAMStorageAdapter()),
+        logger: kad.Logger(0),
+        seeds: [],
+        address: '127.0.0.1',
+        port: 0,
+        noforward: true
+      });
+      var _send = sinon.stub(net._transport, 'send').callsArgWith(
+        2,
+        null,
+        { result: { tunnels: [] } }
+      );
+      var contact = { address: '127.0.0.1', port: 1337 };
+      net._findTunnel([contact, contact], function(err) {
+        _send.restore();
+        expect(_send.callCount).to.equal(2);
+        expect(err.message).to.equal(
+          'Failed to find tunnels from neighbors'
         );
         done();
       });

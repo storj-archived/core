@@ -94,6 +94,7 @@ describe('DataChannelClient', function() {
           cb();
         }
       });
+      dc._client.readyState = 1;
       dc._client.close = sinon.stub();
       var ws = dc.createWriteStream();
       ws.once('finish', function() {

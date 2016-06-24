@@ -399,9 +399,9 @@ var ACTIONS = {
       log('info', 'File was successfully removed from bucket.');
     });
   },
-  uploadfile: function uploadfile(env) {
-    if (!fs.existsSync(env.filepath)) {
-      return log('error', 'No file found at %s', env.filepath);
+  uploadfile: function uploadfile(bucket, filepath, env) {
+    if (!fs.existsSync(filepath)) {
+      return log('error', 'No file found at %s', filepath);
     }
 
     var secret = new storj.DataCipherKeyIv();
@@ -409,14 +409,14 @@ var ACTIONS = {
 
     getKeyRing(function(keyring) {
       log('info', 'Generating encryption key...');
-      log('info', 'Encrypting file "%s"', [env.filepath]);
+      log('info', 'Encrypting file "%s"', [filepath]);
 
       makeTempDir(function(err, tmpDir, tmpCleanup) {
         if (err) {
           return log('error', err.message);
         }
 
-        var tmppath = path.join(tmpDir, path.basename(env.filepath) + '.crypt');
+        var tmppath = path.join(tmpDir, path.basename(filepath) + '.crypt');
 
         function cleanup() {
           log('info', 'Cleaning up...');
@@ -424,13 +424,13 @@ var ACTIONS = {
           log('info', 'Finished cleaning!');
         }
 
-        fs.createReadStream(env.filepath)
+        fs.createReadStream(filepath)
           .pipe(encrypter)
           .pipe(fs.createWriteStream(tmppath)).on('finish', function() {
             log('info', 'Encryption complete!');
             log('info', 'Creating storage token...');
             PrivateClient().createToken(
-              env.bucket,
+              bucket,
               'PUSH',
               function(err, token) {
                 if (err) {
@@ -443,7 +443,7 @@ var ACTIONS = {
                 PrivateClient({
                   concurrency: env.concurrency
                 }).storeFileInBucket(
-                  env.bucket,
+                  bucket,
                   token.token,
                   tmppath,
                   function(err, file) {

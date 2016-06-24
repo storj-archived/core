@@ -441,7 +441,7 @@ var ACTIONS = {
                 log('info', 'Storing file, hang tight!');
 
                 PrivateClient({
-                  concurrency: env.concurrency
+                  concurrency: parseInt(env.concurrency)
                 }).storeFileInBucket(
                   bucket,
                   token.token,

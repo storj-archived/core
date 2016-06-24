@@ -6,6 +6,7 @@ var Protocol = require('../../lib/network/protocol');
 var Logger = require('kad').Logger;
 var KeyPair = require('../../lib/keypair');
 var stream = require('readable-stream');
+var constants = require('../../lib/constants');
 
 describe('Protocol', function() {
 
@@ -248,9 +249,9 @@ describe('Protocol', function() {
                     if (key === 'renter_id') {
                       return 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc';
                     } else if (key === 'store_begin') {
-                      return Date.now() + 200;
+                      return Date.now() + 200 + constants.CONSIGN_THRESHOLD;
                     } else {
-                      return Date.now() + 400;
+                      return Date.now() + 400 + constants.CONSIGN_THRESHOLD;
                     }
                   }
                 }

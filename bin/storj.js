@@ -619,7 +619,7 @@ var ACTIONS = {
       );
     });
   },
-  streamfile: function downloadfile(bucket, id) {
+  streamfile: function streamfile(bucket, id) {
     getKeyRing(function(keyring) {
       var secret = keyring.get(id);
 
@@ -721,24 +721,28 @@ var ACTIONS = {
     log('info', 'NodeID:  %s', [keypair.getNodeID()]);
     log('info', 'Address: %s', [keypair.getAddress()]);
 
-    if (env.save) {
-      log('info', '');
+    function savePrivateKey() {
+      if (env.save) {
+        log('info', '');
 
-      var privkey = keypair.getPrivateKey();
+        var privkey = keypair.getPrivateKey();
 
-      if (env.encrypt) {
-        privkey = storj.utils.simpleEncrypt(env.encrypt, privkey);
+        if (env.encrypt) {
+          privkey = storj.utils.simpleEncrypt(env.encrypt, privkey);
 
-        log('info', 'Key will be encrypted with supplied passphrase');
+          log('info', 'Key will be encrypted with supplied passphrase');
+        }
+
+        if (fs.existsSync(env.save)) {
+          return log('error', 'Save path already exists, refusing overwrite');
+        }
+
+        fs.writeFileSync(env.save, privkey);
+        log('info', 'Key saved to %s', [env.save]);
       }
-
-      if (fs.existsSync(env.save)) {
-        return log('error', 'Save path already exists, refusing to overwrite');
-      }
-
-      fs.writeFileSync(env.save, privkey);
-      log('info', 'Key saved to %s', [env.save]);
     }
+
+    return savePrivateKey();
   },
   signmessage: function signmessage(privatekey, message) {
     var keypair;

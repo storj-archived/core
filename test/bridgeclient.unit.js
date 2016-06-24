@@ -421,8 +421,8 @@ describe('BridgeClient', function() {
 
       it('should create frame, stage the shards, and upload', function(done) {
         var _demuxer = new EventEmitter();
-        var _shard1 = new EventEmitter();
-        var _shard2 = new EventEmitter();
+        var _shard1 = new stream.Readable({ read: function noop() {} });
+        var _shard2 = new stream.Readable({ read: function noop() {} });
         var StubbedClient = proxyquire('../lib/bridgeclient', {
           fs: {
             statSync: sinon.stub().returns({ size: 64 }),
@@ -545,8 +545,8 @@ describe('BridgeClient', function() {
 
       it('should return error if add shard fails', function(done) {
         var _demuxer = new EventEmitter();
-        var _shard1 = new EventEmitter();
-        var _shard2 = new EventEmitter();
+        var _shard1 = new stream.Readable({ read: function noop() {} });
+        var _shard2 = new stream.Readable({ read: function noop() {} });
         var StubbedClient = proxyquire('../lib/bridgeclient', {
           fs: {
             statSync: sinon.stub().returns({ size: 64 }),

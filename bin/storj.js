@@ -12,6 +12,7 @@ var through = require('through');
 var storj = require('..');
 var os = require('os');
 var tmp = require('tmp');
+var merge = require('merge');
 
 var HOME = platform !== 'win32' ? process.env.HOME : process.env.USERPROFILE;
 var DATADIR = path.join(HOME, '.storjcli');
@@ -86,11 +87,11 @@ function loadKeyPair() {
   return storj.KeyPair(fs.readFileSync(KEYPATH).toString());
 }
 
-function PrivateClient() {
-  return storj.BridgeClient(program.url, {
+function PrivateClient(options) {
+  return storj.BridgeClient(program.url, merge({
     keypair: loadKeyPair(),
     logger: log
-  });
+  }, options));
 }
 
 function PublicClient() {
@@ -259,7 +260,10 @@ var ACTIONS = {
           ]);
         }
 
-        log('info', 'Password reset request processed, check your email to continue.');
+        log(
+          'info',
+          'Password reset request processed, check your email to continue.'
+        );
       });
     });
   },
@@ -395,7 +399,7 @@ var ACTIONS = {
       log('info', 'File was successfully removed from bucket.');
     });
   },
-  uploadfile: function uploadfile(bucket, filepath) {
+  uploadfile: function uploadfile(bucket, filepath, env) {
     if (!fs.existsSync(filepath)) {
       return log('error', 'No file found at %s', filepath);
     }
@@ -425,37 +429,43 @@ var ACTIONS = {
           .pipe(fs.createWriteStream(tmppath)).on('finish', function() {
             log('info', 'Encryption complete!');
             log('info', 'Creating storage token...');
-            PrivateClient().createToken(bucket, 'PUSH', function(err, token) {
-              if (err) {
-                log('error', err.message);
-                return cleanup();
-              }
-
-              log('info', 'Storing file, hang tight!');
-
-              PrivateClient().storeFileInBucket(
-                bucket,
-                token.token,
-                tmppath,
-                function(err, file) {
-                  if (err) {
-                    log('error', err.message);
-                    return cleanup();
-                  }
-
-                  keyring.set(file.id, secret);
-                  cleanup();
-                  log('info', 'Encryption key saved to keyring.');
-                  log('info', 'File successfully stored in bucket.');
-                  log(
-                    'info',
-                    'Name: %s, Type: %s, Size: %s bytes, ID: %s',
-                    [file.filename, file.mimetype, file.size, file.id]
-                  );
-                  process.exit();
+            PrivateClient().createToken(
+              bucket,
+              'PUSH',
+              function(err, token) {
+                if (err) {
+                  log('error', err.message);
+                  return cleanup();
                 }
-              );
-            });
+
+                log('info', 'Storing file, hang tight!');
+
+                PrivateClient({
+                  concurrency: env.concurrency ? parseInt(env.concurrency) : 6
+                }).storeFileInBucket(
+                  bucket,
+                  token.token,
+                  tmppath,
+                  function(err, file) {
+                    if (err) {
+                      log('error', err.message);
+                      return cleanup();
+                    }
+
+                    keyring.set(file.id, secret);
+                    cleanup();
+                    log('info', 'Encryption key saved to keyring.');
+                    log('info', 'File successfully stored in bucket.');
+                    log(
+                      'info',
+                      'Name: %s, Type: %s, Size: %s bytes, ID: %s',
+                      [file.filename, file.mimetype, file.size, file.id]
+                    );
+                    process.exit();
+                  }
+                );
+              }
+            );
           }
         );
       });
@@ -609,7 +619,7 @@ var ACTIONS = {
       );
     });
   },
-  streamfile: function downloadfile(bucket, id) {
+  streamfile: function streamfile(bucket, id) {
     getKeyRing(function(keyring) {
       var secret = keyring.get(id);
 
@@ -711,24 +721,28 @@ var ACTIONS = {
     log('info', 'NodeID:  %s', [keypair.getNodeID()]);
     log('info', 'Address: %s', [keypair.getAddress()]);
 
-    if (env.save) {
-      log('info', '');
+    function savePrivateKey() {
+      if (env.save) {
+        log('info', '');
 
-      var privkey = keypair.getPrivateKey();
+        var privkey = keypair.getPrivateKey();
 
-      if (env.encrypt) {
-        privkey = storj.utils.simpleEncrypt(env.encrypt, privkey);
+        if (env.encrypt) {
+          privkey = storj.utils.simpleEncrypt(env.encrypt, privkey);
 
-        log('info', 'Key will be encrypted with supplied passphrase');
+          log('info', 'Key will be encrypted with supplied passphrase');
+        }
+
+        if (fs.existsSync(env.save)) {
+          return log('error', 'Save path already exists, refusing overwrite');
+        }
+
+        fs.writeFileSync(env.save, privkey);
+        log('info', 'Key saved to %s', [env.save]);
       }
-
-      if (fs.existsSync(env.save)) {
-        return log('error', 'Save path already exists, refusing to overwrite');
-      }
-
-      fs.writeFileSync(env.save, privkey);
-      log('info', 'Key saved to %s', [env.save]);
     }
+
+    return savePrivateKey();
   },
   signmessage: function signmessage(privatekey, message) {
     var keypair;
@@ -949,6 +963,7 @@ program
 
 program
   .command('upload-file <bucket> <filepath>')
+  .option('-c, --concurrency <count>', 'max upload concurrency')
   .description('upload a file to the network and track in a bucket')
   .action(ACTIONS.uploadfile);
 

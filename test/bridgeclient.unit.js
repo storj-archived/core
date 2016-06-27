@@ -987,6 +987,8 @@ describe('BridgeClient', function() {
         setImmediate(function() {
           _transferStatus.emit('retry');
           setImmediate(function() {
+            _transferShard.restore();
+            _transferComplete.restore();
             expect(_kill.called).to.equal(true);
             expect(_callback.calledWithMatch(
               new Error('Failed to upload shard after 3 attempts')

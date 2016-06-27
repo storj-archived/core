@@ -30,7 +30,7 @@ describe('TunnelClient+TunnelServer/Integration', function() {
       return handlers.http(req, res);
     });
 
-    localhttp.listen(60001, function() {
+    localhttp.listen(60002, function() {
       localws = ws.Server({ server: localhttp });
 
       localws.on('connection', function(socket) {
@@ -46,7 +46,7 @@ describe('TunnelClient+TunnelServer/Integration', function() {
     tunserver.createGateway(function(err, gw) {
       entrance = gw.getEntranceAddress();
       serverurl = 'ws://127.0.0.1:60000/tun?token=' + gw.getEntranceToken();
-      tunclient = new TunnelClient(serverurl, 'http://127.0.0.1:60001');
+      tunclient = new TunnelClient(serverurl, 'http://127.0.0.1:60002');
 
       tunclient.once('error', done);
       tunclient.on('open', function() {

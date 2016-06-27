@@ -893,6 +893,129 @@ describe('BridgeClient', function() {
 
   describe('BridgeClient/Internal', function() {
 
+    describe('#_transferShard', function() {
+
+      it('should emit a retry on client error', function(done) {
+        var clientEmitter = new EventEmitter();
+        var StubbedClient = proxyquire('../lib/bridgeclient', {
+          fs: {
+            createReadStream: sinon.stub().returns({}),
+            './datachannel/client': sinon.stub().returns(clientEmitter)
+          }
+        });
+        var client = new StubbedClient();
+        var emitter = new EventEmitter();
+        var pointer = {
+          farmer: {
+            address: '127.0.0.1',
+            port: 1337,
+            nodeID: utils.rmd160('nodeid')
+          }
+        };
+        var callback = sinon.stub();
+        client._transferShard(emitter, 'name', pointer, callback);
+        emitter.once('retry', function(name, pointer2, callback2) {
+          expect(name).to.equal('name');
+          expect(pointer).to.equal(pointer2);
+          expect(callback2).to.equal(callback);
+          done();
+        });
+        setImmediate(function() {
+          clientEmitter.emit('error', new Error('FAIL'));
+        });
+      });
+
+    });
+
+    describe('#_startTransfer', function() {
+
+      it('should retry transfer if count less than 3', function(done) {
+        var _transferStatus = new EventEmitter();
+        var client = new BridgeClient();
+        var pointer = {
+          farmer: {
+            address: '127.0.0.1',
+            port: 1337,
+            nodeID: utils.rmd160('nodeid')
+          }
+        };
+        var _transferShard = sinon.stub(client, '_transferShard', function() {
+          return _transferStatus;
+        });
+        var _transferComplete = sinon.stub(
+          client,
+          '_shardTransferComplete'
+        ).callsArg(2);
+        client._startTransfer(pointer, {}, {}, function() {
+          _transferShard.restore();
+          _transferComplete.restore();
+          expect(_transferShard.callCount).to.equal(2);
+          done();
+        });
+        setImmediate(function() {
+          _transferStatus.emit('retry');
+          setImmediate(function() {
+            _transferStatus.emit('finish');
+          });
+        });
+      });
+
+      it('should callback with error if count greater than 3', function(done) {
+        var _transferStatus = new EventEmitter();
+        _transferStatus._eventsCount = 3;
+        var _kill = sinon.stub();
+        var _callback = sinon.stub();
+        var client = new BridgeClient();
+        var pointer = {
+          farmer: {
+            address: '127.0.0.1',
+            port: 1337,
+            nodeID: utils.rmd160('nodeid')
+          }
+        };
+        var _transferShard = sinon.stub(client, '_transferShard', function() {
+          return _transferStatus;
+        });
+        var _transferComplete = sinon.stub(
+          client,
+          '_shardTransferComplete'
+        ).callsArg(2);
+        client._startTransfer(pointer, {
+          queue: { kill: _kill },
+          callback: _callback
+        }, {});
+        setImmediate(function() {
+          _transferStatus.emit('retry');
+          setImmediate(function() {
+            expect(_kill.called).to.equal(true);
+            expect(_callback.calledWithMatch(
+              new Error('Failed to upload shard after 3 attempts')
+            )).to.equal(true);
+            done();
+          });
+        });
+      });
+
+    });
+
+    describe('#_shardTransferComplete', function() {
+
+      it('should not create an entry if remaining shards', function(done) {
+        var fakeState = {
+          complete: 0,
+          numShards: 2,
+          cleanup: sinon.stub()
+        };
+        var client = new BridgeClient();
+        client._shardTransferComplete(fakeState, {}, sinon.stub());
+        setImmediate(function() {
+          expect(fakeState.cleanup.called).to.equal(false);
+          done();
+        });
+      });
+
+    });
+
     describe('#_request', function() {
 
       it('should bubble connection error', function(done) {

@@ -130,6 +130,23 @@ describe('DataChannelClient', function() {
       });
     });
 
+    it('should emit an error if socket closes during xfer', function(done) {
+      var dc = new DataChannelClient({ address: '', port: 0 });
+      sinon.stub(dc._client, 'send', function(data, cb) {
+        if (cb) {
+          cb();
+        }
+      });
+      dc._client.readyState = 3;
+      var ws = dc.createWriteStream();
+      dc.once('error', function(err) {
+        expect(err.message).to.equal('Remote host terminated early');
+        done();
+      });
+      setImmediate(function() {
+        ws.write(Buffer('hay gurl hay'));
+      });
+    });
   });
 
   describe('#_handleChannelError', function() {

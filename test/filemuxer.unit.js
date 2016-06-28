@@ -114,7 +114,7 @@ describe('FileMuxer', function() {
 
     it('should wait until next tick if no input is available', function(done) {
       var pushed = false;
-      FileMuxer({ shards: 2, length: 128 }).on('data', function(data) {
+      FileMuxer({ shards: 2, length: 128 }).on('data', function() {
         done();
       }).input(ReadableStream({
         read: function() {

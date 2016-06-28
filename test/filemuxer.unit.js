@@ -112,12 +112,20 @@ describe('FileMuxer', function() {
         });
     });
 
-    it('should error if read with no inputs', function(done) {
-      FileMuxer({ shards: 2, length: 128 }).on('error', function(err) {
-        expect(err.message).to.equal('Unexpected end of input');
+    it('should wait until next tick if no input is available', function(done) {
+      var pushed = false;
+      FileMuxer({ shards: 2, length: 128 }).on('data', function() {
         done();
-      }).read();
-
+      }).input(ReadableStream({
+        read: function() {
+          if (pushed) {
+            this.push(null);
+          } else {
+            pushed = true;
+            this.push(Buffer('hay gurl hay'));
+          }
+        }
+      }));
     });
 
     it('should error if input length exceeds declared length', function(done) {

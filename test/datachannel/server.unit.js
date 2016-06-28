@@ -121,7 +121,11 @@ describe('DataChannelServer', function() {
         manager: Manager(RAMStorageAdapter()),
         logger: Logger(0)
       });
-      dcs._allowed.token = { client: null, hash: 'test' };
+      dcs._allowed.token = {
+        client: null,
+        hash: 'test',
+        expires: Date.now() + 12000
+      };
       var socket = new EventEmitter();
       socket.close = function(code, message) {
         expect(code).to.equal(400);

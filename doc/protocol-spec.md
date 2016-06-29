@@ -778,7 +778,7 @@ to store the data and that the number of items in the `audit_tree` is equal to
 the next power of 2 of the `audit_count` supplied in the original contract.
 
 Once verified, the farmer must respond with a generated token that the renter
-of another authorized party can use to open a data channel with the farmer
+or another authorized party can use to open a data channel with the farmer
 (via websocket) to deliver the data as a binary stream.
 
 > For more information on the Data Channel specification see the tutorial for

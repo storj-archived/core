@@ -7,6 +7,7 @@ var Logger = require('kad').Logger;
 var KeyPair = require('../../lib/keypair');
 var stream = require('readable-stream');
 var constants = require('../../lib/constants');
+var StorageItem = require('../../lib/storage/item');
 
 describe('Protocol', function() {
 
@@ -230,6 +231,23 @@ describe('Protocol', function() {
         contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' }
       }, function(err) {
         expect(err.message).to.equal('Failed');
+        done();
+      });
+    });
+
+    it('should error if the contract is for different nodeid', function(done) {
+      var proto = new Protocol({
+        network: {
+          _logger: Logger(0),
+          _manager: {
+            load: sinon.stub().callsArgWith(1, null, StorageItem({}))
+          }
+        }
+      });
+      proto._handleConsign({
+        contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' }
+      }, function(err) {
+        expect(err.message).to.equal('Consignment is not authorized');
         done();
       });
     });

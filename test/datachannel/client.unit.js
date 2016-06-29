@@ -163,3 +163,14 @@ describe('DataChannelClient', function() {
   });
 
 });
+
+describe('DataChannelClient#getChannelURL', function() {
+
+  it('should create url and trim whitespace from address', function() {
+    expect(DataChannelClient.getChannelURL({
+      address: ' 127.0.0.1  ',
+      port: 1337
+    })).to.equal('ws://127.0.0.1:1337');
+  });
+
+});

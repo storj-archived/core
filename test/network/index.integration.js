@@ -63,7 +63,7 @@ function createFarmer() {
 }
 
 var renters = [createRenter(), createRenter()];
-var farmers = [createFarmer(), createFarmer()];
+var farmers = [createFarmer()];
 
 before(function(done) {
   this.timeout(35000);
@@ -190,10 +190,18 @@ describe('Network/Integration/Tunnelling', function() {
 
   });
 
-  describe('getMirrorNodes', function() {
+  describe('#getMirrorNodes', function() {
+
+    before(function(done) {
+      this.timeout(10000);
+      createFarmer().join(done);
+    });
 
     it('should get successful mirrors', function(done) {
+      this.timeout(12000);
+      var _negotiator = sinon.stub(farmers[0], '_negotiator').returns(false);
       renter.getStorageOffer(contract, function(_farmer) {
+        _negotiator.restore();
         renter.getRetrieveToken(farmer, contract, function(err, token) {
           var pointers = [new DataChannelPointer(
             _farmer,
@@ -206,7 +214,6 @@ describe('Network/Integration/Tunnelling', function() {
             done();
           });
         });
-        done();
       });
     });
 

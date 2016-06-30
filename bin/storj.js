@@ -378,7 +378,7 @@ var ACTIONS = {
       }
 
       if (!files.length) {
-        return log('warn', 'There are not files in this bucket.');
+        return log('warn', 'There are no files in this bucket.');
       }
 
       files.forEach(function(file) {

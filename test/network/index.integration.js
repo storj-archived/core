@@ -62,7 +62,7 @@ function createFarmer() {
 }
 
 var renters = [createRenter(), createRenter()];
-var farmers = [createFarmer()];
+var farmers = [createFarmer(), createFarmer()];
 
 before(function(done) {
   this.timeout(35000);
@@ -185,6 +185,14 @@ describe('Network/Integration/Tunnelling', function() {
         expect(v[0]).to.equal(v[1]);
         done();
       });
+    });
+
+  });
+
+  describe('getMirrorNodes', function() {
+
+    it('should get successful mirrors', function(done) {
+
     });
 
   });

@@ -344,6 +344,64 @@ describe('Protocol', function() {
 
   });
 
+  describe('#_handleMirror', function() {
+
+    it('should error if it fails to load', function(done) {
+      var proto = new Protocol({
+        network: {
+          _logger: Logger(0),
+          _manager: {
+            load: sinon.stub().callsArgWith(1, new Error('Failed'))
+          }
+        }
+      });
+      proto._handleMirror({}, function(err) {
+        expect(err.message).to.equal('Failed');
+        done();
+      });
+    });
+
+    it('should error if no contract found', function(done) {
+      var proto = new Protocol({
+        network: {
+          _logger: Logger(0),
+          _manager: {
+            load: sinon.stub().callsArgWith(1, null, { contracts: {} })
+          }
+        }
+      });
+      proto._handleMirror({
+        contact: { nodeID: 'test' }
+      }, function(err) {
+        expect(err.message).to.equal('No contract found for shard');
+        done();
+      });
+    });
+
+    it('should callback immediately if shard already exists', function(done) {
+      var proto = new Protocol({
+        network: {
+          _logger: Logger(0),
+          _manager: {
+            load: sinon.stub().callsArgWith(1, null, {
+              contracts: {
+                test: {}
+              },
+              shard: { read: sinon.stub() }
+            })
+          }
+        }
+      });
+      proto._handleMirror({
+        contact: { nodeID: 'test' }
+      }, function(err) {
+        expect(err).to.equal(null);
+        done();
+      });
+    });
+
+  });
+
   describe('#_handleProbe', function() {
 
     it('should respond with an error if probe fails', function(done) {

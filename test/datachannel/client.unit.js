@@ -6,6 +6,9 @@ var DataChannelClient = proxyquire('../../lib/datachannel/client', {
   ws: require('events').EventEmitter
 });
 var sinon = require('sinon');
+var DataChannelPointer = require('../../lib/datachannel/pointer');
+var Contact = require('../../lib/network/contact');
+var utils = require('../../lib/utils');
 
 describe('DataChannelClient', function() {
 
@@ -171,6 +174,42 @@ describe('DataChannelClient#getChannelURL', function() {
       address: ' 127.0.0.1  ',
       port: 1337
     })).to.equal('ws://127.0.0.1:1337');
+  });
+
+});
+
+describe('DataChannelClient#getStreamFromPointer', function() {
+
+  it('should return a readable stream for PULL pointer', function(done) {
+    var pointer = new DataChannelPointer(
+      Contact({ address: '127.0.0.1', port: 1337, nodeID: utils.rmd160('') }),
+      utils.rmd160('hash'),
+      utils.generateToken(),
+      'PULL'
+    );
+    var dcx = DataChannelClient.getStreamFromPointer(pointer, function(err, s) {
+      expect(typeof s.read).to.equal('function');
+      done();
+    });
+    setImmediate(function() {
+      dcx.emit('open');
+    });
+  });
+
+  it('should return a writable stream for PUSH pointer', function(done) {
+    var pointer = new DataChannelPointer(
+      Contact({ address: '127.0.0.1', port: 1337, nodeID: utils.rmd160('') }),
+      utils.rmd160('hash'),
+      utils.generateToken(),
+      'PUSH'
+    );
+    var dcx = DataChannelClient.getStreamFromPointer(pointer, function(err, s) {
+      expect(typeof s.write).to.equal('function');
+      done();
+    });
+    setImmediate(function() {
+      dcx.emit('open');
+    });
   });
 
 });

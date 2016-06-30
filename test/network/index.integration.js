@@ -13,6 +13,7 @@ var DataChannelClient = require('../../lib/datachannel/client');
 var StorageItem = require('../../lib/storage/item');
 var Verification = require('../../lib/verification');
 var memdown = require('memdown');
+var DataChannelPointer = require('../../lib/datachannel/pointer');
 
 kad.constants.T_RESPONSETIMEOUT = 2000;
 
@@ -192,7 +193,21 @@ describe('Network/Integration/Tunnelling', function() {
   describe('getMirrorNodes', function() {
 
     it('should get successful mirrors', function(done) {
-
+      renter.getStorageOffer(contract, function(_farmer) {
+        renter.getRetrieveToken(farmer, contract, function(err, token) {
+          var pointers = [new DataChannelPointer(
+            _farmer,
+            contract.get('data_hash'),
+            token,
+            'PULL'
+          )];
+          renter.getMirrorNodes(pointers, [_farmer], function(err, nodes) {
+            expect(nodes).to.have.lengthOf(1);
+            done();
+          });
+        });
+        done();
+      });
     });
 
   });

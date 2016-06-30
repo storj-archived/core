@@ -827,9 +827,11 @@ In these scenarios, renters can offload the burden of storing multiple copies
 of a shard to the farmers by issuing a `MIRROR` RPC in lieu of establishing
 a data channel. A `MIRROR` RPC instructs a contracted farmer to retrieve the
 data already uploaded to another farmer by providing them with a retrieval
-token authorized by another farmer. This allows the renter to incur the
-bandwidth and latency once and instead pay the recently contracted farmer to
-transfer the data to another farmer for redundancy.
+token authorized by another farmer (this is performed by issuing a `RETRIEVE`
+RPC message - see *Downloading Consigned Data* later in this document). This
+allows the renter to incur the bandwidth and latency once and instead pay the
+recently contracted farmer to transfer the data to another farmer for
+redundancy.
 
 To initiate this process, instead of opening a data channel, issue a `MIRROR`
 RPC message to the farmer after contract negotiation is complete:
@@ -866,7 +868,7 @@ Once the mirroring farmer receives the request, it should open a data channel
 to the original farmer and pass along the supplied token and data hash in the
 initial authorization frame. Once the mirroring farmer begins receiving data
 it must respond to the renter's request with a simple acknowledgement to
-indicate that the mirror operation has succeeded.
+indicate that the mirror operation was successfully initiated.
 
 ```
 {

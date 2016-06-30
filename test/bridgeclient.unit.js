@@ -815,7 +815,7 @@ describe('BridgeClient', function() {
           meta: 'data'
         }, function() {
           _request.restore();
-          expect(_request.callCount).to.equal(4);
+          expect(_request.callCount).to.equal(7);
           done();
         });
       });

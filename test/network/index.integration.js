@@ -67,9 +67,15 @@ var farmers = [createFarmer()];
 
 before(function(done) {
   this.timeout(35000);
-  sinon.stub(farmers[0], '_requestProbe').callsArgWith(
-    1, new Error('Probe failed')
-  ); // NB: Force tunneling
+  var _requestProbeCalled = false;
+
+  sinon.stub(farmers[0], '_requestProbe', function(c, cb) {
+    if (!_requestProbeCalled) {
+      _requestProbeCalled = true;
+      return cb(new Error('Probe failed'));
+    }
+    cb(null, {});
+  }); // NB: Force tunneling
 
   async.each(renters, function(node, next) {
     node.join(function noop() {});

@@ -236,7 +236,7 @@ async.timesSeries(redundancy, _getMirroringContract, function(err, sources) {
     return console.error(err);
   }
 
-  renter.createMirrors(sources, mirrors, function(err, completed) {
+  renter.getMirrorNodes(sources, mirrors, function(err, completed) {
     if (err) {
       return console.error('Failed to replicate to all mirrors');
     }

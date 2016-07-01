@@ -731,7 +731,11 @@ offer loop or until both parties have signed the same contract.
 Once a storage contract has been signed by both parties, the renter may execute
 the terms of the contract by issuing a `CONSIGN` message to the farmer. The
 purpose of this message is to deliver the data referenced by the contract for
-the farmer to store. The consign message must contain the hex-encoded
+the farmer to store.
+
+#### CONSIGN
+
+The consign message must contain the hex-encoded
 `data_shard` itself, the `contract_hash`, as well as an `audit_tree` that
 contains the bottom leaves of the audit strategy's merkle tree (see **Auditing
 a Storage Contract** below).
@@ -823,6 +827,8 @@ shards. Additionally, the amount of bandwidth consumed by the renter increases
 in the same way as the renter will have to upload the data for each redundant
 shard.
 
+#### MIRROR
+
 In these scenarios, renters can offload the burden of storing multiple copies
 of a shard to the farmers by issuing a `MIRROR` RPC in lieu of establishing
 a data channel. A `MIRROR` RPC instructs a contracted farmer to retrieve the
@@ -908,6 +914,8 @@ as hex. In order to ensure that the resulting merkle tree is properly
 the audit count. To ensure this, the additional leaves can simply be the double
 `RIPEMD160(SHA256(''))` (the same hash function for an audit, but applied to an
 empty buffer).
+
+#### AUDIT
 
 To audit a farmer is to request proof that it is still honoring the terms of
 the storage contract without the need to have them supply the entire
@@ -1012,7 +1020,7 @@ Conversely, if the verification succeeds and the renter does not issue the
 payment in a timely manner, then the contract is also null and the farmer may
 decide to cease storage of the data.
 
-### Downloading Consigned Data
+#### RETRIEVE
 
 When a renter wishes to retrieve data that is stored under contract, it can
 issue a `RETRIEVE` RPC message that includes the `data_hash` to the farmer

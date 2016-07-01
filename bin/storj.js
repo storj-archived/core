@@ -33,7 +33,7 @@ program.option('-k, --keypass <password>', 'unlock keyring without prompt');
 function log(type, message, args) {
   switch (type) {
     case 'debug':
-      message = colors.bold.magena(' [debug]  ') + message;
+      message = colors.bold.magenta(' [debug]  ') + message;
       break;
     case 'info':
       message = colors.bold.cyan(' [info]   ') + message;
@@ -46,6 +46,7 @@ function log(type, message, args) {
       break;
   }
 
+  message = colors.bold.gray(' [' + new Date() + ']') + message;
   console.log.apply(console, [message].concat(args || []));
 }
 

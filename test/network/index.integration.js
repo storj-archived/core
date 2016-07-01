@@ -205,6 +205,7 @@ describe('Network/Integration/Tunnelling', function() {
 
     it('should get successful mirrors', function(done) {
       this.timeout(12000);
+      kad.constants.T_RESPONSETIMEOUT = 6000;
       var _negotiator = sinon.stub(farmers[0], '_negotiator').returns(false);
       renter.getStorageOffer(contract, function(_farmer) {
         _negotiator.restore();

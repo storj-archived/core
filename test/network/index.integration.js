@@ -209,6 +209,7 @@ describe('Network/Integration/Tunnelling', function() {
       renter.getStorageOffer(contract, function(_farmer) {
         _negotiator.restore();
         renter.getRetrieveToken(farmer, contract, function(err, token) {
+          expect(err).to.equal(null);
           var pointers = [new DataChannelPointer(
             _farmer,
             contract.get('data_hash'),

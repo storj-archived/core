@@ -17,6 +17,9 @@ module.exports.Transport = require('./lib/network/transport');
 /** {@link Contact} */
 module.exports.Contact = require('./lib/network/contact');
 
+/** {@link ContactChecker} */
+module.exports.ContactChecker = require('./lib/network/contactchecker');
+
 /** {@link RateLimiter} */
 module.exports.RateLimiter = require('./lib/network/ratelimiter');
 

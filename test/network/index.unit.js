@@ -1,14 +1,20 @@
 'use strict';
 
+var sinon = require('sinon');
 var expect = require('chai').expect;
 var proxyquire = require('proxyquire');
 var EventEmitter = require('events').EventEmitter;
-var Network = require('../../lib/network');
+var Network = proxyquire('../../lib/network', {
+  './contactchecker': function() {
+    var emitter = new EventEmitter();
+    emitter.check = sinon.stub().callsArgWith(1, null);
+    return emitter;
+  }
+});
 var Manager = require('../../lib/manager');
 var KeyPair = require('../../lib/keypair');
 var RAMStorageAdapter = require('../../lib/storage/adapters/ram');
 var kad = require('kad');
-var sinon = require('sinon');
 var version = require('../../lib/version');
 var utils = require('../../lib/utils');
 var version = require('../../lib/version');
@@ -690,7 +696,7 @@ describe('Network (private)', function() {
       });
     });
 
-    it('should try to re-establish tunnel on probe fail', function(done) {
+    it('should try to re-establish tunnel on check fail', function(done) {
       var emitter = new EventEmitter();
       emitter.open = function() {
         emitter.emit('open');
@@ -700,6 +706,11 @@ describe('Network (private)', function() {
       };
       var TunClientStubNetwork = proxyquire('../../lib/network', {
         '../tunnel/client': function() {
+          return emitter;
+        },
+        './contactchecker': function() {
+          var emitter = new EventEmitter();
+          emitter.check = sinon.stub().callsArgWith(1, new Error('Failed'));
           return emitter;
         }
       });
@@ -748,6 +759,11 @@ describe('Network (private)', function() {
       var TunClientStubNetwork = proxyquire('../../lib/network', {
         '../tunnel/client': function() {
           return emitter;
+        },
+        './contactchecker': function() {
+          var emitter = new EventEmitter();
+          emitter.check = sinon.stub().callsArgWith(1, null);
+          return emitter;
         }
       });
       var net = TunClientStubNetwork({
@@ -787,6 +803,11 @@ describe('Network (private)', function() {
       };
       var TunClientStubNetwork = proxyquire('../../lib/network', {
         '../tunnel/client': function() {
+          return emitter;
+        },
+        './contactchecker': function() {
+          var emitter = new EventEmitter();
+          emitter.check = sinon.stub().callsArgWith(1, null);
           return emitter;
         }
       });

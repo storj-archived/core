@@ -912,7 +912,7 @@ program
   .action(ACTIONS.listbuckets);
 
 program
-  .command('get-bucket <id>')
+  .command('get-bucket <bucket-id>')
   .description('get specific storage bucket information')
   .action(ACTIONS.getbucket);
 
@@ -922,12 +922,12 @@ program
   .action(ACTIONS.addbucket);
 
 program
-  .command('remove-bucket <id>')
+  .command('remove-bucket <bucket-id>')
   .description('destroys a specific storage bucket')
   .action(ACTIONS.removebucket);
 
 program
-  .command('update-bucket <id> [name] [storage] [transfer]')
+  .command('update-bucket <bucket-id> [name] [storage] [transfer]')
   .description('updates a specific storage bucket')
   .action(ACTIONS.updatebucket);
 
@@ -942,48 +942,48 @@ program
   .action(ACTIONS.listframes);
 
 program
-  .command('get-frame <id>')
+  .command('get-frame <frame-id>')
   .description('retreives the file staging frame by id')
   .action(ACTIONS.getframe);
 
 program
-  .command('remove-frame <id>')
+  .command('remove-frame <frame-id>')
   .description('removes the file staging frame by id')
   .action(ACTIONS.removeframe);
 
 program
-  .command('list-files <bucket>')
+  .command('list-files <bucket-id>')
   .description('list the files in a specific storage bucket')
   .action(ACTIONS.listfiles);
 
 program
-  .command('remove-file <bucket> <id>')
+  .command('remove-file <bucket-id> <file-id>')
   .description('delete a file pointer from a specific bucket')
   .action(ACTIONS.removefile);
 
 program
-  .command('upload-file <bucket> <filepath>')
+  .command('upload-file <bucket-id> <filepath>')
   .option('-c, --concurrency <count>', 'max upload concurrency')
   .description('upload a file to the network and track in a bucket')
   .action(ACTIONS.uploadfile);
 
 program
-  .command('download-file <bucket> <id> <filepath>')
+  .command('download-file <bucket-id> <file-id> <filepath>')
   .description('download a file from the network with a pointer from a bucket')
   .action(ACTIONS.downloadfile);
 
 program
-  .command('stream-file <bucket> <id>')
+  .command('stream-file <bucket-id> <file-id>')
   .description('stream a file from the network and write to stdout')
   .action(ACTIONS.streamfile);
 
 program
-  .command('get-pointer <bucket> <id>')
+  .command('get-pointer <bucket-id> <file-id>')
   .description('get pointer metadata for a file in a bucket')
   .action(ACTIONS.getpointer);
 
 program
-  .command('create-token <bucket> <operation>')
+  .command('create-token <bucket-id> <operation>')
   .description('create a push or pull token for a file')
   .action(ACTIONS.getfile);
 

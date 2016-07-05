@@ -82,7 +82,7 @@ function makeTempDir(callback) {
 function loadKeyPair() {
   if (!fs.existsSync(KEYPATH)) {
     log('error', 'You have not authenticated, please login.');
-    process.exit();
+    process.exit(1);
   }
 
   return storj.KeyPair(fs.readFileSync(KEYPATH).toString());

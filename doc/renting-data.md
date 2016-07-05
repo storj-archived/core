@@ -195,6 +195,57 @@ implementing clients. If you do not wish to manage this yourself, consider
 running a [Bridge](https://github.com/storj/bridge) or using the
 [Storj API](https://storj.io).
 
+### Replicating Shards for Redundancy
+
+Once we have successfully consigned our data to a farmer, we can ensure that in
+the event that farmer disappears, our data can be recovered from elsewhere. We
+use mirrors to accomplish this. Mirroring is a method for *passively*
+replicating our data, meaning that instead of uploading it again, we instruct a
+new farmer to retrieve it from the location we already stored it.
+
+To do this we are going to need:
+
+* {@link DataChannelPointer} - for representing the location of the shard
+
+> We are also going to use the [async](https://github.com/caolan/async) module
+> for managing flow control.
+
+First we'll need to negotiate a few more contracts, then authorize some
+retrieval tokens (outlined later in this document), and finally request some
+mirrors.
+
+```
+var redundancy = 3;
+var mirrors = [];
+
+function _getMirroringContract(n, next) {
+  renter.getStorageOffer(contract, function(mirror, contract) {
+    renter.getRetrieveToken(farmer, contract, function(err, token) {
+      if (err) {
+        return next(err);
+      }
+
+      mirrors.push(mirror);
+      next(null, new storj.DataChannelPointer(farmer, hash, token));
+    });
+  });
+}
+
+async.timesSeries(redundancy, _getMirroringContract, function(err, sources) {
+  if (err) {
+    return console.error(err);
+  }
+
+  renter.getMirrorNodes(sources, mirrors, function(err, completed) {
+    if (err) {
+      return console.error('Failed to replicate to all mirrors');
+    }
+
+    console.info('Replicated to %s mirrors', completed.length);
+  });
+});
+```
+
 ### Auditing Farmer Storage
 
 Now that we have successfully consigned a shard, we will want to be sure that

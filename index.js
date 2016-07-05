@@ -29,6 +29,9 @@ module.exports.DataChannelClient = require('./lib/datachannel/client');
 /** {@link DataChannelServer} */
 module.exports.DataChannelServer = require('./lib/datachannel/server');
 
+/** {@link DataChannelPointer} */
+module.exports.DataChannelPointer = require('./lib/datachannel/pointer');
+
 /** {@link Protocol} */
 module.exports.Protocol = require('./lib/network/protocol');
 
@@ -118,3 +121,6 @@ module.exports.constants = require('./lib/constants');
 
 /** {@link utils} */
 module.exports.utils = require('./lib/utils');
+
+/** {@link deps} */
+module.exports.deps = require('./lib/deps');

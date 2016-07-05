@@ -731,7 +731,11 @@ offer loop or until both parties have signed the same contract.
 Once a storage contract has been signed by both parties, the renter may execute
 the terms of the contract by issuing a `CONSIGN` message to the farmer. The
 purpose of this message is to deliver the data referenced by the contract for
-the farmer to store. The consign message must contain the hex-encoded
+the farmer to store.
+
+#### CONSIGN
+
+The consign message must contain the hex-encoded
 `data_shard` itself, the `contract_hash`, as well as an `audit_tree` that
 contains the bottom leaves of the audit strategy's merkle tree (see **Auditing
 a Storage Contract** below).
@@ -778,8 +782,8 @@ to store the data and that the number of items in the `audit_tree` is equal to
 the next power of 2 of the `audit_count` supplied in the original contract.
 
 Once verified, the farmer must respond with a generated token that the renter
-can use to open a data channel with the farmer (via websocket) to deliver the
-data as a binary stream.
+or another authorized party can use to open a data channel with the farmer
+(via websocket) to deliver the data as a binary stream.
 
 > For more information on the Data Channel specification see the tutorial for
 > {@tutorial data-channels}.
@@ -807,6 +811,93 @@ done this, it must acknowledge the renter to confirm:
 }
 ```
 
+### Using Mirrors for Redundancy
+
+In most cases it is desirable for the renter to store multiple copies of the
+shard across a number of farmers in the event that one of the contracted
+farmers leaves the network, loses the data, or otherwise breaches the terms of
+the storage contract. This can be accomplished by simply performing an
+iterative `PUBLISH - OFFER - CONSIGN` loop for the desired level of redundancy,
+followed by the establishment of a data channel as described in
+{@tutorial data-channels}.
+
+However, this method can introduce a significant amount of latency for
+completing a full upload that increases linearly with the number of redundant
+shards. Additionally, the amount of bandwidth consumed by the renter increases
+in the same way as the renter will have to upload the data for each redundant
+shard.
+
+#### MIRROR
+
+In these scenarios, renters can offload the burden of storing multiple copies
+of a shard to the farmers by issuing a `MIRROR` RPC in lieu of establishing
+a data channel. A `MIRROR` RPC instructs a contracted farmer to retrieve the
+data already uploaded to another farmer by providing them with a retrieval
+token authorized by another farmer (this is performed by issuing a `RETRIEVE`
+RPC message - see *Downloading Consigned Data* later in this document). This
+allows the renter to incur the bandwidth and latency once and instead pay the
+recently contracted farmer to transfer the data to another farmer for
+redundancy.
+
+To initiate this process, instead of opening a data channel, issue a `MIRROR`
+RPC message to the farmer after contract negotiation is complete:
+
+```
+{
+  "method": "MIRROR",
+  "params": {
+    "data_hash": "4efc1c36d3349189fb3486d2914f56e05d3e66f8",
+    "token": "ce898e520cede42fd847ba5176b6d6b6ea47481f",
+    "farmer": {
+      "address": "remote.farmer.host",
+      "port": 4000,
+      "nodeID": "e77e46ceb7f8dbf2904eff254a479f90a4f8ddbd",
+      "protocol": "0.8.0"
+    },
+    "contact": {
+      "address": "10.0.0.2",
+      "port": 1337,
+      "nodeID": "48dc026fa01ae26822bfb23f98e725444d6775b0",
+      "protocol": "0.8.0"
+    },
+    "nonce": 1455216323786,
+    "signature": "304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c..."
+  },
+  "id": "7b6a2ab35da6826995abf3310a4875097df88cdb"
+}
+```
+
+> Note that you should wait until data is successfully consigned to the first
+> farmer before sending a `MIRROR` RPC for replication.
+
+Once the mirroring farmer receives the request, it should open a data channel
+to the original farmer and pass along the supplied token and data hash in the
+initial authorization frame. Once the mirroring farmer begins receiving data
+it must respond to the renter's request with a simple acknowledgement to
+indicate that the mirror operation was successfully initiated.
+
+```
+{
+  "result": {
+    "contact": {
+      "address": "10.0.0.2",
+      "port": 1337,
+      "nodeID": "48dc026fa01ae26822bfb23f98e725444d6775b0",
+      "protocol": "0.8.0"
+    },
+    "nonce": 1455216323786,
+    "signature": "304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c..."
+  },
+  "id": "7b6a2ab35da6826995abf3310a4875097df88cdb"
+}
+```
+
+> Note that data transfer may fail after the original acknowledgement. It is
+> important to regularly issue `AUDIT` messages to farmers storing your data.
+> If a mirror farmer later fails an audit, the renter should negotiate a new
+> contract and attempt to create a new mirror to retain the expected level of
+> redundancy.
+
 ### Auditing a Storage Contract
 
 Before a renter issues a `CONSIGN` RPC, it must pre-calculate a series of
@@ -823,6 +914,8 @@ as hex. In order to ensure that the resulting merkle tree is properly
 the audit count. To ensure this, the additional leaves can simply be the double
 `RIPEMD160(SHA256(''))` (the same hash function for an audit, but applied to an
 empty buffer).
+
+#### AUDIT
 
 To audit a farmer is to request proof that it is still honoring the terms of
 the storage contract without the need to have them supply the entire
@@ -927,7 +1020,7 @@ Conversely, if the verification succeeds and the renter does not issue the
 payment in a timely manner, then the contract is also null and the farmer may
 decide to cease storage of the data.
 
-### Downloading Consigned Data
+#### RETRIEVE
 
 When a renter wishes to retrieve data that is stored under contract, it can
 issue a `RETRIEVE` RPC message that includes the `data_hash` to the farmer

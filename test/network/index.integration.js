@@ -13,6 +13,7 @@ var DataChannelClient = require('../../lib/datachannel/client');
 var StorageItem = require('../../lib/storage/item');
 var Verification = require('../../lib/verification');
 var memdown = require('memdown');
+var DataChannelPointer = require('../../lib/datachannel/pointer');
 
 kad.constants.T_RESPONSETIMEOUT = 2000;
 
@@ -190,6 +191,37 @@ describe('Network/Integration/Tunnelling', function() {
         );
         expect(v[0]).to.equal(v[1]);
         done();
+      });
+    });
+
+  });
+
+  describe('#getMirrorNodes', function() {
+
+    before(function(done) {
+      this.timeout(10000);
+      createFarmer().join(done);
+    });
+
+    it('should get successful mirrors', function(done) {
+      this.timeout(12000);
+      kad.constants.T_RESPONSETIMEOUT = 6000;
+      var _negotiator = sinon.stub(farmers[0], '_negotiator').returns(false);
+      renter.getStorageOffer(contract, function(_farmer) {
+        _negotiator.restore();
+        renter.getRetrieveToken(farmer, contract, function(err, token) {
+          expect(err).to.equal(null);
+          var pointers = [new DataChannelPointer(
+            _farmer,
+            contract.get('data_hash'),
+            token,
+            'PULL'
+          )];
+          renter.getMirrorNodes(pointers, [_farmer], function(err, nodes) {
+            expect(nodes).to.have.lengthOf(1);
+            done();
+          });
+        });
       });
     });
 

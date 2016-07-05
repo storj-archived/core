@@ -12,6 +12,7 @@ var StorageItem = require('../../lib/storage/item');
 var RAMStorageAdapter = require('../../lib/storage/adapters/ram');
 var Manager = require('../../lib/manager');
 var AuditStream = require('../../lib/auditstream');
+var DataChannelPointer = require('../../lib/datachannel/pointer');
 
 describe('RenterInterface', function() {
 
@@ -295,6 +296,41 @@ describe('RenterInterface', function() {
       }), Contract({}), function(err) {
         _send.restore();
         expect(err.message).to.equal('FAILED');
+        done();
+      });
+    });
+
+  });
+
+  describe('#getMirrorNodes', function() {
+
+    it('should callback error if all nodes fail', function(done) {
+      var renter = new RenterInterface({
+        keypair: KeyPair(),
+        port: 0,
+        noforward: true,
+        logger: kad.Logger(0),
+        manager: Manager(RAMStorageAdapter())
+      });
+      var _send = sinon.stub(renter._transport, 'send').callsArgWith(
+        2,
+        new Error('Send failed')
+      );
+      renter.getMirrorNodes([DataChannelPointer(
+        Contact({
+          address: '0.0.0.0',
+          port: 0,
+          nodeID: utils.rmd160('contact')
+        }),
+        utils.rmd160('hash'),
+        utils.generateToken()
+      )], [Contact({
+        address: '0.0.0.0',
+        port: 0,
+        nodeID: utils.rmd160('contact')
+      })], function(err) {
+        _send.restore();
+        expect(err.message).to.equal('All mirror requests failed');
         done();
       });
     });

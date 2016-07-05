@@ -96,6 +96,31 @@ describe('Network/Transport', function() {
       });
     });
 
+    it('should bubble private ip error', function(done) {
+      var BadIPTransport = proxyquire('../../lib/network/transport', {
+        'nat-upnp': {
+          createClient: function() {
+            return {
+              portMapping: sinon.stub().callsArg(1),
+              externalIp: sinon.stub().callsArgWith(0, null, '127.0.0.1')
+            };
+          }
+        }
+      });
+      var transport = new BadIPTransport(Contact({
+        address: '127.0.0.1',
+        port: 0,
+        nodeID: KeyPair().getNodeID()
+      }));
+      transport.on('ready', function() {
+        expect(transport._isPublic).to.equal(false);
+        transport._forwardPort(function(err) {
+          expect(err.message).to.equal('UPnP device has no public IP address');
+          done();
+        });
+      });
+    });
+
     it('should bubble portfinder error', function(done) {
       var BadPortFinder = proxyquire('../../lib/network/transport', {
         portfinder: {

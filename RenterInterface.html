@@ -34,14 +34,14 @@
 			<li class="dropdown">
 				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="module-storj.html">storj</a></li><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_utils.html">storj/utils</a></li>
+					<li><a href="module-storj.html">storj</a></li><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_deps.html">storj/deps</a></li><li><a href="module-storj_utils.html">storj/utils</a></li>
 				</ul>
 			</li>
 			
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="AuditStream.html">AuditStream</a></li><li><a href="BridgeClient.html">BridgeClient</a></li><li><a href="Contact.html">Contact</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="DataCipherKeyIv.html">DataCipherKeyIv</a></li><li><a href="DecryptStream.html">DecryptStream</a></li><li><a href="EncryptStream.html">EncryptStream</a></li><li><a href="FarmerInterface.html">FarmerInterface</a></li><li><a href="FileDemuxer.html">FileDemuxer</a></li><li><a href="FileMuxer.html">FileMuxer</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="KeyRing.html">KeyRing</a></li><li><a href="LevelDBFileStore.html">LevelDBFileStore</a></li><li><a href="LevelDBStorageAdapter.html">LevelDBStorageAdapter</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Padder.html">Padder</a></li><li><a href="ProofStream.html">ProofStream</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="RateLimiter.html">RateLimiter</a></li><li><a href="RenterInterface.html">RenterInterface</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="StorageMigration.html">StorageMigration</a></li><li><a href="Transport.html">Transport</a></li><li><a href="TunnelClient.html">TunnelClient</a></li><li><a href="TunnelDemuxer.html">TunnelDemuxer</a></li><li><a href="TunnelerInterface.html">TunnelerInterface</a></li><li><a href="TunnelGateway.html">TunnelGateway</a></li><li><a href="TunnelMuxer.html">TunnelMuxer</a></li><li><a href="TunnelServer.html">TunnelServer</a></li><li><a href="Unpadder.html">Unpadder</a></li><li><a href="Verification.html">Verification</a></li>
+					<li><a href="AuditStream.html">AuditStream</a></li><li><a href="BridgeClient.html">BridgeClient</a></li><li><a href="Contact.html">Contact</a></li><li><a href="ContactChecker.html">ContactChecker</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelPointer.html">DataChannelPointer</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="DataCipherKeyIv.html">DataCipherKeyIv</a></li><li><a href="DecryptStream.html">DecryptStream</a></li><li><a href="EncryptStream.html">EncryptStream</a></li><li><a href="FarmerInterface.html">FarmerInterface</a></li><li><a href="FileDemuxer.html">FileDemuxer</a></li><li><a href="FileMuxer.html">FileMuxer</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="KeyRing.html">KeyRing</a></li><li><a href="LevelDBFileStore.html">LevelDBFileStore</a></li><li><a href="LevelDBStorageAdapter.html">LevelDBStorageAdapter</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Padder.html">Padder</a></li><li><a href="ProofStream.html">ProofStream</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="RateLimiter.html">RateLimiter</a></li><li><a href="RenterInterface.html">RenterInterface</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="StorageMigration.html">StorageMigration</a></li><li><a href="Transport.html">Transport</a></li><li><a href="TunnelClient.html">TunnelClient</a></li><li><a href="TunnelDemuxer.html">TunnelDemuxer</a></li><li><a href="TunnelerInterface.html">TunnelerInterface</a></li><li><a href="TunnelGateway.html">TunnelGateway</a></li><li><a href="TunnelMuxer.html">TunnelMuxer</a></li><li><a href="TunnelServer.html">TunnelServer</a></li><li><a href="Unpadder.html">Unpadder</a></li><li><a href="Verification.html">Verification</a></li>
 				</ul>
 			</li>
 			
@@ -390,6 +390,216 @@
             
 <hr>
 <dt>
+    <h4 class="name" id="getConsignmentPointer"><span class="type-signature"></span>getConsignmentPointer(farmer, contract, audit, callback)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Requests a consignment pointer from the given farmer for opening a
+<a href="DataChannelClient.html">DataChannelClient</a> for transferring the the data shard to the farmer
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>farmer</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Contact.html">Contact</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The farmer contact object for requesting token</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>contract</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Contract.html">Contract</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The storage contract for this consignment</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>audit</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="AuditStream.html">AuditStream</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The audit object for merkle leaves</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="RenterInterface.html#~getConsignmentPointerCallback">RenterInterface~getConsignmentPointerCallback</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_interfaces_renter.js.html">lib/interfaces/renter.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
     <h4 class="name" id="getConsignToken"><span class="type-signature"></span>getConsignToken(farmer, contract, audit, callback)</h4>
     
     
@@ -523,7 +733,202 @@
 
             
 
-            <td class="description last">Token handler</td>
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+	<dt class="important tag-deprecated method-doc-label method-doc-details-label">Deprecated:</dt>
+	
+    <dd>
+        <ul class="dummy">
+            <li>since version 1.4.0</li>
+        </ul>
+    </dd>
+    
+    
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_interfaces_renter.js.html">lib/interfaces/renter.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getMirrorNodes"><span class="type-signature"></span>getMirrorNodes(sources, destinations, callback)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Requests that the given destination farmers mirror the data from the source
+<a href="DataChannelPointer.html">DataChannelPointer</a>.
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>sources</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;<a href="DataChannelPointer.html">DataChannelPointer</a>></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Pointers for each destination</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>destinations</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;<a href="Contact.html">Contact</a>></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The farmers to replicate to</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="RenterInterface.html#~getMirrorNodesCallback">RenterInterface~getMirrorNodesCallback</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Results handler</td>
         </tr>
 
     
@@ -600,7 +1005,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="getRetrieveToken"><span class="type-signature"></span>getRetrieveToken(farmer, contract, callback)</h4>
+    <h4 class="name" id="getRetrievalPointer"><span class="type-signature"></span>getRetrievalPointer(farmer, contract, callback)</h4>
     
     
 </dt>
@@ -698,7 +1103,7 @@
             <td class="type">
             
                 
-<span class="param-type"><a href="RenterInterface.html#~getRetrieveTokenCallback">RenterInterface~getRetrieveTokenCallback</a></span>
+<span class="param-type"><a href="RenterInterface.html#~getRetrievalPointerCallback">RenterInterface~getRetrievalPointerCallback</a></span>
 
 
 
@@ -737,6 +1142,201 @@
     
 
 	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_interfaces_renter.js.html">lib/interfaces/renter.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getRetrieveToken"><span class="type-signature"></span>getRetrieveToken(farmer, contract, callback)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Requests a retrieval token from the given farmer for opening a
+<a href="DataChannelClient.html">DataChannelClient</a> for transferring the the data shard from the farmer
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>farmer</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Contact.html">Contact</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The farmer contact object for requesting token</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>contract</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Contract.html">Contract</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The storage contract for this retrieval</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="RenterInterface.html#~getConsignTokenCallback">RenterInterface~getConsignTokenCallback</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+	<dt class="important tag-deprecated method-doc-label method-doc-details-label">Deprecated:</dt>
+	
+    <dd>
+        <ul class="dummy">
+            <li>since version 1.4.0</li>
+        </ul>
+    </dd>
+    
+    
 
 	
 
@@ -1796,6 +2396,171 @@ supplied shard metadata.
                 
 <hr>
 <dt>
+    <h4 class="name" id="~getConsignmentPointerCallback"><span class="type-signature"></span>getConsignmentPointerCallback(err, pointer)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        This callback is called upon receipt of a consignment token from
+<a href="RenterInterface.html#getConsignmentPointer">RenterInterface#getConsignmentPointer</a>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>err</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Error</span>
+|
+
+<span class="param-type">null</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">If requesting the token failed, an error object</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>pointer</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="DataChannelPointer.html">DataChannelPointer</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Pointer for a <a href="DataChannelClient.html">DataChannelClient</a></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_interfaces_renter.js.html">lib/interfaces/renter.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
     <h4 class="name" id="~getConsignTokenCallback"><span class="type-signature"></span>getConsignTokenCallback(err, token)</h4>
     
     
@@ -1961,7 +2726,7 @@ supplied shard metadata.
                 
 <hr>
 <dt>
-    <h4 class="name" id="~getRetrieveTokenCallback"><span class="type-signature"></span>getRetrieveTokenCallback(err, token)</h4>
+    <h4 class="name" id="~getConsignTokenCallback"><span class="type-signature"></span>getConsignTokenCallback(err, token)</h4>
     
     
 </dt>
@@ -1969,8 +2734,8 @@ supplied shard metadata.
 
     
     <div class="description">
-        This callback is called upon receipt of a retrieval token from
-<a href="RenterInterface.html#getRetrieveToken">RenterInterface#getRetrieveToken</a>
+        This callback is called upon receipt of a consignment token from
+<a href="RenterInterface.html#getConsignToken">RenterInterface#getConsignToken</a>
     </div>
     
 
@@ -2050,6 +2815,335 @@ supplied shard metadata.
             
 
             <td class="description last">Consignment token for a <a href="DataChannelClient.html">DataChannelClient</a></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_interfaces_renter.js.html">lib/interfaces/renter.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    <h4 class="name" id="~getMirrorNodesCallback"><span class="type-signature"></span>getMirrorNodesCallback(err, results)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        This callback is called upon acknowledgement of a mirror request
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>err</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Error</span>
+|
+
+<span class="param-type">null</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">If requesting all mirrors failed, an error object</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>results</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;<a href="Contact.html">Contact</a>></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The farmers who successfully mirrored</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_interfaces_renter.js.html">lib/interfaces/renter.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    <h4 class="name" id="~getRetrievalPointerCallback"><span class="type-signature"></span>getRetrievalPointerCallback(err, pointer)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        This callback is called upon receipt of a retrieval token from
+<a href="RenterInterface.html#getRetrieveToken">RenterInterface#getRetrieveToken</a>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>err</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Error</span>
+|
+
+<span class="param-type">null</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">If requesting the token failed, an error object</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>pointer</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="DataChannelPointer.html">DataChannelPointer</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Pointer for a <a href="DataChannelClient.html">DataChannelClient</a></td>
         </tr>
 
     

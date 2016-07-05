@@ -34,14 +34,14 @@
 			<li class="dropdown">
 				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="module-storj.html">storj</a></li><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_utils.html">storj/utils</a></li>
+					<li><a href="module-storj.html">storj</a></li><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_deps.html">storj/deps</a></li><li><a href="module-storj_utils.html">storj/utils</a></li>
 				</ul>
 			</li>
 			
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="AuditStream.html">AuditStream</a></li><li><a href="BridgeClient.html">BridgeClient</a></li><li><a href="Contact.html">Contact</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="DataCipherKeyIv.html">DataCipherKeyIv</a></li><li><a href="DecryptStream.html">DecryptStream</a></li><li><a href="EncryptStream.html">EncryptStream</a></li><li><a href="FarmerInterface.html">FarmerInterface</a></li><li><a href="FileDemuxer.html">FileDemuxer</a></li><li><a href="FileMuxer.html">FileMuxer</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="KeyRing.html">KeyRing</a></li><li><a href="LevelDBFileStore.html">LevelDBFileStore</a></li><li><a href="LevelDBStorageAdapter.html">LevelDBStorageAdapter</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Padder.html">Padder</a></li><li><a href="ProofStream.html">ProofStream</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="RateLimiter.html">RateLimiter</a></li><li><a href="RenterInterface.html">RenterInterface</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="StorageMigration.html">StorageMigration</a></li><li><a href="Transport.html">Transport</a></li><li><a href="TunnelClient.html">TunnelClient</a></li><li><a href="TunnelDemuxer.html">TunnelDemuxer</a></li><li><a href="TunnelerInterface.html">TunnelerInterface</a></li><li><a href="TunnelGateway.html">TunnelGateway</a></li><li><a href="TunnelMuxer.html">TunnelMuxer</a></li><li><a href="TunnelServer.html">TunnelServer</a></li><li><a href="Unpadder.html">Unpadder</a></li><li><a href="Verification.html">Verification</a></li>
+					<li><a href="AuditStream.html">AuditStream</a></li><li><a href="BridgeClient.html">BridgeClient</a></li><li><a href="Contact.html">Contact</a></li><li><a href="ContactChecker.html">ContactChecker</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelPointer.html">DataChannelPointer</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="DataCipherKeyIv.html">DataCipherKeyIv</a></li><li><a href="DecryptStream.html">DecryptStream</a></li><li><a href="EncryptStream.html">EncryptStream</a></li><li><a href="FarmerInterface.html">FarmerInterface</a></li><li><a href="FileDemuxer.html">FileDemuxer</a></li><li><a href="FileMuxer.html">FileMuxer</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="KeyRing.html">KeyRing</a></li><li><a href="LevelDBFileStore.html">LevelDBFileStore</a></li><li><a href="LevelDBStorageAdapter.html">LevelDBStorageAdapter</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Padder.html">Padder</a></li><li><a href="ProofStream.html">ProofStream</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="RateLimiter.html">RateLimiter</a></li><li><a href="RenterInterface.html">RenterInterface</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="StorageMigration.html">StorageMigration</a></li><li><a href="Transport.html">Transport</a></li><li><a href="TunnelClient.html">TunnelClient</a></li><li><a href="TunnelDemuxer.html">TunnelDemuxer</a></li><li><a href="TunnelerInterface.html">TunnelerInterface</a></li><li><a href="TunnelGateway.html">TunnelGateway</a></li><li><a href="TunnelMuxer.html">TunnelMuxer</a></li><li><a href="TunnelServer.html">TunnelServer</a></li><li><a href="Unpadder.html">Unpadder</a></li><li><a href="Verification.html">Verification</a></li>
 				</ul>
 			</li>
 			
@@ -98,6 +98,7 @@ var assert = require('assert');
 var events = require('events');
 var inherits = require('util').inherits;
 var url = require('url');
+var DataChannelPointer = require('./pointer');
 
 /**
  * Creates a data channel client for sending and receiving consigned file shards
@@ -185,6 +186,14 @@ DataChannelClient.prototype.createWriteStream = function(token, hash) {
   var self = this;
   var auth = false;
 
+  function sendData(chunk, next) {
+    if (WebSocketClient.OPEN !== self._client.readyState) {
+      return self.emit('error', new Error('Remote host terminated early'));
+    }
+
+    self._client.send(chunk, { binary: true }, next);
+  }
+
   var wstream = new stream.Writable({
     write: function(chunk, encoding, next) {
       if (!auth) {
@@ -194,11 +203,11 @@ DataChannelClient.prototype.createWriteStream = function(token, hash) {
           operation: 'PUSH'
         }), function() {
           auth = true;
-          self._client.send(chunk, { binary: true }, next);
+          sendData(chunk, next);
         });
       }
 
-      self._client.send(chunk, { binary: true }, next);
+      sendData(chunk, next);
     }
   });
 
@@ -244,10 +253,40 @@ DataChannelClient.getChannelURL = function(contact) {
   return url.format({
     protocol: 'ws',
     slashes: true,
-    hostname: contact.address,
+    hostname: contact.address.trim(),
     port: contact.port
   });
 };
+
+/**
+ * Creates a Readable or Writable stream from a {@link DataChannelPointer}
+ * @static
+ * @param {DataChannelPointer} pointer - The pointer to create stream
+ * @param {DataChannelClient~getStreamFromPointerCallback} callback
+ */
+DataChannelClient.getStreamFromPointer = function(pointer, callback) {
+  assert(pointer instanceof DataChannelPointer, 'Invalid pointer supplied');
+
+  var dcx = new DataChannelClient(pointer.farmer);
+
+  dcx.on('error', callback).on('open', function() {
+    dcx.removeAllListeners('error');
+
+    if (pointer.operation === 'PUSH') {
+      callback(null, dcx.createWriteStream(pointer.token, pointer.hash));
+    } else {
+      callback(null, dcx.createReadStream(pointer.token, pointer.hash));
+    }
+  });
+
+  return dcx;
+};
+/**
+ * This callback is called when the client is open and stream is created
+ * @callback DataChannelClient~getStreamFromPointerCallback
+ * @param {Error|null} err - If opening client failed, an error object
+ * @param {stream.Writable|stream.Readable} stream - The data channel stream
+ */
 
 module.exports = DataChannelClient;
 </pre>

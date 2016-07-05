@@ -34,14 +34,14 @@
 			<li class="dropdown">
 				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="module-storj.html">storj</a></li><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_utils.html">storj/utils</a></li>
+					<li><a href="module-storj.html">storj</a></li><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_deps.html">storj/deps</a></li><li><a href="module-storj_utils.html">storj/utils</a></li>
 				</ul>
 			</li>
 			
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="AuditStream.html">AuditStream</a></li><li><a href="BridgeClient.html">BridgeClient</a></li><li><a href="Contact.html">Contact</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="DataCipherKeyIv.html">DataCipherKeyIv</a></li><li><a href="DecryptStream.html">DecryptStream</a></li><li><a href="EncryptStream.html">EncryptStream</a></li><li><a href="FarmerInterface.html">FarmerInterface</a></li><li><a href="FileDemuxer.html">FileDemuxer</a></li><li><a href="FileMuxer.html">FileMuxer</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="KeyRing.html">KeyRing</a></li><li><a href="LevelDBFileStore.html">LevelDBFileStore</a></li><li><a href="LevelDBStorageAdapter.html">LevelDBStorageAdapter</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Padder.html">Padder</a></li><li><a href="ProofStream.html">ProofStream</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="RateLimiter.html">RateLimiter</a></li><li><a href="RenterInterface.html">RenterInterface</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="StorageMigration.html">StorageMigration</a></li><li><a href="Transport.html">Transport</a></li><li><a href="TunnelClient.html">TunnelClient</a></li><li><a href="TunnelDemuxer.html">TunnelDemuxer</a></li><li><a href="TunnelerInterface.html">TunnelerInterface</a></li><li><a href="TunnelGateway.html">TunnelGateway</a></li><li><a href="TunnelMuxer.html">TunnelMuxer</a></li><li><a href="TunnelServer.html">TunnelServer</a></li><li><a href="Unpadder.html">Unpadder</a></li><li><a href="Verification.html">Verification</a></li>
+					<li><a href="AuditStream.html">AuditStream</a></li><li><a href="BridgeClient.html">BridgeClient</a></li><li><a href="Contact.html">Contact</a></li><li><a href="ContactChecker.html">ContactChecker</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelPointer.html">DataChannelPointer</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="DataCipherKeyIv.html">DataCipherKeyIv</a></li><li><a href="DecryptStream.html">DecryptStream</a></li><li><a href="EncryptStream.html">EncryptStream</a></li><li><a href="FarmerInterface.html">FarmerInterface</a></li><li><a href="FileDemuxer.html">FileDemuxer</a></li><li><a href="FileMuxer.html">FileMuxer</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="KeyRing.html">KeyRing</a></li><li><a href="LevelDBFileStore.html">LevelDBFileStore</a></li><li><a href="LevelDBStorageAdapter.html">LevelDBStorageAdapter</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Padder.html">Padder</a></li><li><a href="ProofStream.html">ProofStream</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="RateLimiter.html">RateLimiter</a></li><li><a href="RenterInterface.html">RenterInterface</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="StorageMigration.html">StorageMigration</a></li><li><a href="Transport.html">Transport</a></li><li><a href="TunnelClient.html">TunnelClient</a></li><li><a href="TunnelDemuxer.html">TunnelDemuxer</a></li><li><a href="TunnelerInterface.html">TunnelerInterface</a></li><li><a href="TunnelGateway.html">TunnelGateway</a></li><li><a href="TunnelMuxer.html">TunnelMuxer</a></li><li><a href="TunnelServer.html">TunnelServer</a></li><li><a href="Unpadder.html">Unpadder</a></li><li><a href="Verification.html">Verification</a></li>
 				</ul>
 			</li>
 			
@@ -102,6 +102,7 @@ var kad = require('kad');
 var async = require('async');
 var Contact =  require('./contact');
 var constants = require('../constants');
+var DataChannelClient = require('../datachannel/client');
 
 /**
  * Defines the Storj protocol methods and mounts on a {@link Network} instance
@@ -288,11 +289,17 @@ Protocol.prototype._handleConsign = function(params, callback) {
 
     var contract = item.contracts[params.contact.nodeID];
     var t = Date.now();
+
+    if (!contract) {
+      return callback(new Error('Consignment is not authorized'));
+    }
+
     item.trees[contract.get('renter_id')] = params.audit_tree;
 
     try {
       assert(
-        t &lt; contract.get('store_end') &amp;&amp; t > contract.get('store_begin'),
+        t &lt; contract.get('store_end') &amp;&amp;
+        t + constants.CONSIGN_THRESHOLD > contract.get('store_begin'),
         'Consignment violates contract store time'
       );
     } catch (err) {
@@ -315,6 +322,49 @@ Protocol.prototype._handleConsign = function(params, callback) {
 };
 
 /**
+ * Handles MIRROR messages
+ * @private
+ * @param {Object} params
+ * @param {Function} callback
+ */
+Protocol.prototype._handleMirror = function(params, callback) {
+  var self = this;
+  var hash = params.data_hash;
+  var token = params.token;
+
+  self._network._manager.load(hash, function(err, item) {
+    if (err) {
+      return callback(err);
+    }
+
+    // NB: Don't mirror data we are not contracted for
+    if (!item.contracts[params.contact.nodeID]) {
+      return callback(new Error('No contract found for shard'));
+    }
+
+    // NB: Don't mirror if we already have the shard
+    if (typeof item.shard.write !== 'function') {
+      return callback(null, {});
+    }
+
+    self._logger.info(
+      'opening datachannel with %j to mirror %s',
+      params.farmer,
+      hash
+    );
+
+    var dcx = new DataChannelClient(params.farmer);
+
+    dcx.on('error', callback).on('open', function() {
+      self._logger.info('datachannel successfully established for mirror');
+      dcx.removeAllListeners('error');
+      dcx.createReadStream(token, hash).pipe(item.shard);
+      callback(null, {});
+    });
+  });
+};
+
+/**
  * Handles RETRIEVE messages
  * @private
  * @param {Object} params
@@ -325,14 +375,14 @@ Protocol.prototype._handleRetrieve = function(params, callback) {
   var hash = params.data_hash;
   var token = utils.generateToken();
 
-  // TODO: We will need to increment the download count to track payments, as
-  // TODO: well as make sure that the requester is allowed to fetch the shard
-  // TODO: as part of the contract.
-
   self._network._manager.load(hash, function(err, item) {
     if (err) {
       return callback(err);
     }
+
+    // TODO: We will need to increment the download count to track payments, as
+    // TODO: well as make sure that the requester is allowed to fetch the shard
+    // TODO: as part of the contract.
 
     self._logger.info(
       'authorizing data channel for %s', params.contact.nodeID
@@ -501,6 +551,7 @@ Protocol.prototype.handlers = function() {
     OFFER: this._handleOffer.bind(this),
     AUDIT: this._handleAudit.bind(this),
     CONSIGN: this._handleConsign.bind(this),
+    MIRROR: this._handleMirror.bind(this),
     RETRIEVE: this._handleRetrieve.bind(this),
     PROBE: this._handleProbe.bind(this),
     FIND_TUNNEL: this._handleFindTunnel.bind(this),

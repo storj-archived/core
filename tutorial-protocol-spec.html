@@ -34,14 +34,14 @@
 			<li class="dropdown">
 				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="module-storj.html">storj</a></li><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_utils.html">storj/utils</a></li>
+					<li><a href="module-storj.html">storj</a></li><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_deps.html">storj/deps</a></li><li><a href="module-storj_utils.html">storj/utils</a></li>
 				</ul>
 			</li>
 			
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="AuditStream.html">AuditStream</a></li><li><a href="BridgeClient.html">BridgeClient</a></li><li><a href="Contact.html">Contact</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="DataCipherKeyIv.html">DataCipherKeyIv</a></li><li><a href="DecryptStream.html">DecryptStream</a></li><li><a href="EncryptStream.html">EncryptStream</a></li><li><a href="FarmerInterface.html">FarmerInterface</a></li><li><a href="FileDemuxer.html">FileDemuxer</a></li><li><a href="FileMuxer.html">FileMuxer</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="KeyRing.html">KeyRing</a></li><li><a href="LevelDBFileStore.html">LevelDBFileStore</a></li><li><a href="LevelDBStorageAdapter.html">LevelDBStorageAdapter</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Padder.html">Padder</a></li><li><a href="ProofStream.html">ProofStream</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="RateLimiter.html">RateLimiter</a></li><li><a href="RenterInterface.html">RenterInterface</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="StorageMigration.html">StorageMigration</a></li><li><a href="Transport.html">Transport</a></li><li><a href="TunnelClient.html">TunnelClient</a></li><li><a href="TunnelDemuxer.html">TunnelDemuxer</a></li><li><a href="TunnelerInterface.html">TunnelerInterface</a></li><li><a href="TunnelGateway.html">TunnelGateway</a></li><li><a href="TunnelMuxer.html">TunnelMuxer</a></li><li><a href="TunnelServer.html">TunnelServer</a></li><li><a href="Unpadder.html">Unpadder</a></li><li><a href="Verification.html">Verification</a></li>
+					<li><a href="AuditStream.html">AuditStream</a></li><li><a href="BridgeClient.html">BridgeClient</a></li><li><a href="Contact.html">Contact</a></li><li><a href="ContactChecker.html">ContactChecker</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelPointer.html">DataChannelPointer</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="DataCipherKeyIv.html">DataCipherKeyIv</a></li><li><a href="DecryptStream.html">DecryptStream</a></li><li><a href="EncryptStream.html">EncryptStream</a></li><li><a href="FarmerInterface.html">FarmerInterface</a></li><li><a href="FileDemuxer.html">FileDemuxer</a></li><li><a href="FileMuxer.html">FileMuxer</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="KeyRing.html">KeyRing</a></li><li><a href="LevelDBFileStore.html">LevelDBFileStore</a></li><li><a href="LevelDBStorageAdapter.html">LevelDBStorageAdapter</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Padder.html">Padder</a></li><li><a href="ProofStream.html">ProofStream</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="RateLimiter.html">RateLimiter</a></li><li><a href="RenterInterface.html">RenterInterface</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="StorageMigration.html">StorageMigration</a></li><li><a href="Transport.html">Transport</a></li><li><a href="TunnelClient.html">TunnelClient</a></li><li><a href="TunnelDemuxer.html">TunnelDemuxer</a></li><li><a href="TunnelerInterface.html">TunnelerInterface</a></li><li><a href="TunnelGateway.html">TunnelGateway</a></li><li><a href="TunnelMuxer.html">TunnelMuxer</a></li><li><a href="TunnelServer.html">TunnelServer</a></li><li><a href="Unpadder.html">Unpadder</a></li><li><a href="Verification.html">Verification</a></li>
 				</ul>
 			</li>
 			
@@ -672,7 +672,8 @@ that can be keyed by the <code>data_hash</code>.</p>
 <h3>Executing a Storage Contract</h3><p>Once a storage contract has been signed by both parties, the renter may execute
 the terms of the contract by issuing a <code>CONSIGN</code> message to the farmer. The
 purpose of this message is to deliver the data referenced by the contract for
-the farmer to store. The consign message must contain the hex-encoded
+the farmer to store.</p>
+<h4>CONSIGN</h4><p>The consign message must contain the hex-encoded
 <code>data_shard</code> itself, the <code>contract_hash</code>, as well as an <code>audit_tree</code> that
 contains the bottom leaves of the audit strategy's merkle tree (see <strong>Auditing
 a Storage Contract</strong> below).</p>
@@ -713,8 +714,8 @@ contract by the supplied <code>data_hash</code> and verify that the renter is au
 to store the data and that the number of items in the <code>audit_tree</code> is equal to
 the next power of 2 of the <code>audit_count</code> supplied in the original contract.</p>
 <p>Once verified, the farmer must respond with a generated token that the renter
-can use to open a data channel with the farmer (via websocket) to deliver the
-data as a binary stream.</p>
+or another authorized party can use to open a data channel with the farmer
+(via websocket) to deliver the data as a binary stream.</p>
 <blockquote>
 <p>For more information on the Data Channel specification see the tutorial for
 <a href="tutorial-data-channels.html">Transferring File Shards</a>.</p>
@@ -737,7 +738,79 @@ done this, it must acknowledge the renter to confirm:</p>
     &quot;signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
   },
   &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
-}</code></pre><h3>Auditing a Storage Contract</h3><p>Before a renter issues a <code>CONSIGN</code> RPC, it must pre-calculate a series of
+}</code></pre><h3>Using Mirrors for Redundancy</h3><p>In most cases it is desirable for the renter to store multiple copies of the
+shard across a number of farmers in the event that one of the contracted
+farmers leaves the network, loses the data, or otherwise breaches the terms of
+the storage contract. This can be accomplished by simply performing an
+iterative <code>PUBLISH - OFFER - CONSIGN</code> loop for the desired level of redundancy,
+followed by the establishment of a data channel as described in
+<a href="tutorial-data-channels.html">Transferring File Shards</a>.</p>
+<p>However, this method can introduce a significant amount of latency for
+completing a full upload that increases linearly with the number of redundant
+shards. Additionally, the amount of bandwidth consumed by the renter increases
+in the same way as the renter will have to upload the data for each redundant
+shard.</p>
+<h4>MIRROR</h4><p>In these scenarios, renters can offload the burden of storing multiple copies
+of a shard to the farmers by issuing a <code>MIRROR</code> RPC in lieu of establishing
+a data channel. A <code>MIRROR</code> RPC instructs a contracted farmer to retrieve the
+data already uploaded to another farmer by providing them with a retrieval
+token authorized by another farmer (this is performed by issuing a <code>RETRIEVE</code>
+RPC message - see <em>Downloading Consigned Data</em> later in this document). This
+allows the renter to incur the bandwidth and latency once and instead pay the
+recently contracted farmer to transfer the data to another farmer for
+redundancy.</p>
+<p>To initiate this process, instead of opening a data channel, issue a <code>MIRROR</code>
+RPC message to the farmer after contract negotiation is complete:</p>
+<pre class="prettyprint source"><code>{
+  &quot;method&quot;: &quot;MIRROR&quot;,
+  &quot;params&quot;: {
+    &quot;data_hash&quot;: &quot;4efc1c36d3349189fb3486d2914f56e05d3e66f8&quot;,
+    &quot;token&quot;: &quot;ce898e520cede42fd847ba5176b6d6b6ea47481f&quot;,
+    &quot;farmer&quot;: {
+      &quot;address&quot;: &quot;remote.farmer.host&quot;,
+      &quot;port&quot;: 4000,
+      &quot;nodeID&quot;: &quot;e77e46ceb7f8dbf2904eff254a479f90a4f8ddbd&quot;,
+      &quot;protocol&quot;: &quot;0.8.0&quot;
+    },
+    &quot;contact&quot;: {
+      &quot;address&quot;: &quot;10.0.0.2&quot;,
+      &quot;port&quot;: 1337,
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+      &quot;protocol&quot;: &quot;0.8.0&quot;
+    },
+    &quot;nonce&quot;: 1455216323786,
+    &quot;signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+  },
+  &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
+}</code></pre><blockquote>
+<p>Note that you should wait until data is successfully consigned to the first
+farmer before sending a <code>MIRROR</code> RPC for replication.</p>
+</blockquote>
+<p>Once the mirroring farmer receives the request, it should open a data channel
+to the original farmer and pass along the supplied token and data hash in the
+initial authorization frame. Once the mirroring farmer begins receiving data
+it must respond to the renter's request with a simple acknowledgement to
+indicate that the mirror operation was successfully initiated.</p>
+<pre class="prettyprint source"><code>{
+  &quot;result&quot;: {
+    &quot;contact&quot;: {
+      &quot;address&quot;: &quot;10.0.0.2&quot;,
+      &quot;port&quot;: 1337,
+      &quot;nodeID&quot;: &quot;48dc026fa01ae26822bfb23f98e725444d6775b0&quot;,
+      &quot;protocol&quot;: &quot;0.8.0&quot;
+    },
+    &quot;nonce&quot;: 1455216323786,
+    &quot;signature&quot;: &quot;304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c...&quot;
+  },
+  &quot;id&quot;: &quot;7b6a2ab35da6826995abf3310a4875097df88cdb&quot;
+}</code></pre><blockquote>
+<p>Note that data transfer may fail after the original acknowledgement. It is
+important to regularly issue <code>AUDIT</code> messages to farmers storing your data.
+If a mirror farmer later fails an audit, the renter should negotiate a new
+contract and attempt to create a new mirror to retain the expected level of
+redundancy.</p>
+</blockquote>
+<h3>Auditing a Storage Contract</h3><p>Before a renter issues a <code>CONSIGN</code> RPC, it must pre-calculate a series of
 &quot;challenges&quot;, the number of which must equal the <code>audit_count</code> defined in the
 negotiated contract. A challenge is simply 32 random bytes encoded as hex. The
 generated challenges must not be shared until the renter wishes to issue an
@@ -750,7 +823,7 @@ as hex. In order to ensure that the resulting merkle tree is properly
 the audit count. To ensure this, the additional leaves can simply be the double
 <code>RIPEMD160(SHA256(''))</code> (the same hash function for an audit, but applied to an
 empty buffer).</p>
-<p>To audit a farmer is to request proof that it is still honoring the terms of
+<h4>AUDIT</h4><p>To audit a farmer is to request proof that it is still honoring the terms of
 the storage contract without the need to have them supply the entire
 <code>data_shard</code>. To do this, the renter must supply the farmer with one of the
 secret pre-calculated challenges:</p>
@@ -822,7 +895,7 @@ the original contract. The amount of the payment should be equal to:</p>
 Conversely, if the verification succeeds and the renter does not issue the
 payment in a timely manner, then the contract is also null and the farmer may
 decide to cease storage of the data.</p>
-<h3>Downloading Consigned Data</h3><p>When a renter wishes to retrieve data that is stored under contract, it can
+<h4>RETRIEVE</h4><p>When a renter wishes to retrieve data that is stored under contract, it can
 issue a <code>RETRIEVE</code> RPC message that includes the <code>data_hash</code> to the farmer
 storing the data:</p>
 <pre class="prettyprint source"><code>{

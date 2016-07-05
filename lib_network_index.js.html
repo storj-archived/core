@@ -34,14 +34,14 @@
 			<li class="dropdown">
 				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="module-storj.html">storj</a></li><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_utils.html">storj/utils</a></li>
+					<li><a href="module-storj.html">storj</a></li><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_deps.html">storj/deps</a></li><li><a href="module-storj_utils.html">storj/utils</a></li>
 				</ul>
 			</li>
 			
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="AuditStream.html">AuditStream</a></li><li><a href="BridgeClient.html">BridgeClient</a></li><li><a href="Contact.html">Contact</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="DataCipherKeyIv.html">DataCipherKeyIv</a></li><li><a href="DecryptStream.html">DecryptStream</a></li><li><a href="EncryptStream.html">EncryptStream</a></li><li><a href="FarmerInterface.html">FarmerInterface</a></li><li><a href="FileDemuxer.html">FileDemuxer</a></li><li><a href="FileMuxer.html">FileMuxer</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="KeyRing.html">KeyRing</a></li><li><a href="LevelDBFileStore.html">LevelDBFileStore</a></li><li><a href="LevelDBStorageAdapter.html">LevelDBStorageAdapter</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Padder.html">Padder</a></li><li><a href="ProofStream.html">ProofStream</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="RateLimiter.html">RateLimiter</a></li><li><a href="RenterInterface.html">RenterInterface</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="StorageMigration.html">StorageMigration</a></li><li><a href="Transport.html">Transport</a></li><li><a href="TunnelClient.html">TunnelClient</a></li><li><a href="TunnelDemuxer.html">TunnelDemuxer</a></li><li><a href="TunnelerInterface.html">TunnelerInterface</a></li><li><a href="TunnelGateway.html">TunnelGateway</a></li><li><a href="TunnelMuxer.html">TunnelMuxer</a></li><li><a href="TunnelServer.html">TunnelServer</a></li><li><a href="Unpadder.html">Unpadder</a></li><li><a href="Verification.html">Verification</a></li>
+					<li><a href="AuditStream.html">AuditStream</a></li><li><a href="BridgeClient.html">BridgeClient</a></li><li><a href="Contact.html">Contact</a></li><li><a href="ContactChecker.html">ContactChecker</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelPointer.html">DataChannelPointer</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="DataCipherKeyIv.html">DataCipherKeyIv</a></li><li><a href="DecryptStream.html">DecryptStream</a></li><li><a href="EncryptStream.html">EncryptStream</a></li><li><a href="FarmerInterface.html">FarmerInterface</a></li><li><a href="FileDemuxer.html">FileDemuxer</a></li><li><a href="FileMuxer.html">FileMuxer</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="KeyRing.html">KeyRing</a></li><li><a href="LevelDBFileStore.html">LevelDBFileStore</a></li><li><a href="LevelDBStorageAdapter.html">LevelDBStorageAdapter</a></li><li><a href="Manager.html">Manager</a></li><li><a href="Network.html">Network</a></li><li><a href="Padder.html">Padder</a></li><li><a href="ProofStream.html">ProofStream</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="RateLimiter.html">RateLimiter</a></li><li><a href="RenterInterface.html">RenterInterface</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="StorageMigration.html">StorageMigration</a></li><li><a href="Transport.html">Transport</a></li><li><a href="TunnelClient.html">TunnelClient</a></li><li><a href="TunnelDemuxer.html">TunnelDemuxer</a></li><li><a href="TunnelerInterface.html">TunnelerInterface</a></li><li><a href="TunnelGateway.html">TunnelGateway</a></li><li><a href="TunnelMuxer.html">TunnelMuxer</a></li><li><a href="TunnelServer.html">TunnelServer</a></li><li><a href="Unpadder.html">Unpadder</a></li><li><a href="Verification.html">Verification</a></li>
 				</ul>
 			</li>
 			
@@ -115,6 +115,7 @@ var RateLimiter = require('./ratelimiter');
 var ms = require('ms');
 var shuffle = require('knuth-shuffle').knuthShuffle;
 var BridgeClient = require('../bridgeclient');
+var ContactChecker = require('./contactchecker');
 
 /**
  * Storj network interface
@@ -223,6 +224,7 @@ Network.prototype.join = function(callback) {
   this._transport.before('receive', kad.hooks.protocol(
     this._protocol.handlers()
   ));
+  this._transport.after('receive', this._updateActivityCounter.bind(this));
 
   this._node = new kad.Node({
     transport: this._transport,
@@ -776,22 +778,29 @@ Network.prototype._establishTunnel = function(tunnels, callback) {
 
     var local = 'http://127.0.0.1:' + self._transport._server.address().port;
     var tunclient = new TunnelClient(tunnel, local);
+    var checker = new ContactChecker();
 
     tunclient.on('open', function() {
       self._logger.info('tunnel successfully established: %j', alias);
+
       self._contact.address = alias.address;
       self._contact.port = alias.port;
 
-      self._listenForTunnelers();
-      callback();
+      self._logger.info('testing newly established tunnel: %j', alias);
+      checker.check(self._contact, function(err) {
+        if (err) {
+          self._logger.warn('tunnel test failed, establishing new tunnel');
+          return tunclient.close();
+        }
+
+        self._listenForTunnelers();
+        callback();
+      });
     });
 
-    tunclient.on('close', function onTunnelClosed(code, message) {
-      self._logger.warn(
-        'tunnel connection closed: %s / %s',
-        code,
-        message
-      );
+    tunclient.on('close', function onTunnelClosed() {
+      self._logger.warn('tunnel connection closed');
+      tunclient.removeAllListeners('error');
       self._establishTunnel(tunnels, callback);
     });
 
@@ -800,6 +809,7 @@ Network.prototype._establishTunnel = function(tunnels, callback) {
         'tunnel connection lost, reason: %s',
         err.message
       );
+      tunclient.removeAllListeners();
       self._establishTunnel(tunnels, callback);
     });
 
@@ -847,6 +857,19 @@ Network.prototype._startRouterCleaner = function() {
     var dropped = self._cleanRoutingTable();
     self._logger.debug('dropping %s bad contacts from router', dropped.length);
   }, constants.ROUTER_CLEAN_INTERVAL);
+};
+
+/**
+ * Resets the countdown until network re-entry due to inactivity
+ * @private
+ */
+Network.prototype._updateActivityCounter = function() {
+  clearTimeout(this._reentranceCountdown);
+
+  this._reentranceCountdown = setTimeout(
+    this._enterOverlay.bind(this, utils.noop),
+    constants.NET_REENTRY
+  );
 };
 
 module.exports = Network;

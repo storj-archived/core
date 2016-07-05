@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Storj Core Source: index.js</title>
+	<title>Storj Core Source: lib/datachannel/pointer.js</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -85,137 +85,42 @@
 		<div id="main">
 			
 
-		<h1 class="page-title">Source: index.js</h1>
+		<h1 class="page-title">Source: lib/datachannel/pointer.js</h1>
     
 <section>
     <article>
         <pre
-            class="sunlight-highlight-javascript ">/**
- * @module storj
+            class="sunlight-highlight-javascript ">'use strict';
+
+var assert = require('assert');
+var Contact = require('../network/contact');
+
+/**
+ * Represents a pointer for opening a {@link DataChannelClient} stream
+ * @constructor
+ * @param {Contact} contact - The farmer the pointer is for
+ * @param {String} hash - The hash of the data to consign or retrieve
+ * @param {String} token - The authorization token fot the operation
+ * @param {String} [operation=PULL] - The type of operation (PUSH or PULL)
  */
+function DataChannelPointer(contact, hash, token, operation) {
+  if (!(this instanceof DataChannelPointer)) {
+    return new DataChannelPointer(contact, hash, token, operation);
+  }
 
-'use strict';
+  assert(contact instanceof Contact, 'Invalid contact supplied');
+  assert(typeof hash === 'string', 'Invalid hash supplied');
+  assert(hash.length === 40, 'Invalid hash supplied');
+  assert(typeof token === 'string', 'Invalid token supplied');
+  assert(token.length === 40, 'Invalid token supplied');
 
-require('./lib/patches')(); // NB: Apply any monkey patches
+  this.farmer = contact;
+  this.hash = hash;
+  this.token = token;
+  this.operation = operation || 'PULL';
+}
 
-module.exports.version = require('./lib/version');
-
-/** {@link Network} */
-module.exports.Network = require('./lib/network');
-
-/** {@link Transport} */
-module.exports.Transport = require('./lib/network/transport');
-
-/** {@link Contact} */
-module.exports.Contact = require('./lib/network/contact');
-
-/** {@link ContactChecker} */
-module.exports.ContactChecker = require('./lib/network/contactchecker');
-
-/** {@link RateLimiter} */
-module.exports.RateLimiter = require('./lib/network/ratelimiter');
-
-/** {@link DataChannelClient} */
-module.exports.DataChannelClient = require('./lib/datachannel/client');
-
-/** {@link DataChannelServer} */
-module.exports.DataChannelServer = require('./lib/datachannel/server');
-
-/** {@link DataChannelPointer} */
-module.exports.DataChannelPointer = require('./lib/datachannel/pointer');
-
-/** {@link Protocol} */
-module.exports.Protocol = require('./lib/network/protocol');
-
-/** {@link TunnelServer} */
-module.exports.Tunnel = require('./lib/tunnel/server');
-
-/** {@link TunnelMuxer} */
-module.exports.TunnelMuxer = require('./lib/tunnel/multiplexer');
-
-/** {@link TunnelDemuxer} */
-module.exports.TunnelDemuxer = require('./lib/tunnel/demultiplexer');
-
-/** {@link TunnelClient} */
-module.exports.TunnelClient = require('./lib/tunnel/client');
-
-/** {@link EncryptStream} */
-module.exports.EncryptStream = require('./lib/cryptostream/encrypt');
-
-/** {@link DecryptStream} */
-module.exports.DecryptStream = require('./lib/cryptostream/decrypt');
-
-/** {@link FileMuxer} */
-module.exports.FileMuxer = require('./lib/filemuxer');
-
-/** {@link FileDemuxer} */
-module.exports.FileDemuxer = require('./lib/filedemuxer');
-
-/** {@link Padder} */
-module.exports.Padder = require('./lib/padder');
-
-/** {@link Unpadder} */
-module.exports.Unpadder = require('./lib/unpadder');
-
-/** {@link Contract} */
-module.exports.Contract = require('./lib/contract');
-
-/** {@link AuditStream} */
-module.exports.AuditStream = require('./lib/auditstream');
-
-/** {@link ProofStream} */
-module.exports.ProofStream = require('./lib/proofstream');
-
-/** {@link Verification} */
-module.exports.Verification = require('./lib/verification');
-
-/** {@link Manager} */
-module.exports.Manager = require('./lib/manager');
-
-/** {@link StorageAdapter} */
-module.exports.StorageAdapter = require('./lib/storage/adapter');
-
-/** {@link StorageMigration} */
-module.exports.StorageMigration = require('./lib/storage/migration');
-
-/** {@link LevelDBStorageAdapter} */
-module.exports.LevelDBStorageAdapter = require('./lib/storage/adapters/level');
-
-/** {@link RAMStorageAdapter} */
-module.exports.RAMStorageAdapter = require('./lib/storage/adapters/ram');
-
-/** {@link StorageItem} */
-module.exports.StorageItem = require('./lib/storage/item');
-
-/** {@link DataCipherKeyIv} */
-module.exports.DataCipherKeyIv = require('./lib/cipherkeyiv');
-
-/** {@link KeyPair} */
-module.exports.KeyPair = require('./lib/keypair');
-
-/** {@link KeyRing} */
-module.exports.KeyRing = require('./lib/keyring');
-
-/** {@link RenterInterface} */
-module.exports.RenterInterface = require('./lib/interfaces/renter');
-
-/** {@link FarmerInterface} */
-module.exports.FarmerInterface = require('./lib/interfaces/farmer');
-
-/** {@link TunnelerInterface} */
-module.exports.TunnelerInterface = require('./lib/interfaces/tunneler');
-
-/** {@link BridgeClient} */
-module.exports.BridgeClient = require('./lib/bridgeclient');
-
-/** {@link constants} */
-module.exports.constants = require('./lib/constants');
-
-/** {@link utils} */
-module.exports.utils = require('./lib/utils');
-
-/** {@link deps} */
-module.exports.deps = require('./lib/deps');
+module.exports = DataChannelPointer;
 </pre>
     </article>
 </section>

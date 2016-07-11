@@ -634,6 +634,46 @@ describe('BridgeClient', function() {
 
     });
 
+    describe('#replicateFileFromBucket', function() {
+
+      it('should send the correct args to _request', function(done) {
+        var _request = sinon.stub(BridgeClient.prototype, '_request').callsArg(
+          3,
+          null,
+          {}
+        );
+        var client = new BridgeClient();
+        client.replicateFileFromBucket('bucket', 'file', function() {
+          _request.restore();
+          expect(_request.calledWithMatch(
+            'POST',
+            '/buckets/bucket/mirrors',
+            { file: 'file', redundancy: undefined }
+          )).to.equal(true);
+          done();
+        });
+      });
+
+      it('should send the correct args to _request', function(done) {
+        var _request = sinon.stub(BridgeClient.prototype, '_request').callsArg(
+          3,
+          null,
+          {}
+        );
+        var client = new BridgeClient();
+        client.replicateFileFromBucket('bucket', 'file', 8, function() {
+          _request.restore();
+          expect(_request.calledWithMatch(
+            'POST',
+            '/buckets/bucket/mirrors',
+            { file: 'file', redundancy: 8 }
+          )).to.equal(true);
+          done();
+        });
+      });
+
+    });
+
     describe('#getFilePointer', function() {
 
       it('should bubble request error', function(done) {

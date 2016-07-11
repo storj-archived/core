@@ -462,6 +462,11 @@ var ACTIONS = {
                       'Name: %s, Type: %s, Size: %s bytes, ID: %s',
                       [file.filename, file.mimetype, file.size, file.id]
                     );
+
+                    if (env.redundancy) {
+                      return ACTIONS.createmirrors(bucket, file.id, env);
+                    }
+
                     process.exit();
                   }
                 );
@@ -471,6 +476,33 @@ var ACTIONS = {
         );
       });
     });
+  },
+  createmirrors: function createmirrors(bucket, file, env) {
+    log(
+      'info',
+      'Establishing %s mirrors per shard for redundancy',
+      [env.redundancy]
+    );
+    log('info', 'This can take a moment...');
+    PrivateClient().replicateFileFromBucket(
+      bucket,
+      file,
+      parseInt(env.redundancy),
+      function(err, replicas) {
+        if (err) {
+          return log('error', err.message);
+        }
+
+        replicas.forEach(function(shard) {
+          log('info', 'Shard %s mirrored by %s nodes', [
+            shard.hash,
+            shard.mirrors.length
+          ]);
+        });
+
+        process.exit();
+      }
+    );
   },
   getpointer: function getpointer(bucket, id) {
     PrivateClient().createToken(bucket, 'PULL', function(err, token) {
@@ -965,8 +997,15 @@ program
 program
   .command('upload-file <bucket-id> <filepath>')
   .option('-c, --concurrency <count>', 'max upload concurrency')
+  .option('-r, --redundancy <mirrors>', 'number of mirrors to create for file')
   .description('upload a file to the network and track in a bucket')
   .action(ACTIONS.uploadfile);
+
+program
+  .command('create-mirrors <bucket-id> <file-id>')
+  .option('-r, --redundancy <mirrors>', 'number of mirrors to create for file')
+  .description('create redundant mirrors for the given file')
+  .action(ACTIONS.createmirrors);
 
 program
   .command('download-file <bucket-id> <file-id> <filepath>')

@@ -1003,7 +1003,7 @@ program
 
 program
   .command('create-mirrors <bucket-id> <file-id>')
-  .option('-r, --redundancy <mirrors>', 'number of mirrors to create for file')
+  .option('-r, --redundancy [mirrors]', 'mirrors to create for file', 3)
   .description('create redundant mirrors for the given file')
   .action(ACTIONS.createmirrors);
 

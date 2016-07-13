@@ -504,30 +504,45 @@ var ACTIONS = {
       }
     );
   },
-  getpointer: function getpointer(bucket, id) {
+  getpointers: function getpointers(bucket, id, env) {
     PrivateClient().createToken(bucket, 'PULL', function(err, token) {
       if (err) {
         return log('error', err.message);
       }
 
-      PrivateClient().getFilePointer(
-        bucket,
-        token.token,
-        id,
-        function(err, pointer) {
-          if (err) {
-            return log('error', err.message);
-          }
+      var skip = Number(env.skip);
+      var limit = Number(env.limit);
 
-          pointer.forEach(function(location) {
-            log(
-              'info',
-              'Hash: %s, Token: %s, Farmer: %j',
-              [location.hash, location.token, location.farmer]
-            );
-          });
+      PrivateClient().getFilePointers({
+        bucket: bucket,
+        file: id,
+        token: token.token,
+        skip: skip,
+        limit: limit
+      }, function(err, pointers) {
+        if (err) {
+          return log('error', err.message);
         }
-      );
+
+        if (!pointers.length) {
+          return log('warn', 'There are no pointers to return for that range');
+        }
+
+        log('info', 'Listing pointers for shards %s - %s', [
+          skip, skip + pointers.length - 1
+        ]);
+        log('info', '-----------------------------------------');
+        log('info', '');
+        pointers.forEach(function(location, i) {
+          log('info', 'Index:  %s', [skip + i]);
+          log('info', 'Hash:   %s', [location.hash]);
+          log('info', 'Token:  %s', [location.token]);
+          log('info', 'Farmer: %s', [
+            storj.utils.getContactURL(location.farmer)
+          ]);
+          log('info', '');
+        });
+      });
     });
   },
   addframe: function addframe() {
@@ -586,55 +601,34 @@ var ACTIONS = {
     }
 
     getKeyRing(function(keyring) {
-      log('info', 'Creating retrieval token...');
-      PrivateClient().createToken(bucket, 'PULL', function(err, token) {
+      var target = fs.createWriteStream(filepath);
+      var secret = keyring.get(id);
+
+      if (!secret) {
+        return log('error', 'No decryption key found in key ring!');
+      }
+
+      var decrypter = new storj.DecryptStream(secret);
+      var received = 0;
+
+      target.on('finish', function() {
+        log('info', 'File downloaded and written to %s.', [filepath]);
+      }).on('error', function(err) {
+        log('error', err.message);
+      });
+
+      PrivateClient().createFileStream(bucket, id, function(err, stream) {
         if (err) {
           return log('error', err.message);
         }
 
-        log('info', 'Resolving file pointer...');
-        PrivateClient().getFilePointer(
-          bucket,
-          token.token,
-          id,
-          function(err, pointer) {
-            if (err) {
-              return log('error', err.message);
-            }
-
-            log('info', 'Downloading file from %s channels.', [pointer.length]);
-            var target = fs.createWriteStream(filepath);
-            var secret = keyring.get(id);
-
-            if (!secret) {
-              return log('error', 'No decryption key found in key ring!');
-            }
-
-            var decrypter = new storj.DecryptStream(secret);
-
-            target.on('finish', function() {
-              log('info', 'File downloaded and written to %s.', [filepath]);
-            }).on('error', function(err) {
-              log('error', err.message);
-            });
-
-            PrivateClient().resolveFileFromPointers(
-              pointer,
-              function(err, stream) {
-                if (err) {
-                  return log('error', err.message);
-                }
-
-                stream.on('error', function(err) {
-                  log('error', err.message);
-                }).pipe(through(function(chunk) {
-                  log('info', 'Received %s bytes of data', [chunk.length]);
-                  this.queue(chunk);
-                })).pipe(decrypter).pipe(target);
-              }
-            );
-          }
-        );
+        stream.on('error', function(err) {
+          log('error', err.message);
+        }).pipe(through(function(chunk) {
+          received += chunk.length;
+          log('info', 'Received %s of %s bytes', [received, stream._length]);
+          this.queue(chunk);
+        })).pipe(decrypter).pipe(target);
       });
     });
   },
@@ -662,32 +656,14 @@ var ACTIONS = {
 
       var decrypter = new storj.DecryptStream(secret);
 
-      PrivateClient().createToken(bucket, 'PULL', function(err, token) {
+      PrivateClient({
+        logger: storj.deps.kad.Logger(0)
+      }).createFileStream(bucket, id, function(err, stream) {
         if (err) {
-          return log('error', err.message);
+          return process.stderr.write(err.message);
         }
 
-        PrivateClient().getFilePointer(
-          bucket,
-          token.token,
-          id,
-          function(err, pointer) {
-            if (err) {
-              return process.stderr.write(err.message);
-            }
-
-            PrivateClient().resolveFileFromPointers(
-              pointer,
-              function(err, stream) {
-                if (err) {
-                  return process.stderr.write(err.message);
-                }
-
-                stream.pipe(decrypter).pipe(process.stdout);
-              }
-            );
-          }
-        );
+        stream.pipe(decrypter).pipe(process.stdout);
       });
     });
   },
@@ -1018,9 +994,11 @@ program
   .action(ACTIONS.streamfile);
 
 program
-  .command('get-pointer <bucket-id> <file-id>')
-  .description('get pointer metadata for a file in a bucket')
-  .action(ACTIONS.getpointer);
+  .command('get-pointers <bucket-id> <file-id>')
+  .option('-s, --skip <index>', 'starting index for file slice', 0)
+  .option('-n, --limit <number>', 'total pointers to return from index', 6)
+  .description('get pointers metadata for a file in a bucket')
+  .action(ACTIONS.getpointers);
 
 program
   .command('create-token <bucket-id> <operation>')

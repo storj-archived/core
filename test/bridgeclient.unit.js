@@ -674,14 +674,18 @@ describe('BridgeClient', function() {
 
     });
 
-    describe('#getFilePointer', function() {
+    describe('#getFilePointers', function() {
 
       it('should bubble request error', function(done) {
         var StubbedClient = proxyquire('../lib/bridgeclient', {
           request: sinon.stub().callsArgWith(1, new Error('Failed'))
         });
         var client = new StubbedClient();
-        client.getFilePointer('1', 'mytoken', 'myfile', function(err) {
+        client.getFilePointers({
+          bucket: '1',
+          token: 'token',
+          file: 'file'
+        }, function(err) {
           expect(err.message).to.equal('Failed');
           done();
         });
@@ -694,7 +698,11 @@ describe('BridgeClient', function() {
           }, { error: 'Bad request' })
         });
         var client = new StubbedClient();
-        client.getFilePointer('1', 'mytoken', 'myfile', function(err) {
+        client.getFilePointers({
+          bucket: '1',
+          token: 'token',
+          file: 'file'
+        }, function(err) {
           expect(err.message).to.equal('Bad request');
           done();
         });
@@ -707,7 +715,11 @@ describe('BridgeClient', function() {
           }, 'Bad request')
         });
         var client = new StubbedClient();
-        client.getFilePointer('1', 'mytoken', 'myfile', function(err) {
+        client.getFilePointers({
+          bucket: '1',
+          token: 'token',
+          file: 'file'
+        }, function(err) {
           expect(err.message).to.equal('Bad request');
           done();
         });
@@ -720,7 +732,11 @@ describe('BridgeClient', function() {
           }, { hello: 'world' })
         });
         var client = new StubbedClient();
-        client.getFilePointer('1', 'mytoken', 'myfile', function(err, result) {
+        client.getFilePointers({
+          bucket: '1',
+          token: 'token',
+          file: 'file'
+        }, function(err, result) {
           expect(result.hello).to.equal('world');
           done();
         });
@@ -1000,11 +1016,10 @@ describe('BridgeClient', function() {
         });
       });
 
-      it('should callback with error if count greater than 3', function(done) {
+      it('should get a new contract if transfer fails 3 times', function(done) {
         var _transferStatus = new EventEmitter();
         _transferStatus._eventsCount = 3;
         var _kill = sinon.stub();
-        var _callback = sinon.stub();
         var client = new BridgeClient();
         var pointer = {
           farmer: {
@@ -1020,19 +1035,17 @@ describe('BridgeClient', function() {
           client,
           '_shardTransferComplete'
         ).callsArg(2);
+        var _retry = sinon.stub(client, '_handleShardTmpFileFinish');
         client._startTransfer(pointer, {
           queue: { kill: _kill },
-          callback: _callback
-        }, {});
+          callback: sinon.stub()
+        }, { excludeFarmers: [] });
         setImmediate(function() {
           _transferStatus.emit('retry');
           setImmediate(function() {
             _transferShard.restore();
             _transferComplete.restore();
-            expect(_kill.called).to.equal(true);
-            expect(_callback.calledWithMatch(
-              new Error('Failed to upload shard after 3 attempts')
-            )).to.equal(true);
+            expect(_retry.called).to.equal(true);
             done();
           });
         });

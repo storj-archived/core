@@ -14,23 +14,9 @@ var EventEmitter = require('events').EventEmitter;
 
 describe('FarmerInterface', function() {
 
-  describe('#_handleContractPublication', function() {
+  describe('@constructor', function() {
 
-    it('should not send an offer if the negotiator returns false', function() {
-      var farmer = new FarmerInterface({
-        keypair: KeyPair(),
-        port: 0,
-        noforward: true,
-        negotiator: function() {
-          return false;
-        },
-        logger: kad.Logger(0),
-        backend: require('memdown')
-      });
-      expect(farmer._handleContractPublication(Contract({}))).to.equal(false);
-    });
-
-    it('should not send an offer if the negotiator returns false', function() {
+    it('should use the keypair address if non supplied', function() {
       var keypair = KeyPair();
       var farmer = new FarmerInterface({
         keypair: KeyPair(),
@@ -46,19 +32,47 @@ describe('FarmerInterface', function() {
       expect(farmer.getPaymentAddress()).to.equal(keypair.getAddress());
     });
 
-    it('should not send an offer if concurrency is exceeded', function() {
+  });
+
+  describe('#_handleContractPublication', function() {
+
+    it('should not send an offer if negotiator returns false', function(done) {
       var farmer = new FarmerInterface({
         keypair: KeyPair(),
         port: 0,
         noforward: true,
-        negotiator: function() {
-          return true;
+        negotiator: function(contract, callback) {
+          callback(false);
+        },
+        logger: kad.Logger(0),
+        backend: require('memdown')
+      });
+      var _addTo = sinon.stub(farmer, '_addContractToPendingList');
+      farmer._handleContractPublication(Contract({}));
+      setImmediate(function() {
+        expect(_addTo.called).to.equal(false);
+        done();
+      });
+    });
+
+    it('should not send an offer if concurrency is exceeded', function(done) {
+      var farmer = new FarmerInterface({
+        keypair: KeyPair(),
+        port: 0,
+        noforward: true,
+        negotiator: function(c, callback) {
+          callback(true);
         },
         logger: kad.Logger(0),
         backend: require('memdown'),
         concurrency: 0
       });
-      expect(farmer._handleContractPublication(Contract({}))).to.equal(false);
+      var _addTo = sinon.stub(farmer, '_addContractToPendingList');
+      farmer._handleContractPublication(Contract({}));
+      setImmediate(function() {
+        expect(_addTo.called).to.equal(false);
+        done();
+      });
     });
 
   });
@@ -349,12 +363,16 @@ describe('FarmerInterface', function() {
 
   describe('#_handleContractPublication', function() {
 
-    it('should return false for invalid contract', function() {
-      expect(
-        FarmerInterface.prototype._handleContractPublication.call({
-          _logger: { debug: sinon.stub() }
-        }, { version: '12' })
-      ).to.equal(false);
+    it('should return false for invalid contract', function(done) {
+      var _shouldSendOffer = sinon.stub();
+      FarmerInterface.prototype._handleContractPublication.call({
+        _logger: { debug: sinon.stub() },
+        _shouldSendOffer: _shouldSendOffer
+      }, { version: '12' });
+      setImmediate(function() {
+        expect(_shouldSendOffer.called).to.equal(false);
+        done();
+      });
     });
 
   });

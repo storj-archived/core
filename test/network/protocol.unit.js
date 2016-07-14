@@ -8,6 +8,7 @@ var KeyPair = require('../../lib/keypair');
 var stream = require('readable-stream');
 var constants = require('../../lib/constants');
 var StorageItem = require('../../lib/storage/item');
+var utils = require('../../lib/utils');
 
 describe('Protocol', function() {
 
@@ -336,7 +337,9 @@ describe('Protocol', function() {
           }
         }
       });
-      proto._handleRetrieve({}, function(err) {
+      proto._handleRetrieve({
+        data_hash: utils.rmd160('')
+      }, function(err) {
         expect(err.message).to.equal('Failed');
         done();
       });

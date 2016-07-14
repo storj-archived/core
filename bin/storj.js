@@ -595,7 +595,7 @@ var ACTIONS = {
       log('info', 'Frame was successfully removed.');
     });
   },
-  downloadfile: function downloadfile(bucket, id, filepath) {
+  downloadfile: function downloadfile(bucket, id, filepath, env) {
     if (fs.existsSync(filepath)) {
       return log('error', 'Refusing to overwrite file at %s', filepath);
     }
@@ -610,6 +610,7 @@ var ACTIONS = {
 
       var decrypter = new storj.DecryptStream(secret);
       var received = 0;
+      var exclude = env.exclude.split(',');
 
       target.on('finish', function() {
         log('info', 'File downloaded and written to %s.', [filepath]);
@@ -617,13 +618,30 @@ var ACTIONS = {
         log('error', err.message);
       });
 
-      PrivateClient().createFileStream(bucket, id, function(err, stream) {
+      PrivateClient().createFileStream(bucket, id, {
+        exclude: exclude
+      },function(err, stream) {
         if (err) {
           return log('error', err.message);
         }
 
         stream.on('error', function(err) {
-          log('error', err.message);
+          log('warn', 'Failed to download shard, reason: %s', [err.message]);
+          fs.unlink(filepath, function(unlinkFailed) {
+            if (unlinkFailed) {
+              return log('error', 'Failed to unlink partial file.');
+            }
+
+            if (!err.pointer) {
+              return;
+            }
+
+            log('info', 'Retrying download from other mirrors...');
+            exclude.push(err.pointer.farmer.nodeID);
+            ACTIONS.downloadfile(bucket, id, filepath, {
+              exclude: env.exclude.join(',')
+            });
+          });
         }).pipe(through(function(chunk) {
           received += chunk.length;
           log('info', 'Received %s of %s bytes', [received, stream._length]);
@@ -646,7 +664,7 @@ var ACTIONS = {
       );
     });
   },
-  streamfile: function streamfile(bucket, id) {
+  streamfile: function streamfile(bucket, id, env) {
     getKeyRing(function(keyring) {
       var secret = keyring.get(id);
 
@@ -655,6 +673,7 @@ var ACTIONS = {
       }
 
       var decrypter = new storj.DecryptStream(secret);
+      var exclude = env.exclude.split(',');
 
       PrivateClient({
         logger: storj.deps.kad.Logger(0)
@@ -663,7 +682,19 @@ var ACTIONS = {
           return process.stderr.write(err.message);
         }
 
-        stream.pipe(decrypter).pipe(process.stdout);
+        stream.on('error', function(err) {
+          log('warn', 'Failed to download shard, reason: %s', [err.message]);
+
+          if (!err.pointer) {
+            return;
+          }
+
+          log('info', 'Retrying download from other mirrors...');
+          exclude.push(err.pointer.farmer.nodeID);
+          ACTIONS.streamfile(bucket, id, {
+            exclude: env.exclude.join(',')
+          });
+        }).pipe(decrypter).pipe(process.stdout);
       });
     });
   },
@@ -985,11 +1016,13 @@ program
 
 program
   .command('download-file <bucket-id> <file-id> <filepath>')
+  .option('-x, --exclude <nodeID,nodeID...>', 'mirrors to create for file', '')
   .description('download a file from the network with a pointer from a bucket')
   .action(ACTIONS.downloadfile);
 
 program
   .command('stream-file <bucket-id> <file-id>')
+  .option('-x, --exclude <nodeID,nodeID...>', 'mirrors to create for file', '')
   .description('stream a file from the network and write to stdout')
   .action(ACTIONS.streamfile);
 

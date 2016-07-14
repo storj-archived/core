@@ -114,7 +114,7 @@ describe('Network/Integration/Tunnelling', function() {
         store_end: Date.now() + 10000,
         audit_count: 12
       });
-      renter.getStorageOffer(contract, function(_farmer, _contract) {
+      renter.getStorageOffer(contract, function(err, _farmer, _contract) {
         expect(_farmer).to.be.instanceOf(Contact);
         expect(_contract).to.be.instanceOf(Contract);
         contract = _contract;
@@ -207,7 +207,7 @@ describe('Network/Integration/Tunnelling', function() {
       this.timeout(12000);
       kad.constants.T_RESPONSETIMEOUT = 6000;
       var _negotiator = sinon.stub(farmers[0], '_negotiator').returns(false);
-      renter.getStorageOffer(contract, function(_farmer) {
+      renter.getStorageOffer(contract, function(err, _farmer) {
         _negotiator.restore();
         renter.getRetrieveToken(farmer, contract, function(err, token) {
           expect(err).to.equal(null);

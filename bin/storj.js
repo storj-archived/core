@@ -483,7 +483,7 @@ var ACTIONS = {
       'Establishing %s mirrors per shard for redundancy',
       [env.redundancy]
     );
-    log('info', 'This can take a moment...');
+    log('info', 'This can take a while, so grab a cocktail...');
     PrivateClient().replicateFileFromBucket(
       bucket,
       file,

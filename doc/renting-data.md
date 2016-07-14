@@ -118,7 +118,7 @@ var contract = new storj.Contract({
   audit_count: 12
 });
 
-renter.getStorageOffer(contract, function(farmer, contract) {
+renter.getStorageOffer(contract, function(err, farmer, contract) {
   // CONTINUED IN NEXT EXAMPLE...
 });
 ```
@@ -219,7 +219,7 @@ var redundancy = 3;
 var mirrors = [];
 
 function _getMirroringContract(n, next) {
-  renter.getStorageOffer(contract, function(mirror, contract) {
+  renter.getStorageOffer(contract, function(err, mirror, contract) {
     renter.getRetrieveToken(farmer, contract, function(err, token) {
       if (err) {
         return next(err);

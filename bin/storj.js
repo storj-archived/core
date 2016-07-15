@@ -17,7 +17,6 @@ var merge = require('merge');
 var HOME = platform !== 'win32' ? process.env.HOME : process.env.USERPROFILE;
 var DATADIR = path.join(HOME, '.storjcli');
 var KEYPATH = path.join(DATADIR, 'id_ecdsa');
-var KEYRINGPATH = path.join(DATADIR, 'keyring');
 
 if (!fs.existsSync(DATADIR)) {
   fs.mkdirSync(DATADIR);
@@ -104,7 +103,7 @@ function getKeyRing(callback) {
     var keyring;
 
     try {
-      keyring = storj.KeyRing(KEYRINGPATH, program.keypass);
+      keyring = storj.KeyRing(DATADIR, program.keypass);
     } catch (err) {
       return log('error', 'Could not unlock keyring, bad password?');
     }
@@ -112,7 +111,7 @@ function getKeyRing(callback) {
     return callback(keyring);
   }
 
-  var description = fs.existsSync(KEYRINGPATH) ?
+  var description = fs.existsSync(DATADIR) ?
                     'Enter your passphrase to unlock your keyring' :
                     'Enter a passphrase to protect your keyring';
 
@@ -134,7 +133,7 @@ function getKeyRing(callback) {
     var keyring;
 
     try {
-      keyring = storj.KeyRing(KEYRINGPATH, result.passphrase);
+      keyring = storj.KeyRing(DATADIR, result.passphrase);
     } catch (err) {
       return log('error', 'Could not unlock keyring, bad password?');
     }

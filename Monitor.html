@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Storj Core Class: ProofStream</title>
+	<title>Storj Core Class: Monitor</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -85,13 +85,13 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: ProofStream</h1>
+	<h1 class="page-title">Class: Monitor</h1>
 <section>
 
 <header>
     
         <h2>
-        ProofStream
+        Monitor
         </h2>
         
     
@@ -104,7 +104,7 @@
         
 <hr>
 <dt>
-    <h4 class="name" id="ProofStream"><span class="type-signature"></span>new ProofStream(leaves, challenge)</h4>
+    <h4 class="name" id="Monitor"><span class="type-signature"></span>new Monitor(network, options)</h4>
     
     
 </dt>
@@ -112,8 +112,8 @@
 
     
     <div class="description">
-        Provides interface for proving possession of a file for an
-<a href="AuditStream.html">AuditStream</a>
+        Wraps a <a href="Network.html">Network</a> instance and provides events for gathering
+statistics about node operation
     </div>
     
 
@@ -148,13 +148,13 @@
 
         <tr>
             
-                <td class="name"><code>leaves</code></td>
+                <td class="name"><code>network</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Array</span>
+<span class="param-type"><a href="Network.html">Network</a></span>
 
 
 
@@ -165,20 +165,20 @@
 
             
 
-            <td class="description last">Bottom leaves of the audit merkle tree</td>
+            <td class="description last">The network interface to monitor</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>challenge</code></td>
+                <td class="name"><code>options</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">Object</span>
 
 
 
@@ -189,7 +189,7 @@
 
             
 
-            <td class="description last">The challenge data in hex to prepend to shard</td>
+            <td class="description last"></td>
         </tr>
 
     
@@ -233,7 +233,7 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_proofstream.js.html">lib/proofstream.js</a>
+				<a href="lib_network_monitor.js.html">lib/network/monitor.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -284,7 +284,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="getProofResult"><span class="type-signature"></span>getProofResult()</h4>
+    <h4 class="name" id=".getConnectedPeers"><span class="type-signature">&lt;static> </span>getConnectedPeers(source, callback)</h4>
     
     
 </dt>
@@ -292,7 +292,651 @@
 
     
     <div class="description">
-        Returns the generated proof structure
+        Gets the list of currently known <a href="Contact.html">Contact</a>s
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>source</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Network.html">Network</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The network instance to use</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_network_monitor.js.html">lib/network/monitor.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id=".getContractsDetails"><span class="type-signature">&lt;static> </span>getContractsDetails(source, callback)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Gets the total contracts stored
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>source</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Network.html">Network</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The network instance to use</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_network_monitor.js.html">lib/network/monitor.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id=".getDiskUtilization"><span class="type-signature">&lt;static> </span>getDiskUtilization(source, callback)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Gets the amount of used space compared to amount shared
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>source</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Network.html">Network</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The network instance to use</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_network_monitor.js.html">lib/network/monitor.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id=".getPaymentAddressBalances"><span class="type-signature">&lt;static> </span>getPaymentAddressBalances(source, callback)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Gets the balance of SJCX/SJCT from a <a href="FarmerInterface.html">FarmerInterface</a>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>source</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Network.html">Network</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The network instance to use</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_network_monitor.js.html">lib/network/monitor.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getSnapshot"><span class="type-signature"></span>getSnapshot()</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Returns the current snapshot
     </div>
     
 
@@ -338,7 +982,118 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_proofstream.js.html">lib/proofstream.js</a>
+				<a href="lib_network_monitor.js.html">lib/network/monitor.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    snapshot
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="start"><span class="type-signature"></span>start()</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Starts the network monitor
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_network_monitor.js.html">lib/network/monitor.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -374,7 +1129,114 @@
     </dt>
     <dd>
         
-<span class="param-type">Array</span>
+<span class="param-type"><a href="Monitor.html">Monitor</a></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="stop"><span class="type-signature"></span>stop()</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Stops the network monitor
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_network_monitor.js.html">lib/network/monitor.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="Monitor.html">Monitor</a></span>
 
 
 

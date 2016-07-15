@@ -16,6 +16,55 @@ var DataChannelPointer = require('../../lib/datachannel/pointer');
 
 describe('RenterInterface', function() {
 
+  describe('#getStorageOffer', function() {
+
+    it('should timeout the contract publication and callback', function(done) {
+      var renter = new RenterInterface({
+        keypair: KeyPair(),
+        port: 0,
+        noforward: true,
+        logger: kad.Logger(0),
+        manager: Manager(RAMStorageAdapter())
+      });
+      var clock = sinon.useFakeTimers();
+      var contract = Contract({});
+      var publish = sinon.stub(renter, 'publish');
+      renter.getStorageOffer(contract, [], function(err) {
+        clock.restore();
+        publish.restore();
+        expect(err.message).to.equal(
+          'No storage offers were received'
+        );
+        done();
+      });
+      clock.tick(15000);
+    });
+
+    it('should do nothing if the callback was already called', function(done) {
+      var renter = new RenterInterface({
+        keypair: KeyPair(),
+        port: 0,
+        noforward: true,
+        logger: kad.Logger(0),
+        manager: Manager(RAMStorageAdapter())
+      });
+      var clock = sinon.useFakeTimers();
+      var contract = Contract({});
+      var publish = sinon.stub(renter, 'publish');
+      var callback = sinon.stub();
+      renter.getStorageOffer(contract, [], callback);
+      renter._pendingContracts = {};
+      clock.tick(15000);
+      clock.restore();
+      setImmediate(function() {
+        publish.restore();
+        expect(callback.called).to.equal(false);
+        done();
+      });
+    });
+
+  });
+
   describe('#getStorageProof', function() {
 
     it('should return error if no contracts for farmer', function(done) {

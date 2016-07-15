@@ -11,6 +11,9 @@ module.exports.version = require('./lib/version');
 /** {@link Network} */
 module.exports.Network = require('./lib/network');
 
+/** {@link Monitor} */
+module.exports.Monitor = require('./lib/network/monitor');
+
 /** {@link Transport} */
 module.exports.Transport = require('./lib/network/transport');
 

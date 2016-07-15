@@ -84,6 +84,27 @@ describe('Network (public)', function() {
       });
     });
 
+    it('should callback with error if db open fails', function(done) {
+      var net = Network({
+        keypair: KeyPair(),
+        manager: Manager(RAMStorageAdapter()),
+        logger: kad.Logger(0),
+        seeds: [],
+        address: '127.0.0.1',
+        port: 0,
+        noforward: true
+      });
+      var _open = sinon.stub(net._manager, 'open').callsArgWith(
+        0,
+        new Error('Failed')
+      );
+      net.join(function(err) {
+        _open.restore();
+        expect(err.message).to.equal('Failed');
+        done();
+      });
+    });
+
   });
 
   describe('#leave', function() {
@@ -101,6 +122,27 @@ describe('Network (public)', function() {
       net._node = { disconnect: sinon.stub() };
       net.leave();
       expect(net._node.disconnect.called).to.equal(true);
+    });
+
+    it('should callback with error if db close fails', function(done) {
+      var net = Network({
+        keypair: KeyPair(),
+        manager: Manager(RAMStorageAdapter()),
+        logger: kad.Logger(0),
+        seeds: [],
+        address: '127.0.0.1',
+        port: 0,
+        noforward: true
+      });
+      var _close = sinon.stub(net._manager, 'close').callsArgWith(
+        0,
+        new Error('Failed')
+      );
+      net.leave(function(err) {
+        _close.restore();
+        expect(err.message).to.equal('Failed');
+        done();
+      });
     });
 
   });

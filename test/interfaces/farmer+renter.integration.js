@@ -116,7 +116,7 @@ describe('Interfaces/Farmer+Renter/Integration', function() {
         store_end: Date.now() + 10000,
         audit_count: 12
       });
-      renter.getStorageOffer(contract, function(_farmer, _contract) {
+      renter.getStorageOffer(contract, function(err, _farmer, _contract) {
         expect(_farmer).to.be.instanceOf(Contact);
         expect(_contract).to.be.instanceOf(Contract);
         contract = _contract;

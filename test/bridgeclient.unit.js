@@ -634,14 +634,58 @@ describe('BridgeClient', function() {
 
     });
 
-    describe('#getFilePointer', function() {
+    describe('#replicateFileFromBucket', function() {
+
+      it('should send the correct args to _request', function(done) {
+        var _request = sinon.stub(BridgeClient.prototype, '_request').callsArg(
+          3,
+          null,
+          {}
+        );
+        var client = new BridgeClient();
+        client.replicateFileFromBucket('bucket', 'file', function() {
+          _request.restore();
+          expect(_request.calledWithMatch(
+            'POST',
+            '/buckets/bucket/mirrors',
+            { file: 'file', redundancy: undefined }
+          )).to.equal(true);
+          done();
+        });
+      });
+
+      it('should send the correct args to _request', function(done) {
+        var _request = sinon.stub(BridgeClient.prototype, '_request').callsArg(
+          3,
+          null,
+          {}
+        );
+        var client = new BridgeClient();
+        client.replicateFileFromBucket('bucket', 'file', 8, function() {
+          _request.restore();
+          expect(_request.calledWithMatch(
+            'POST',
+            '/buckets/bucket/mirrors',
+            { file: 'file', redundancy: 8 }
+          )).to.equal(true);
+          done();
+        });
+      });
+
+    });
+
+    describe('#getFilePointers', function() {
 
       it('should bubble request error', function(done) {
         var StubbedClient = proxyquire('../lib/bridgeclient', {
           request: sinon.stub().callsArgWith(1, new Error('Failed'))
         });
         var client = new StubbedClient();
-        client.getFilePointer('1', 'mytoken', 'myfile', function(err) {
+        client.getFilePointers({
+          bucket: '1',
+          token: 'token',
+          file: 'file'
+        }, function(err) {
           expect(err.message).to.equal('Failed');
           done();
         });
@@ -654,7 +698,11 @@ describe('BridgeClient', function() {
           }, { error: 'Bad request' })
         });
         var client = new StubbedClient();
-        client.getFilePointer('1', 'mytoken', 'myfile', function(err) {
+        client.getFilePointers({
+          bucket: '1',
+          token: 'token',
+          file: 'file'
+        }, function(err) {
           expect(err.message).to.equal('Bad request');
           done();
         });
@@ -667,7 +715,11 @@ describe('BridgeClient', function() {
           }, 'Bad request')
         });
         var client = new StubbedClient();
-        client.getFilePointer('1', 'mytoken', 'myfile', function(err) {
+        client.getFilePointers({
+          bucket: '1',
+          token: 'token',
+          file: 'file'
+        }, function(err) {
           expect(err.message).to.equal('Bad request');
           done();
         });
@@ -680,9 +732,55 @@ describe('BridgeClient', function() {
           }, { hello: 'world' })
         });
         var client = new StubbedClient();
-        client.getFilePointer('1', 'mytoken', 'myfile', function(err, result) {
+        client.getFilePointers({
+          bucket: '1',
+          token: 'token',
+          file: 'file'
+        }, function(err, result) {
           expect(result.hello).to.equal('world');
           done();
+        });
+      });
+
+      it('should pass the given exclude parameter', function(done) {
+        var exclude = [1, 2, 3];
+        var StubbedClient = proxyquire('../lib/bridgeclient', {
+          request: function(opts, callback) {
+            expect(opts.qs.exclude).to.equal(exclude.join(','));
+            callback(null, { statusCode: 200 }, {});
+          }
+        });
+        var client = new StubbedClient();
+        client.getFilePointers({
+          bucket: '1',
+          token: 'token',
+          file: 'file',
+          exclude: exclude
+        }, done);
+      });
+
+    });
+
+    describe('#_createInputFromPointer', function() {
+
+      it('should callback with the error', function(done) {
+        var emitter = new EventEmitter();
+        var StubbedClient = proxyquire('../lib/bridgeclient', {
+          './datachannel/client': sinon.stub().returns(emitter)
+        });
+        var client = new StubbedClient();
+        client._createInputFromPointer({
+          farmer: {
+            address: '127.0.0.1',
+            port: 1337,
+            nodeID: utils.rmd160('')
+          }
+        }, function(err) {
+          expect(err.message).to.equal('Failed');
+          done();
+        });
+        setImmediate(function() {
+          emitter.emit('error', new Error('Failed'));
         });
       });
 
@@ -887,6 +985,333 @@ describe('BridgeClient', function() {
         });
       });
 
+      it('should emit an error event if the pointer fails', function(done) {
+        var emitters = [new EventEmitter(), new EventEmitter()];
+        var count = 0;
+        var StubbedClient = proxyquire('../lib/bridgeclient', {
+          './datachannel/client': function() {
+            emitters[count++].createReadStream = function() {
+              return new stream.Readable({ read: function() {} });
+            };
+            return emitters[count - 1];
+          }
+        });
+        var client = new StubbedClient();
+        client.resolveFileFromPointers([
+          {
+            size: 512,
+            farmer: {
+              address: '127.0.0.1',
+              port: 8080,
+              nodeID: utils.rmd160('nodeid')
+            }
+          }
+        ], function(err, stream, queue) {
+          stream.on('error', function(err) {
+            expect(err.message).to.equal('Failed');
+            done();
+          });
+          queue.push({
+            size: 512,
+            farmer: {
+              address: '127.0.0.1',
+              port: 8080,
+              nodeID: utils.rmd160('nodeid')
+            }
+          });
+          setImmediate(function() {
+            emitters[1].emit('error', new Error('Failed'));
+          });
+        });
+        setImmediate(function() {
+          emitters[0].emit('open');
+        });
+      });
+
+      it('should add the pointers to the queue afterwards', function(done) {
+        var emitters = [new EventEmitter(), new EventEmitter()];
+        var count = 0;
+        var StubbedClient = proxyquire('../lib/bridgeclient', {
+          './datachannel/client': function() {
+            emitters[count++].createReadStream = function() {
+              return new stream.Readable({ read: function() {} });
+            };
+            return emitters[count - 1];
+          }
+        });
+        var client = new StubbedClient();
+        client.resolveFileFromPointers([
+          {
+            size: 512,
+            farmer: {
+              address: '127.0.0.1',
+              port: 8080,
+              nodeID: utils.rmd160('nodeid')
+            }
+          }
+        ], function(err, stream, queue) {
+          queue.push({
+            size: 512,
+            farmer: {
+              address: '127.0.0.1',
+              port: 8080,
+              nodeID: utils.rmd160('nodeid')
+            }
+          });
+          setImmediate(function() {
+            emitters[1].emit('open');
+            setImmediate(function() {
+              expect(stream._inputs).to.have.lengthOf(2);
+              done();
+            });
+          });
+        });
+        setImmediate(function() {
+          emitters[0].emit('open');
+        });
+      });
+
+    });
+
+    describe('#createFileStream', function() {
+
+      it('should return a file stream', function(done) {
+        var client = new BridgeClient();
+        var _getFilePointers = sinon.stub(
+          client,
+          'getFilePointers'
+        );
+        _getFilePointers.onFirstCall().callsArgWith(1, null, [
+          {
+            size: 512,
+            farmer: {
+              address: '127.0.0.1',
+              port: 8080,
+              nodeID: utils.rmd160('nodeid')
+            }
+          },
+          {
+            size: 512,
+            farmer: {
+              address: '127.0.0.1',
+              port: 8080,
+              nodeID: utils.rmd160('nodeid')
+            }
+          }
+        ]);
+        _getFilePointers.onSecondCall().callsArgWith(1, null, [
+          {
+            size: 512,
+            farmer: {
+              address: '127.0.0.1',
+              port: 8080,
+              nodeID: utils.rmd160('nodeid')
+            }
+          }
+        ]);
+        _getFilePointers.onThirdCall().callsArgWith(1, null, []);
+        sinon.stub(
+          client,
+          'createToken'
+        ).callsArgWith(2, null, 'token');
+        sinon.stub(
+          client,
+          'resolveFileFromPointers'
+        ).callsArgWith(1, null, new stream.Readable({
+          read: utils.noop
+        }), { push: sinon.stub().callsArg(1) });
+        client.createFileStream('bucket', 'file', {}, function(err, stream) {
+          expect(typeof stream.read).to.equal('function');
+          done();
+        });
+      });
+
+      it('should error if failed to get token', function(done) {
+        var client = new BridgeClient();
+        var _createToken = sinon.stub(
+          client,
+          'createToken'
+        ).callsArgWith(2, new Error('no tokenz 4 u'));
+        client.createFileStream('bucket', 'file', {}, function(err) {
+          _createToken.restore();
+          expect(err.message).to.equal('no tokenz 4 u');
+          done();
+        });
+      });
+
+      it('should error if failed to get pointers', function(done) {
+        var client = new BridgeClient();
+        var _getFilePointers = sinon.stub(
+          client,
+          'getFilePointers'
+        ).callsArgWith(1, new Error('no pointerz 4 u'));
+        var _createToken = sinon.stub(
+          client,
+          'createToken'
+        ).callsArgWith(2, null, 'token');
+        client.createFileStream('bucket', 'file', {}, function(err) {
+          _createToken.restore();
+          _getFilePointers.restore();
+          expect(err.message).to.equal('no pointerz 4 u');
+          done();
+        });
+      });
+
+      it('should error if it fails to resolve pointers', function(done) {
+        var client = new BridgeClient();
+        var _getFilePointers = sinon.stub(
+          client,
+          'getFilePointers'
+        );
+        _getFilePointers.onFirstCall().callsArgWith(1, null, [
+          {
+            size: 512,
+            farmer: {
+              address: '127.0.0.1',
+              port: 8080,
+              nodeID: utils.rmd160('nodeid')
+            }
+          },
+          {
+            size: 512,
+            farmer: {
+              address: '127.0.0.1',
+              port: 8080,
+              nodeID: utils.rmd160('nodeid')
+            }
+          }
+        ]);
+        _getFilePointers.onSecondCall().callsArgWith(1, null, [
+          {
+            size: 512,
+            farmer: {
+              address: '127.0.0.1',
+              port: 8080,
+              nodeID: utils.rmd160('nodeid')
+            }
+          }
+        ]);
+        _getFilePointers.onThirdCall().callsArgWith(1, null, []);
+        var _createToken = sinon.stub(
+          client,
+          'createToken'
+        ).callsArgWith(2, null, 'token');
+        var _resolveFileFromPointers = sinon.stub(
+          client,
+          'resolveFileFromPointers'
+        ).callsArgWith(1, new Error('no bytez 4 u lol'));
+        client.createFileStream('bucket', 'file', {}, function(err) {
+          _createToken.restore();
+          _getFilePointers.restore();
+          _resolveFileFromPointers.restore();
+          expect(err.message).to.equal('no bytez 4 u lol');
+          done();
+        });
+      });
+
+      it('should emit stream error if slice cannot get token', function(done) {
+        var client = new BridgeClient();
+        var _getFilePointers = sinon.stub(
+          client,
+          'getFilePointers'
+        );
+        _getFilePointers.onFirstCall().callsArgWith(1, null, [
+          {
+            size: 512,
+            farmer: {
+              address: '127.0.0.1',
+              port: 8080,
+              nodeID: utils.rmd160('nodeid')
+            }
+          },
+          {
+            size: 512,
+            farmer: {
+              address: '127.0.0.1',
+              port: 8080,
+              nodeID: utils.rmd160('nodeid')
+            }
+          }
+        ]);
+        _getFilePointers.onSecondCall().callsArgWith(1, null, [
+          {
+            size: 512,
+            farmer: {
+              address: '127.0.0.1',
+              port: 8080,
+              nodeID: utils.rmd160('nodeid')
+            }
+          }
+        ]);
+        _getFilePointers.onThirdCall().callsArgWith(1, null, []);
+        var _createToken = sinon.stub(
+          client,
+          'createToken'
+        );
+        _createToken.onFirstCall().callsArgWith(2, null, 'token');
+        _createToken.onSecondCall().callsArgWith(2, null, 'token');
+        _createToken.onThirdCall().callsArgWith(
+          2,
+          new Error('Failed to get token')
+        );
+        sinon.stub(
+          client,
+          'resolveFileFromPointers'
+        ).callsArgWith(1, null, new stream.Readable({
+          read: utils.noop
+        }), { push: sinon.stub().callsArg(1) });
+        client.createFileStream('bucket', 'file', {}, function(err, stream) {
+          stream.on('error', function(err) {
+            expect(err.message).to.equal('Failed to get token');
+            done();
+          });
+        });
+      });
+
+      it('should emit stream error if slice cannot resolve', function(done) {
+        var client = new BridgeClient();
+        var _getFilePointers = sinon.stub(
+          client,
+          'getFilePointers'
+        );
+        _getFilePointers.onFirstCall().callsArgWith(1, null, [
+          {
+            size: 512,
+            farmer: {
+              address: '127.0.0.1',
+              port: 8080,
+              nodeID: utils.rmd160('nodeid')
+            }
+          },
+          {
+            size: 512,
+            farmer: {
+              address: '127.0.0.1',
+              port: 8080,
+              nodeID: utils.rmd160('nodeid')
+            }
+          }
+        ]);
+        _getFilePointers.onSecondCall().callsArgWith(1, new Error('Failed'));
+        sinon.stub(
+          client,
+          'createToken'
+        ).callsArgWith(2, null, 'token');
+        var _resolveFile = sinon.stub(
+          client,
+          'resolveFileFromPointers'
+        );
+        _resolveFile.onFirstCall().callsArgWith(1, null, new stream.Readable({
+          read: utils.noop
+        }), { push: sinon.stub().callsArg(1) });
+        client.createFileStream('bucket', 'file', function(err, stream) {
+          stream.on('error', function(err) {
+            expect(err.message).to.equal('Failed');
+            done();
+          });
+        });
+      });
+
     });
 
   });
@@ -960,11 +1385,10 @@ describe('BridgeClient', function() {
         });
       });
 
-      it('should callback with error if count greater than 3', function(done) {
+      it('should get a new contract if transfer fails 3 times', function(done) {
         var _transferStatus = new EventEmitter();
         _transferStatus._eventsCount = 3;
         var _kill = sinon.stub();
-        var _callback = sinon.stub();
         var client = new BridgeClient();
         var pointer = {
           farmer: {
@@ -980,19 +1404,17 @@ describe('BridgeClient', function() {
           client,
           '_shardTransferComplete'
         ).callsArg(2);
+        var _retry = sinon.stub(client, '_handleShardTmpFileFinish');
         client._startTransfer(pointer, {
           queue: { kill: _kill },
-          callback: _callback
-        }, {});
+          callback: sinon.stub()
+        }, { excludeFarmers: [] });
         setImmediate(function() {
           _transferStatus.emit('retry');
           setImmediate(function() {
             _transferShard.restore();
             _transferComplete.restore();
-            expect(_kill.called).to.equal(true);
-            expect(_callback.calledWithMatch(
-              new Error('Failed to upload shard after 3 attempts')
-            )).to.equal(true);
+            expect(_retry.called).to.equal(true);
             done();
           });
         });

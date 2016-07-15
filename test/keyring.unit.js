@@ -6,6 +6,7 @@ var expect = require('chai').expect;
 var path = require('path');
 var fs = require('fs');
 var crypto = require('crypto');
+var rimraf = require('rimraf');
 
 var tmpfolder = require('os').tmpdir();
 
@@ -27,21 +28,8 @@ describe('KeyRing', function() {
     });
 
     it('should create key.ring folder if not exists', function() {
-      var deleteFolderRecursive = function(path) {
-        if( fs.existsSync(path) ) {
-          fs.readdirSync(path).forEach(function(file){
-            var curPath = path + '/' + file;
-            if(fs.lstatSync(curPath).isDirectory()) { // recurse
-              deleteFolderRecursive(curPath);
-            } else { // delete file
-              fs.unlinkSync(curPath);
-            }
-          });
-          fs.rmdirSync(path);
-        }
-      };
       var folder = path.join(tmpfolder, 'key.ring');
-      deleteFolderRecursive(folder);
+      rimraf.sync(folder);
       KeyRing(tmpfolder, 'test');
       expect(fs.existsSync(folder)).to.equal(true);
     });
@@ -67,7 +55,6 @@ describe('KeyRing', function() {
       KeyRing(tmpfolder, 'testpass');
       var newFile = path.join(tmpfolder, 'key.ring/test3');
       expect(fs.existsSync(newFile)).to.equal(true);
-      fs.unlinkSync(path.join(tmpfolder, 'keyring'));
     });
 
   });

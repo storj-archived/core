@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Storj Core Source: lib/auditstream.js</title>
+	<title>Storj Core Source: lib/network/monitor.js</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -92,176 +92,232 @@
 		<div id="main">
 			
 
-		<h1 class="page-title">Source: lib/auditstream.js</h1>
+		<h1 class="page-title">Source: lib/network/monitor.js</h1>
     
 <section>
     <article>
         <pre
             class="sunlight-highlight-javascript ">'use strict';
 
-var assert = require('assert');
-var crypto = require('crypto');
-var constants = require('./constants');
-var MerkleTree = require('mtree');
-var utils = require('./utils');
-var stream = require('readable-stream');
+var Network = require('./index');
+var EventEmitter = require('events').EventEmitter;
 var inherits = require('util').inherits;
+var assert = require('assert');
+var merge = require('merge');
+var async = require('async');
+var request = require('request');
 
 /**
- * Represents a streaming audit challenge generator
- * @constructor
- * @param {Number} audits - Total number of challenges to generate
- * @emits AuditStream#finish
+ * Wraps a {@link Network} instance and provides events for gathering
+ * statistics about node operation
+ * @param {Network} network - The network interface to monitor
+ * @param {Object} options
  */
-function AuditStream(audits) {
-  if (!(this instanceof AuditStream)) {
-    return new AuditStream(audits);
+function Monitor(network, options) {
+  if (!(this instanceof Monitor)) {
+    return new Monitor(network, options);
   }
 
-  assert(typeof audits === 'number', 'Invalid number of audits supplied');
-  assert(!Number.isNaN(audits), 'Invalid number of audits supplied');
-  assert(Number.isFinite(audits), 'Invalid number of audits supplied');
+  assert(network instanceof Network, 'Invalid network instance supplied');
 
-  this._audits = audits;
-  this._finished = false;
-  this._challenges = [];
-  this._inputs = this._prepareChallenges();
+  this._source = network;
+  this._options = merge(Object.create(Monitor.DEFAULTS), options);
+  this._statistics = {};
+  this._collectors = {
+    soft: [
+      Monitor.getConnectedPeers,
+      Monitor.getDiskUtilization
+    ],
+    hard: [
+      Monitor.getContractsDetails,
+      Monitor.getPaymentAddressBalances
+    ]
+  };
 
-  stream.Writable.call(this);
-  this.on('finish', this._generateTree.bind(this));
+  EventEmitter.call(this);
 }
 
-/**
- * Triggered when the stream has ended
- * @event AuditStream#finish
- */
+inherits(Monitor, EventEmitter);
 
-inherits(AuditStream, stream.Writable);
-
-/**
- * Returns the bottom leaves of the merkle tree for sending to farmer
- * @returns {Array} leaves - Bottom merkle leaves of audit tree
- */
-AuditStream.prototype.getPublicRecord = function() {
-  assert(this._finished, 'Challenge generation is not finished');
-
-  return this._tree.level(this._tree.levels() - 1);
+Monitor.DEFAULTS = {
+  softInterval: 10000, // NB: Interval for simple jobs
+  hardInterval: 3 * 60 * 1000 // NB: Interval for resource heavy jobs
 };
 
 /**
- * Returns the challenges, the tree depth, and merkle root
- * @returns {Object} challenge - Private audit record with challenges
+ * Starts the network monitor
+ * @returns {Monitor}
  */
-AuditStream.prototype.getPrivateRecord = function() {
-  assert(this._finished, 'Challenge generation is not finished');
-
-  return {
-    root: this._tree.root(),
-    depth: this._tree.levels(),
-    challenges: this._challenges
-  };
-};
-
-/**
- * Implements the underlying write method
- * @private
- */
-AuditStream.prototype._write = function(bytes, encoding, next) {
-  var self = this;
-
-  this._inputs.forEach(function(input, i) {
-    if (i &lt; self._audits) {
-      input.update(bytes.toString('hex'));
-    }
-  });
-  next();
-};
-
-/**
- * Prepares the challenge hasher instances
- * @private
- */
-AuditStream.prototype._prepareChallenges = function() {
-  var iterations = 0;
-  var inputs = [];
-
-  while (iterations &lt; this._audits) {
-    var challenge = this._generateChallenge();
-    var input = this._createResponseInput(challenge);
-
-    this._challenges.push(challenge);
-    inputs.push(input);
-
-    iterations++;
+Monitor.prototype.start = function() {
+  if (this._softInterval &amp;&amp; this._hardInterval) {
+    return false;
   }
 
-  while (iterations &lt; utils.getNextPowerOfTwo(this._audits)) {
-    inputs.push(utils.rmd160sha256(''));
-    iterations++;
-  }
-
-  return inputs;
-};
-
-/**
- * Generate the audit merkle tree from a series of challenges
- * @private
- */
-AuditStream.prototype._generateTree = function() {
-  var self = this;
-
-  this._finished = true;
-
-  this._tree = new MerkleTree(this._inputs.map(function(input, i) {
-    if (i >= self._audits) {
-      return input;
-    } else {
-      return utils.rmd160sha256(utils.rmd160(input.digest('hex')));
-    }
-  }), utils.rmd160sha256);
-};
-
-/**
- * Generate a random challenge buffer
- * @private
- * @returns {String} Hex encoded random bytes
- */
-AuditStream.prototype._generateChallenge = function() {
-  return crypto.randomBytes(constants.AUDIT_BYTES).toString('hex');
-};
-
-/**
- * Create a challenge response input to merkle tree
- * @private
- */
-AuditStream.prototype._createResponseInput = function(challenge) {
-  return crypto.createHash('sha256').update(challenge);
-};
-
-/**
- * Returns a new instance from the predefined challenges and tree
- * @param {Array} challenges - The precomputed challenges
- * @param {Array} tree - The bottom leaves of the existing merkle tree
- * @returns {AuditStream}
- */
-AuditStream.fromRecords = function(challenges, tree) {
-  assert(Array.isArray(challenges), 'Invalid challenges supplied');
-  assert(Array.isArray(tree), 'Invalid tree supplied');
-  assert(
-    tree.length === utils.getNextPowerOfTwo(challenges.length),
-    'Challenges and tree do not match'
+  this._softInterval = setInterval(
+    this._collectSoftStats.bind(this),
+    this._options.softInterval
   );
 
-  var auditor = new AuditStream(challenges.length);
+  this._hardInterval = setInterval(
+    this._collectHardStats.bind(this),
+    this._options.hardInterval
+  );
 
-  auditor._challenges = challenges;
-  auditor._tree = new MerkleTree(tree, utils.rmd160sha256);
-  auditor._finished = true;
-
-  return auditor;
+  return true;
 };
 
-module.exports = AuditStream;
+/**
+ * Stops the network monitor
+ * @returns {Monitor}
+ */
+Monitor.prototype.stop = function() {
+  if (!this._softInterval &amp;&amp; !this._hardInterval) {
+    return false;
+  }
+
+  clearInterval(this._softInterval);
+  clearInterval(this._hardInterval);
+
+  delete this._softInterval;
+  delete this._hardInterval;
+
+  return true;
+};
+
+/**
+ * Returns the current snapshot
+ * @returns {Object} snapshot
+ */
+Monitor.prototype.getSnapshot = function() {
+  return merge(Object.create(this._statistics), {
+    timestamp: new Date()
+  });
+};
+
+/**
+ * Collects the soft stats
+ * @private
+ */
+Monitor.prototype._collectStats = function(collectors) {
+  var self = this;
+
+  async.parallel(collectors.map(function(collector) {
+    return collector.bind(null, self._source);
+  }), function(err, results) {
+    results.forEach(function(result) {
+      self._statistics = merge(self._statistics, result);
+    });
+    self.emit('update', self.getSnapshot());
+  });
+};
+
+/**
+ * Collects the soft stats
+ * @private
+ */
+Monitor.prototype._collectSoftStats = function() {
+  this._collectStats(this._collectors.soft);
+};
+
+/**
+ * Collects the hard stats
+ * @private
+ */
+Monitor.prototype._collectHardStats = function() {
+  this._collectStats(this._collectors.hard);
+};
+
+/**
+ * Gets the list of currently known {@link Contact}s
+ * @static
+ * @param {Network} source - The network instance to use
+ * @param {Function} callback
+ */
+Monitor.getConnectedPeers = function(source, callback) {
+  var stats = { connected: 0 };
+  var buckets = source._router._buckets;
+
+  for (var k in buckets) {
+    stats.connected += buckets[k].getSize();
+  }
+
+  callback(null, { peers: stats });
+};
+
+/**
+ * Gets the amount of used space compared to amount shared
+ * @static
+ * @param {Network} source - The network instance to use
+ * @param {Function} callback
+ */
+Monitor.getDiskUtilization = function(source, callback) {
+  var stats = { free: source._manager._options.maxCapacity };
+
+  source._manager._storage.size(function(err, bytes) {
+    if (err) {
+      return callback(null, {
+        disk: merge(stats, { used: 0, free: stats.free })
+      });
+    }
+
+    callback(null, {
+      disk: merge(stats, { used: bytes, free: stats.free - bytes })
+    });
+  });
+};
+
+/**
+ * Gets the balance of SJCX/SJCT from a {@link FarmerInterface}
+ * @static
+ * @param {Network} source - The network instance to use
+ * @param {Function} callback
+ */
+Monitor.getPaymentAddressBalances = function(source, callback) {
+  var stats = { balances: { sjcx: 0, sjct: 0 } };
+  var address = source._keypair.getAddress();
+
+  if (source._options.payment &amp;&amp; source._options.payment.address) {
+    address = source._options.payment.address.trim();
+  }
+
+  var url = 'https://counterpartychain.io/api/balances/' + address;
+
+  request({ url: url, json: true }, function(err, res, body) {
+    if (err || res.statusCode !== 200) {
+      return callback(null, { payments: stats });
+    }
+
+    if (body &amp;&amp; body.data.length) {
+      for (var balance = 0; balance &lt; body.data.length; balance++) {
+        stats.balances[body.data[balance].asset.toLowerCase()] = Number(
+          body.data[balance].amount
+        );
+      }
+    }
+
+    callback(null, { payments: stats });
+  });
+};
+
+/**
+ * Gets the total contracts stored
+ * @static
+ * @param {Network} source - The network instance to use
+ * @param {Function} callback
+ */
+Monitor.getContractsDetails = function(source, callback) {
+  var stats = { total: 0 };
+
+  source._manager._storage._keys(function(err, keys) {
+    if (err) {
+      return callback(null, { contracts: stats });
+    }
+
+    callback(null, { contracts: merge(stats, { total: keys.length }) });
+  });
+};
+
+module.exports = Monitor;
 </pre>
     </article>
 </section>

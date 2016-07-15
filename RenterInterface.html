@@ -59,6 +59,13 @@
 				</ul>
 			</li>
 			
+			<li class="dropdown">
+				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="global.html#Monitor">Monitor</a></li>
+				</ul>
+			</li>
+			
 		</ul>
 		<div class="col-sm-3 col-md-4">
             <form class="navbar-form" role="search">
@@ -1386,7 +1393,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="getStorageOffer"><span class="type-signature"></span>getStorageOffer(contract, callback)</h4>
+    <h4 class="name" id="getStorageOffer"><span class="type-signature"></span>getStorageOffer(contract [, blacklist], callback)</h4>
     
     
 </dt>
@@ -1418,6 +1425,8 @@ supplied shard metadata.
         <th>Type</th>
 
         
+        <th>Argument</th>
+        
 
         
 
@@ -1444,10 +1453,52 @@ supplied shard metadata.
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
             <td class="description last">Proposed storage contract to solicit for offers</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>blacklist</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Optional farmer blacklist for offers</td>
         </tr>
 
     
@@ -1467,6 +1518,14 @@ supplied shard metadata.
             
             </td>
 
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
             
 
             
@@ -3220,7 +3279,7 @@ supplied shard metadata.
                 
 <hr>
 <dt>
-    <h4 class="name" id="~getStorageOfferCallback"><span class="type-signature"></span>getStorageOfferCallback(farmer, contract)</h4>
+    <h4 class="name" id="~getStorageOfferCallback"><span class="type-signature"></span>getStorageOfferCallback(err, farmer, contract)</h4>
     
     
 </dt>
@@ -3260,6 +3319,33 @@ supplied shard metadata.
     </thead>
 
     <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>err</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Error</span>
+|
+
+<span class="param-type">null</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">An error if one is encountered</td>
+        </tr>
+
     
 
         <tr>

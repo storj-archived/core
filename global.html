@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Storj Core Source: lib/auditstream.js</title>
+	<title>Storj Core Global</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -87,185 +87,259 @@
 <div class="row">
 
 	
-	<div class="col-md-12">
+	<div class="col-md-8">
 	
 		<div id="main">
 			
 
-		<h1 class="page-title">Source: lib/auditstream.js</h1>
-    
+	<h1 class="page-title">Global</h1>
 <section>
-    <article>
-        <pre
-            class="sunlight-highlight-javascript ">'use strict';
 
-var assert = require('assert');
-var crypto = require('crypto');
-var constants = require('./constants');
-var MerkleTree = require('mtree');
-var utils = require('./utils');
-var stream = require('readable-stream');
-var inherits = require('util').inherits;
+<header>
+    
+        <h2>
+        
+        </h2>
+        
+    
+</header>
 
-/**
- * Represents a streaming audit challenge generator
- * @constructor
- * @param {Number} audits - Total number of challenges to generate
- * @emits AuditStream#finish
- */
-function AuditStream(audits) {
-  if (!(this instanceof AuditStream)) {
-    return new AuditStream(audits);
-  }
 
-  assert(typeof audits === 'number', 'Invalid number of audits supplied');
-  assert(!Number.isNaN(audits), 'Invalid number of audits supplied');
-  assert(Number.isFinite(audits), 'Invalid number of audits supplied');
+<article>
+    <div class="container-overview">
+    
+        
 
-  this._audits = audits;
-  this._finished = false;
-  this._challenges = [];
-  this._inputs = this._prepareChallenges();
+        
+<dl class="details">
+    
 
-  stream.Writable.call(this);
-  this.on('finish', this._generateTree.bind(this));
-}
+	
 
-/**
- * Triggered when the stream has ended
- * @event AuditStream#finish
- */
+	
 
-inherits(AuditStream, stream.Writable);
+	
 
-/**
- * Returns the bottom leaves of the merkle tree for sending to farmer
- * @returns {Array} leaves - Bottom merkle leaves of audit tree
- */
-AuditStream.prototype.getPublicRecord = function() {
-  assert(this._finished, 'Challenge generation is not finished');
+    
 
-  return this._tree.level(this._tree.levels() - 1);
-};
+    
 
-/**
- * Returns the challenges, the tree depth, and merkle root
- * @returns {Object} challenge - Private audit record with challenges
- */
-AuditStream.prototype.getPrivateRecord = function() {
-  assert(this._finished, 'Challenge generation is not finished');
+    
 
-  return {
-    root: this._tree.root(),
-    depth: this._tree.levels(),
-    challenges: this._challenges
-  };
-};
+    
 
-/**
- * Implements the underlying write method
- * @private
- */
-AuditStream.prototype._write = function(bytes, encoding, next) {
-  var self = this;
+	
 
-  this._inputs.forEach(function(input, i) {
-    if (i &lt; self._audits) {
-      input.update(bytes.toString('hex'));
-    }
-  });
-  next();
-};
+	
 
-/**
- * Prepares the challenge hasher instances
- * @private
- */
-AuditStream.prototype._prepareChallenges = function() {
-  var iterations = 0;
-  var inputs = [];
+	
 
-  while (iterations &lt; this._audits) {
-    var challenge = this._generateChallenge();
-    var input = this._createResponseInput(challenge);
+	
 
-    this._challenges.push(challenge);
-    inputs.push(input);
+	
 
-    iterations++;
-  }
 
-  while (iterations &lt; utils.getNextPowerOfTwo(this._audits)) {
-    inputs.push(utils.rmd160sha256(''));
-    iterations++;
-  }
 
-  return inputs;
-};
+	
 
-/**
- * Generate the audit merkle tree from a series of challenges
- * @private
- */
-AuditStream.prototype._generateTree = function() {
-  var self = this;
+	
 
-  this._finished = true;
+	
 
-  this._tree = new MerkleTree(this._inputs.map(function(input, i) {
-    if (i >= self._audits) {
-      return input;
-    } else {
-      return utils.rmd160sha256(utils.rmd160(input.digest('hex')));
-    }
-  }), utils.rmd160sha256);
-};
+	
+</dl>
 
-/**
- * Generate a random challenge buffer
- * @private
- * @returns {String} Hex encoded random bytes
- */
-AuditStream.prototype._generateChallenge = function() {
-  return crypto.randomBytes(constants.AUDIT_BYTES).toString('hex');
-};
 
-/**
- * Create a challenge response input to merkle tree
- * @private
- */
-AuditStream.prototype._createResponseInput = function(challenge) {
-  return crypto.createHash('sha256').update(challenge);
-};
+        
+    
+    </div>
 
-/**
- * Returns a new instance from the predefined challenges and tree
- * @param {Array} challenges - The precomputed challenges
- * @param {Array} tree - The bottom leaves of the existing merkle tree
- * @returns {AuditStream}
- */
-AuditStream.fromRecords = function(challenges, tree) {
-  assert(Array.isArray(challenges), 'Invalid challenges supplied');
-  assert(Array.isArray(tree), 'Invalid tree supplied');
-  assert(
-    tree.length === utils.getNextPowerOfTwo(challenges.length),
-    'Challenges and tree do not match'
-  );
+    
 
-  var auditor = new AuditStream(challenges.length);
+    
 
-  auditor._challenges = challenges;
-  auditor._tree = new MerkleTree(tree, utils.rmd160sha256);
-  auditor._finished = true;
+    
 
-  return auditor;
-};
+    
 
-module.exports = AuditStream;
-</pre>
-    </article>
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        <dl>
+            
+<hr>
+<dt>
+    <h4 class="name" id="Monitor"><span class="type-signature"></span>Monitor(network, options)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Wraps a <a href="Network.html">Network</a> instance and provides events for gathering
+statistics about node operation
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>network</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Network.html">Network</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The network interface to monitor</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_network_monitor.js.html">lib/network/monitor.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        </dl>
+    
+
+    
+
+    
+</article>
+
 </section>
-
 
 
 
@@ -275,6 +349,10 @@ module.exports = AuditStream;
 
 	<div class="clearfix"></div>
 
+	
+		<div class="col-md-3">
+			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
+		</div>
 	
 
 </div>

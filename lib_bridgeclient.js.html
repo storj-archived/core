@@ -59,6 +59,13 @@
 				</ul>
 			</li>
 			
+			<li class="dropdown">
+				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="global.html#Monitor">Monitor</a></li>
+				</ul>
+			</li>
+			
 		</ul>
 		<div class="col-sm-3 col-md-4">
             <form class="navbar-form" role="search">
@@ -406,6 +413,26 @@ BridgeClient.prototype.addShardToFileStagingFrame = function(f, s, opt, cb) {
 };
 
 /**
+ * Instructs the bridge to find N mirroring farmers for redundancy
+ * @param {String} id - Unique bucket ID
+ * @param {String} token - Token from {@link BridgeClient#createToken}
+ * @param {String} file - Path to file to store
+ * @param {Number} concurrency - Upload concurrency
+ * @param {Function} callback
+ */
+BridgeClient.prototype.replicateFileFromBucket = function(id, file, n, cb) {
+  if (typeof n === 'function') {
+    cb = n;
+    n = undefined;
+  }
+
+  return this._request('POST', '/buckets/' + id + '/mirrors', {
+    file: file,
+    redundancy: n
+  }, cb);
+};
+
+/**
  * Stores a file in the bucket
  * @param {String} id - Unique bucket ID
  * @param {String} token - Token from {@link BridgeClient#createToken}
@@ -476,7 +503,8 @@ BridgeClient.prototype._handleShardStream = function(shard, i, frame, state) {
     tmpName: path.join(tmpdir, crypto.randomBytes(6).toString('hex')),
     size: 0,
     index: i,
-    hasher: crypto.createHash('sha256')
+    hasher: crypto.createHash('sha256'),
+    excludeFarmers: []
   };
   var tmpFile = fs.createWriteStream(meta.tmpName);
   var passthrough = new stream.PassThrough();
@@ -517,7 +545,8 @@ BridgeClient.prototype._handleShardTmpFileFinish = function(state, meta, done) {
       size: meta.size,
       index: meta.index,
       challenges: challenges,
-      tree: tree
+      tree: tree,
+      exclude: meta.excludeFarmers
     }, function(err, pointer) {
       if (err) {
         self._logger.warn('Failed to upload shard...');
@@ -550,10 +579,13 @@ BridgeClient.prototype._startTransfer = function(pointer, state, meta, done) {
       self._logger.info('Retrying shard transfer, pointer: %j', pointer);
       self._transferShard(emitter, meta.tmpName, pointer);
     } else {
-      state.queue.kill();
-      state.callback(
-        new Error('Failed to upload shard after 3 attempts')
+      self._logger.info(
+        'Shard transfer failed %s times, getting another contract...',
+        3
       );
+      transferStatus.removeAllListeners();
+      meta.excludeFarmers.push(pointer.farmer.nodeID);
+      self._handleShardTmpFileFinish(state, meta, done);
     }
   });
 
@@ -633,21 +665,29 @@ BridgeClient.prototype._transferShard = function(emitter, name, pointer, cb) {
 };
 
 /**
- * Retrieves a file pointer from the bucket
- * @param {String} bucket - Unique bucket ID
- * @param {String} token - Token from {@link BridgeClient#createToken}
- * @param {String} fileID - The unique file pointer ID
+ * Retrieves a series of file pointers from the bucket
+ * @param {Object} options
+ * @param {String} options.bucket - Unique bucket ID
+ * @param {String} options.token - Token from {@link BridgeClient#createToken}
+ * @param {String} options.file - The unique file pointer ID
+ * @param {Number} options.skip - The starting index of pointers to resolve
+ * @param {Number} options.limit - The number of pointers to resolve
  * @param {Function} callback
  */
-BridgeClient.prototype.getFilePointer = function(bucket, token, fileID, cb) {
+BridgeClient.prototype.getFilePointers = function(options, cb) {
   var self = this;
 
   request({
     method: 'GET',
     baseUrl: self._options.baseURI,
-    uri: '/buckets/' + bucket + '/files/' + fileID,
+    uri: '/buckets/' + options.bucket + '/files/' + options.file,
     headers: {
-      'x-token': token
+      'x-token': options.token
+    },
+    qs: {
+      skip: options.skip,
+      limit: options.limit,
+      exclude: Array.isArray(options.exclude) ? options.exclude.join() : null
     },
     json: true
   }, function(err, res, body) {
@@ -673,15 +713,20 @@ BridgeClient.prototype._createInputFromPointer = function(pointer, callback) {
   var dcx = new DataChannelClient(new Contact(pointer.farmer));
 
   dcx.on('open', function() {
-    callback(dcx.createReadStream(pointer.token, pointer.hash));
+    callback(null, dcx.createReadStream(pointer.token, pointer.hash));
+  });
+
+  dcx.on('error', function(err) {
+    dcx.removeAllListeners('open');
+    callback(err);
   });
 };
 
 /**
  * Open a series of data channels based on the returned value of
- * {@link BridgeClient#getFilePointer} to resolve all the shards and
+ * {@link BridgeClient#getFilePointers} to resolve all the shards and
  * reassemble them together as a binary stream
- * @param {Array} pointers - Result of {@link BridgeClient#getFilePointer}
+ * @param {Array} pointers - Result of {@link BridgeClient#getFilePointers}
  * @param {Function} callback
  */
 BridgeClient.prototype.resolveFileFromPointers = function(pointers, callback) {
@@ -698,7 +743,18 @@ BridgeClient.prototype.resolveFileFromPointers = function(pointers, callback) {
       return onInputAdded();
     }
 
-    self._createInputFromPointer(pointer, function(inputStream) {
+    self._createInputFromPointer(pointer, function(err, inputStream) {
+      if (err) {
+        err.pointer = pointer;
+        return muxer.emit('error', err);
+      }
+
+      // NB: Trick the multiplexer into letting us incrementally modify it's
+      // NB: internal state so we can add input sources after initialization
+      if (muxer._added === muxer._shards) {
+        muxer._length += pointer.size; muxer._shards++;
+      }
+
       muxer.input(inputStream);
       onInputAdded();
     });
@@ -717,9 +773,112 @@ BridgeClient.prototype.resolveFileFromPointers = function(pointers, callback) {
       _addPointerToInputQueue(next);
     },
     function onInputsAdded() {
-      callback(null, muxer);
+      callback(null, muxer, queue);
     }
   );
+};
+
+/**
+ * Create a readable stream from the given bucket and file id
+ * @param {String} bucket - The unique bucket ID
+ * @param {String} file - The unique file ID
+ * @param {Object} [options]
+ * @param {Array} [options.exlude] - Exclude these nodeID's from pointers
+ * @param {Function} callback - Receives (err, stream)
+ */
+BridgeClient.prototype.createFileStream = function(bucket, file, opt, cb) {
+  var self = this;
+  var skip = -6;
+  var limit = 6;
+  var resolved = false;
+
+  if (typeof opt === 'function') {
+    cb = opt;
+    opt = {};
+  }
+
+  function _getPullToken(done) {
+    self._logger.info('Creating retrieval token...');
+    self.createToken(bucket, 'PULL', function(err, token) {
+      if (err) {
+        return done(err);
+      }
+
+      done(null, token.token);
+    });
+  }
+
+  function _getPointerSlice(token, done) {
+    self._logger.info('Resolving %s file pointers...', limit);
+    self.getFilePointers({
+      bucket: bucket,
+      token: token,
+      file: file,
+      skip: skip += 6,
+      limit: limit,
+      exclude: opt.exclude
+    }, function(err, pointers) {
+      if (err) {
+        return done(err);
+      }
+
+      done(null, pointers);
+    });
+  }
+
+  function _createStreamAndQueue(pointers, done) {
+    self.resolveFileFromPointers(pointers, function(err, stream, queue) {
+      if (err) {
+        return done(err);
+      }
+
+      done(null, stream, queue);
+    });
+  }
+
+  function _resolveNextSlice(queue, done) {
+    _getPullToken(function(err, token) {
+      if (err) {
+        return done(err);
+      }
+
+      _getPointerSlice(token, function(err, pointers) {
+        if (err) {
+          return done(err);
+        }
+
+        if (pointers.length === 0) {
+          resolved = true;
+          return done();
+        }
+
+        self._logger.info(
+          'Downloading file slice from %s channels.',
+          pointers.length
+        );
+        async.eachSeries(pointers, queue.push.bind(queue), done);
+      });
+    });
+  }
+
+  async.waterfall([
+    _getPullToken,
+    _getPointerSlice,
+    _createStreamAndQueue
+  ], function(err, stream, queue) {
+    if (err) {
+      return cb(err);
+    }
+
+    cb(null, stream); // NB: Provide the stream as soon as it is ready
+    async.until(function _pointersAreExhausted() {
+      return resolved;
+    }, _resolveNextSlice.bind(null, queue), function(err) {
+      if (err) {
+        stream.emit('error', err);
+      }
+    });
+  });
 };
 
 /**

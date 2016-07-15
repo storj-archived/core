@@ -59,6 +59,13 @@
 				</ul>
 			</li>
 			
+			<li class="dropdown">
+				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="global.html#Monitor">Monitor</a></li>
+				</ul>
+			</li>
+			
 		</ul>
 		<div class="col-sm-3 col-md-4">
             <form class="navbar-form" role="search">
@@ -119,7 +126,7 @@ ContactChecker.DEFAULTS = {
 /**
  * Opens a connection to the contact to ensure it's reachable
  * @param {Contact} contact - The contact to check
- * @param {Function} callback -
+ * @param {Function} callback
  */
 ContactChecker.prototype.check = function(contact, callback) {
   assert(contact instanceof Contact, 'Invalid contact supplied');

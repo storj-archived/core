@@ -59,6 +59,13 @@
 				</ul>
 			</li>
 			
+			<li class="dropdown">
+				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="global.html#Monitor">Monitor</a></li>
+				</ul>
+			</li>
+			
 		</ul>
 		<div class="col-sm-3 col-md-4">
             <form class="navbar-form" role="search">
@@ -241,12 +248,18 @@ Network.prototype.join = function(callback) {
     callback(err, self);
   }
 
-  this._setupTunnelClient(function(err) {
+  this._manager.open(function(err) {
     if (err) {
       return callback(err);
     }
 
-    self._enterOverlay(onJoinComplete);
+    self._setupTunnelClient(function(err) {
+      if (err) {
+        return callback(err);
+      }
+
+      self._enterOverlay(onJoinComplete);
+    });
   });
 };
 
@@ -306,7 +319,15 @@ Network.prototype._enterOverlay = function(callback) {
  * @param {Function} callback - Called when successful disconnect
  */
 Network.prototype.leave = function(callback) {
-  this._node.disconnect(callback);
+  var self = this;
+
+  this._manager.close(function(err) {
+    if (err) {
+      return callback(err);
+    }
+
+    self._node.disconnect(callback);
+  });
 };
 
 /**

@@ -59,6 +59,13 @@
 				</ul>
 			</li>
 			
+			<li class="dropdown">
+				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="global.html#Monitor">Monitor</a></li>
+				</ul>
+			</li>
+			
 		</ul>
 		<div class="col-sm-3 col-md-4">
             <form class="navbar-form" role="search">
@@ -96,16 +103,19 @@
 
 'use strict';
 
-module.exports = (function() {
-  var pack = require('../package');
-  var deps = {};
+/**
+ * Implementation of the Kademlia distributed hash table
+ * @see http://kadtools.github.io/
+ */
+exports.kad = require('kad');
+exports.kad.Quasar = require('kad-quasar');
 
-  for (var _dep in pack.dependencies) {
-    deps[_dep] = require(_dep);
-  }
-
-  return deps;
-})();
+/**
+ * A modular node for Bitcoin and blockchain-based apps
+ * @see https://bitcore.io/
+ */
+exports.bitcore = require('bitcore-lib');
+exports.bitcore.ECIES = require('bitcore-ecies');
 </pre>
     </article>
 </section>

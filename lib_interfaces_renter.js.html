@@ -59,6 +59,13 @@
 				</ul>
 			</li>
 			
+			<li class="dropdown">
+				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="global.html#Monitor">Monitor</a></li>
+				</ul>
+			</li>
+			
 		</ul>
 		<div class="col-sm-3 col-md-4">
             <form class="navbar-form" role="search">
@@ -95,6 +102,7 @@
 var assert = require('assert');
 var Contract = require('../contract');
 var Contact = require('../network/contact');
+var constants = require('../constants');
 var AuditStream = require('../auditstream');
 var kad = require('kad');
 var Network = require('../network');
@@ -122,22 +130,41 @@ inherits(RenterInterface, Network);
  * Publishes a storage {@link Contract} for solicitation of offers based on the
  * supplied shard metadata.
  * @param {Contract} contract - Proposed storage contract to solicit for offers
+ * @param {Array} [blacklist] - Optional farmer blacklist for offers
  * @param {RenterInterface~getStorageOfferCallback} callback - Offer handler
  */
-RenterInterface.prototype.getStorageOffer = function(contract, callback) {
+RenterInterface.prototype.getStorageOffer = function(contract, bl, callback) {
+  var self = this;
+
+  if (typeof bl === 'function') {
+    callback = bl;
+    bl = [];
+  }
+
   assert(contract instanceof Contract, 'Invalid contract supplied');
   assert(typeof callback === 'function', 'Invalid offer handler supplied');
 
-  this._pendingContracts[contract.get('data_hash')] = callback;
+  var hash = contract.get('data_hash');
+  this._pendingContracts[hash] = callback;
+  this._pendingContracts[hash].blacklist = bl;
 
-  this.publish(contract.getTopicString(), contract.toObject(), {
-    key: contract.get('data_hash')
-  });
+  function _handleTimeout() {
+    if (!self._pendingContracts[hash]) {
+      return;
+    }
+
+    self._pendingContracts[hash](new Error('No storage offers were received'));
+    delete self._pendingContracts[hash];
+  }
+
+  this.publish(contract.getTopicString(), contract.toObject(), { key: hash });
+  setTimeout(_handleTimeout, constants.OFFER_TIMEOUT);
 };
 /**
  * This callback is called upon receipt of an offer from
  * {@link RenterInterface#getStorageOffer}
  * @callback RenterInterface~getStorageOfferCallback
+ * @param {Error|null} err - An error if one is encountered
  * @param {Contact} farmer - The farmer who offered to fulfill the contract
  * @param {Contract} contract - The {@link Contact} offered by the farmer
  */

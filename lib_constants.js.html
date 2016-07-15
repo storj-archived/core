@@ -59,6 +59,13 @@
 				</ul>
 			</li>
 			
+			<li class="dropdown">
+				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="global.html#Monitor">Monitor</a></li>
+				</ul>
+			</li>
+			
 		</ul>
 		<div class="col-sm-3 col-md-4">
             <form class="navbar-form" role="search">
@@ -117,6 +124,8 @@ module.exports = {
   TOKEN_EXPIRE: 86400000,
   /** @constant {Number} TUNNEL_ANNOUNCE_INTERVAL - Announce tunnel state */
   TUNNEL_ANNOUNCE_INTERVAL: 900000,
+  /** @constant {Number} OFFER_TIMEOUT - Max wait time for storage offer */
+  OFFER_TIMEOUT: 15000,
   /** @constant {Number} ROUTER_CLEAN_INTERVAL - Drop bad contacts */
   ROUTER_CLEAN_INTERVAL: 60000,
   /** @constant {Number} OPCODE_TUNRPC_PREFIX - Opcode for tunnel rpc message */

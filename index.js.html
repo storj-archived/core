@@ -59,6 +59,13 @@
 				</ul>
 			</li>
 			
+			<li class="dropdown">
+				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="global.html#Monitor">Monitor</a></li>
+				</ul>
+			</li>
+			
 		</ul>
 		<div class="col-sm-3 col-md-4">
             <form class="navbar-form" role="search">
@@ -102,6 +109,9 @@ module.exports.version = require('./lib/version');
 
 /** {@link Network} */
 module.exports.Network = require('./lib/network');
+
+/** {@link Monitor} */
+module.exports.Monitor = require('./lib/network/monitor');
 
 /** {@link Transport} */
 module.exports.Transport = require('./lib/network/transport');

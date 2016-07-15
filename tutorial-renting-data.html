@@ -59,6 +59,13 @@
 				</ul>
 			</li>
 			
+			<li class="dropdown">
+				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="global.html#Monitor">Monitor</a></li>
+				</ul>
+			</li>
+			
 		</ul>
 		<div class="col-sm-3 col-md-4">
             <form class="navbar-form" role="search">
@@ -183,7 +190,7 @@ var contract = new storj.Contract({
   audit_count: 12
 });
 
-renter.getStorageOffer(contract, function(farmer, contract) {
+renter.getStorageOffer(contract, function(err, farmer, contract) {
   // CONTINUED IN NEXT EXAMPLE...
 });</code></pre><p>Now we have created a <a href="Contract.html">Contract</a> for the shard and we are waiting for an
 offer from a farmer on the network. When we receive one, the callback supplied
@@ -265,7 +272,7 @@ mirrors.</p>
 var mirrors = [];
 
 function _getMirroringContract(n, next) {
-  renter.getStorageOffer(contract, function(mirror, contract) {
+  renter.getStorageOffer(contract, function(err, mirror, contract) {
     renter.getRetrieveToken(farmer, contract, function(err, token) {
       if (err) {
         return next(err);

@@ -59,6 +59,13 @@
 				</ul>
 			</li>
 			
+			<li class="dropdown">
+				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="global.html#Monitor">Monitor</a></li>
+				</ul>
+			</li>
+			
 		</ul>
 		<div class="col-sm-3 col-md-4">
             <form class="navbar-form" role="search">
@@ -157,6 +164,7 @@ Protocol.prototype._handleOffer = function(params, callback) {
 
     var doConsign = self._network._pendingContracts[key].bind(
       self._network,
+      null,
       Contact(params.contact),
       contract
     );
@@ -198,6 +206,14 @@ Protocol.prototype._verifyContract = function(contract, contact, callback) {
 
   if (!this._network._pendingContracts[contract.get('data_hash')]) {
     this._network.emit('unhandledOffer', contract, contact);
+    return callback(new Error('Contract no longer open to offers'));
+  }
+
+  var blacklist = this._network._pendingContracts[
+    contract.get('data_hash')
+  ].blacklist;
+
+  if (blacklist.indexOf(contact.nodeID) !== -1) {
     return callback(new Error('Contract no longer open to offers'));
   }
 
@@ -374,6 +390,10 @@ Protocol.prototype._handleRetrieve = function(params, callback) {
   var self = this;
   var hash = params.data_hash;
   var token = utils.generateToken();
+
+  if (!kad.utils.isValidKey(hash)) {
+    return callback(new Error('Invalid data hash provided: ' + hash));
+  }
 
   self._network._manager.load(hash, function(err, item) {
     if (err) {

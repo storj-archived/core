@@ -59,6 +59,13 @@
 				</ul>
 			</li>
 			
+			<li class="dropdown">
+				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="global.html#Monitor">Monitor</a></li>
+				</ul>
+			</li>
+			
 		</ul>
 		<div class="col-sm-3 col-md-4">
             <form class="navbar-form" role="search">
@@ -187,7 +194,22 @@ Manager.prototype.save = function(item, callback) {
     self._checkCapacity();
     callback(null);
   });
+};
 
+/**
+ * Opens the underlying storage adapter
+ * @param {Function} callback - Called on complete
+ */
+Manager.prototype.open = function(callback) {
+  this._storage._open(callback);
+};
+
+/**
+ * Closes the underlying storage adapter
+ * @param {Function} callback - Called on complete
+ */
+Manager.prototype.close = function(callback) {
+  this._storage._close(callback);
 };
 
 /**

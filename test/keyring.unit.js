@@ -54,7 +54,6 @@ describe('KeyRing', function() {
       );
 
       KeyRing(tmpfolder, 'testpass');
-      var newFile = path.join(tmpfolder, 'key.ring/test3');
 
       _JSON.restore();
       expect(fs.existsSync(path.join(tmpfolder, 'keyring'))).to.equal(false);

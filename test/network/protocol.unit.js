@@ -125,6 +125,35 @@ describe('Protocol', function() {
       });
     });
 
+    it('should fail if nodeID is blacklisted', function(done) {
+      var callback = utils.noop;
+      callback.blacklist = ['adc83b19e793491b1c6ea0fd8b46cd9f32e592fc'];
+      var proto = new Protocol({
+        network: {
+          _logger: Logger(0),
+          _keypair: KeyPair(),
+          _pendingContracts: {
+            adc83b19e793491b1c6ea0fd8b46cd9f32e592fc: callback
+          }
+        }
+      });
+      var contract = {
+        get: sinon.stub().returns('adc83b19e793491b1c6ea0fd8b46cd9f32e592fc'),
+        verify: sinon.stub().returns(true),
+        isComplete: sinon.stub().returns(true),
+        sign: sinon.stub()
+      };
+      var contact = {
+        address: '127.0.0.1',
+        port: 1337,
+        nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc'
+      };
+      proto._verifyContract(contract, contact, function(err) {
+        expect(err.message).to.equal('Contract no longer open to offers');
+        done();
+      });
+    });
+
   });
 
   describe('#_handleAudit', function() {
@@ -341,6 +370,23 @@ describe('Protocol', function() {
         data_hash: utils.rmd160('')
       }, function(err) {
         expect(err.message).to.equal('Failed');
+        done();
+      });
+    });
+
+    it('should error if invalid key', function(done) {
+      var proto = new Protocol({
+        network: {
+          _logger: Logger(0),
+          _manager: {
+            load: sinon.stub().callsArgWith(1, new Error('Failed'))
+          }
+        }
+      });
+      proto._handleRetrieve({
+        data_hash: 'butts'
+      }, function(err) {
+        expect(err.message).to.equal('Invalid data hash provided: butts');
         done();
       });
     });

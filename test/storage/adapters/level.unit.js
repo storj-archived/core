@@ -191,6 +191,81 @@ describe('LevelDBStorageAdapter', function() {
 
   });
 
+  describe('#_open', function() {
+
+    it('should callback null if already open', function(done) {
+      store._open(function(err) {
+        expect(err).to.equal(null);
+        done();
+      });
+    });
+
+    it('should open the db if closed', function(done) {
+      store._isOpen = false;
+      var open = sinon.stub(store._db, 'open').callsArgWith(0, null);
+      store._open(function(err) {
+        open.restore();
+        expect(open.called).to.equal(true);
+        expect(err).to.equal(null);
+        done();
+      });
+    });
+
+    it('should bubble error if db open fails', function(done) {
+      store._isOpen = false;
+      var open = sinon.stub(store._db, 'open').callsArgWith(
+        0,
+        new Error('Failed')
+      );
+      store._open(function(err) {
+        store._isOpen = true;
+        open.restore();
+        expect(open.called).to.equal(true);
+        expect(err.message).to.equal('Failed');
+        done();
+      });
+    });
+
+  });
+
+  describe('#_close', function() {
+
+    it('should callback null if already closed', function(done) {
+      store._isOpen = false;
+      store._close(function(err) {
+        expect(err).to.equal(null);
+        done();
+      });
+    });
+
+    it('should close the db if open', function(done) {
+      store._isOpen = true;
+      var close = sinon.stub(store._db, 'close').callsArgWith(0, null);
+      store._close(function(err) {
+        close.restore();
+        expect(close.called).to.equal(true);
+        expect(err).to.equal(null);
+        done();
+      });
+    });
+
+    it('should bubble error if db close fails', function(done) {
+      store._isOpen = true;
+      var close = sinon.stub(store._db, 'close').callsArgWith(
+        0,
+        new Error('Failed')
+      );
+      store._close(function(err) {
+        store._isOpen = true;
+        close.restore();
+        expect(close.called).to.equal(true);
+        expect(err.message).to.equal('Failed');
+        done();
+      });
+    });
+
+  });
+
 });
 
 describe('LevelDBFileStore', function() {

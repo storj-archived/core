@@ -5,8 +5,6 @@ var DataCipherKeyIv = require('../lib/cipherkeyiv');
 var expect = require('chai').expect;
 var path = require('path');
 var fs = require('fs');
-var proxyquire = require('proxyquire');
-var sinon = require('sinon');
 var crypto = require('crypto');
 
 var tmpfolder = require('os').tmpdir();
@@ -31,8 +29,8 @@ describe('KeyRing', function() {
     it('should create key.ring folder if not exists', function() {
       var deleteFolderRecursive = function(path) {
         if( fs.existsSync(path) ) {
-          fs.readdirSync(path).forEach(function(file,index){
-            var curPath = path + "/" + file;
+          fs.readdirSync(path).forEach(function(file){
+            var curPath = path + '/' + file;
             if(fs.lstatSync(curPath).isDirectory()) { // recurse
               deleteFolderRecursive(curPath);
             } else { // delete file
@@ -42,7 +40,7 @@ describe('KeyRing', function() {
           fs.rmdirSync(path);
         }
       };
-      var folder = path.join(tmpfolder, 'key.ring')
+      var folder = path.join(tmpfolder, 'key.ring');
       deleteFolderRecursive(folder);
       KeyRing(tmpfolder, 'test');
       expect(fs.existsSync(folder)).to.equal(true);
@@ -66,7 +64,7 @@ describe('KeyRing', function() {
         path.join(tmpfolder, 'key.ring/test4'),
         encrypt(JSON.stringify({'a':'b'}))
       );
-      var keyring = new KeyRing(tmpfolder, 'testpass');
+      KeyRing(tmpfolder, 'testpass');
       var newFile = path.join(tmpfolder, 'key.ring/test3');
       expect(fs.existsSync(newFile)).to.equal(true);
       fs.unlinkSync(path.join(tmpfolder, 'keyring'));

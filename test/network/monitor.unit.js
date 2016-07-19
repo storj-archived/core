@@ -336,6 +336,26 @@ describe('Monitor#getPaymentAddressBalances', function() {
     });
   });
 
+  it('should return 0 if the address is invalid', function(done) {
+    var kp = new KeyPair();
+    var StubbedMonitor = proxyquire('../../lib/network/monitor', {
+      request: function(opts, callback) {
+        callback(null, { statusCode: 200 }, {
+          success: 0,
+          error: 'Invalid address'
+        });
+      }
+    });
+    StubbedMonitor.getPaymentAddressBalances({
+      _keypair: kp,
+      _options: { payment: { address: '1234' } }
+    }, function(err, stats) {
+      expect(stats.payments.balances.sjcx).to.equal(0);
+      expect(stats.payments.balances.sjct).to.equal(0);
+      done();
+    });
+  });
+
 });
 
 describe('Monitor#getContractsDetails', function() {

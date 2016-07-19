@@ -44,7 +44,7 @@ nvm install 4.4.4
 > `build-essential` package using APT and Mac OSX users can install with
 > `xcode-select --install` and follow the wizard.
 
-### Installing on Windows
+### Installing on Windows (Manual)
 
 Download [Node.js LTS](https://nodejs.org/en/download/) for Windows, launch the
 installer and follow the setup instructions. Restart your PC, then test it from
@@ -82,6 +82,14 @@ Finally, set the new environment variable in the Windows command prompt with:
 ````
 setx GYP_MSVS_VERSION 2015
 ```
+
+### Installing on Windows (Automated)
+
+Install utilizing automated script
+
+<a href="https://github.com/Storj/storj-automation/archive/master.zip">https://github.com/Storj/storj-automation/archive/master.zip</a>
+
+Run the `install.bat` located in `/Windows/storj-automate`
 
 Quick Start (Programmatic)
 --------------------------

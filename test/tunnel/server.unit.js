@@ -24,6 +24,42 @@ describe('TunnelServer', function() {
 
   });
 
+  describe('#close', function() {
+
+    it('should bubble error if failed to close', function(done) {
+      TunnelServer.prototype.close.call({
+        _server: {
+          close: sinon.stub().callsArgWith(0, new Error('Failed to close'))
+        },
+        _shutdownGateways: sinon.stub().callsArg(0)
+      }, function(err) {
+        expect(err.message).to.equal('Failed to close');
+        done();
+      });
+    });
+
+  });
+
+  describe('#_shutdownGateways', function() {
+
+    it('should close each gateway in the tunnel server', function(done) {
+      var _gateways = {
+        test1: { close: sinon.stub().callsArg(0) },
+        test2: { close: sinon.stub().callsArg(0) },
+        test3: { close: sinon.stub().callsArg(0) },
+      };
+      TunnelServer.prototype._shutdownGateways.call({
+        _gateways: _gateways
+      }, function() {
+        expect(_gateways.test1.close.called).to.equal(true);
+        expect(_gateways.test2.close.called).to.equal(true);
+        expect(_gateways.test3.close.called).to.equal(true);
+        done();
+      });
+    });
+
+  });
+
   describe('#createGateway', function() {
 
     it('should refuse to open tunnel if max is reached', function(done) {

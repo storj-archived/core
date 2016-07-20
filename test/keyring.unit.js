@@ -8,7 +8,6 @@ var fs = require('fs');
 var crypto = require('crypto');
 var sinon = require('sinon');
 var rimraf = require('rimraf');
-var proxyquire = require('proxyquire');
 
 var tmpfolder = require('os').tmpdir();
 

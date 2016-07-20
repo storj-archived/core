@@ -306,7 +306,7 @@ describe('FarmerInterface', function() {
 
   describe('#_sendOfferForContract', function() {
 
-    it('should log an error if transport send fails', function(done) {
+    it('should log a warning if transport send fails', function(done) {
       var farmer = new FarmerInterface({
         keypair: KeyPair(),
         port: 0,
@@ -319,15 +319,15 @@ describe('FarmerInterface', function() {
         2,
         new Error('Failed to send offer')
       );
-      var _error = sinon.stub(farmer._logger, 'error');
+      var _warn = sinon.stub(farmer._logger, 'warn');
       farmer._sendOfferForContract({
         toObject: sinon.stub(),
         get: sinon.stub()
       });
       setImmediate(function() {
         _send.restore();
-        _error.restore();
-        expect(_error.calledWith('Failed to send offer')).to.equal(true);
+        _warn.restore();
+        expect(_warn.calledWith('Failed to send offer')).to.equal(true);
         done();
       });
     });
@@ -346,15 +346,15 @@ describe('FarmerInterface', function() {
         null,
         { result: {} }
       );
-      var _error = sinon.stub(farmer._logger, 'error');
+      var _warn = sinon.stub(farmer._logger, 'warn');
       farmer._sendOfferForContract({
         toObject: sinon.stub(),
         get: sinon.stub()
       });
       setImmediate(function() {
         _send.restore();
-        _error.restore();
-        expect(_error.calledWith('Renter refused to sign')).to.equal(true);
+        _warn.restore();
+        expect(_warn.calledWith('Renter refused to sign')).to.equal(true);
         done();
       });
     });
@@ -388,12 +388,12 @@ describe('FarmerInterface', function() {
         backend: require('memdown'),
         storage: { path: 'test' }
       });
-      var _error = sinon.stub(farmer._logger, 'error');
+      var _warn = sinon.stub(farmer._logger, 'warn');
       farmer._handleOfferRes({ result: { contract: { version: '12'} } });
       setImmediate(function() {
-        _error.restore();
+        _warn.restore();
         expect(
-          _error.calledWith('renter responded with invalid contract')
+          _warn.calledWith('renter responded with invalid contract')
         ).to.equal(true);
         done();
       });
@@ -408,16 +408,16 @@ describe('FarmerInterface', function() {
         backend: require('memdown'),
         storage: { path: 'test' }
       });
-      var _error = sinon.stub(farmer._logger, 'error');
+      var _warn = sinon.stub(farmer._logger, 'warn');
       farmer._handleOfferRes({
         result: {
           contract: Contract({}).toObject()
         }
       }, new Contract());
       setImmediate(function() {
-        _error.restore();
+        _warn.restore();
         expect(
-          _error.calledWith('renter signature is invalid')
+          _warn.calledWith('renter signature is invalid')
         ).to.equal(true);
         done();
       });
@@ -491,7 +491,7 @@ describe('FarmerInterface', function() {
 
     it('should log the error', function(done) {
       var logger = kad.Logger(0);
-      var _error = sinon.stub(logger, 'error');
+      var _warn = sinon.stub(logger, 'warn');
       var farmer = new FarmerInterface({
         keypair: KeyPair(),
         port: 0,
@@ -504,7 +504,7 @@ describe('FarmerInterface', function() {
       farmer._listenForCapacityChanges(manager);
       manager.emit('error', new Error('Failed'));
       setImmediate(function() {
-        expect(_error.called).to.equal(true);
+        expect(_warn.called).to.equal(true);
         done();
       });
     });

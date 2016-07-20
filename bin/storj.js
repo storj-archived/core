@@ -396,6 +396,9 @@ var ACTIONS = {
         return log('error', err.message);
       }
 
+      var keyring = storj.KeyRing(DATADIR, program.keypass);
+      keyring.deleteKeyFromKeyRing(fileId);
+
       log('info', 'File was successfully removed from bucket.');
     });
   },

@@ -8,6 +8,7 @@ var fs = require('fs');
 var crypto = require('crypto');
 var sinon = require('sinon');
 var rimraf = require('rimraf');
+var proxyquire = require('proxyquire');
 
 var tmpfolder = require('os').tmpdir();
 
@@ -89,6 +90,22 @@ describe('KeyRing', function() {
     it('should generate a keypair and return it', function() {
       var kr = new KeyRing(tmpfolder);
       expect(kr.generate('test')).to.be.instanceOf(DataCipherKeyIv);
+    });
+
+  });
+
+  describe('#deleteKeyFromKeyRing', function() {
+
+    it('should delete a key', function() {
+      fs.writeFileSync(
+        path.join(tmpfolder, 'key.ring/test5'),
+        'contents'
+      );
+      var keyring = new KeyRing(tmpfolder);
+      keyring.deleteKeyFromKeyRing('test5');
+      expect(
+        fs.existsSync(path.join(tmpfolder, 'key.ring/test5'))
+      ).to.equal(false);
     });
 
   });

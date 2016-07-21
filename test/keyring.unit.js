@@ -107,6 +107,14 @@ describe('KeyRing', function() {
       ).to.equal(false);
     });
 
+    it('should do nothing if a key does not exist', function() {
+      var keyring = new KeyRing(tmpfolder);
+      keyring.deleteKeyFromKeyRing('test5');
+      expect(
+        fs.existsSync(path.join(tmpfolder, 'key.ring/test5'))
+      ).to.equal(false);
+    });
+
   });
 
   describe('#get', function() {

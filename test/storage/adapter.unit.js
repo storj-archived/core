@@ -1,5 +1,7 @@
 'use strict';
 
+var sinon = require('sinon');
+var utils = require('../../lib/utils');
 var expect = require('chai').expect;
 var StorageAdapter = require('../../lib/storage/adapter');
 
@@ -9,6 +11,41 @@ describe('StorageAdapter', function() {
 
     it('should create and instance without the new keyword', function() {
       expect(StorageAdapter()).to.be.instanceOf(StorageAdapter);
+    });
+
+  });
+
+  describe('#del', function() {
+
+    it('should bubble errors from #peek', function(done) {
+      var adapter = new StorageAdapter();
+      var _peek = sinon.stub(adapter, 'peek').callsArgWith(
+        1,
+        new Error('Failed')
+      );
+      adapter.del(utils.rmd160('key'), function(err) {
+        _peek.restore();
+        expect(err.message).to.equal('Failed');
+        done();
+      });
+    });
+
+    it('should bubble errors from #_del', function(done) {
+      var adapter = new StorageAdapter();
+      var _peek = sinon.stub(adapter, 'peek').callsArgWith(
+        1,
+        null
+      );
+      var _del = sinon.stub(adapter, '_del').callsArgWith(
+        1,
+        new Error('Failed')
+      );
+      adapter.del(utils.rmd160('key'), function(err) {
+        _peek.restore();
+        _del.restore();
+        expect(err.message).to.equal('Failed');
+        done();
+      });
     });
 
   });

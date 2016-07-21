@@ -391,12 +391,15 @@ var ACTIONS = {
     });
   },
   removefile: function removefile(id, fileId) {
-    PrivateClient().removeFileFromBucket(id, fileId, function(err) {
-      if (err) {
-        return log('error', err.message);
-      }
+    getKeyRing(function(keyring) {
+      PrivateClient().removeFileFromBucket(id, fileId, function(err) {
+        if (err) {
+          return log('error', err.message);
+        }
 
-      log('info', 'File was successfully removed from bucket.');
+        log('info', 'File was successfully removed from bucket.');
+        keyring.deleteKeyFromKeyRing(fileId);
+      });
     });
   },
   uploadfile: function uploadfile(bucket, filepath, env) {

@@ -93,6 +93,30 @@ describe('KeyRing', function() {
 
   });
 
+  describe('#deleteKeyFromKeyRing', function() {
+
+    it('should delete a key', function() {
+      fs.writeFileSync(
+        path.join(tmpfolder, 'key.ring/test5'),
+        'contents'
+      );
+      var keyring = new KeyRing(tmpfolder);
+      keyring.deleteKeyFromKeyRing('test5');
+      expect(
+        fs.existsSync(path.join(tmpfolder, 'key.ring/test5'))
+      ).to.equal(false);
+    });
+
+    it('should do nothing if a key does not exist', function() {
+      var keyring = new KeyRing(tmpfolder);
+      keyring.deleteKeyFromKeyRing('test5');
+      expect(
+        fs.existsSync(path.join(tmpfolder, 'key.ring/test5'))
+      ).to.equal(false);
+    });
+
+  });
+
   describe('#get', function() {
 
     it('should return null if no key for the given ID', function() {

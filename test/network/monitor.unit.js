@@ -9,6 +9,7 @@ var RAMStorageAdapter = require('../../lib/storage/adapters/ram');
 var KeyPair = require('../../lib/keypair');
 var sinon = require('sinon');
 var proxyquire = require('proxyquire');
+var EventEmitter = require('events').EventEmitter;
 
 describe('Network/Monitor', function() {
 
@@ -165,17 +166,11 @@ describe('Network/Monitor', function() {
         Monitor,
         'getPaymentAddressBalances'
       ).callsArgWith(1, null, {});
-      var getContractsDetails = sinon.stub(
-        Monitor,
-        'getContractsDetails'
-      ).callsArgWith(1, null, {});
       var mon = new Monitor(net);
       mon._collectHardStats();
       setImmediate(function() {
         getPaymentAddressBalances.restore();
-        getContractsDetails.restore();
         expect(getPaymentAddressBalances.called).to.equal(true);
-        expect(getContractsDetails.called).to.equal(true);
         done();
       });
     });
@@ -361,24 +356,43 @@ describe('Monitor#getPaymentAddressBalances', function() {
 describe('Monitor#getContractsDetails', function() {
 
   it('should return the number of contracts', function(done) {
+    var stream = new EventEmitter();
     Monitor.getContractsDetails({
       _manager: {
-        _storage: { _keys: sinon.stub().callsArgWith(0, null, [1, 2, 3]) }
+        _storage: {
+          createReadStream: function() {
+            return stream;
+          }
+        }
       }
     }, function(err, stats) {
       expect(stats.contracts.total).to.equal(3);
       done();
     });
+    setImmediate(function() {
+      stream.emit('data', { contracts: { key: {} } });
+      stream.emit('data', { contracts: { key: {} } });
+      stream.emit('data', { contracts: { key: {} } });
+      stream.emit('end');
+    });
   });
 
   it('should return 0 contracts', function(done) {
+    var stream = new EventEmitter();
     Monitor.getContractsDetails({
       _manager: {
-        _storage: { _keys: sinon.stub().callsArgWith(0, new Error('Failed')) }
+        _storage: {
+          createReadStream: function() {
+            return stream;
+          }
+        }
       }
     }, function(err, stats) {
       expect(stats.contracts.total).to.equal(0);
       done();
+    });
+    setImmediate(function() {
+      stream.emit('error', new Error('Failed'));
     });
   });
 

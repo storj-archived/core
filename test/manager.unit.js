@@ -175,9 +175,11 @@ describe('Manager', function() {
     it('should bubble error from underlying db', function(done) {
       var db = new RAMStorageAdapter();
       var man = new Manager(db);
+      var _peek = sinon.stub(db, 'peek').callsArgWith(1, new Error('Failed'));
       var _put = sinon.stub(db, '_put').callsArgWith(2, new Error('Failed'));
       man.save(StorageItem(), function(err) {
         _put.restore();
+        _peek.restore();
         expect(err.message).to.equal('Failed');
         done();
       });

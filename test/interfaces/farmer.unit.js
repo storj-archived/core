@@ -231,11 +231,13 @@ describe('FarmerInterface', function() {
       setImmediate(function() {
         setImmediate(function() {
           setImmediate(function() {
-            _getContactByNodeID.restore();
-            _findNode.restore();
-            _remove.restore();
-            expect(_remove.called).to.equal(true);
-            done();
+            setImmediate(function() {
+              _getContactByNodeID.restore();
+              _findNode.restore();
+              _remove.restore();
+              expect(_remove.called).to.equal(true);
+              done();
+            });
           });
         });
       });

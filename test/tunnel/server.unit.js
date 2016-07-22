@@ -6,6 +6,7 @@ var TunnelServer = require('../../lib/tunnel/server');
 var EventEmitter = require('events').EventEmitter;
 var proxyquire = require('proxyquire');
 var sinon = require('sinon');
+var TunnelErrors = require('../../lib/tunnel/errorcodes');
 
 describe('TunnelServer', function() {
 
@@ -136,8 +137,8 @@ describe('TunnelServer', function() {
       ts._handleClient({
         upgradeReq: { url: 'ws://127.0.0.1:1337/tun?token=sometoken' },
         close: function(code, result) {
-          expect(code).to.equal(404);
-          expect(result.error).to.equal('Gateway no longer open');
+          expect(code).to.equal(TunnelErrors.GATEWAY_CLOSED);
+          expect(result).to.equal('Gateway no longer open');
           done();
         }
       });
@@ -172,8 +173,8 @@ describe('TunnelServer', function() {
       var client = new EventEmitter();
       client.upgradeReq = { url: 'ws://127.0.0.1:1337/tun?token=sometoken' };
       client.close = function(code, result) {
-        expect(code).to.equal(400);
-        expect(result.error).to.equal('Muxer error');
+        expect(code).to.equal(TunnelErrors.UNEXPECTED);
+        expect(result).to.equal('Muxer error');
         done();
       };
       var ts = new BadMuxTunServer({ server: http.Server() });
@@ -192,8 +193,8 @@ describe('TunnelServer', function() {
       var client = new EventEmitter();
       client.upgradeReq = { url: 'ws://127.0.0.1:1337/tun?token=sometoken' };
       client.close = function(code, result) {
-        expect(code).to.equal(400);
-        expect(result.error).to.equal('Demuxer error');
+        expect(code).to.equal(TunnelErrors.UNEXPECTED);
+        expect(result).to.equal('Demuxer error');
         done();
       };
       var ts = new BadDemuxTunServer({ server: http.Server() });
@@ -212,8 +213,8 @@ describe('TunnelServer', function() {
       var client = new EventEmitter();
       client.upgradeReq = { url: 'ws://127.0.0.1:1337/tun?token=sometoken' };
       client.close = function(code, result) {
-        expect(code).to.equal(400);
-        expect(result.error).to.equal('Cannot handle tunnel frame type');
+        expect(code).to.equal(TunnelErrors.INVALID_FRAME_TYPE);
+        expect(result).to.equal('Cannot handle tunnel frame type');
         done();
       };
       var ts = new BadDemuxTunServer({ server: http.Server() });

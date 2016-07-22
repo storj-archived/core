@@ -222,6 +222,30 @@ describe('TunnelServer', function() {
       badDemuxer.emit('data', { type: 'invalid' });
     });
 
+    it('should cleanup on muxer data if the client is closed', function(done) {
+      var muxer = new EventEmitter();
+      muxer.source = sinon.stub();
+      var client = new EventEmitter();
+      client.upgradeReq = { url: 'ws://127.0.0.1:1337/tun?token=sometoken' };
+      client.readyState = 0;
+      var MuxerStubTunServer = proxyquire('../../lib/tunnel/server', {
+        './multiplexer': function() {
+          return muxer;
+        }
+      });
+      var ts = new MuxerStubTunServer({ server: http.Server() });
+      ts._gateways.sometoken = new EventEmitter();
+      ts._gateways.sometoken.close = sinon.stub();
+      ts._handleClient(client);
+      setImmediate(function() {
+        muxer.emit('data', {});
+        setImmediate(function() {
+          expect(ts._gateways.sometoken.close.called).to.equal(true);
+          done();
+        });
+      });
+    });
+
   });
 
   describe('#_getAvailablePort', function() {

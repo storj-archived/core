@@ -1,6 +1,6 @@
 ### Package Versions
 
-Replace the values below using the output from `npm list storj`.
+Replace the values below using the output from `npm list storj`. Use ```npm list -g storj``` if installed globally.
 
 ```
 storj-bridge@0.6.5 /home/gordon/Code/storj-bridge

@@ -7,6 +7,7 @@ var RAMStorageAdapter = require('../../lib/storage/adapters/ram');
 var Manager = require('../../lib/manager');
 var Logger = require('kad').Logger;
 var DataChannelServer = require('../../lib/datachannel/server');
+var DataChannelErrors = require('../../lib/datachannel/errorcodes');
 var sinon = require('sinon');
 var EventEmitter = require('events').EventEmitter;
 var http = require('http');
@@ -66,7 +67,7 @@ describe('DataChannelServer', function() {
       });
       var socket = new EventEmitter();
       socket.close = function(code, message) {
-        expect(code).to.equal(500);
+        expect(code).to.equal(DataChannelErrors.UNEXPECTED);
         expect(message).to.equal('Socket error');
         done();
       };
@@ -84,7 +85,7 @@ describe('DataChannelServer', function() {
       });
       var socket = new EventEmitter();
       socket.close = function(code, message) {
-        expect(code).to.equal(400);
+        expect(code).to.equal(DataChannelErrors.INVALID_MESSAGE);
         expect(message).to.equal('Failed to parse message');
         done();
       };
@@ -102,7 +103,7 @@ describe('DataChannelServer', function() {
       });
       var socket = new EventEmitter();
       socket.close = function(code, message) {
-        expect(code).to.equal(401);
+        expect(code).to.equal(DataChannelErrors.UNAUTHORIZED_TOKEN);
         expect(message).to.equal('The supplied token is not accepted');
         done();
       };
@@ -128,7 +129,7 @@ describe('DataChannelServer', function() {
       };
       var socket = new EventEmitter();
       socket.close = function(code, message) {
-        expect(code).to.equal(400);
+        expect(code).to.equal(DataChannelErrors.INVALID_OPERATION);
         expect(message).to.equal('Failed to handle the defined operation');
         done();
       };
@@ -330,7 +331,7 @@ describe('DataChannelServer', function() {
       (function() {
         socket.close = function(code, message) {
           _load.restore();
-          expect(code).to.equal(400);
+          expect(code).to.equal(DataChannelErrors.FAILED_INTEGRITY);
           expect(message).to.equal(
             'Calculated hash does not match the expected result'
           );

@@ -35,6 +35,9 @@ module.exports.DataChannelServer = require('./lib/datachannel/server');
 /** {@link DataChannelPointer} */
 module.exports.DataChannelPointer = require('./lib/datachannel/pointer');
 
+/** {@link DataChannelErrors} */
+module.exports.DataChannelErrors = require('./lib/datachannel/errorcodes');
+
 /** {@link Protocol} */
 module.exports.Protocol = require('./lib/network/protocol');
 
@@ -46,6 +49,9 @@ module.exports.TunnelMuxer = require('./lib/tunnel/multiplexer');
 
 /** {@link TunnelDemuxer} */
 module.exports.TunnelDemuxer = require('./lib/tunnel/demultiplexer');
+
+/** {@link TunnelErrors} */
+module.exports.TunnelErrors = require('./lib/tunnel/errorcodes');
 
 /** {@link TunnelClient} */
 module.exports.TunnelClient = require('./lib/tunnel/client');

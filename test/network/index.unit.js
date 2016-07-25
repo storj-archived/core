@@ -305,56 +305,6 @@ describe('Network (private)', function() {
 
   describe('#_listenForTunnelers', function() {
 
-    it('should send a publish message on tunserver locked', function(done) {
-      var net = Network({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
-        logger: kad.Logger(0),
-        seeds: [],
-        address: '127.0.0.1',
-        port: 0,
-        noforward: true,
-        tunnels: 0
-      });
-      var emitter = new EventEmitter();
-      net._transport._tunserver = emitter;
-      var _pub = sinon.stub(net._pubsub, 'publish');
-      var _sub = sinon.stub(net._pubsub, 'subscribe');
-      net._listenForTunnelers();
-      emitter.emit('locked');
-      setImmediate(function() {
-        _pub.restore();
-        _sub.restore();
-        expect(_pub.callCount).to.equal(1);
-        done();
-      });
-    });
-
-    it('should send a publish message on tunserver unlocked', function(done) {
-      var net = Network({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
-        logger: kad.Logger(0),
-        seeds: [],
-        address: '127.0.0.1',
-        port: 0,
-        noforward: true,
-        tunnels: 0
-      });
-      var emitter = new EventEmitter();
-      net._transport._tunserver = emitter;
-      var _pub = sinon.stub(net._pubsub, 'publish');
-      var _sub = sinon.stub(net._pubsub, 'subscribe');
-      net._listenForTunnelers();
-      emitter.emit('unlocked');
-      setImmediate(function() {
-        _pub.restore();
-        _sub.restore();
-        expect(_pub.callCount).to.equal(1);
-        done();
-      });
-    });
-
     it('should announce unavailable tunnels', function(done) {
       var net = Network({
         keypair: KeyPair(),

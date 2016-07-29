@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Storj Core Source: lib/storage/adapters/level/filestore.js</title>
+	<title>Storj Core Module: storj/tunnel/errors</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -80,135 +80,296 @@
 <div class="row">
 
 	
-	<div class="col-md-12">
+	<div class="col-md-8">
 	
 		<div id="main">
 			
 
-		<h1 class="page-title">Source: lib/storage/adapters/level/filestore.js</h1>
-    
+	<h1 class="page-title">Module: storj/tunnel/errors</h1>
 <section>
-    <article>
-        <pre
-            class="sunlight-highlight-javascript ">'use strict';
 
-var stream = require('readable-stream');
+<header>
+    
+</header>
 
-/**
- * Exposes an file read/write stream interface in/out of levelup
- * @constructor
- * @param {Object} db - Levelup database instance
- */
-function LevelDBFileStore(db) {
-  if (!(this instanceof LevelDBFileStore)) {
-    return new LevelDBFileStore(db);
-  }
 
-  this._db = db;
-}
+<article>
+    <div class="container-overview">
+    
+        
 
-/**
- * Determines if the file is already stored in the db
- * @param {String} key - The key for the file stored
- * @param {Function} callback - Called with boolean indicating existence
- */
-LevelDBFileStore.prototype.exists = function(key, callback) {
-  this._db.get(key + ' 0', function(err) {
-    callback(!err);
-  });
-};
+        
+<dl class="details">
+    
 
-/**
- * Deletes the file pieces from the database
- * @param {String} key - The key for the file stored
- * @param {Function} callback - Called with boolean indicating existence
- */
-LevelDBFileStore.prototype.reset = function(key, callback) {
-  var self = this;
-  var index = 0;
+	
 
-  function _del(index, callback) {
-    var itemkey = key + ' ' + index.toString();
+	
 
-    self._db.get(itemkey, function(err) {
-      index++;
+	
 
-      if (!err) {
-        self._db.del(itemkey, function() {
-          _del(index, callback);
-        });
-      } else {
-        callback();
-      }
-    });
-  }
+    
 
-  _del(index, callback);
-};
+    
 
-/**
- * Returns a readable stream of the file at the given key
- * @param {String} key - The key for the file to read
- * @returns {ReadableStream}
- */
-LevelDBFileStore.prototype.createReadStream = function(key) {
-  var self = this;
-  var index = 0;
+    
 
-  return new stream.Readable({
-    read: function() {
-      var rs = this;
+    
 
-      self._db.get(key + ' ' + index.toString(), {
-        valueEncoding: 'binary'
-      }, function(err, result) {
-        if (err) {
-          if (err.type === 'NotFoundError') {
-            return rs.push(null);
-          } else {
-            return rs.emit('error', err);
-          }
-        }
+	
 
-        index++;
-        rs.push(Buffer(result, 'binary'));
-      });
-    }
-  });
-};
+	
 
-/**
- * Returns a writable stream for a file at the given key
- * @param {String} key - The key for the file to read
- * @returns {WritableStream}
- */
-LevelDBFileStore.prototype.createWriteStream = function(key) {
-  var self = this;
-  var index = 0;
+	
 
-  return new stream.Writable({
-    write: function(bytes, encoding, callback) {
-      var ws = this;
+	
 
-      self._db.put(key + ' ' + index.toString(), bytes, {
-        valueEncoding: 'binary'
-      }, function(err) {
-        if (err) {
-          return ws.emit('error', err);
-        }
+	
 
-        index++;
-        callback();
-      });
-    }
-  });
-};
 
-module.exports = LevelDBFileStore;
-</pre>
-    </article>
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_tunnel_errorcodes.js.html">lib/tunnel/errorcodes.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Members</h3>
+
+        <dl>
+            
+<hr>
+<dt class="name" id=".GATEWAY_CLOSED">
+    <h4><span class="type-signature">&lt;static> </span>GATEWAY_CLOSED<span class="type-signature"></span></h4>
+
+    
+</dt>
+<dd>
+    
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_tunnel_errorcodes.js.html">lib/tunnel/errorcodes.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt class="name" id=".INVALID_FRAME_TYPE">
+    <h4><span class="type-signature">&lt;static> </span>INVALID_FRAME_TYPE<span class="type-signature"></span></h4>
+
+    
+</dt>
+<dd>
+    
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_tunnel_errorcodes.js.html">lib/tunnel/errorcodes.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt class="name" id=".UNEXPECTED">
+    <h4><span class="type-signature">&lt;static> </span>UNEXPECTED<span class="type-signature"></span></h4>
+
+    
+</dt>
+<dd>
+    
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_tunnel_errorcodes.js.html">lib/tunnel/errorcodes.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+</dd>
+
+        </dl>
+    
+
+    
+
+    
+
+    
+</article>
+
 </section>
-
 
 
 
@@ -218,6 +379,10 @@ module.exports = LevelDBFileStore;
 
 	<div class="clearfix"></div>
 
+	
+		<div class="col-md-3">
+			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
+		</div>
 	
 
 </div>

@@ -38,6 +38,12 @@ describe('LevelDBStorageAdapter', function() {
       ).to.be.instanceOf(LevelDBStorageAdapter);
     });
 
+    it('should use the default backend if none is supplied', function() {
+      LevelDBStorageAdapter.DEFAULT_BACKEND = memdown;
+      var adapter = new LevelDBStorageAdapter(tmpdir());
+      expect(adapter._db.options.db).to.equal(memdown);
+    });
+
   });
 
   describe('#_put', function() {

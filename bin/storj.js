@@ -174,6 +174,22 @@ function getCredentials(callback) {
   }, callback);
 }
 
+function getConfirmation(msg, callback) {
+  prompt.start();
+  prompt.get({
+    properties: {
+      confirm: {
+        description: msg + ' (y/n)',
+        required: true
+      }
+    }
+  }, function(err, result) {
+    if (result && ['y', 'yes'].indexOf(result.confirm.toLowerCase()) !== -1) {
+      callback();
+    }
+  });
+}
+
 var ACTIONS = {
   getinfo: function getinfo() {
     PublicClient().getInfo(function(err, info) {
@@ -287,14 +303,25 @@ var ACTIONS = {
       log('info', 'Key successfully registered.');
     });
   },
-  removekey: function removekey(pubkey) {
-    PrivateClient().destroyPublicKey(pubkey, function(err) {
-      if (err) {
-        return log('error', err.message);
-      }
+  removekey: function removekey(pubkey, env) {
+    function destroyKey() {
+      PrivateClient().destroyPublicKey(pubkey, function(err) {
+        if (err) {
+          return log('error', err.message);
+        }
 
-      log('info', 'Key successfully revoked.');
-    });
+        log('info', 'Key successfully revoked.');
+      });
+    }
+
+    if (!env.force) {
+      return getConfirmation(
+        'Are you sure you want to invalidate the public key?',
+        destroyKey
+      );
+    }
+
+    destroyKey();
   },
   listbuckets: function listbuckets() {
     PrivateClient().getBuckets(function(err, buckets) {
@@ -328,14 +355,25 @@ var ACTIONS = {
       );
     });
   },
-  removebucket: function removebucket(id) {
-    PrivateClient().destroyBucketById(id, function(err) {
-      if (err) {
-        return log('error', err.message);
-      }
+  removebucket: function removebucket(id, env) {
+    function destroyBucket() {
+      PrivateClient().destroyBucketById(id, function(err) {
+        if (err) {
+          return log('error', err.message);
+        }
 
-      log('info', 'Bucket successfully destroyed.');
-    });
+        log('info', 'Bucket successfully destroyed.');
+      });
+    }
+
+    if (!env.force) {
+      return getConfirmation(
+        'Are you sure you want to destroy this bucket?',
+        destroyBucket
+      );
+    }
+
+    destroyBucket();
   },
   addbucket: function addbucket(name, storage, transfer) {
     PrivateClient().createBucket({
@@ -390,17 +428,28 @@ var ACTIONS = {
       });
     });
   },
-  removefile: function removefile(id, fileId) {
-    getKeyRing(function(keyring) {
-      PrivateClient().removeFileFromBucket(id, fileId, function(err) {
-        if (err) {
-          return log('error', err.message);
-        }
+  removefile: function removefile(id, fileId, env) {
+    function destroyFile() {
+      getKeyRing(function(keyring) {
+        PrivateClient().removeFileFromBucket(id, fileId, function(err) {
+          if (err) {
+            return log('error', err.message);
+          }
 
-        log('info', 'File was successfully removed from bucket.');
-        keyring.deleteKeyFromKeyRing(fileId);
+          log('info', 'File was successfully removed from bucket.');
+          keyring.deleteKeyFromKeyRing(fileId);
+        });
       });
-    });
+    }
+
+    if (!env.force) {
+      return getConfirmation(
+        'Are you sure you want to destroy the file?',
+        destroyFile
+      );
+    }
+
+    destroyFile();
   },
   uploadfile: function uploadfile(bucket, filepath, env) {
     if (!fs.existsSync(filepath)) {
@@ -588,14 +637,25 @@ var ACTIONS = {
       );
     });
   },
-  removeframe: function removeframe(frame) {
-    PrivateClient().destroyFileStagingFrameById(frame, function(err) {
-      if (err) {
-        return log('error', err.message);
-      }
+  removeframe: function removeframe(frame, env) {
+    function destroyFrame() {
+      PrivateClient().destroyFileStagingFrameById(frame, function(err) {
+        if (err) {
+          return log('error', err.message);
+        }
 
-      log('info', 'Frame was successfully removed.');
-    });
+        log('info', 'Frame was successfully removed.');
+      });
+    }
+
+    if (!env.force) {
+      return getConfirmation(
+        'Are your sure you want to destroy this frame?',
+        destroyFrame
+      );
+    }
+
+    destroyFrame();
   },
   downloadfile: function downloadfile(bucket, id, filepath, env) {
     if (fs.existsSync(filepath)) {
@@ -945,6 +1005,7 @@ program
 
 program
   .command('remove-key <pubkey>')
+  .option('-f, --force', 'skip confirmation prompt')
   .description('invalidates the registered public key')
   .action(ACTIONS.removekey);
 
@@ -965,6 +1026,7 @@ program
 
 program
   .command('remove-bucket <bucket-id>')
+  .option('-f, --force', 'skip confirmation prompt')
   .description('destroys a specific storage bucket')
   .action(ACTIONS.removebucket);
 
@@ -990,6 +1052,7 @@ program
 
 program
   .command('remove-frame <frame-id>')
+  .option('-f, --force', 'skip confirmation prompt')
   .description('removes the file staging frame by id')
   .action(ACTIONS.removeframe);
 
@@ -1000,6 +1063,7 @@ program
 
 program
   .command('remove-file <bucket-id> <file-id>')
+  .option('-f, --force', 'skip confirmation prompt')
   .description('delete a file pointer from a specific bucket')
   .action(ACTIONS.removefile);
 

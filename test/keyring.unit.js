@@ -8,8 +8,9 @@ var fs = require('fs');
 var crypto = require('crypto');
 var sinon = require('sinon');
 var rimraf = require('rimraf');
+var os = require('os');
 
-var tmpfolder = require('os').tmpdir();
+var tmpfolder = os.tmpdir();
 
 describe('KeyRing', function() {
 
@@ -93,7 +94,7 @@ describe('KeyRing', function() {
 
   });
 
-  describe('#deleteKeyFromKeyRing', function() {
+  describe('#del', function() {
 
     it('should delete a key', function() {
       fs.writeFileSync(
@@ -101,7 +102,7 @@ describe('KeyRing', function() {
         'contents'
       );
       var keyring = new KeyRing(tmpfolder);
-      keyring.deleteKeyFromKeyRing('test5');
+      keyring.del('test5');
       expect(
         fs.existsSync(path.join(tmpfolder, 'key.ring/test5'))
       ).to.equal(false);
@@ -109,19 +110,110 @@ describe('KeyRing', function() {
 
     it('should do nothing if a key does not exist', function() {
       var keyring = new KeyRing(tmpfolder);
-      keyring.deleteKeyFromKeyRing('test5');
+      keyring.del('test5');
       expect(
         fs.existsSync(path.join(tmpfolder, 'key.ring/test5'))
       ).to.equal(false);
     });
 
   });
-
+  
   describe('#get', function() {
 
     it('should return null if no key for the given ID', function() {
       var kr = new KeyRing(tmpfolder);
       expect(kr.get('wrong')).to.equal(null);
+    });
+
+  });
+
+  describe('#export', function() {
+
+    it('should create a tar of keyring', function() {
+      var keypath = path.join(tmpfolder, 'tmpkeyring');
+      var tar = path.join(tmpfolder, 'testkeyring.tar.gz');
+
+      rimraf.sync(keypath);
+      rimraf.sync(tar);
+
+      if (!fs.existsSync(keypath)) {
+        fs.mkdirSync(keypath);
+      }
+
+      var kr = new KeyRing(keypath, 'password');
+      kr.generate('testkey1');
+      kr.generate('testkey2');
+      kr.generate('testkey3');
+      kr.export(tar, function() {
+        expect(
+          fs.existsSync(tar)
+        ).to.equal(true);
+      });
+    });
+
+  });
+
+  describe('#import', function() {
+
+    var fldr1 = path.join(tmpfolder, 'import1');
+    var fldr2 = path.join(tmpfolder, 'import2');
+    var tar = path.join(tmpfolder,'testkeyring2.tar.gz');
+
+    before(function(done) {
+      if (!fs.existsSync(fldr1)) {
+        fs.mkdirSync(fldr1);
+      }
+
+      if (!fs.existsSync(fldr2)) {
+        fs.mkdirSync(fldr2);
+      }
+
+      var kr1 = KeyRing(fldr1, 'password');
+      var kr2 = KeyRing(fldr2, 'poopsword');
+
+      kr1.generate('testkey1');
+      kr1.generate('testkey2');
+      kr1.export(tar, done);
+      kr2.generate('testkey1');
+    });
+
+    it('should import keyring tarball into keyring', function(done) {
+      var kr2 = KeyRing(fldr2, 'poopsword');
+
+      kr2.import(
+        tar,
+        'password',
+        function() {
+          expect(
+            fs.existsSync(path.join(fldr2, 'key.ring', 'testkey2'))
+          ).to.equal(true);
+          done();
+        }
+      );
+    });
+
+    it('should change the password used to encrypt each key', function(done) {
+      var kr1 = KeyRing(fldr1, 'password');
+      var kr2 = KeyRing(fldr2, 'poopsword');
+
+      kr2.import(
+        tar,
+        'password',
+        function() {
+          expect(
+            kr1.get('testkey2').toObject().pass
+          ).to.equal(
+            kr2.get('testkey2').toObject().pass
+          );
+          done();
+        }
+      );
+    });
+
+    after(function() {
+      rimraf.sync(fldr1);
+      rimraf.sync(fldr2);
+      fs.unlinkSync(tar);
     });
 
   });

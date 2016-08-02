@@ -398,7 +398,7 @@ var ACTIONS = {
         }
 
         log('info', 'File was successfully removed from bucket.');
-        keyring.deleteKeyFromKeyRing(fileId);
+        keyring.del(fileId);
       });
     });
   },

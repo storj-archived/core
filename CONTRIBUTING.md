@@ -18,7 +18,7 @@ one of:
 * GNU Lesser General Public License Version 3 (or later)
 
 You also assert that you have completed the
-[Contributor License Agreement](storj.io/cla)
+[Contributor License Agreement](https://storj.io/cla)
 
 Reporting Issues
 ----------------

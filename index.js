@@ -42,7 +42,7 @@ module.exports.DataChannelErrors = require('./lib/datachannel/errorcodes');
 module.exports.Protocol = require('./lib/network/protocol');
 
 /** {@link TunnelServer} */
-module.exports.Tunnel = require('./lib/tunnel/server');
+module.exports.TunnelServer = require('./lib/tunnel/server');
 
 /** {@link TunnelMuxer} */
 module.exports.TunnelMuxer = require('./lib/tunnel/multiplexer');

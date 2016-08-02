@@ -8,6 +8,18 @@ This document outlines general patterns and conventions for contributing
 to the project. For in-depth documentation on StorjCORE, [read the
 documentation](http://storj.github.io/core).
 
+Contributor License Agreement
+-----------------------------
+
+By submitting pull requests, you agree that your work may be licensed under
+one of:
+
+* GNU Affero General Public License Version 3 (or later)
+* GNU Lesser General Public License Version 3 (or later)
+
+You also assert that you have completed the
+[Contributor License Agreement](storj.io/cla)
+
 Reporting Issues
 ----------------
 

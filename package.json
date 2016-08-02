@@ -52,7 +52,7 @@
       "url": "https://github.com/aleitner"
     }
   ],
-  "license": "AGPL-3.0",
+  "license": "(AGPL-3.0 AND LGPL-3.0)",
   "engines": {
     "node": "^4.4.4"
   },

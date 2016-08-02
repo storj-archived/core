@@ -1371,7 +1371,15 @@ describe('BridgeClient', function() {
           client,
           '_shardTransferComplete'
         ).callsArg(2);
-        client._startTransfer(pointer, {}, {}, function() {
+        client._startTransfer(pointer, {}, {
+          frame: 'frame',
+          tmpName: 'tmpname',
+          size: 0,
+          index: 0,
+          hasher: crypto.createHash('sha256'),
+          excludeFarmers: [],
+          transferRetries: 0
+        }, function() {
           _transferShard.restore();
           _transferComplete.restore();
           expect(_transferShard.callCount).to.equal(2);
@@ -1387,7 +1395,6 @@ describe('BridgeClient', function() {
 
       it('should get a new contract if transfer fails 3 times', function(done) {
         var _transferStatus = new EventEmitter();
-        _transferStatus._eventsCount = 3;
         var _kill = sinon.stub();
         var client = new BridgeClient();
         var pointer = {
@@ -1408,7 +1415,7 @@ describe('BridgeClient', function() {
         client._startTransfer(pointer, {
           queue: { kill: _kill },
           callback: sinon.stub()
-        }, { excludeFarmers: [] });
+        }, { excludeFarmers: [], transferRetries: 3 });
         setImmediate(function() {
           _transferStatus.emit('retry');
           setImmediate(function() {

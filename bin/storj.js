@@ -436,11 +436,11 @@ var ACTIONS = {
             return log('error', err.message);
           }
 
-        log('info', 'File was successfully removed from bucket.');
-        keyring.del(fileId);
+          log('info', 'File was successfully removed from bucket.');
+          keyring.del(fileId);
+        });
       });
-    });
-  }
+    }
 
     if (!env.force) {
       return getConfirmation(

@@ -13,6 +13,7 @@ var storj = require('..');
 var os = require('os');
 var tmp = require('tmp');
 var merge = require('merge');
+var assert = require('assert');
 
 var HOME = platform !== 'win32' ? process.env.HOME : process.env.USERPROFILE;
 var DATADIR = path.join(HOME, '.storjcli');
@@ -122,7 +123,8 @@ function getKeyRing(callback) {
         description: description,
         replace: '*',
         hidden: true,
-        default: ''
+        default: '',
+        required: true
       }
     }
   }, function(err, result) {
@@ -142,12 +144,12 @@ function getKeyRing(callback) {
   });
 }
 
-function getNewPassword(callback) {
+function getNewPassword(msg, callback) {
   prompt.start();
   prompt.get({
     properties: {
       password: {
-        description: 'Enter your new desired password',
+        description: msg,
         required: true,
         replace: '*',
         hidden: true
@@ -265,7 +267,7 @@ var ACTIONS = {
     });
   },
   resetpassword: function resetpassword(email) {
-    getNewPassword(function(err, result) {
+    getNewPassword('Enter your new desired password', function(err, result) {
       PublicClient().resetPassword({
         email: email,
         password: result.password
@@ -437,7 +439,7 @@ var ACTIONS = {
           }
 
           log('info', 'File was successfully removed from bucket.');
-          keyring.deleteKeyFromKeyRing(fileId);
+          keyring.del(fileId);
         });
       });
     }
@@ -777,9 +779,13 @@ var ACTIONS = {
           return log('error', err.message);
         }
 
-        keyring._pass = result.passphrase;
-        keyring._saveKeyRingToDisk();
-        log('info', 'Password for keyring has been reset.');
+        keyring.reset(result.passphrase, function(err) {
+          if (err) {
+            return log('error', err.message);
+          }
+
+          log('info', 'Password for keyring has been reset.');
+        });
       });
     });
   },
@@ -965,6 +971,61 @@ var ACTIONS = {
       command
     );
     program.help();
+  },
+  exportkeyring: function(directory) {
+    getKeyRing(function(keyring) {
+      try {
+        var stat = fs.statSync(directory);
+        assert(stat.isDirectory(), 'The path must be a directory');
+      } catch(err) {
+        if (err.code === 'ENOENT') {
+          return log('error', 'The supplied directory does not exist');
+        } else {
+          return log('error', err.message);
+        }
+      }
+
+      var tarball = path.join(directory, 'keyring.bak.' + Date.now() + '.tgz');
+
+      keyring.export(tarball, function(err) {
+        if (err) {
+          return log('error', err.message);
+        }
+
+        log('info', 'Key ring backed up to %s', [tarball]);
+        log('info', 'Don\'t forget the password for this keyring!');
+      });
+    });
+  },
+  importkeyring: function(path) {
+    getKeyRing(function(keyring) {
+      try {
+        fs.statSync(path);
+      } catch(err) {
+        if (err.code === 'ENOENT') {
+          return log('error', 'The supplied tarball does not exist');
+        } else {
+          return log('error', err.message);
+        }
+      }
+
+      getNewPassword(
+        'Enter password for the keys to be imported',
+        function(err, result) {
+          if (err) {
+            return log('error', err.message);
+          }
+
+          keyring.import(path, result.password, function(err) {
+            if (err) {
+              return log('error', err.message);
+            }
+
+            log('info', 'Key ring imported successfully');
+          });
+        }
+      );
+    });
   }
 };
 
@@ -1051,6 +1112,16 @@ program
   .action(ACTIONS.getframe);
 
 program
+  .command('export-keyring <directory>')
+  .description('compresses and exports keyring to specific directory')
+  .action(ACTIONS.exportkeyring);
+
+program
+  .command('import-keyring <path>')
+  .description('imports keyring tarball into current keyring')
+  .action(ACTIONS.importkeyring);
+
+program
   .command('remove-frame <frame-id>')
   .option('-f, --force', 'skip confirmation prompt')
   .description('removes the file staging frame by id')
@@ -1087,10 +1158,16 @@ program
   .action(ACTIONS.downloadfile);
 
 program
-  .command('stream-file <bucket-id> <file-id>')
-  .option('-x, --exclude <nodeID,nodeID...>', 'mirrors to create for file', '')
-  .description('stream a file from the network and write to stdout')
-  .action(ACTIONS.streamfile);
+  .command('generate-key')
+  .option('-s, --save <path>', 'save the generated private key')
+  .option('-e, --encrypt <passphrase>', 'encrypt the generated private key')
+  .description('generate a new ecdsa key pair and print it')
+  .action(ACTIONS.generatekey);
+
+program
+  .command('get-contact <nodeid>')
+  .description('get the contact information for a given node id')
+  .action(ACTIONS.getcontact);
 
 program
   .command('get-pointers <bucket-id> <file-id>')
@@ -1111,29 +1188,6 @@ program
   .action(ACTIONS.listcontacts);
 
 program
-  .command('get-contact <nodeid>')
-  .description('get the contact information for a given node id')
-  .action(ACTIONS.getcontact);
-
-program
-  .command('reset-keyring')
-  .description('reset the keyring password')
-  .action(ACTIONS.resetkeyring);
-
-program
-  .command('generate-key')
-  .option('-s, --save <path>', 'save the generated private key')
-  .option('-e, --encrypt <passphrase>', 'encrypt the generated private key')
-  .description('generate a new ecdsa key pair and print it')
-  .action(ACTIONS.generatekey);
-
-program
-  .command('sign-message <privatekey> <message>')
-  .option('-c, --compact', 'use bitcoin-style compact signature')
-  .description('signs the message using the supplied private key')
-  .action(ACTIONS.signmessage);
-
-program
   .command('prepare-audits <total> <filepath>')
   .description('generates a series of challenges used to prove file possession')
   .action(ACTIONS.prepareaudits);
@@ -1142,6 +1196,23 @@ program
   .command('prove-file <merkleleaves> <challenge> <filepath>')
   .description('generates a proof from the comma-delimited tree and challenge')
   .action(ACTIONS.provefile);
+
+program
+  .command('reset-keyring')
+  .description('reset the keyring password')
+  .action(ACTIONS.resetkeyring);
+
+program
+  .command('sign-message <privatekey> <message>')
+  .option('-c, --compact', 'use bitcoin-style compact signature')
+  .description('signs the message using the supplied private key')
+  .action(ACTIONS.signmessage);
+
+program
+  .command('stream-file <bucket-id> <file-id>')
+  .option('-x, --exclude <nodeID,nodeID...>', 'mirrors to create for file', '')
+  .description('stream a file from the network and write to stdout')
+  .action(ACTIONS.streamfile);
 
 program
   .command('verify-proof <root> <depth> <proof>')

@@ -1,4 +1,5 @@
 'use strict';
+/* jshint maxstatements: false */
 
 var sinon = require('sinon');
 var expect = require('chai').expect;
@@ -19,7 +20,6 @@ var version = require('../../lib/version');
 var utils = require('../../lib/utils');
 var version = require('../../lib/version');
 var Contact = require('../../lib/network/contact');
-var bitcore = require('bitcore-lib');
 var constants = require('../../lib/constants');
 
 describe('Network (public)', function() {

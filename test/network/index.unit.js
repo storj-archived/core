@@ -19,6 +19,7 @@ var version = require('../../lib/version');
 var utils = require('../../lib/utils');
 var version = require('../../lib/version');
 var Contact = require('../../lib/network/contact');
+var bitcore = require('bitcore-lib');
 var constants = require('../../lib/constants');
 
 describe('Network (public)', function() {
@@ -258,6 +259,37 @@ describe('Network (private)', function() {
       });
     });
 
+  });
+
+  describe('#_signMessage', function() {
+
+    it('should throw an error if there is an issue with sign', function(done) {
+
+      var msg = {
+        method: 'PING',
+        id: '123456',
+        params: {}
+      };
+
+      var StubbedKeyPair = proxyquire('../../lib/keypair', {
+          'bitcore-message': function() {
+            return {
+              sign: sinon.stub().throws(
+                new Error('Point does not lie on the curve')
+              )
+            };
+          }
+      });
+
+      Network.prototype._signMessage.call({
+        _keypair: StubbedKeyPair()
+      }, msg, function(err) {
+        expect(err.message).to.equal('Point does not lie on the curve');
+        done();
+      });
+
+
+    });
   });
 
   describe('#_createSignatureObject', function() {

@@ -9,6 +9,7 @@ var fs = require('fs');
 var path = require('path');
 var filePathEven = path.join(os.tmpdir(), 'storjfiledmxtest-even.data');
 var filePathOdd = path.join(os.tmpdir(), 'storjfiledmxtest-odd.data');
+var filePathEmpty = path.join(os.tmpdir(), 'storjfiledmxtest-empty.data');
 
 before(function(done) {
   this.timeout(6000);
@@ -90,6 +91,19 @@ describe('FileDemuxer', function() {
             done();
           }
         });
+      });
+    });
+
+    it('should emit an error if file size is 0B', function(done) {
+      this.timeout(6000);
+
+      fs.closeSync(fs.openSync(filePathEmpty, 'w'));
+      
+      var dmx = new FileDemuxer(filePathEmpty);
+
+      dmx.on('error', function(err) {
+        expect(err.message).to.equal('0 byte file size is for idiots!');
+        done();
       });
     });
 

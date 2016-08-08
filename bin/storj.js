@@ -502,8 +502,9 @@ var ACTIONS = {
                   tmppath,
                   function(err, file) {
                     if (err) {
-                      log('error', err.message);
-                      return cleanup();
+                      log('warn', 'Error occured. Triggering cleanup...');
+                      cleanup();
+                      return log('error', err.message);
                     }
 
                     keyring.set(file.id, secret);

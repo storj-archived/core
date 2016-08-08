@@ -88,6 +88,7 @@ describe('TunnelServer', function() {
     it('should only open within the specified port range', function(done) {
       var ts = new TunnelServer({
         port: 0,
+        tunport: 0,
         maxTunnels: 3,
         portRange: { min: 55000, max: 55002 }
       });

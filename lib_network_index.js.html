@@ -177,8 +177,8 @@ Network.DEFAULTS = {
   port: 4000,
   noforward: false,
   tunnels: 3,
-  tunport: 0, // NB: Pick random open port
-  gateways: { min: 0, max: 0 } // NB: Port range for gatways - default any
+  tunport: 4001,
+  gateways: { min: 4002, max: 4004 }
 };
 
 Network.RPC_VALIDATION_EXEMPT = [
@@ -314,6 +314,11 @@ Network.prototype._enterOverlay = function(callback) {
  */
 Network.prototype.leave = function(callback) {
   var self = this;
+
+  if (self._tunclient &amp;&amp; self._tunclient.status === TunnelClient.OPEN) {
+    self._tunclient.removeAllListeners();
+    self._tunclient.close();
+  }
 
   this._manager.close(function(err) {
     if (err) {
@@ -452,7 +457,13 @@ Network.prototype._onTransportOpen = function() {
 Network.prototype._signMessage = function(message, callback) {
   var nonce = Date.now();
   var target = message.id + nonce;
-  var signature = this._keypair.sign(target);
+  var signature = null;
+
+  try {
+    signature = this._keypair.sign(target);
+  } catch(err) {
+    return callback(err);
+  }
 
   if (kad.Message.isRequest(message)) {
     message.params.nonce = nonce;
@@ -785,21 +796,23 @@ Network.prototype._establishTunnel = function(tunnels, callback) {
       ));
     }
 
-    var local = 'http://127.0.0.1:' + localAddress.port;
-    var tunclient = new TunnelClient(tunnel, local);
-    var checker = new ContactChecker();
+    self._tunclient = new TunnelClient(
+      tunnel,
+      'http://127.0.0.1:' + localAddress.port
+    );
 
-    tunclient.on('open', function() {
+    self._tunclient.on('open', function() {
       self._logger.info('tunnel successfully established: %j', alias);
 
       self._contact.address = alias.address;
       self._contact.port = alias.port;
 
       self._logger.info('testing newly established tunnel: %j', alias);
-      checker.check(self._contact, function(err) {
+
+      ContactChecker().check(self._contact, function(err) {
         if (err) {
           self._logger.warn('tunnel test failed, establishing new tunnel');
-          return tunclient.close();
+          return self._tunclient.close();
         }
 
         self._listenForTunnelers();
@@ -807,22 +820,22 @@ Network.prototype._establishTunnel = function(tunnels, callback) {
       });
     });
 
-    tunclient.on('close', function onTunnelClosed() {
+    self._tunclient.on('close', function onTunnelClosed() {
       self._logger.warn('tunnel connection closed');
-      tunclient.removeAllListeners('error');
+      self._tunclient.removeAllListeners('error');
       self._establishTunnel(tunnels, callback);
     });
 
-    tunclient.on('error', function onTunnelError(err) {
+    self._tunclient.on('error', function onTunnelError(err) {
       self._logger.warn(
         'tunnel connection lost, reason: %s',
         err.message
       );
-      tunclient.removeAllListeners();
+      self._tunclient.removeAllListeners();
       self._establishTunnel(tunnels, callback);
     });
 
-    tunclient.open();
+    self._tunclient.open();
   });
 };
 

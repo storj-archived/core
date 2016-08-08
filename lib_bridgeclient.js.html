@@ -458,7 +458,7 @@ BridgeClient.prototype.storeFileInBucket = function(id, token, file, cb) {
 
     demuxer.on('shard', function(shardStream, index) {
       self._handleShardStream(shardStream, index, frame, uploadState);
-    });
+    }).on('error', cb);
   });
 };
 

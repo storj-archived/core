@@ -123,9 +123,13 @@ function TunnelClient(tunnel, target) {
   this._muxer = null;
   this._demuxer = null;
   this._channels = {};
+  this.status = TunnelClient.CLOSED;
 
   events.EventEmitter.call(this);
 }
+
+TunnelClient.OPEN = 1;
+TunnelClient.CLOSED = 0;
 
 /**
  * Triggered when the tunnel is opened
@@ -184,6 +188,7 @@ TunnelClient.prototype.open = function() {
   });
 
   this._tunnel.on('open', function() {
+    this.status = TunnelClient.OPEN;
     self.emit('open');
   });
 
@@ -210,7 +215,8 @@ TunnelClient.prototype.close = function() {
   }
 
   this._tunnel = null;
-
+  this.status = TunnelClient.CLOSED;
+  
   this.emit('close');
 };
 

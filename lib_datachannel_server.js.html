@@ -295,7 +295,15 @@ DataChannelServer.prototype._handleConsignStream = function(socket, token) {
       hasher.update(chunk);
       item.shard.write(chunk);
 
-      if (received >= shardsize) {
+      if (received > shardsize) {
+        passthrough.removeAllListeners().end();
+        return socket.close(
+          DataChannelErrors.FAILED_INTEGRITY,
+          'The data transferred exceeds the amount defined in the contract'
+        );
+      }
+
+      if (received === shardsize) {
         passthrough.end();
       }
     }).resume();

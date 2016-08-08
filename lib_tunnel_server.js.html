@@ -162,12 +162,12 @@ function TunnelServer(options) {
 inherits(TunnelServer, events.EventEmitter);
 
 TunnelServer.DEFAULTS = {
-  port: 0,
+  port: 4001,
   server: null,
   maxTunnels: 3,
   portRange: {
-    min: 0, // NB: 0 means use any port
-    max: 0  // NB: 0 means use any port
+    min: 4002,
+    max: 4004
   }
 };
 

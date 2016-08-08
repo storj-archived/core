@@ -34,6 +34,7 @@ describe('Network (public)', function() {
         seeds: [],
         address: '127.0.0.1',
         port: 0,
+        tunport: 0,
         noforward: true
       })).to.be.instanceOf(Network);
     });
@@ -50,6 +51,7 @@ describe('Network (public)', function() {
         seeds: [],
         address: '127.0.0.1',
         port: 0,
+        tunport: 0,
         noforward: true
       });
       net._ready = false;
@@ -70,6 +72,7 @@ describe('Network (public)', function() {
         seeds: [],
         address: '127.0.0.1',
         port: 0,
+        tunport: 0,
         noforward: true
       });
       var _setupTunnel = sinon.stub(net, '_setupTunnelClient').callsArgWith(
@@ -93,6 +96,7 @@ describe('Network (public)', function() {
         seeds: [],
         address: '127.0.0.1',
         port: 0,
+        tunport: 0,
         noforward: true
       });
       var _open = sinon.stub(net._manager, 'open').callsArgWith(
@@ -118,6 +122,7 @@ describe('Network (public)', function() {
         seeds: [],
         address: '127.0.0.1',
         port: 0,
+        tunport: 0,
         noforward: true
       });
       net._node = { disconnect: sinon.stub() };
@@ -153,6 +158,7 @@ describe('Network (public)', function() {
         seeds: [],
         address: '127.0.0.1',
         port: 0,
+        tunport: 0,
         noforward: true
       });
       var _close = sinon.stub(net._manager, 'close').callsArgWith(
@@ -340,6 +346,7 @@ describe('Network (private)', function() {
         seeds: [],
         address: '127.0.0.1',
         port: 0,
+        tunport: 0,
         noforward: true
       });
       var _isLimited = sinon.stub(net._limiter, 'isLimited').returns(true);
@@ -365,6 +372,7 @@ describe('Network (private)', function() {
         seeds: [],
         address: '127.0.0.1',
         port: 0,
+        tunport: 0,
         noforward: true,
         tunnels: 1
       });
@@ -394,6 +402,7 @@ describe('Network (private)', function() {
         seeds: [],
         address: '127.0.0.1',
         port: 0,
+        tunport: 0,
         noforward: true,
         tunnels: 0
       });
@@ -445,6 +454,7 @@ describe('Network (private)', function() {
         seeds: [],
         address: '127.0.0.1',
         port: 0,
+        tunport: 0,
         noforward: true,
         tunnels: 0
       });
@@ -480,6 +490,7 @@ describe('Network (private)', function() {
         seeds: [],
         address: '127.0.0.1',
         port: 0,
+        tunport: 0,
         noforward: true,
         bridge: false
       });
@@ -500,6 +511,7 @@ describe('Network (private)', function() {
         seeds: [],
         address: '127.0.0.1',
         port: 0,
+        tunport: 0,
         noforward: true
       });
       var _bridge = sinon.stub(net._bridge, 'getInfo').callsArgWith(0, null, {
@@ -527,6 +539,7 @@ describe('Network (private)', function() {
         seeds: [],
         address: '127.0.0.1',
         port: 0,
+        tunport: 0,
         noforward: true
       });
       var _bridge = sinon.stub(net._bridge, 'getInfo').callsArgWith(
@@ -552,6 +565,7 @@ describe('Network (private)', function() {
         ],
         address: '127.0.0.1',
         port: 0,
+        tunport: 0,
         noforward: true
       });
       net._transport._isPublic = false;
@@ -579,6 +593,7 @@ describe('Network (private)', function() {
         ],
         address: '127.0.0.1',
         port: 0,
+        tunport: 0,
         noforward: true
       });
       net._transport._isPublic = false;
@@ -608,6 +623,7 @@ describe('Network (private)', function() {
         seeds: [],
         address: '127.0.0.1',
         port: 0,
+        tunport: 0,
         noforward: true
       });
       var _send = sinon.stub(net._transport, 'send').callsArg(2);
@@ -631,6 +647,7 @@ describe('Network (private)', function() {
         seeds: [],
         address: '127.0.0.1',
         port: 0,
+        tunport: 0,
         noforward: true
       });
       net._findTunnel([], function(err) {
@@ -649,6 +666,7 @@ describe('Network (private)', function() {
         seeds: [],
         address: '127.0.0.1',
         port: 0,
+        tunport: 0,
         noforward: true
       });
       var _send = sinon.stub(net._transport, 'send').callsArgWith(
@@ -675,6 +693,7 @@ describe('Network (private)', function() {
         seeds: [],
         address: '127.0.0.1',
         port: 0,
+        tunport: 0,
         noforward: true
       });
       var _send = sinon.stub(net._transport, 'send').callsArgWith(
@@ -703,6 +722,7 @@ describe('Network (private)', function() {
         seeds: [],
         address: '127.0.0.1',
         port: 0,
+        tunport: 0,
         noforward: true
       });
       net._establishTunnel([], function(err) {
@@ -721,6 +741,7 @@ describe('Network (private)', function() {
         seeds: [],
         address: '127.0.0.1',
         port: 0,
+        tunport: 0,
         noforward: true
       });
       var _send = sinon.stub(net._transport, 'send').callsArgWith(
@@ -748,6 +769,7 @@ describe('Network (private)', function() {
         seeds: [],
         address: '127.0.0.1',
         port: 0,
+        tunport: 0,
         noforward: true
       });
       var _send = sinon.stub(net._transport, 'send').callsArgWith(
@@ -795,6 +817,7 @@ describe('Network (private)', function() {
         seeds: [],
         address: '127.0.0.1',
         port: 0,
+        tunport: 0,
         noforward: true
       });
       var _send = sinon.stub(net._transport, 'send').callsArgWith(
@@ -847,6 +870,7 @@ describe('Network (private)', function() {
         seeds: [],
         address: '127.0.0.1',
         port: 0,
+        tunport: 0,
         noforward: true
       });
       var _send = sinon.stub(net._transport, 'send').callsArgWith(
@@ -892,6 +916,7 @@ describe('Network (private)', function() {
         seeds: [],
         address: '127.0.0.1',
         port: 0,
+        tunport: 0,
         noforward: true
       });
       var _send = sinon.stub(net._transport, 'send').callsArgWith(
@@ -927,6 +952,7 @@ describe('Network (private)', function() {
         seeds: [],
         address: '127.0.0.1',
         port: 0,
+        tunport: 0,
         noforward: true
       });
       var _setupTunnel = sinon.stub(net, '_setupTunnelClient').callsArg(0);
@@ -952,6 +978,7 @@ describe('Network (private)', function() {
         seeds: [],
         address: '127.0.0.1',
         port: 0,
+        tunport: 0,
         noforward: true
       });
       var _setupTunnel = sinon.stub(net, '_setupTunnelClient').callsArg(0);
@@ -975,6 +1002,7 @@ describe('Network (private)', function() {
         bridge: false,
         address: '127.0.0.1',
         port: 0,
+        tunport: 0,
         noforward: true
       });
       var _setupTunnel = sinon.stub(net, '_setupTunnelClient').callsArg(0);
@@ -997,6 +1025,7 @@ describe('Network (private)', function() {
         bridge: false,
         address: '127.0.0.1',
         port: 0,
+        tunport: 0,
         noforward: true
       });
       var _connect = sinon.stub(net, 'connect').callsArgWith(
@@ -1035,6 +1064,7 @@ describe('Network (private/jobs)', function() {
         bridge: false,
         address: '127.0.0.1',
         port: 0,
+        tunport: 0,
         noforward: true
       });
       setTimeout(function() {
@@ -1058,6 +1088,7 @@ describe('Network (private/jobs)', function() {
         bridge: false,
         address: '127.0.0.1',
         port: 0,
+        tunport: 0,
         noforward: true
       });
       net._router._buckets[0] = new kad.Bucket();

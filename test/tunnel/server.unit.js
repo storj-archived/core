@@ -88,6 +88,7 @@ describe('TunnelServer', function() {
     it('should only open within the specified port range', function(done) {
       var ts = new TunnelServer({
         port: 0,
+        tunport: 0,
         maxTunnels: 3,
         portRange: { min: 55000, max: 55002 }
       });
@@ -144,8 +145,12 @@ describe('TunnelServer', function() {
       });
     });
 
-    it('should glose the gateway if client disconnects', function(done) {
-      var ts = new TunnelServer({ port: 0 });
+    it('should close the gateway if client disconnects', function(done) {
+      var ts = new TunnelServer({ port: 0, portRange: {
+          min: 0,
+          max: 0
+        }
+      });
       var client = new EventEmitter();
       ts.createGateway(function(err, gateway) {
         client.upgradeReq = {

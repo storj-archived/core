@@ -37,6 +37,7 @@ function createNode(opcodes) {
     seeds: NODE_LIST.slice(),
     address: '127.0.0.1',
     port: port,
+    tunport: 0,
     opcodes: opcodes,
     noforward: true,
     backend: memdown,

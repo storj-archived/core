@@ -38,6 +38,7 @@ function createNode(opcodes, tunnels) {
     opcodes: opcodes,
     noforward: true,
     tunnels: tunnels,
+    tunport: 0,
     backend: memdown
   };
 

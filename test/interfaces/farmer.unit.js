@@ -21,6 +21,7 @@ describe('FarmerInterface', function() {
       var farmer = new FarmerInterface({
         keypair: KeyPair(),
         port: 0,
+        tunport: 0,
         noforward: true,
         negotiator: function() {
           return false;
@@ -40,6 +41,7 @@ describe('FarmerInterface', function() {
       var farmer = new FarmerInterface({
         keypair: KeyPair(),
         port: 0,
+        tunport: 0,
         noforward: true,
         negotiator: function(contract, callback) {
           callback(false);
@@ -59,6 +61,7 @@ describe('FarmerInterface', function() {
       var farmer = new FarmerInterface({
         keypair: KeyPair(),
         port: 0,
+        tunport: 0,
         noforward: true,
         negotiator: function(c, callback) {
           callback(true);
@@ -111,6 +114,7 @@ describe('FarmerInterface', function() {
       var farmer = new FarmerInterface({
         keypair: KeyPair(),
         port: 0,
+        tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
         backend: require('memdown'),
@@ -143,6 +147,7 @@ describe('FarmerInterface', function() {
       var farmer = new FarmerInterface({
         keypair: KeyPair(),
         port: 0,
+        tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
         backend: require('memdown'),
@@ -173,6 +178,7 @@ describe('FarmerInterface', function() {
       var farmer = new FarmerInterface({
         keypair: KeyPair(),
         port: 0,
+        tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
         backend: require('memdown'),
@@ -210,6 +216,7 @@ describe('FarmerInterface', function() {
       var farmer = new FarmerInterface({
         keypair: KeyPair(),
         port: 0,
+        tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
         backend: require('memdown'),
@@ -259,6 +266,7 @@ describe('FarmerInterface', function() {
       var farmer = new FarmerInterface({
         keypair: KeyPair(),
         port: 0,
+        tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
         backend: require('memdown'),
@@ -288,6 +296,7 @@ describe('FarmerInterface', function() {
       var farmer = new FarmerInterface({
         keypair: KeyPair(),
         port: 0,
+        tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
         backend: require('memdown'),
@@ -312,6 +321,7 @@ describe('FarmerInterface', function() {
       var farmer = new FarmerInterface({
         keypair: KeyPair(),
         port: 0,
+        tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
         backend: require('memdown'),
@@ -338,6 +348,7 @@ describe('FarmerInterface', function() {
       var farmer = new FarmerInterface({
         keypair: KeyPair(),
         port: 0,
+        tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
         backend: require('memdown'),
@@ -405,6 +416,7 @@ describe('FarmerInterface', function() {
       var farmer = new FarmerInterface({
         keypair: KeyPair(),
         port: 0,
+        tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
         backend: require('memdown'),
@@ -429,6 +441,7 @@ describe('FarmerInterface', function() {
       var farmer = new FarmerInterface({
         keypair: KeyPair(),
         port: 0,
+        tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
         backend: require('memdown'),
@@ -459,6 +472,7 @@ describe('FarmerInterface', function() {
       var farmer = new FarmerInterface({
         keypair: KeyPair(),
         port: 0,
+        tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
         backend: require('memdown'),
@@ -473,10 +487,11 @@ describe('FarmerInterface', function() {
       });
     });
 
-    it('should set the free space to true', function(done) {
+    it('should set the free space to false', function(done) {
       var farmer = new FarmerInterface({
         keypair: KeyPair(),
         port: 0,
+        tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
         backend: require('memdown'),
@@ -497,6 +512,7 @@ describe('FarmerInterface', function() {
       var farmer = new FarmerInterface({
         keypair: KeyPair(),
         port: 0,
+        tunport: 0,
         noforward: true,
         logger: logger,
         backend: require('memdown'),

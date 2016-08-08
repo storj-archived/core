@@ -19,7 +19,8 @@ describe('Network/Monitor', function() {
       keypair: new KeyPair(),
       manager: new Manager(new RAMStorageAdapter()),
       logger: new kad.Logger(),
-      port: 0
+      port: 0,
+      tunport: 0
     });
 
     it('should create an instance without the new keyword', function() {
@@ -42,7 +43,8 @@ describe('Network/Monitor', function() {
       keypair: new KeyPair(),
       manager: new Manager(new RAMStorageAdapter()),
       logger: new kad.Logger(),
-      port: 0
+      port: 0,
+      tunport: 0
     });
 
     it('should start the soft and hard intervals', function() {
@@ -72,7 +74,8 @@ describe('Network/Monitor', function() {
       keypair: new KeyPair(),
       manager: new Manager(new RAMStorageAdapter()),
       logger: new kad.Logger(),
-      port: 0
+      port: 0,
+      tunport: 0
     });
 
     it('should stop the soft and hard intervals', function() {
@@ -104,7 +107,8 @@ describe('Network/Monitor', function() {
       keypair: new KeyPair(),
       manager: new Manager(new RAMStorageAdapter()),
       logger: new kad.Logger(),
-      port: 0
+      port: 0,
+      tunport: 0
     });
 
     it('should return the current snapshot', function() {
@@ -123,7 +127,8 @@ describe('Network/Monitor', function() {
       keypair: new KeyPair(),
       manager: new Manager(new RAMStorageAdapter()),
       logger: new kad.Logger(),
-      port: 0
+      port: 0,
+      tunport: 0
     });
 
     it('should call the soft collectors', function(done) {
@@ -158,7 +163,8 @@ describe('Network/Monitor', function() {
       keypair: new KeyPair(),
       manager: new Manager(new RAMStorageAdapter()),
       logger: new kad.Logger(),
-      port: 0
+      port: 0,
+      tunport: 0
     });
 
     it('should call the hard collectors', function(done) {

@@ -31,14 +31,92 @@ describe('Network/Transport', function() {
         Transport.prototype,
         '_forwardPort'
       ).callsArg(0);
+      var _checkIfReachable = sinon.stub(
+        Transport.prototype,
+        '_checkIfReachable'
+      ).callsArgWith(0, false);
       var transport = new Transport(Contact({
         address: '127.0.0.1',
         port: 0,
         nodeID: KeyPair().getNodeID()
       }));
       transport.on('ready', function() {
-        expect(_forwardPort.called).to.equal(true);
         _forwardPort.restore();
+        _checkIfReachable.restore();
+        expect(_forwardPort.called).to.equal(true);
+        done();
+      });
+    });
+
+    it('should not close the transport if already reachable', function(done) {
+      var _checkIfReachable = sinon.stub(
+        Transport.prototype,
+        '_checkIfReachable'
+      ).callsArgWith(0, true);
+      var _close = sinon.stub(
+        require('kad').transports.HTTP.prototype,
+        '_close'
+      );
+      var transport = new Transport(Contact({
+        address: '127.0.0.1',
+        port: 0,
+        nodeID: KeyPair().getNodeID()
+      }));
+      transport.on('ready', function() {
+        _close.restore();
+        _checkIfReachable.restore();
+        expect(_close.called).to.equal(false);
+        done();
+      });
+    });
+
+  });
+
+  describe('#_checkIfReachable', function() {
+
+    it('it should check the contact if address public', function(done) {
+      var _check = sinon.stub().callsArg(1);
+      var StubbedTransport = proxyquire('../../lib/network/transport', {
+        ip: { isPrivate: sinon.stub().returns(false) },
+        './contactchecker': sinon.stub().returns({
+          check: _check
+        })
+      });
+      StubbedTransport.prototype._checkIfReachable.call({
+        _contact: { address: 'public.ip.address' }
+      }, function() {
+        done();
+      });
+    });
+
+    it('it should callback true if reachable', function(done) {
+      var _check = sinon.stub().callsArgWith(1, null);
+      var StubbedTransport = proxyquire('../../lib/network/transport', {
+        ip: { isPrivate: sinon.stub().returns(false) },
+        './contactchecker': sinon.stub().returns({
+          check: _check
+        })
+      });
+      StubbedTransport.prototype._checkIfReachable.call({
+        _contact: { address: 'public.ip.address' }
+      }, function(result) {
+        expect(result).to.equal(true);
+        done();
+      });
+    });
+
+    it('it should callback false if reachable', function(done) {
+      var _check = sinon.stub().callsArgWith(1, new Error('Failed'));
+      var StubbedTransport = proxyquire('../../lib/network/transport', {
+        ip: { isPrivate: sinon.stub().returns(false) },
+        './contactchecker': sinon.stub().returns({
+          check: _check
+        })
+      });
+      StubbedTransport.prototype._checkIfReachable.call({
+        _contact: { address: 'public.ip.address' }
+      }, function(result) {
+        expect(result).to.equal(false);
         done();
       });
     });

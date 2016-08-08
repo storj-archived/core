@@ -20,6 +20,7 @@ var tmpfolder = function() {
 };
 
 describe('KeyRing', function() {
+  this.timeout(6000);
 
   after(function() {
     cleanup.forEach(function(folder){

@@ -98,11 +98,11 @@ describe('FileDemuxer', function() {
       this.timeout(6000);
 
       fs.closeSync(fs.openSync(filePathEmpty, 'w'));
-      
+
       var dmx = new FileDemuxer(filePathEmpty);
 
       dmx.on('error', function(err) {
-        expect(err.message).to.equal('0 byte file size is for idiots!');
+        expect(err.message).to.equal('File size cannot be 0 Bytes.');
         done();
       });
     });

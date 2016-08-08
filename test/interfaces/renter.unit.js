@@ -24,6 +24,7 @@ describe('RenterInterface', function() {
         port: 0,
         noforward: true,
         logger: kad.Logger(0),
+        tunport: 0,
         manager: Manager(RAMStorageAdapter())
       });
       var clock = sinon.useFakeTimers();
@@ -44,6 +45,7 @@ describe('RenterInterface', function() {
       var renter = new RenterInterface({
         keypair: KeyPair(),
         port: 0,
+        tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
         manager: Manager(RAMStorageAdapter())
@@ -71,6 +73,7 @@ describe('RenterInterface', function() {
       var renter = new RenterInterface({
         keypair: KeyPair(),
         port: 0,
+        tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
         manager: Manager(RAMStorageAdapter())
@@ -93,6 +96,7 @@ describe('RenterInterface', function() {
       var renter = new RenterInterface({
         keypair: KeyPair(),
         port: 0,
+        tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
         manager: Manager(RAMStorageAdapter())
@@ -129,6 +133,7 @@ describe('RenterInterface', function() {
       var renter = new RenterInterface({
         keypair: KeyPair(),
         port: 0,
+        tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
         manager: Manager(RAMStorageAdapter())
@@ -167,6 +172,7 @@ describe('RenterInterface', function() {
       var renter = new RenterInterface({
         keypair: KeyPair(),
         port: 0,
+        tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
         manager: Manager(RAMStorageAdapter())
@@ -205,6 +211,7 @@ describe('RenterInterface', function() {
       var renter = new RenterInterface({
         keypair: KeyPair(),
         port: 0,
+        tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
         manager: Manager(RAMStorageAdapter())
@@ -247,6 +254,7 @@ describe('RenterInterface', function() {
       var renter = new RenterInterface({
         keypair: KeyPair(),
         port: 0,
+        tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
         manager: Manager(RAMStorageAdapter())
@@ -274,6 +282,7 @@ describe('RenterInterface', function() {
       var renter = new RenterInterface({
         keypair: KeyPair(),
         port: 0,
+        tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
         manager: Manager(RAMStorageAdapter())
@@ -306,6 +315,7 @@ describe('RenterInterface', function() {
       var renter = new RenterInterface({
         keypair: KeyPair(),
         port: 0,
+        tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
         manager: Manager(RAMStorageAdapter())
@@ -329,6 +339,7 @@ describe('RenterInterface', function() {
       var renter = new RenterInterface({
         keypair: KeyPair(),
         port: 0,
+        tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
         manager: Manager(RAMStorageAdapter())
@@ -357,6 +368,7 @@ describe('RenterInterface', function() {
       var renter = new RenterInterface({
         keypair: KeyPair(),
         port: 0,
+        tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
         manager: Manager(RAMStorageAdapter())

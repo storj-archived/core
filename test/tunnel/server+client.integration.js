@@ -41,7 +41,11 @@ describe('TunnelClient+TunnelServer/Integration', function() {
   });
 
   it('should establish the tunnel', function(done) {
-    tunserver = new TunnelServer({ port: 60000 });
+    tunserver = new TunnelServer({ port: 60000, portRange: {
+        min: 0,
+        max: 0
+      }
+    });
 
     tunserver.createGateway(function(err, gw) {
       entrance = gw.getEntranceAddress();

@@ -144,8 +144,12 @@ describe('TunnelServer', function() {
       });
     });
 
-    it('should glose the gateway if client disconnects', function(done) {
-      var ts = new TunnelServer({ port: 0 });
+    it('should close the gateway if client disconnects', function(done) {
+      var ts = new TunnelServer({ port: 0, portRange: {
+          min: 0,
+          max: 0
+        }
+      });
       var client = new EventEmitter();
       ts.createGateway(function(err, gateway) {
         client.upgradeReq = {

@@ -18,7 +18,8 @@ describe('Network/Transport', function() {
         port: 0,
         nodeID: KeyPair().getNodeID()
       }), {
-        noforward: true
+        noforward: true,
+        tunport: 0
       })).to.be.instanceOf(Transport);
     });
 
@@ -35,7 +36,7 @@ describe('Network/Transport', function() {
         address: '127.0.0.1',
         port: 0,
         nodeID: KeyPair().getNodeID()
-      }));
+      }), { tunport: 0 });
       transport.on('ready', function() {
         expect(_forwardPort.called).to.equal(true);
         _forwardPort.restore();
@@ -61,7 +62,7 @@ describe('Network/Transport', function() {
         address: '127.0.0.1',
         port: 0,
         nodeID: KeyPair().getNodeID()
-      }));
+      }), { tunport: 0 });
       transport.on('ready', function() {
         expect(transport._isPublic).to.equal(false);
         transport._forwardPort(function(err) {
@@ -86,7 +87,7 @@ describe('Network/Transport', function() {
         address: '127.0.0.1',
         port: 0,
         nodeID: KeyPair().getNodeID()
-      }));
+      }), { tunport: 0 });
       transport.on('ready', function() {
         expect(transport._isPublic).to.equal(false);
         transport._forwardPort(function(err) {
@@ -111,7 +112,7 @@ describe('Network/Transport', function() {
         address: '127.0.0.1',
         port: 0,
         nodeID: KeyPair().getNodeID()
-      }));
+      }), { tunport: 0 });
       transport.on('ready', function() {
         expect(transport._isPublic).to.equal(false);
         transport._forwardPort(function(err) {
@@ -133,7 +134,7 @@ describe('Network/Transport', function() {
         address: '127.0.0.1',
         port: 0,
         nodeID: KeyPair().getNodeID()
-      }));
+      }), { tunport: 0 });
       transport.on('ready', function() {
         expect(transport._isPublic).to.equal(false);
         transport._forwardPort(function(err) {
@@ -158,7 +159,7 @@ describe('Network/Transport', function() {
         address: '127.0.0.1',
         port: 4000,
         nodeID: KeyPair().getNodeID()
-      }));
+      }), { tunport: 0 });
       transport.on('ready', function() {
         expect(transport._isPublic).to.equal(true);
         transport._forwardPort(function(err, ip, port) {
@@ -185,7 +186,7 @@ describe('Network/Transport', function() {
         address: '127.0.0.1',
         port: 0,
         nodeID: KeyPair().getNodeID()
-      }));
+      }), { tunport: 0 });
       transport.on('ready', function() {
         expect(transport._isPublic).to.equal(true);
         transport._forwardPort(function(err, ip, port) {

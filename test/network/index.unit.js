@@ -130,6 +130,26 @@ describe('Network (public)', function() {
       expect(net._node.disconnect.called).to.equal(true);
     });
 
+    it('should close the tunnel client if it is open', function() {
+      var net = Network({
+        keypair: KeyPair(),
+        manager: Manager(RAMStorageAdapter()),
+        logger: kad.Logger(0),
+        seeds: [],
+        address: '127.0.0.1',
+        port: 0,
+        noforward: true
+      });
+      net._tunclient = {
+        status: 1,
+        close: sinon.stub(),
+        removeAllListeners: sinon.stub()
+      };
+      net._node = { disconnect: sinon.stub() };
+      net.leave();
+      expect(net._tunclient.close.called).to.equal(true);
+    });
+
     it('should callback with error if db close fails', function(done) {
       var net = Network({
         keypair: KeyPair(),

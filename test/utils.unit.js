@@ -5,6 +5,9 @@ var utils = require('../lib/utils');
 var semver = require('semver');
 var version = require('../lib/version');
 var KeyPair = require('../lib/keypair');
+var proxyquire = require('proxyquire');
+var sinon = require('sinon');
+var constants = require('../lib/constants');
 
 describe('utils', function() {
 
@@ -145,6 +148,60 @@ describe('utils', function() {
       var enc = utils.simpleEncrypt('password', data);
       var dec = utils.simpleDecrypt('password', enc);
       expect(dec).to.equal(data);
+    });
+
+  });
+
+  describe('#getNtpTimeDelta', function() {
+
+    it('should bubble errors from the ntp client', function(done) {
+      var stubbedUtils = proxyquire('../lib/utils', {
+        'ntp-client': {
+          getNetworkTime: sinon.stub().callsArgWith(
+            2,
+            new Error('Time paradox occurred')
+          )
+        }
+      });
+      stubbedUtils.getNtpTimeDelta(function(err) {
+        expect(err.message).to.equal('Time paradox occurred');
+        done();
+      });
+    });
+
+  });
+
+  describe('#ensureNtpClockIsSynchronized', function() {
+
+    it('should bubble errors from the ntp client', function(done) {
+      var stubbedUtils = proxyquire('../lib/utils', {
+        'ntp-client': {
+          getNetworkTime: sinon.stub().callsArgWith(
+            2,
+            new Error('Time paradox occurred')
+          )
+        }
+      });
+      stubbedUtils.ensureNtpClockIsSynchronized(function(err) {
+        expect(err.message).to.equal('Time paradox occurred');
+        done();
+      });
+    });
+
+    it('should error is delta is greater than NONCE_EXPIRE', function(done) {
+      var time = new Date();
+      time.setTime(time.getTime() + constants.NONCE_EXPIRE + 2000);
+      var stubbedUtils = proxyquire('../lib/utils', {
+        'ntp-client': {
+          getNetworkTime: sinon.stub().callsArgWith(2, null, time)
+        }
+      });
+      stubbedUtils.ensureNtpClockIsSynchronized(function(err) {
+        expect(err.message).to.equal(
+          'System clock is not syncronized with NTP'
+        );
+        done();
+      });
     });
 
   });

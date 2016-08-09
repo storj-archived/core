@@ -995,6 +995,7 @@ describe('Network (private)', function() {
     });
 
     it('should do nothing if no seeds or bridge', function(done) {
+      this.timeout(4000);
       var net = Network({
         keypair: KeyPair(),
         manager: Manager(RAMStorageAdapter()),

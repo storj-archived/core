@@ -64,7 +64,11 @@ describe('TunnelServer', function() {
   describe('#createGateway', function() {
 
     it('should refuse to open tunnel if max is reached', function(done) {
-      var ts = new TunnelServer({ port: 0, maxTunnels: 0 });
+      var ts = new TunnelServer({
+        port: 0,
+        maxTunnels: 0,
+        portRange: { min: 0, max: 0 }
+      });
       ts.createGateway(function(err) {
         expect(err.message).to.equal('Maximum number of tunnels open');
         done();
@@ -72,7 +76,11 @@ describe('TunnelServer', function() {
     });
 
     it('should emit the locked event when max reached', function(done) {
-      var ts = new TunnelServer({ port: 0, maxTunnels: 1 });
+      var ts = new TunnelServer({
+        port: 0,
+        maxTunnels: 1,
+        portRange: { min: 0, max: 0 }
+      });
       var gw = null;
       ts.on('locked', function() {
         ts.on('unlocked', done);

@@ -1,6 +1,6 @@
 {
   "name": "storj",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "description": "implementation of the storj protocol for node.js and the browser",
   "main": "index.js",
   "directories": {
@@ -79,6 +79,7 @@
     "nat-upnp": "^1.0.2",
     "node-tar.gz": "^1.0.0",
     "node-uuid": "^1.4.7",
+    "ntp-client": "^0.5.3",
     "portfinder": "^1.0.3",
     "prompt": "^1.0.0",
     "readable-stream": "^2.0.6",

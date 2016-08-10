@@ -13,7 +13,7 @@ client.createUser({
 }, function(err) {
   if (err) {
     // Handle error on failure.
-    return console.log(err.message);
+    return console.log('error', err.message);
   }
 
   // Check email for confirmation link

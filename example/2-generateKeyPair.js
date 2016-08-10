@@ -17,7 +17,7 @@ var api = 'https://api.storj.io';
   client.addPublicKey(keypair.getPublicKey(), function(err) {
     if (err) {
       // Handle error on failure.
-      return console.log(err.message);
+      return console.log('error', err.message);
     }
     // Save the private key for using to login later.
     // You should probably encrypt this

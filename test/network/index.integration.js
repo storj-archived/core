@@ -20,6 +20,8 @@ kad.constants.T_RESPONSETIMEOUT = 2000;
 var NODE_LIST = [];
 var STARTING_PORT = 64535;
 
+var _ntp = null;
+
 function createNode(opcodes, tunnels) {
   var node = null;
   var kp = new storj.KeyPair();
@@ -65,28 +67,6 @@ function createFarmer() {
 
 var renters = [createRenter(), createRenter()];
 var farmers = [createFarmer()];
-
-before(function(done) {
-  this.timeout(35000);
-  var _requestProbeCalled = false;
-
-  sinon.stub(farmers[0], '_requestProbe', function(c, cb) {
-    if (!_requestProbeCalled) {
-      _requestProbeCalled = true;
-      return cb(new Error('Probe failed'));
-    }
-    cb(null, {});
-  }); // NB: Force tunneling
-
-  async.each(renters, function(node, next) {
-    node.join(function noop() {});
-    next();
-  }, function() {
-    farmers[0]._transport._isPublic = false;
-    farmers[0].join(done);
-  });
-});
-
 var contract = null;
 var farmer = null;
 var shard = new Buffer('hello storj');
@@ -99,8 +79,32 @@ describe('Network/Integration/Tunnelling', function() {
   var renter = renters[renters.length - 1];
 
   before(function(done) {
-    audit.end(shard);
-    setImmediate(done);
+    this.timeout(35000);
+    var _requestProbeCalled = false;
+
+    _ntp = sinon.stub(utils, 'ensureNtpClockIsSynchronized').callsArgWith(
+      0,
+      null
+    );
+
+    sinon.stub(farmers[0], '_requestProbe', function(c, cb) {
+      if (!_requestProbeCalled) {
+        _requestProbeCalled = true;
+        return cb(new Error('Probe failed'));
+      }
+      cb(null, {});
+    }); // NB: Force tunneling
+
+    async.each(renters, function(node, next) {
+      node.join(function noop() {});
+      next();
+    }, function() {
+      farmers[0]._transport._isPublic = false;
+      farmers[0].join(function() {
+        audit.end(shard);
+        done();
+      });
+    });
   });
 
   describe('#getStorageOffer', function() {
@@ -226,6 +230,10 @@ describe('Network/Integration/Tunnelling', function() {
       });
     });
 
+  });
+
+  after(function() {
+    _ntp.restore();
   });
 
 });

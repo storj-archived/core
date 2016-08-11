@@ -1,3 +1,5 @@
+/* jshint maxstatements: false */
+
 'use strict';
 
 var BridgeClient = require('../lib/bridgeclient');
@@ -11,6 +13,7 @@ var stream = require('readable-stream');
 var FileMuxer = require('../lib/filemuxer');
 var crypto = require('crypto');
 var utils = require('../lib/utils');
+var ReadableStream = require('readable-stream');
 
 describe('BridgeClient', function() {
 
@@ -1545,6 +1548,245 @@ describe('BridgeClient', function() {
         );
       });
 
+    });
+
+  });
+
+  describe('#getFrameFromFile', function() {
+
+    it('should bubble error from #listFilesInBucket', function(done) {
+      var client = new BridgeClient();
+      var _listFiles = sinon.stub(client, 'listFilesInBucket').callsArgWith(
+        1,
+        new Error('Failed')
+      );
+      client.getFrameFromFile('bucketid', 'fileid', function(err) {
+        _listFiles.restore();
+        expect(err.message).to.equal('Failed');
+        done();
+      });
+    });
+
+    it('should error if file not found', function(done) {
+      var client = new BridgeClient();
+      var _listFiles = sinon.stub(client, 'listFilesInBucket').callsArgWith(
+        1,
+        null,
+        []
+      );
+      client.getFrameFromFile('bucketid', 'fileid', function(err) {
+        _listFiles.restore();
+        expect(err.message).to.equal('Failed to find file staging frame');
+        done();
+      });
+    });
+
+    it('should bubble error from #getFileStagingFrameById', function(done) {
+      var client = new BridgeClient();
+      var _listFiles = sinon.stub(client, 'listFilesInBucket').callsArgWith(
+        1,
+        null,
+        [{ id: 'fileid', frame: 'frameid' }]
+      );
+      var _getFrame = sinon.stub(
+        client,
+        'getFileStagingFrameById'
+      ).callsArgWith(1, new Error('Failed'));
+      client.getFrameFromFile('bucketid', 'fileid', function(err) {
+        _listFiles.restore();
+        _getFrame.restore();
+        expect(err.message).to.equal('Failed');
+        done();
+      });
+    });
+
+    it('should return the frame', function(done) {
+      var client = new BridgeClient();
+      var frame = {};
+      var _listFiles = sinon.stub(client, 'listFilesInBucket').callsArgWith(
+        1,
+        null,
+        [{ id: 'wrong', frame: 'frameid' }, { id: 'fileid', frame: 'frameid' }]
+      );
+      var _getFrame = sinon.stub(
+        client,
+        'getFileStagingFrameById'
+      ).callsArgWith(1, null, frame);
+      client.getFrameFromFile('bucketid', 'fileid', function(err, result) {
+        _listFiles.restore();
+        _getFrame.restore();
+        expect(result).to.equal(frame);
+        done();
+      });
+    });
+
+  });
+
+  describe('#createFileSliceStream', function() {
+
+    it('should bubble errors from #getFrameFromFile', function(done) {
+      var client = new BridgeClient();
+      var _getFrame = sinon.stub(client, 'getFrameFromFile').callsArgWith(
+        2,
+        new Error('Failed')
+      );
+      client.createFileSliceStream({
+        bucket: 'bucketid',
+        file: 'fileid',
+        start: 0,
+        end: 10
+      }, function(err) {
+        _getFrame.restore();
+        expect(err.message).to.equal('Failed');
+        done();
+      });
+    });
+
+    it('should bubble errors from #createToken', function(done) {
+      var client = new BridgeClient();
+      var _getFrame = sinon.stub(client, 'getFrameFromFile').callsArgWith(
+        2,
+        null,
+        { shards: [] }
+      );
+      var _createToken = sinon.stub(client, 'createToken').callsArgWith(
+        2,
+        new Error('Failed')
+      );
+      client.createFileSliceStream({
+        bucket: 'bucketid',
+        file: 'fileid',
+        start: 0,
+        end: 10
+      }, function(err) {
+        _getFrame.restore();
+        _createToken.restore();
+        expect(err.message).to.equal('Failed');
+        done();
+      });
+    });
+
+    it('should bubble errors from #getFilePointers', function(done) {
+      var client = new BridgeClient();
+      var _getFrame = sinon.stub(client, 'getFrameFromFile').callsArgWith(
+        2,
+        null,
+        { shards: [] }
+      );
+      var _createToken = sinon.stub(client, 'createToken').callsArgWith(
+        2,
+        null,
+        {}
+      );
+      var _getFilePointers = sinon.stub(client, 'getFilePointers').callsArgWith(
+        1,
+        new Error('Failed')
+      );
+      client.createFileSliceStream({
+        bucket: 'bucketid',
+        file: 'fileid',
+        start: 0,
+        end: 10
+      }, function(err) {
+        _getFrame.restore();
+        _createToken.restore();
+        _getFilePointers.restore();
+        expect(err.message).to.equal('Failed');
+        done();
+      });
+    });
+
+    it('should bubble errors from #resolveFileFromPointers', function(done) {
+      var client = new BridgeClient();
+      var _getFrame = sinon.stub(client, 'getFrameFromFile').callsArgWith(
+        2,
+        null,
+        { shards: [] }
+      );
+      var _createToken = sinon.stub(client, 'createToken').callsArgWith(
+        2,
+        null,
+        {}
+      );
+      var _getFilePointers = sinon.stub(client, 'getFilePointers').callsArgWith(
+        1,
+        null,
+        []
+      );
+      var _resolveFile = sinon.stub(
+        client,
+        'resolveFileFromPointers'
+      ).callsArgWith(1, new Error('Failed'));
+      client.createFileSliceStream({
+        bucket: 'bucketid',
+        file: 'fileid',
+        start: 0,
+        end: 10
+      }, function(err) {
+        _getFrame.restore();
+        _createToken.restore();
+        _getFilePointers.restore();
+        _resolveFile.restore();
+        expect(err.message).to.equal('Failed');
+        done();
+      });
+    });
+
+    it('should return the stream', function(done) {
+      var client = new BridgeClient();
+      var _getFrame = sinon.stub(client, 'getFrameFromFile').callsArgWith(
+        2,
+        null,
+        { shards: [] }
+      );
+      var _createToken = sinon.stub(client, 'createToken').callsArgWith(
+        2,
+        null,
+        {}
+      );
+      var _getFilePointers = sinon.stub(client, 'getFilePointers').callsArgWith(
+        1,
+        null,
+        []
+      );
+      var _resolveFile = sinon.stub(
+        client,
+        'resolveFileFromPointers'
+      ).callsArgWith(1, null, new ReadableStream({ read: utils.noop }));
+      client.createFileSliceStream({
+        bucket: 'bucketid',
+        file: 'fileid',
+        start: 0,
+        end: 10
+      }, function(err, stream) {
+        _getFrame.restore();
+        _createToken.restore();
+        _getFilePointers.restore();
+        _resolveFile.restore();
+        expect(typeof stream.pipe).to.equal('function');
+        done();
+      });
+    });
+
+  });
+
+  describe('#_getSliceParams', function() {
+
+    it('should return the correct params', function() {
+      var client = new BridgeClient();
+      var params = client._getSliceParams({
+        shards: [
+          { size: 100 },
+          { size: 100 },
+          { size: 100 },
+          { size: 100 },
+          { size: 100 }
+        ]
+      }, 150, 375);
+      expect(params.skip).to.equal(1);
+      expect(params.limit).to.equal(3);
+      expect(params.trimFront).to.equal(50);
+      expect(params.trimBack).to.equal(25);
     });
 
   });

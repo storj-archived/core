@@ -206,4 +206,24 @@ describe('utils', function() {
 
   });
 
+  describe('#createStreamTrimmer', function() {
+
+    it('should trim the stream to the specified length', function(done) {
+      var noise = require('noisegen')({
+        length: 5 * (1024 * 1024),
+        size: 64 * 1024
+      });
+      var trimmer = utils.createStreamTrimmer(100 * 1024, 1024 * 1024);
+      var bytes = 0;
+
+      noise.pipe(trimmer).on('data', function(data) {
+        bytes += data.length;
+      }).on('end', function() {
+        expect(bytes).to.equal(1024 * 1024);
+        done();
+      });
+    });
+
+  });
+
 });

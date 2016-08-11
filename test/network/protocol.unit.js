@@ -1,3 +1,5 @@
+/* jshint maxstatements: false */
+
 'use strict';
 
 var sinon = require('sinon');
@@ -9,6 +11,7 @@ var stream = require('readable-stream');
 var constants = require('../../lib/constants');
 var StorageItem = require('../../lib/storage/item');
 var utils = require('../../lib/utils');
+var TriggerManager = require('../../lib/sips/0003').TriggerManager;
 
 describe('Protocol', function() {
 
@@ -793,6 +796,32 @@ describe('Protocol', function() {
         contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' }
       }, function(err) {
         expect(err.message).to.equal('Failed');
+        done();
+      });
+    });
+
+  });
+
+  describe('#_handleTrigger', function() {
+
+    it('should call TriggerManager#process', function(done) {
+      var triggers = new TriggerManager();
+      triggers.add('adc83b19e793491b1c6ea0fd8b46cd9f32e592fc', {
+        test: function(params, reply, destroy) {
+          reply(null, { message: 'SUCCESS' });
+          destroy();
+        }
+      });
+      var proto = new Protocol({
+        network: {
+          triggers: triggers
+        }
+      });
+      proto._handleTrigger({
+        contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
+        behavior: 'test'
+      }, function(err, result) {
+        expect(result.message).to.equal('SUCCESS');
         done();
       });
     });

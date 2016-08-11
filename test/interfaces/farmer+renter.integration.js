@@ -3,6 +3,7 @@
 var expect = require('chai').expect;
 var async = require('async');
 var kad = require('kad');
+var sinon = require('sinon');
 var Contract = require('../../lib/contract');
 var AuditStream = require('../../lib/auditstream');
 var Contact = require('../../lib/network/contact');
@@ -21,6 +22,8 @@ kad.constants.T_RESPONSETIMEOUT = 5000;
 
 var NODE_LIST = [];
 var STARTING_PORT = 65535;
+
+var _ntp = null;
 
 function createNode(opcodes) {
   var node = null;
@@ -79,12 +82,16 @@ var audit = new AuditStream(12);
 var ctoken = null;
 var rtoken = null;
 
-before(function(done) {
-  audit.end(shard);
-  setImmediate(done);
-});
-
 describe('Interfaces/Farmer+Renter/Integration', function() {
+
+  before(function(done) {
+    _ntp = sinon.stub(utils, 'ensureNtpClockIsSynchronized').callsArgWith(
+      0,
+      null
+    );
+    audit.end(shard);
+    setImmediate(done);
+  });
 
   describe('#join', function() {
 
@@ -200,6 +207,10 @@ describe('Interfaces/Farmer+Renter/Integration', function() {
       });
     });
 
+  });
+
+  after(function() {
+    _ntp.restore();
   });
 
 });

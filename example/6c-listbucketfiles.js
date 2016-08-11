@@ -11,20 +11,24 @@ var keypair = storj.KeyPair(fs.readFileSync('./private.key').toString());
 // Login using the keypair generated
 var client = storj.BridgeClient(api, {keypair: keypair});
 
-var bucketInfo = {
-  name: 'Cool bucket',
-  storage: 30,
-  transfer: 10
-};
+var bucketid = 'insertbucketidhere';
 
-client.createBucket(bucketInfo, function(err, bucket) {
+client.listFilesInBucket(bucketid, function(err, files) {
   if (err) {
     return console.log('error', err.message);
   }
 
-  console.log(
-    'info',
-    'ID: %s, Name: %s, Storage: %s, Transfer: %s',
-    [bucket.id, bucket.name, bucket.storage, bucket.transfer]
-  );
+  if (!files.length) {
+    return console.log('warn', 'There are no files in this bucket.');
+  }
+
+  // Log out info for each file
+  files.forEach(function(file) {
+    console.log(
+      'info',
+      'Name: %s, Type: %s, Size: %s bytes, ID: %s',
+      [file.filename, file.mimetype, file.size, file.id]
+    );
+  });
+
 });

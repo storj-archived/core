@@ -11,8 +11,10 @@ var keypair = storj.KeyPair(fs.readFileSync('./private.key').toString());
 // Login using the keypair generated
 var client = storj.BridgeClient(api, {keypair: keypair});
 
+// List all buckets
 client.getBuckets(function(err, buckets) {
   if (err) {
+    // Handle error on failure.
     return console.log('error', err.message);
   }
 
@@ -20,6 +22,7 @@ client.getBuckets(function(err, buckets) {
     return console.log('warn', 'You have not created any buckets.');
   }
 
+  // Log out info for each bucket
   buckets.forEach(function(bucket) {
     console.log(
       'info',

@@ -7,8 +7,6 @@
 
 require('./lib/patches')(); // NB: Apply any monkey patches
 
-module.exports.version = require('./lib/version');
-
 /** {@link Network} */
 module.exports.Network = require('./lib/network');
 
@@ -36,7 +34,7 @@ module.exports.DataChannelServer = require('./lib/datachannel/server');
 /** {@link DataChannelPointer} */
 module.exports.DataChannelPointer = require('./lib/datachannel/pointer');
 
-/** {@link DataChannelErrors} */
+/** {@link module:storj/datachannel/errors} */
 module.exports.DataChannelErrors = require('./lib/datachannel/errorcodes');
 
 /** {@link Protocol} */
@@ -51,7 +49,7 @@ module.exports.TunnelMuxer = require('./lib/tunnel/multiplexer');
 /** {@link TunnelDemuxer} */
 module.exports.TunnelDemuxer = require('./lib/tunnel/demultiplexer');
 
-/** {@link TunnelErrors} */
+/** {@link module:storj/tunnel/errors} */
 module.exports.TunnelErrors = require('./lib/tunnel/errorcodes');
 
 /** {@link TunnelClient} */
@@ -126,11 +124,17 @@ module.exports.TunnelerInterface = require('./lib/interfaces/tunneler');
 /** {@link BridgeClient} */
 module.exports.BridgeClient = require('./lib/bridgeclient');
 
-/** {@link constants} */
+/** {@link module:storj/version} */
+module.exports.version = require('./lib/version');
+
+/** {@link module:storj/constants} */
 module.exports.constants = require('./lib/constants');
 
-/** {@link utils} */
+/** {@link module:storj/utils} */
 module.exports.utils = require('./lib/utils');
 
-/** {@link deps} */
+/** {@link module:storj/deps} */
 module.exports.deps = require('./lib/deps');
+
+/** {@link module:storj/sips} */
+module.exports.sips = require('./lib/sips');

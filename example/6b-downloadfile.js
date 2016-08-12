@@ -31,7 +31,8 @@ var secret = keyring.get(id);
 // Prepare to decrypt the encrypted file
 var decrypter = new storj.DecryptStream(secret);
 var received = 0;
-var exclude = env.exclude.split(',');
+// list of servers to exclude when finding the download server
+var exclude = '';
 
 // Handle Events emitted from file download stream
 target.on('finish', function() {

@@ -8,6 +8,10 @@ This document outlines the specification for the RPC interface by defining the
 message structure, required methods, and expected response formats that are
 needed for a Storj protocol compliant implementation.
 
+> Note that there may be other aspects of the protocol that are implemented as
+> SIPs (Storj Improvement Proposals). See the end of this document for a list
+> of implemented SIPs.
+
 ### Request Format
 
 Requests are formed according to the JSON-RPC 2.0 specification and are issued
@@ -1076,3 +1080,7 @@ next audit).
 In addition, the renter must check the integrity of the returned `data_shard`
 by calculating the hash and checking it against the expected `data_hash`. If
 the test fails, then this effectively a failed audit and the contract is null.
+
+### Implemented SIPs
+
+* [SIP0003 Application Specific Triggers](https://github.com/bookchin/storj-sips/blob/master/sip-0003.md)

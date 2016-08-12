@@ -103,10 +103,10 @@ describe('Network/Integration/Tunnelling', function() {
       node.join(function noop() {});
       next();
     }, function() {
-      farmers[0]._transport._isPublic = false;
+      farmers[0].transport._isPublic = false;
       farmers[0].join(function() {
         audit.end(shard);
-        farmers[1]._transport._isPublic = false;
+        farmers[1].transport._isPublic = false;
         farmers[1].join(function() {
           done();
         });
@@ -119,7 +119,7 @@ describe('Network/Integration/Tunnelling', function() {
     it('should receive an offer for the published contract', function(done) {
       this.timeout(12000);
       contract = new Contract({
-        renter_id: renter._keypair.getNodeID(),
+        renter_id: renter.keypair.getNodeID(),
         data_size: shard.length,
         data_hash: utils.rmd160sha256(shard),
         store_begin: Date.now(),

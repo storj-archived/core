@@ -49,7 +49,7 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          _manager: {
+          manager: {
             save: _save
           },
           _pendingContracts: {
@@ -80,7 +80,7 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          _keypair: KeyPair(),
+          keypair: KeyPair(),
           _pendingContracts: {
             adc83b19e793491b1c6ea0fd8b46cd9f32e592fc: function() {}
           }
@@ -105,7 +105,7 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          _keypair: KeyPair(),
+          keypair: KeyPair(),
           _pendingContracts: {
             adc83b19e793491b1c6ea0fd8b46cd9f32e592fc: function() {}
           }
@@ -134,7 +134,7 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          _keypair: KeyPair(),
+          keypair: KeyPair(),
           _pendingContracts: {
             adc83b19e793491b1c6ea0fd8b46cd9f32e592fc: callback
           }
@@ -204,7 +204,7 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          _manager: {
+          manager: {
             load: sinon.stub()
           }
         }
@@ -219,7 +219,7 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          _manager: {
+          manager: {
             load: sinon.stub().callsArgWith(1, new Error('Failed'))
           }
         }
@@ -234,7 +234,7 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          _manager: {
+          manager: {
             load: sinon.stub().callsArgWith(1, null, {
               shard: new stream.Writable()
             })
@@ -255,7 +255,7 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          _manager: {
+          manager: {
             load: sinon.stub().callsArgWith(1, new Error('Failed'))
           }
         }
@@ -272,7 +272,7 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          _manager: {
+          manager: {
             load: sinon.stub().callsArgWith(1, null, StorageItem({}))
           }
         }
@@ -289,7 +289,7 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          _manager: {
+          manager: {
             load: sinon.stub().callsArgWith(1, null, {
               trees: {
                 adc83b19e793491b1c6ea0fd8b46cd9f32e592fc: null
@@ -325,7 +325,7 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          _manager: {
+          manager: {
             load: sinon.stub().callsArgWith(1, null, {
               trees: {
                 adc83b19e793491b1c6ea0fd8b46cd9f32e592fc: null
@@ -364,7 +364,7 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          _manager: {
+          manager: {
             load: sinon.stub().callsArgWith(1, new Error('Failed'))
           }
         }
@@ -381,7 +381,7 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          _manager: {
+          manager: {
             load: sinon.stub().callsArgWith(1, new Error('Failed'))
           }
         }
@@ -402,7 +402,7 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          _manager: {
+          manager: {
             load: sinon.stub().callsArgWith(1, new Error('Failed'))
           }
         }
@@ -417,7 +417,7 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          _manager: {
+          manager: {
             load: sinon.stub().callsArgWith(1, null, { contracts: {} })
           }
         }
@@ -434,7 +434,7 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          _manager: {
+          manager: {
             load: sinon.stub().callsArgWith(1, null, {
               contracts: {
                 test: {}
@@ -461,7 +461,7 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          _transport: {
+          transport: {
             send: _send
           }
         }
@@ -479,7 +479,7 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          _transport: {
+          transport: {
             send: _send
           }
         }
@@ -500,11 +500,11 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          _router: {
+          router: {
             getNearestContacts: sinon.stub().returns([{}])
           },
-          _contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
-          _transport: {
+          contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
+          transport: {
             _tunserver: {
               hasTunnelAvailable: sinon.stub().returns(false)
             }
@@ -529,11 +529,11 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          _router: {
+          router: {
             getNearestContacts: sinon.stub().returns([{}])
           },
-          _contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
-          _transport: {
+          contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
+          transport: {
             _tunserver: {
               hasTunnelAvailable: sinon.stub().returns(false)
             }
@@ -564,11 +564,11 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          _router: {
+          router: {
             getNearestContacts: sinon.stub().returns([{}])
           },
-          _contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
-          _transport: {
+          contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
+          transport: {
             send: sinon.stub().callsArgWith(2, new Error('Failed'), {
               result: {
                 tunnels: { forEach: _forEach }
@@ -591,11 +591,11 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          _router: {
+          router: {
             getNearestContacts: sinon.stub().returns([{}])
           },
-          _contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
-          _transport: {
+          contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
+          transport: {
             send: sinon.stub().callsArgWith(2, null, {
               result: {
                 tunnels: { forEach: _forEach }
@@ -618,11 +618,11 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          _router: {
+          router: {
             getNearestContacts: sinon.stub().returns([{}])
           },
-          _contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
-          _transport: {
+          contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
+          transport: {
             send: sinon.stub().callsArgWith(2, null, {
               result: {
                 tunnels: [
@@ -649,11 +649,11 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          _router: {
+          router: {
             getNearestContacts: sinon.stub().returns([{}])
           },
-          _contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
-          _transport: {
+          contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
+          transport: {
             _createContact: sinon.stub(),
             send: sinon.stub().callsArgWith(2, null, {
               result: {
@@ -681,11 +681,11 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          _router: {
+          router: {
             getNearestContacts: sinon.stub().returns([{}])
           },
-          _contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
-          _transport: {
+          contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
+          transport: {
             _createContact: sinon.stub(),
             send: sinon.stub().callsArgWith(2, null, {
               result: {
@@ -716,7 +716,7 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          _transport: {
+          transport: {
             _tunserver: {
               createGateway: _createGateway
             }
@@ -744,8 +744,8 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          _contact: {},
-          _transport: {
+          contact: {},
+          transport: {
             _requiresTraversal: true,
             _isPublic: true,
             _tunserver: {
@@ -780,8 +780,8 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          _contact: {},
-          _transport: {
+          contact: {},
+          transport: {
             _requiresTraversal: true,
             _isPublic: true,
             _tunserver: {

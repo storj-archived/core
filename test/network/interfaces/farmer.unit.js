@@ -122,18 +122,18 @@ describe('FarmerInterface', function() {
         storage: { path: 'test' }
       });
       var _getContactByNodeID = sinon.stub(
-        farmer._router,
+        farmer.router,
         'getContactByNodeID'
       ).returns(null);
       var _findNode = sinon.stub(
-        farmer._router,
+        farmer.router,
         'findNode'
       ).callsArgWith(1, null, [Contact({
         address: '127.0.0.1',
         port: 1234,
         nodeID: kp1.getNodeID()
       })]);
-      var _save = sinon.stub(farmer._manager, 'save').callsArg(1);
+      var _save = sinon.stub(farmer.manager, 'save').callsArg(1);
       farmer._sendOfferForContract = function() {
         expect(_findNode.called).to.equal(true);
         _getContactByNodeID.restore();
@@ -156,10 +156,10 @@ describe('FarmerInterface', function() {
       });
       var _remove = sinon.stub(farmer, '_removeContractFromPendingList');
       var _getContactByNodeID = sinon.stub(
-        farmer._router,
+        farmer.router,
         'getContactByNodeID'
       ).returns(null);
-      var _save = sinon.stub(farmer._manager, 'save').callsArgWith(
+      var _save = sinon.stub(farmer.manager, 'save').callsArgWith(
         1,
         new Error('Save failed')
       );
@@ -185,16 +185,16 @@ describe('FarmerInterface', function() {
         backend: require('memdown'),
         storage: { path: 'test' }
       });
-      var _save = sinon.stub(farmer._manager, 'save').callsArgWith(
+      var _save = sinon.stub(farmer.manager, 'save').callsArgWith(
         1,
         null
       );
       var _remove = sinon.stub(farmer, '_removeContractFromPendingList');
       var _getContactByNodeID = sinon.stub(
-        farmer._router,
+        farmer.router,
         'getContactByNodeID'
       ).returns(null);
-      var _findNode = sinon.stub(farmer._router, 'findNode').callsArgWith(
+      var _findNode = sinon.stub(farmer.router, 'findNode').callsArgWith(
         1,
         new Error('Lookup failed')
       );
@@ -225,10 +225,10 @@ describe('FarmerInterface', function() {
       });
       var _remove = sinon.stub(farmer, '_removeContractFromPendingList');
       var _getContactByNodeID = sinon.stub(
-        farmer._router,
+        farmer.router,
         'getContactByNodeID'
       ).returns(null);
-      var _findNode = sinon.stub(farmer._router, 'findNode').callsArgWith(
+      var _findNode = sinon.stub(farmer.router, 'findNode').callsArgWith(
         1,
         null,
         []
@@ -274,11 +274,11 @@ describe('FarmerInterface', function() {
         storage: { path: 'test' }
       });
       var _getContactByNodeID = sinon.stub(
-        farmer._router,
+        farmer.router,
         'getContactByNodeID'
       ).returns({});
-      var _findNode = sinon.stub(farmer._router, 'findNode');
-      var _save = sinon.stub(farmer._manager, 'save').callsArg(1);
+      var _findNode = sinon.stub(farmer.router, 'findNode');
+      var _save = sinon.stub(farmer.manager, 'save').callsArg(1);
       farmer._sendOfferForContract = function() {
         expect(_findNode.called).to.equal(false);
         _getContactByNodeID.restore();
@@ -328,7 +328,7 @@ describe('FarmerInterface', function() {
         backend: require('memdown'),
         storage: { path: 'test' }
       });
-      var _send = sinon.stub(farmer._transport, 'send').callsArgWith(
+      var _send = sinon.stub(farmer.transport, 'send').callsArgWith(
         2,
         new Error('Failed to send offer')
       );
@@ -355,7 +355,7 @@ describe('FarmerInterface', function() {
         backend: require('memdown'),
         storage: { path: 'test' }
       });
-      var _send = sinon.stub(farmer._transport, 'send').callsArgWith(
+      var _send = sinon.stub(farmer.transport, 'send').callsArgWith(
         2,
         null,
         { result: {} }
@@ -449,8 +449,8 @@ describe('FarmerInterface', function() {
         backend: require('memdown'),
         storage: { path: 'test' }
       });
-      var _load = sinon.stub(farmer._manager, 'load').callsArgWith(1, {});
-      var _save = sinon.stub(farmer._manager, 'save');
+      var _load = sinon.stub(farmer.manager, 'load').callsArgWith(1, {});
+      var _save = sinon.stub(farmer.manager, 'save');
       var _verify = sinon.stub(Contract.prototype, 'verify').returns(true);
       farmer._handleOfferRes({
         result: {

@@ -3,12 +3,13 @@
 var crypto = require('crypto');
 var memdown = require('memdown');
 var LevelDBStorageAdapter = require('../../../lib/storage/adapters/level');
-var LevelDBFileStore = require('../../../lib/storage/adapters/level/filestore');
+var FileStore = require('../../../lib/storage/adapters/level/file-store');
+var LevelDBFileStore = FileStore;
 var StorageItem = require('../../../lib/storage/item');
 var expect = require('chai').expect;
 var utils = require('../../../lib/utils');
 var Contract = require('../../../lib/contract');
-var AuditStream = require('../../../lib/auditstream');
+var AuditStream = require('../../../lib/audit-tools/audit-stream');
 var sinon = require('sinon');
 
 function tmpdir() {
@@ -337,6 +338,19 @@ describe('LevelDBFileStore', function() {
       }).end(data);
     });
 
+    it('should expose a destroy method', function(done) {
+      var data = crypto.randomBytes(16);
+      var fs = new LevelDBFileStore(store);
+      var ws = fs.createWriteStream('destroyme');
+      ws.on('finish', function() {
+        var rs = fs.createReadStream('destroyme');
+        rs.destroy(function() {
+          rs.destroy(); // Should be idempotent and optional callback
+          done();
+        });
+      }).end(data);
+    });
+
     it('should work with base64 encoding', function(done) {
       var data = Buffer(sample.toString('base64'), 'base64');
       var fs = new LevelDBFileStore(store);
@@ -417,7 +431,6 @@ describe('LevelDBFileStore', function() {
         expect(_del.called).to.equal(true);
         done();
       });
-
     });
 
   });

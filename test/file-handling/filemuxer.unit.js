@@ -1,7 +1,7 @@
 'use strict';
 
 var expect = require('chai').expect;
-var FileMuxer = require('../lib/filemuxer');
+var FileMuxer = require('../../lib/file-handling/file-muxer');
 var ReadableStream = require('readable-stream');
 
 describe('FileMuxer', function() {

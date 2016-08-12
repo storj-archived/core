@@ -6,7 +6,7 @@ var TunnelServer = require('../../lib/tunnel/server');
 var EventEmitter = require('events').EventEmitter;
 var proxyquire = require('proxyquire');
 var sinon = require('sinon');
-var TunnelErrors = require('../../lib/tunnel/errorcodes');
+var TunnelErrors = require('../../lib/tunnel/error-codes');
 
 describe('TunnelServer', function() {
 

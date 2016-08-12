@@ -4,19 +4,19 @@ var expect = require('chai').expect;
 var async = require('async');
 var kad = require('kad');
 var sinon = require('sinon');
-var Contract = require('../../lib/contract');
-var AuditStream = require('../../lib/auditstream');
-var Contact = require('../../lib/network/contact');
-var utils = require('../../lib/utils');
-var DataChannelClient = require('../../lib/datachannel/client');
-var StorageItem = require('../../lib/storage/item');
-var Verification = require('../../lib/verification');
+var Contract = require('../../../lib/contract');
+var AuditStream = require('../../../lib/audit-tools/audit-stream');
+var Contact = require('../../../lib/network/contact');
+var utils = require('../../../lib/utils');
+var DataChannelClient = require('../../../lib/data-channels/client');
+var StorageItem = require('../../../lib/storage/item');
+var Verification = require('../../../lib/audit-tools/verification');
 var memdown = require('memdown');
-var KeyPair = require('../../lib/keypair');
-var Manager = require('../../lib/manager');
-var LevelDBStorageAdapter = require('../../lib/storage/adapters/level');
-var FarmerInterface = require('../../lib/interfaces/farmer');
-var RenterInterface = require('../../lib/interfaces/renter');
+var KeyPair = require('../../../lib/crypto-tools/keypair');
+var Manager = require('../../../lib/storage/manager');
+var LevelDBStorageAdapter = require('../../../lib/storage/adapters/level');
+var FarmerInterface = require('../../../lib/network/interfaces/farmer');
+var RenterInterface = require('../../../lib/network/interfaces/renter');
 
 kad.constants.T_RESPONSETIMEOUT = 5000;
 
@@ -68,7 +68,7 @@ function createFarmer() {
   return createNode(['0f01010202']);
 }
 
-var farmers = Array.apply(null, Array(1)).map(function() {
+var farmers = Array.apply(null, Array(2)).map(function() {
   return createFarmer();
 });
 var renters = Array.apply(null, Array(2)).map(function() {
@@ -99,12 +99,9 @@ describe('Interfaces/Farmer+Renter/Integration', function() {
       this.timeout(35000);
       farmers[0].join(function() {
         farmers.shift();
-        async.each(farmers.concat(renters), function(node, done) {
-          node.join(function noop() { });
-          done();
-        }, function() {
-          setTimeout(done, 5000);
-        });
+        async.each(farmers.concat(renters), function(node, next) {
+          node.join(next);
+        }, done);
       });
     });
 

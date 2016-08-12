@@ -1,6 +1,6 @@
 'use strict';
 
-var DataChannelPointer = require('../../lib/datachannel/pointer');
+var DataChannelPointer = require('../../lib/data-channels/pointer');
 var Contact = require('../../lib/network/contact');
 var utils = require('../../lib/utils');
 var expect = require('chai').expect;

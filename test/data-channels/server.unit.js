@@ -4,10 +4,10 @@ var PassThrough = require('readable-stream').PassThrough;
 var proxyquire = require('proxyquire');
 var expect = require('chai').expect;
 var RAMStorageAdapter = require('../../lib/storage/adapters/ram');
-var Manager = require('../../lib/manager');
+var Manager = require('../../lib/storage/manager');
 var Logger = require('kad').Logger;
-var DataChannelServer = require('../../lib/datachannel/server');
-var DataChannelErrors = require('../../lib/datachannel/errorcodes');
+var DataChannelServer = require('../../lib/data-channels/server');
+var DataChannelErrors = require('../../lib/data-channels/error-codes');
 var sinon = require('sinon');
 var EventEmitter = require('events').EventEmitter;
 var http = require('http');
@@ -288,7 +288,7 @@ describe('DataChannelServer', function() {
     it('should close the socket with error if bad hash', function(done) {
       var emitter = new PassThrough();
       var manager = Manager(RAMStorageAdapter());
-      var BadHashDataChannelS = proxyquire('../../lib/datachannel/server', {
+      var BadHashDataChannelS = proxyquire('../../lib/data-channels/server', {
         'readable-stream': {
           PassThrough: function() {
             return emitter;
@@ -319,7 +319,7 @@ describe('DataChannelServer', function() {
           }
         }
       });
-      item.shard = { write: function() {} };
+      item.shard = { write: function() {}, destroy: function() {} };
       var _load = sinon.stub(manager, 'load', function(a ,cb) {
         cb(null, item);
         setImmediate(function() {
@@ -347,14 +347,14 @@ describe('DataChannelServer', function() {
       var emitter = new PassThrough();
       emitter.end = sinon.stub();
       var manager = Manager(RAMStorageAdapter());
-      var PassThroughDataChannelS = proxyquire('../../lib/datachannel/server', {
+      var PTDataChannelS = proxyquire('../../lib/data-channels/server', {
         'readable-stream': {
           PassThrough: function() {
             return emitter;
           }
         }
       });
-      var dcs = PassThroughDataChannelS({
+      var dcs = PTDataChannelS({
         server: http.createServer(function noop() {}),
         manager: manager,
         logger: Logger(0)
@@ -378,7 +378,7 @@ describe('DataChannelServer', function() {
           }
         }
       });
-      item.shard = { write: function() {} };
+      item.shard = { write: function() {}, destroy: function() {} };
       var _load = sinon.stub(manager, 'load', function(a ,cb) {
         cb(null, item);
         setImmediate(function() {

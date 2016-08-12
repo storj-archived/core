@@ -1,9 +1,9 @@
 'use strict';
 
 var expect = require('chai').expect;
-var DataCipherKeyIv = require('../lib/cipherkeyiv');
-var EncryptStream = require('../lib/cryptostream/encrypt');
-var DecryptStream = require('../lib/cryptostream/decrypt');
+var DataCipherKeyIv = require('../../lib/crypto-tools/cipher-key-iv');
+var EncryptStream = require('../../lib/crypto-tools/encrypt-stream');
+var DecryptStream = require('../../lib/crypto-tools/decrypt-stream');
 
 describe('EncryptStream', function() {
 

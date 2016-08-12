@@ -1,9 +1,9 @@
 'use strict';
 
 var expect = require('chai').expect;
-var AuditStream = require('../lib/auditstream');
-var ProofStream = require('../lib/proofstream');
-var utils = require('../lib/utils');
+var AuditStream = require('../../lib/audit-tools/audit-stream');
+var ProofStream = require('../../lib/audit-tools/proof-stream');
+var utils = require('../../lib/utils');
 var sinon = require('sinon');
 
 describe('Proof', function() {

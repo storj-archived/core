@@ -2,7 +2,7 @@
 
 var crypto = require('crypto');
 var expect = require('chai').expect;
-var AuditStream = require('../lib/auditstream');
+var AuditStream = require('../../lib/audit-tools/audit-stream');
 
 var SHARD = new Buffer('testshard');
 

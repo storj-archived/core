@@ -1,7 +1,7 @@
 'use strict';
 
-var KeyRing = require('../lib/keyring');
-var DataCipherKeyIv = require('../lib/cipherkeyiv');
+var KeyRing = require('../../lib/crypto-tools/keyring');
+var DataCipherKeyIv = require('../../lib/crypto-tools/cipher-key-iv');
 var expect = require('chai').expect;
 var path = require('path');
 var fs = require('fs');

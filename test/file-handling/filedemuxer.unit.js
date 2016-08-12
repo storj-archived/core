@@ -1,7 +1,7 @@
 'use strict';
 
 var expect = require('chai').expect;
-var FileDemuxer = require('../lib/filedemuxer');
+var FileDemuxer = require('../../lib/file-handling/file-demuxer');
 var stream = require('readable-stream');
 var noisegen = require('noisegen');
 var os = require('os');

@@ -2,14 +2,14 @@
 
 var sinon = require('sinon');
 var expect = require('chai').expect;
-var Contract = require('../../lib/contract');
-var KeyPair = require('../../lib/keypair');
-var FarmerInterface = require('../../lib/interfaces/farmer');
-var Network = require('../../lib/network');
+var Contract = require('../../../lib/contract');
+var KeyPair = require('../../../lib/crypto-tools/keypair');
+var FarmerInterface = require('../../../lib/network/interfaces/farmer');
+var Network = require('../../../lib/network');
 var kad = require('kad');
-var Contact = require('../../lib/network/contact');
-var utils = require('../../lib/utils');
-var StorageItem = require('../../lib/storage/item');
+var Contact = require('../../../lib/network/contact');
+var utils = require('../../../lib/utils');
+var StorageItem = require('../../../lib/storage/item');
 var EventEmitter = require('events').EventEmitter;
 
 describe('FarmerInterface', function() {
@@ -52,6 +52,7 @@ describe('FarmerInterface', function() {
       var _addTo = sinon.stub(farmer, '_addContractToPendingList');
       farmer._handleContractPublication(Contract({}));
       setImmediate(function() {
+        _addTo.restore();
         expect(_addTo.called).to.equal(false);
         done();
       });
@@ -396,6 +397,7 @@ describe('FarmerInterface', function() {
       var farmer = new FarmerInterface({
         keypair: KeyPair(),
         port: 0,
+        tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
         backend: require('memdown'),

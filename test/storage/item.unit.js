@@ -2,10 +2,10 @@
 
 var expect = require('chai').expect;
 var StorageItem = require('../../lib/storage/item');
-var AuditStream = require('../../lib/auditstream');
+var AuditStream = require('../../lib/audit-tools/audit-stream');
 var Contact = require('../../lib/network/contact');
 var Contract = require('../../lib/contract');
-var KeyPair = require('../../lib/keypair');
+var KeyPair = require('../../lib/crypto-tools/keypair');
 var utils = require('../../lib/utils');
 
 describe('StorageItem', function() {

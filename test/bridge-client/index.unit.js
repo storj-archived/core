@@ -2,17 +2,17 @@
 
 'use strict';
 
-var BridgeClient = require('../lib/bridgeclient');
+var BridgeClient = require('../../lib/bridge-client');
 var proxyquire = require('proxyquire');
 var sinon = require('sinon');
 var expect = require('chai').expect;
-var KeyPair = require('../lib/keypair');
-var utils = require('../lib/utils');
+var KeyPair = require('../../lib/crypto-tools/keypair');
+var utils = require('../../lib/utils');
 var EventEmitter = require('events').EventEmitter;
 var stream = require('readable-stream');
-var FileMuxer = require('../lib/filemuxer');
+var FileMuxer = require('../../lib/file-handling/file-muxer');
 var crypto = require('crypto');
-var utils = require('../lib/utils');
+var utils = require('../../lib/utils');
 var ReadableStream = require('readable-stream');
 
 describe('BridgeClient', function() {
@@ -426,7 +426,7 @@ describe('BridgeClient', function() {
         var _demuxer = new EventEmitter();
         var _shard1 = new stream.Readable({ read: function noop() {} });
         var _shard2 = new stream.Readable({ read: function noop() {} });
-        var StubbedClient = proxyquire('../lib/bridgeclient', {
+        var StubbedClient = proxyquire('../../lib/bridge-client', {
           fs: {
             statSync: sinon.stub().returns({ size: 64 }),
             unlinkSync: sinon.stub(),
@@ -452,7 +452,7 @@ describe('BridgeClient', function() {
               });
             }
           },
-          './datachannel/client': function() {
+          '../data-channels/client': function() {
             var emitter = new EventEmitter();
             emitter.createWriteStream = function() {
               return new stream.Writable({
@@ -466,7 +466,7 @@ describe('BridgeClient', function() {
             }, 20);
             return emitter;
           },
-          './filedemuxer': function() {
+          '../file-handling/file-demuxer': function() {
             _demuxer.DEFAULTS = { shardSize: 32 };
             return _demuxer;
           },
@@ -518,12 +518,12 @@ describe('BridgeClient', function() {
 
       it('should return error if create frame fails', function(done) {
         var _demuxer = new EventEmitter();
-        var StubbedClient = proxyquire('../lib/bridgeclient', {
+        var StubbedClient = proxyquire('../../lib/bridge-client', {
           fs: {
             statSync: sinon.stub().returns({ size: 64 }),
             unlinkSync: sinon.stub()
           },
-          './filedemuxer': function() {
+          '../file-handling/file-demuxer': function() {
             _demuxer.DEFAULTS = { shardSize: 32 };
             return _demuxer;
           },
@@ -550,7 +550,7 @@ describe('BridgeClient', function() {
         var _demuxer = new EventEmitter();
         var _shard1 = new stream.Readable({ read: function noop() {} });
         var _shard2 = new stream.Readable({ read: function noop() {} });
-        var StubbedClient = proxyquire('../lib/bridgeclient', {
+        var StubbedClient = proxyquire('../../lib/bridge-client', {
           fs: {
             statSync: sinon.stub().returns({ size: 64 }),
             unlinkSync: sinon.stub(),
@@ -576,7 +576,7 @@ describe('BridgeClient', function() {
               });
             }
           },
-          './datachannel/client': function() {
+          '../data-channels/client': function() {
             var emitter = new EventEmitter();
             emitter.createWriteStream = function() {
               return new stream.Writable({
@@ -590,7 +590,7 @@ describe('BridgeClient', function() {
             }, 20);
             return emitter;
           },
-          './filedemuxer': function() {
+          '../file-handling/file-demuxer': function() {
             _demuxer.DEFAULTS = { shardSize: 32 };
             return _demuxer;
           },
@@ -680,7 +680,7 @@ describe('BridgeClient', function() {
     describe('#getFilePointers', function() {
 
       it('should bubble request error', function(done) {
-        var StubbedClient = proxyquire('../lib/bridgeclient', {
+        var StubbedClient = proxyquire('../../lib/bridge-client', {
           request: sinon.stub().callsArgWith(1, new Error('Failed'))
         });
         var client = new StubbedClient();
@@ -695,7 +695,7 @@ describe('BridgeClient', function() {
       });
 
       it('should pass error if bad request', function(done) {
-        var StubbedClient = proxyquire('../lib/bridgeclient', {
+        var StubbedClient = proxyquire('../../lib/bridge-client', {
           request: sinon.stub().callsArgWith(1, null, {
             statusCode: 400
           }, { error: 'Bad request' })
@@ -712,7 +712,7 @@ describe('BridgeClient', function() {
       });
 
       it('should pass body if bad request and no error', function(done) {
-        var StubbedClient = proxyquire('../lib/bridgeclient', {
+        var StubbedClient = proxyquire('../../lib/bridge-client', {
           request: sinon.stub().callsArgWith(1, null, {
             statusCode: 400
           }, 'Bad request')
@@ -729,7 +729,7 @@ describe('BridgeClient', function() {
       });
 
       it('should pass the result', function(done) {
-        var StubbedClient = proxyquire('../lib/bridgeclient', {
+        var StubbedClient = proxyquire('../../lib/bridge-client', {
           request: sinon.stub().callsArgWith(1, null, {
             statusCode: 200
           }, { hello: 'world' })
@@ -747,7 +747,7 @@ describe('BridgeClient', function() {
 
       it('should pass the given exclude parameter', function(done) {
         var exclude = [1, 2, 3];
-        var StubbedClient = proxyquire('../lib/bridgeclient', {
+        var StubbedClient = proxyquire('../../lib/bridge-client', {
           request: function(opts, callback) {
             expect(opts.qs.exclude).to.equal(exclude.join(','));
             callback(null, { statusCode: 200 }, {});
@@ -768,8 +768,8 @@ describe('BridgeClient', function() {
 
       it('should callback with the error', function(done) {
         var emitter = new EventEmitter();
-        var StubbedClient = proxyquire('../lib/bridgeclient', {
-          './datachannel/client': sinon.stub().returns(emitter)
+        var StubbedClient = proxyquire('../../lib/bridge-client', {
+          '../data-channels/client': sinon.stub().returns(emitter)
         });
         var client = new StubbedClient();
         client._createInputFromPointer({
@@ -950,8 +950,8 @@ describe('BridgeClient', function() {
       it('should return a readable stream as a file muxer', function(done) {
         var emitters = [new EventEmitter(), new EventEmitter()];
         var count = 0;
-        var StubbedClient = proxyquire('../lib/bridgeclient', {
-          './datachannel/client': function() {
+        var StubbedClient = proxyquire('../../lib/bridge-client', {
+          '../data-channels/client': function() {
             emitters[count++].createReadStream = function() {
               return new stream.Readable({ read: function() {} });
             };
@@ -991,8 +991,8 @@ describe('BridgeClient', function() {
       it('should emit an error event if the pointer fails', function(done) {
         var emitters = [new EventEmitter(), new EventEmitter()];
         var count = 0;
-        var StubbedClient = proxyquire('../lib/bridgeclient', {
-          './datachannel/client': function() {
+        var StubbedClient = proxyquire('../../lib/bridge-client', {
+          '../data-channels/client': function() {
             emitters[count++].createReadStream = function() {
               return new stream.Readable({ read: function() {} });
             };
@@ -1034,8 +1034,8 @@ describe('BridgeClient', function() {
       it('should add the pointers to the queue afterwards', function(done) {
         var emitters = [new EventEmitter(), new EventEmitter()];
         var count = 0;
-        var StubbedClient = proxyquire('../lib/bridgeclient', {
-          './datachannel/client': function() {
+        var StubbedClient = proxyquire('../../lib/bridge-client', {
+          '../data-channels/client': function() {
             emitters[count++].createReadStream = function() {
               return new stream.Readable({ read: function() {} });
             };
@@ -1325,10 +1325,10 @@ describe('BridgeClient', function() {
 
       it('should emit a retry on client error', function(done) {
         var clientEmitter = new EventEmitter();
-        var StubbedClient = proxyquire('../lib/bridgeclient', {
+        var StubbedClient = proxyquire('../../lib/bridge-client', {
           fs: {
             createReadStream: sinon.stub().returns({}),
-            './datachannel/client': sinon.stub().returns(clientEmitter)
+            '../data-channels/client': sinon.stub().returns(clientEmitter)
           }
         });
         var client = new StubbedClient();
@@ -1453,7 +1453,7 @@ describe('BridgeClient', function() {
     describe('#_request', function() {
 
       it('should bubble connection error', function(done) {
-        var StubbedClient = proxyquire('../lib/bridgeclient', {
+        var StubbedClient = proxyquire('../../lib/bridge-client', {
           request: sinon.stub().callsArgWith(1, new Error('Failed'))
         });
         var client = new StubbedClient();
@@ -1464,7 +1464,7 @@ describe('BridgeClient', function() {
       });
 
       it('should pass error if non-200 status', function(done) {
-        var StubbedClient = proxyquire('../lib/bridgeclient', {
+        var StubbedClient = proxyquire('../../lib/bridge-client', {
           request: sinon.stub().callsArgWith(1, null, {
             statusCode: 400
           }, { error: 'Bad request' })
@@ -1477,7 +1477,7 @@ describe('BridgeClient', function() {
       });
 
       it('should pass body if non-200 status and no error', function(done) {
-        var StubbedClient = proxyquire('../lib/bridgeclient', {
+        var StubbedClient = proxyquire('../../lib/bridge-client', {
           request: sinon.stub().callsArgWith(1, null, {
             statusCode: 400
           }, 'Bad request')
@@ -1490,7 +1490,7 @@ describe('BridgeClient', function() {
       });
 
       it('should pass the result back', function(done) {
-        var StubbedClient = proxyquire('../lib/bridgeclient', {
+        var StubbedClient = proxyquire('../../lib/bridge-client', {
           request: sinon.stub().callsArgWith(1, null, {
             statusCode: 200
           }, { hello: 'world' })

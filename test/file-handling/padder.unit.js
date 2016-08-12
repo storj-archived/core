@@ -2,7 +2,7 @@
 
 var expect = require('chai').expect;
 var sinon = require('sinon');
-var Padder = require('../lib/padder');
+var Padder = require('../../lib/file-handling/padder');
 
 describe('Padder', function() {
 

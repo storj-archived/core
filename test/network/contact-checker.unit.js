@@ -4,7 +4,7 @@ var EventEmitter = require('events').EventEmitter;
 var expect = require('chai').expect;
 var proxyquire = require('proxyquire');
 var sinon = require('sinon');
-var ContactChecker = require('../../lib/network/contactchecker');
+var ContactChecker = require('../../lib/network/contact-checker');
 var Contact = require('../../lib/network/contact');
 var utils = require('../../lib/utils');
 
@@ -21,7 +21,7 @@ describe('ContactChecker', function() {
   describe('#check', function() {
 
     it('should error if timeout', function(done) {
-      var ContactChecker = proxyquire('../../lib/network/contactchecker', {
+      var ContactChecker = proxyquire('../../lib/network/contact-checker', {
         net: {
           connect: function() {
             var c = new EventEmitter();
@@ -42,7 +42,7 @@ describe('ContactChecker', function() {
     });
 
     it('should bubble connection error', function(done) {
-      var ContactChecker = proxyquire('../../lib/network/contactchecker', {
+      var ContactChecker = proxyquire('../../lib/network/contact-checker', {
         net: {
           connect: function() {
             var c = new EventEmitter();

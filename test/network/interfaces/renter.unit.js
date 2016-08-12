@@ -1,18 +1,18 @@
 'use strict';
 
 var expect = require('chai').expect;
-var Contract = require('../../lib/contract');
-var KeyPair = require('../../lib/keypair');
-var RenterInterface = require('../../lib/interfaces/renter');
+var Contract = require('../../../lib/contract');
+var KeyPair = require('../../../lib/crypto-tools/keypair');
+var RenterInterface = require('../../../lib/network/interfaces/renter');
 var kad = require('kad');
 var sinon = require('sinon');
-var utils = require('../../lib/utils');
-var Contact = require('../../lib/network/contact');
-var StorageItem = require('../../lib/storage/item');
-var RAMStorageAdapter = require('../../lib/storage/adapters/ram');
-var Manager = require('../../lib/manager');
-var AuditStream = require('../../lib/auditstream');
-var DataChannelPointer = require('../../lib/datachannel/pointer');
+var utils = require('../../../lib/utils');
+var Contact = require('../../../lib/network/contact');
+var StorageItem = require('../../../lib/storage/item');
+var RAMStorageAdapter = require('../../../lib/storage/adapters/ram');
+var Manager = require('../../../lib/storage/manager');
+var AuditStream = require('../../../lib/audit-tools/audit-stream');
+var DataChannelPointer = require('../../../lib/data-channels/pointer');
 
 describe('RenterInterface', function() {
 

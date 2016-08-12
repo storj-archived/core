@@ -1,7 +1,7 @@
 'use strict';
 
 var expect = require('chai').expect;
-var Unpadder = require('../lib/unpadder');
+var Unpadder = require('../../lib/file-handling/unpadder');
 
 describe('Unpadder', function() {
 

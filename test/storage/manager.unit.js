@@ -2,10 +2,10 @@
 
 var sinon = require('sinon');
 var expect = require('chai').expect;
-var Manager = require('../lib/manager');
-var RAMStorageAdapter = require('../lib/storage/adapters/ram');
-var utils = require('../lib/utils');
-var StorageItem = require('../lib/storage/item');
+var Manager = require('../../lib/storage/manager');
+var RAMStorageAdapter = require('../../lib/storage/adapters/ram');
+var utils = require('../../lib/utils');
+var StorageItem = require('../../lib/storage/item');
 
 describe('Manager', function() {
 

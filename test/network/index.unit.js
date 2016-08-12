@@ -6,23 +6,31 @@ var expect = require('chai').expect;
 var proxyquire = require('proxyquire');
 var EventEmitter = require('events').EventEmitter;
 var Network = proxyquire('../../lib/network', {
-  './contactchecker': function() {
+  './contact-checker': function() {
     var emitter = new EventEmitter();
     emitter.check = sinon.stub().callsArgWith(1, null);
     return emitter;
   }
 });
-var Manager = require('../../lib/manager');
-var KeyPair = require('../../lib/keypair');
+var Manager = require('../../lib/storage/manager');
+var KeyPair = require('../../lib/crypto-tools/keypair');
 var RAMStorageAdapter = require('../../lib/storage/adapters/ram');
 var kad = require('kad');
 var version = require('../../lib/version');
 var utils = require('../../lib/utils');
-var version = require('../../lib/version');
 var Contact = require('../../lib/network/contact');
 var constants = require('../../lib/constants');
 
+var _ntp = null;
+
 describe('Network (public)', function() {
+
+  before(function() {
+    _ntp = sinon.stub(utils, 'ensureNtpClockIsSynchronized').callsArgWith(
+      0,
+      null
+    );
+  });
 
   describe('@constructor', function() {
 
@@ -297,7 +305,7 @@ describe('Network (private)', function() {
         params: {}
       };
 
-      var StubbedKeyPair = proxyquire('../../lib/keypair', {
+      var StubbedKeyPair = proxyquire('../../lib/crypto-tools/keypair', {
           'bitcore-message': function() {
             return {
               sign: sinon.stub().throws(
@@ -804,7 +812,7 @@ describe('Network (private)', function() {
         '../tunnel/client': function() {
           return emitter;
         },
-        './contactchecker': function() {
+        './contact-checker': function() {
           var emitter = new EventEmitter();
           emitter.check = sinon.stub().callsArgWith(1, new Error('Failed'));
           return emitter;
@@ -857,7 +865,7 @@ describe('Network (private)', function() {
         '../tunnel/client': function() {
           return emitter;
         },
-        './contactchecker': function() {
+        './contact-checker': function() {
           var emitter = new EventEmitter();
           emitter.check = sinon.stub().callsArgWith(1, null);
           return emitter;
@@ -903,7 +911,7 @@ describe('Network (private)', function() {
         '../tunnel/client': function() {
           return emitter;
         },
-        './contactchecker': function() {
+        './contact-checker': function() {
           var emitter = new EventEmitter();
           emitter.check = sinon.stub().callsArgWith(1, null);
           return emitter;
@@ -971,7 +979,7 @@ describe('Network (private)', function() {
     });
 
     it('should use bridge to get seeds and use them', function(done) {
-      this.timeout(4000);
+      this.timeout(12000);
       var net = Network({
         keypair: KeyPair(),
         manager: Manager(RAMStorageAdapter()),
@@ -1121,5 +1129,8 @@ describe('Network (private/jobs)', function() {
 
   });
 
+  after(function() {
+    _ntp.restore();
+  });
 
 });

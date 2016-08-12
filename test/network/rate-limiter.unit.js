@@ -1,6 +1,6 @@
 'use strict';
 
-var RateLimiter = require('../../lib/network/ratelimiter');
+var RateLimiter = require('../../lib/network/rate-limiter');
 var expect = require('chai').expect;
 var sinon = require('sinon');
 var utils = require('../../lib/utils');

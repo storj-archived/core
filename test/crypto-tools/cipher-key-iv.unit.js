@@ -1,7 +1,7 @@
 'use strict';
 
 var expect = require('chai').expect;
-var DataCipherKeyIv = require('../lib/cipherkeyiv');
+var DataCipherKeyIv = require('../../lib/crypto-tools/cipher-key-iv');
 
 describe('DataCipherKeyIv', function() {
 

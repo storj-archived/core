@@ -3,7 +3,7 @@
 var crypto = require('crypto');
 var expect = require('chai').expect;
 var Contract = require('../../lib/contract');
-var KeyPair = require('../../lib/keypair');
+var KeyPair = require('../../lib/crypto-tools/keypair');
 var constants = require('../../lib/constants');
 var ms = require('ms');
 

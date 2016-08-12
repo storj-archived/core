@@ -2,11 +2,11 @@
 
 var expect = require('chai').expect;
 var proxyquire = require('proxyquire').noPreserveCache();
-var DataChannelClient = proxyquire('../../lib/datachannel/client', {
+var DataChannelClient = proxyquire('../../lib/data-channels/client', {
   ws: require('events').EventEmitter
 });
 var sinon = require('sinon');
-var DataChannelPointer = require('../../lib/datachannel/pointer');
+var DataChannelPointer = require('../../lib/data-channels/pointer');
 var Contact = require('../../lib/network/contact');
 var utils = require('../../lib/utils');
 

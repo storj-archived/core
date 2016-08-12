@@ -1,9 +1,9 @@
 'use strict';
 
 var expect = require('chai').expect;
-var Network = require('../../lib/network');
-var TunnelerInterface = require('../../lib/interfaces/tunneler');
-var KeyPair = require('../../lib/keypair');
+var Network = require('../../../lib/network');
+var TunnelerInterface = require('../../../lib/network/interfaces/tunneler');
+var KeyPair = require('../../../lib/crypto-tools/keypair');
 var kad = require('kad');
 
 describe('TunnelerInterface', function() {

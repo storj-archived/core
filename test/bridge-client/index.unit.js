@@ -455,8 +455,8 @@ describe('BridgeClient', function() {
           '../data-channels/client': function() {
             var emitter = new EventEmitter();
             emitter.createWriteStream = function() {
-              return new stream.Writable({
-                write: function(c, e, cb) {
+              return new stream.Transform({
+                transform: function(c, e, cb) {
                   cb();
                 }
               });

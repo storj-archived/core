@@ -13,7 +13,7 @@ var os = require('os');
 var cleanup = [];
 
 var tmpfolder = function() {
-  var folder = path.join(os.tmpdir(),Date.now().toString());
+  var folder = path.join(os.tmpdir(), Date.now().toString());
   fs.mkdirSync(folder);
   cleanup.push(folder);
   return folder;
@@ -254,7 +254,7 @@ describe('KeyRing', function() {
     var tar = path.join(tmp,'testkeyring2.tar.gz');
 
     before(function(done) {
-      this.timeout(3000); // ),:
+      this.timeout(6000); // ),:
       if (!fs.existsSync(fldr1)) {
         fs.mkdirSync(fldr1);
       }

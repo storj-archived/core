@@ -30,5 +30,4 @@ client.listFilesInBucket(bucketid, function(err, files) {
       [file.filename, file.mimetype, file.size, file.id]
     );
   });
-
 });

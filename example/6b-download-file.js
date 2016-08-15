@@ -22,7 +22,7 @@ var filepath = '/path/to./file.txt';
 // Id of file to be downloaded
 var id = 'insertfileid';
 
-// WHere the downloaded file will be saved
+// Where the downloaded file will be saved
 var target = fs.createWriteStream(filepath);
 
 //
@@ -32,7 +32,7 @@ var secret = keyring.get(id);
 var decrypter = new storj.DecryptStream(secret);
 var received = 0;
 // list of servers to exclude when finding the download server
-var exclude = '';
+var exclude = [];
 
 // Handle Events emitted from file download stream
 target.on('finish', function() {

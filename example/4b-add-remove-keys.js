@@ -30,5 +30,4 @@ client.addPublicKey(keypair.getPublicKey(), function(err) {
 
     console.log('info', 'Key successfully revoked.');
   });
-
 });

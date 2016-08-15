@@ -31,34 +31,28 @@ fs.createReadStream(filepath)
   .pipe(encrypter)
   .pipe(fs.createWriteStream(tmppath)).on('finish', function() {
 
-    // Create token for uploading to bucket by bucketid
-    client.createToken(bucket, 'PUSH', function(err, token) {
+  // Create token for uploading to bucket by bucketid
+  client.createToken(bucket, 'PUSH', function(err, token) {
+    if (err) {
+      console.log('error', err.message);
+    }
+
+    // Store the file using the bucket id, token, and encrypted file
+    client({ concurrency: concurrency})
+      .storeFileInBucket(bucket, token.token,tmppath, function(err, file) {
+
       if (err) {
-        console.log('error', err.message);
+        return console.log('error', err.message);
       }
 
-      // Store the file using the bucket id, token, and encrypted file
-      client({ concurrency: concurrency})
-        .storeFileInBucket(bucket, token.token,tmppath, function(err, file) {
-          if (err) {
-            return console.log('error', err.message);
-          }
+      // Save key for access to download file
+      keyring.set(file.id, secret);
 
-          // Save key for access to download file
-          keyring.set(file.id, secret);
-
-
-          console.log(
-            'info',
-            'Name: %s, Type: %s, Size: %s bytes, ID: %s',
-            [file.filename, file.mimetype, file.size, file.id]
-          );
-
-          // Mirror the item
-
-        }
+      console.log(
+        'info',
+        'Name: %s, Type: %s, Size: %s bytes, ID: %s',
+        [file.filename, file.mimetype, file.size, file.id]
       );
-      }
-    );
-  }
-);
+    });
+  });
+});

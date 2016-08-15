@@ -1,4 +1,5 @@
 'use strict';
+/* jshint unused: false */
 
 var storj = require('storj');
 var fs = require('fs');
@@ -9,5 +10,4 @@ var api = 'https://api.storj.io';
 var keypair = storj.KeyPair(fs.readFileSync('./private.key').toString());
 
 // Login using the keypair generated
-var client;
-client = storj.BridgeClient(api, {keypair: keypair});
+var client = storj.BridgeClient(api, {keypair: keypair});

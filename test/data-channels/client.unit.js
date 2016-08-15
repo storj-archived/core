@@ -150,6 +150,45 @@ describe('DataChannelClient', function() {
         ws.write(Buffer('hay gurl hay'));
       });
     });
+
+    it('should wait for socket to close before flushing', function(done) {
+      var dc = new DataChannelClient({ address: '', port: 0 });
+      sinon.stub(dc._client, 'send', function(data, flags, cb) {
+        if (typeof flags === 'function') {
+          cb = flags;
+        }
+        cb();
+      });
+      dc._client.readyState = 1;
+      var ws = dc.createWriteStream();
+      ws.on('finish', done);
+      setImmediate(function() {
+        ws.write(Buffer('hay gurl hay'));
+        ws.end();
+        setImmediate(function() {
+          dc._client.emit('close');
+        });
+      });
+    });
+
+    it('should flush if the socket is already closed', function(done) {
+      var dc = new DataChannelClient({ address: '', port: 0 });
+      dc._client.readyState = 1;
+      sinon.stub(dc._client, 'send', function(data, flags, cb) {
+        if (typeof flags === 'function') {
+          cb = flags;
+        }
+        cb();
+        dc._client.readyState = 3;
+      });
+      var ws = dc.createWriteStream();
+      ws.on('finish', done);
+      setImmediate(function() {
+        ws.write(Buffer('hay gurl hay'));
+        ws.end();
+      });
+    });
+
   });
 
   describe('#_handleChannelError', function() {

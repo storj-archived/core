@@ -455,11 +455,16 @@ describe('BridgeClient', function() {
           '../data-channels/client': function() {
             var emitter = new EventEmitter();
             emitter.createWriteStream = function() {
-              return new stream.Transform({
+              var ws = new stream.Transform({
                 transform: function(c, e, cb) {
-                  cb();
+                  this.push(c);
+                  cb(null);
                 }
               });
+              setTimeout(function() {
+                ws.emit('end');
+              }, 200);
+              return ws;
             };
             setTimeout(function() {
               emitter.emit('open');
@@ -481,12 +486,12 @@ describe('BridgeClient', function() {
               _demuxer.emit('shard', _shard1, 0);
               setImmediate(function() {
                 _demuxer.emit('shard', _shard2, 1);
-                _shard1.emit('data', crypto.randomBytes(32));
+                _shard1.push(crypto.randomBytes(32));
                 setImmediate(function() {
-                  _shard1.emit('end');
-                  _shard2.emit('data', crypto.randomBytes(32));
+                  _shard1.push(null);
+                  _shard2.push(crypto.randomBytes(32));
                   setImmediate(function() {
-                    _shard2.emit('end');
+                    _shard2.push(null);
                   });
                 });
               });

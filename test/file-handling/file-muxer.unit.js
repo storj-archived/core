@@ -142,6 +142,29 @@ describe('FileMuxer', function() {
       setImmediate(fmx.read.bind(fmx));
     });
 
+    it('should wait for an available source before reading', function(done) {
+      var chunks = [0x01, 0x02];
+      var fmx = FileMuxer({ shards: 1, length: 2 });
+      fmx.on('data', function() {}).on('end', done);
+      setImmediate(function() {
+        fmx.input(ReadableStream({
+          read: function() {
+            var chunk = chunks.pop();
+            this.push(chunk ? Buffer([chunk]) : null);
+          }
+        }));
+      });
+    });
+
+    it('should error if source unavailable after timeout', function(done) {
+      var fmx = FileMuxer({ shards: 1, length: 2, sourceDrainWait: 0 });
+      fmx.on('data', function() {}).on('error', function(err) {
+        expect(err.message).to.equal('Unexpected end of source stream');
+        done();
+      });
+
+    });
+
   });
 
 });

@@ -149,7 +149,7 @@ describe('Network (public)', function() {
         noforward: true
       });
       net._tunclient = {
-        status: 1,
+        readyState: 1,
         close: sinon.stub(),
         removeAllListeners: sinon.stub()
       };
@@ -797,6 +797,54 @@ describe('Network (private)', function() {
           'Local transport not initialized, refusing to establish new tunnel'
         );
         done();
+      });
+    });
+
+    it('should recurse with callback if not already called', function(done) {
+      var emitter = new EventEmitter();
+      var calledOnce = false;
+      emitter.open = function() {
+        if (calledOnce) {
+          return emitter.emit('open');
+        }
+        emitter.emit('error', new Error('Failed'));
+      };
+      var TunClientStubNetwork = proxyquire('../../lib/network', {
+        '../tunnel/client': function() {
+          return emitter;
+        },
+        './contact-checker': function() {
+          var emitter = new EventEmitter();
+          emitter.check = sinon.stub().callsArgWith(1, null);
+          return emitter;
+        }
+      });
+      var net = TunClientStubNetwork({
+        keypair: KeyPair(),
+        manager: Manager(RAMStorageAdapter()),
+        logger: kad.Logger(0),
+        seeds: [],
+        address: '127.0.0.1',
+        port: 0,
+        tunport: 0,
+        noforward: true
+      });
+      var _send = sinon.stub(net.transport, 'send').callsArgWith(
+        2,
+        null,
+        { result: { tunnel: true, alias: true } }
+      );
+      var _establishTunnel = sinon.spy(net, '_establishTunnel');
+      net._establishTunnel([{
+        address: '127.0.0.1',
+        port: 1337,
+        nodeID: utils.rmd160('nodeid')
+      }], function() {
+        _send.restore();
+        setImmediate(function() {
+          expect(_establishTunnel.callCount).to.equal(2);
+          done();
+        });
       });
     });
 

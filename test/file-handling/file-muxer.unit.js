@@ -40,7 +40,7 @@ describe('FileMuxer', function() {
         var rs1 = new ReadableStream();
         var rs2 = new ReadableStream();
         var rs3 = new ReadableStream();
-        fmxr.input(rs1).input(rs2).input(rs3);
+        fmxr.addInputSource(rs1).addInputSource(rs2).addInputSource(rs3);
       }).to.throw(Error, 'Inputs exceed defined number of shards');
     });
 
@@ -96,10 +96,10 @@ describe('FileMuxer', function() {
         }
       });
       fmxr
-        .input(rs1)
-        .input(rs2)
-        .input(rs3)
-        .input(rs4)
+        .addInputSource(rs1)
+        .addInputSource(rs2)
+        .addInputSource(rs3)
+        .addInputSource(rs4)
         .on('data', function(data) {
           chunks += data;
         })
@@ -116,7 +116,7 @@ describe('FileMuxer', function() {
       var pushed = false;
       FileMuxer({ shards: 2, length: 128 }).on('data', function() {
         done();
-      }).input(ReadableStream({
+      }).addInputSource(ReadableStream({
         read: function() {
           if (pushed) {
             this.push(null);
@@ -133,7 +133,7 @@ describe('FileMuxer', function() {
       var fmx = FileMuxer({ shards: 1, length: 2 }).on('error', function(err) {
         expect(err.message).to.equal('Input exceeds expected length');
         done();
-      }).input(ReadableStream({
+      }).addInputSource(ReadableStream({
         read: function() {
           var chunk = chunks.pop();
           this.push(chunk ? Buffer([chunk]) : null);
@@ -147,7 +147,7 @@ describe('FileMuxer', function() {
       var fmx = FileMuxer({ shards: 1, length: 2 });
       fmx.on('data', function() {}).on('end', done);
       setImmediate(function() {
-        fmx.input(ReadableStream({
+        fmx.addInputSource(ReadableStream({
           read: function() {
             var chunk = chunks.pop();
             this.push(chunk ? Buffer([chunk]) : null);

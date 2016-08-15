@@ -993,6 +993,38 @@ describe('BridgeClient', function() {
         });
       });
 
+      it('should callback error if fails before stream', function(done) {
+        var emitters = [new EventEmitter(), new EventEmitter()];
+        var count = 0;
+        var StubbedClient = proxyquire('../../lib/bridge-client', {
+          '../data-channels/client': function() {
+            emitters[count++].createReadStream = function() {
+              return new stream.Readable({ read: function() {} });
+            };
+            return emitters[count - 1];
+          }
+        });
+        var client = new StubbedClient();
+        var _createInputFromPointer = sinon.stub(
+          client,
+          '_createInputFromPointer'
+        ).callsArgWith(1, new Error('Failed'));
+        client.resolveFileFromPointers([
+          {
+            size: 512,
+            farmer: {
+              address: '127.0.0.1',
+              port: 8080,
+              nodeID: utils.rmd160('nodeid')
+            }
+          }
+        ], function(err) {
+          _createInputFromPointer.restore();
+          expect(err.message).to.equal('Failed');
+          done();
+        });
+      });
+
       it('should emit an error event if the pointer fails', function(done) {
         var emitters = [new EventEmitter(), new EventEmitter()];
         var count = 0;

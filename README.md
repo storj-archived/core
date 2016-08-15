@@ -105,10 +105,11 @@ layer, and join the network in just a few lines of code:
 
 ```
 var storj = require('storj');
+var adapter = storj.LevelDBStorageAdapter('/path/to/datadir');
 
 var network = storj.Network({
   keypair: storj.KeyPair(/* existing_key */),
-  manager: storj.Manager(storj.LevelDBStorageAdapter('/path/to/datadir')),
+  manager: storj.StorageManager(adapter),
   address: 'ip.or.hostname',
   port: 4000
 });

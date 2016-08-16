@@ -14,20 +14,6 @@ describe('DataChannelClient', function() {
 
   describe('#createReadStream', function() {
 
-    it('should emit an error for bad json', function(done) {
-      var dc = new DataChannelClient({ address: '', port: 0 });
-      dc._client.send = sinon.stub();
-      dc._client.close = sinon.stub();
-      var rs = dc.createReadStream();
-      rs.once('error', function(err) {
-        expect(err.message).to.equal('Unexpected token ~');
-        done();
-      });
-      setImmediate(function() {
-        dc._client.emit('message', '~');
-      });
-    });
-
     it('should emit an error for channel error', function(done) {
       var dc = new DataChannelClient({ address: '', port: 0 });
       dc._client.send = sinon.stub();
@@ -38,10 +24,7 @@ describe('DataChannelClient', function() {
         done();
       });
       setImmediate(function() {
-        dc._client.emit('message', JSON.stringify({
-          code: 500,
-          message: 'FAIL'
-        }));
+        dc._client.emit('close', 500, 'FAIL');
       });
     });
 
@@ -64,29 +47,13 @@ describe('DataChannelClient', function() {
         dc._client.emit('message', Buffer('hello '));
         dc._client.emit('message', Buffer('data'));
         dc._client.emit('message', Buffer(' channel'));
-        dc._client.emit('message', JSON.stringify({
-          code: 200
-        }));
+        dc._client.emit('close', 1000);
       });
     });
 
   });
 
   describe('#createWriteStream', function() {
-
-    it('should emit an error for bad json', function(done) {
-      var dc = new DataChannelClient({ address: '', port: 0 });
-      dc._client.send = sinon.stub();
-      dc._client.close = sinon.stub();
-      var ws = dc.createWriteStream();
-      ws.once('error', function(err) {
-        expect(err.message).to.equal('Unexpected token ~');
-        done();
-      });
-      setImmediate(function() {
-        dc._client.emit('message', '~');
-      });
-    });
 
     it('should call send 1 for auth, 2 for data', function(done) {
       var dc = new DataChannelClient({ address: '', port: 0 });
@@ -126,10 +93,7 @@ describe('DataChannelClient', function() {
         done();
       });
       setImmediate(function() {
-        dc._client.emit('message', JSON.stringify({
-          code: 500,
-          message: 'FAIL'
-        }));
+        dc._client.emit('close', 500, 'FAIL');
       });
     });
 

@@ -40,6 +40,19 @@ describe('DataChannelServer', function() {
       expect(dcs._allowed.token).to.equal(undefined);
     });
 
+    it('should close a client that does exist', function() {
+      var dcs = DataChannelServer({
+        server: http.createServer(function noop() {}),
+        manager: Manager(RAMStorageAdapter()),
+        logger: Logger(0)
+      });
+      var _close = sinon.stub();
+      dcs._allowed.token = { client: { readyState: 1, close: _close } };
+      dcs.reject('token');
+      expect(dcs._allowed.token).to.equal(undefined);
+      expect(_close.called).to.equal(true);
+    });
+
   });
 
   describe('#close', function() {

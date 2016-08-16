@@ -22,5 +22,8 @@
   },
   "environment-variables": {
     "title": "Environment Variables"
+  },
+  "file-encryption": {
+    "title": "File Encryption Standards"
   }
 }

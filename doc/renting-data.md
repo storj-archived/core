@@ -9,7 +9,7 @@ Before we can join the network, we need to set up a few required components:
 
 * {@link KeyPair} - for representing our identity on the network
 * {@link StorageAdapter} - for persisting our contracts and shard metadata
-* {@link Manager} - for managing our persistence layer
+* {@link StorageManager} - for managing our persistence layer
 
 Start by importing the `storj` module and instantiating these objects:
 
@@ -17,7 +17,7 @@ Start by importing the `storj` module and instantiating these objects:
 var storj = require('storj');
 var keypair = new storj.KeyPair();
 var persistence = new storj.LevelDBStorageAdapter('/path/to/datadir');
-var manager = new storj.Manager(persistence);
+var manager = new storj.StorageManager(persistence);
 ```
 
 Now that we have a way of identifying ourselves to the network and keeping a

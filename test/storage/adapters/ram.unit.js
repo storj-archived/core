@@ -45,6 +45,25 @@ describe('RAMStorageAdapter', function() {
       );
     });
 
+    it('should expose a destroy method on the stream', function(done) {
+      var store = new RAMStorageAdapter();
+      store._items.c527900223f9d08e0776d695f13a95cd6ac0e471 = {};
+      store._shards.c527900223f9d08e0776d695f13a95cd6ac0e471 = new Buffer(
+        'hello ram store'
+      );
+      store._get(
+        'c527900223f9d08e0776d695f13a95cd6ac0e471',
+        function(err, result) {
+          expect(result.shard).to.be.instanceOf(ReadableStream);
+          result.shard.destroy();
+          expect(
+            store._shards.c527900223f9d08e0776d695f13a95cd6ac0e471
+          ).to.equal(undefined);
+          done();
+        }
+      );
+    });
+
     it('should return a writable stream if shard not found', function(done) {
       var store = new RAMStorageAdapter();
       store._items.c527900223f9d08e0776d695f13a95cd6ac0e471 = {};

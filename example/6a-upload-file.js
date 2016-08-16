@@ -8,15 +8,19 @@ var api = 'https://api.storj.io';
 // Load keypair from your saved private key
 var keypair = storj.KeyPair(fs.readFileSync('./private.key').toString());
 
+// How many pieces of the file can be uploaded at once
+var concurrency = 6;
+
 // console.login using the keypair generated
-var client = storj.BridgeClient(api, {keypair: keypair});
+var client = storj.BridgeClient(api, {
+  keypair: keypair,
+  concurrency: concurrency // Set upload concurrency
+});
 
 // Bucket being uploaded to
 var bucket = 'insertbucketid';
 // File to be uploaded
 var filepath = '/path/to./file.txt';
-// How many pieces of the file can be uploaded at once
-var concurrency = 6;
 // Path to temporarily store encrypted version of file to be uploaded
 var tmppath = './' + filepath + '.crypt';
 // Key ring to hold key used to interact with uploaded file
@@ -38,9 +42,7 @@ fs.createReadStream(filepath)
     }
 
     // Store the file using the bucket id, token, and encrypted file
-    client({ concurrency: concurrency})
-      .storeFileInBucket(bucket, token.token,tmppath, function(err, file) {
-
+    client.storeFileInBucket(bucket, token.token,tmppath, function(err, file) {
       if (err) {
         return console.log('error', err.message);
       }

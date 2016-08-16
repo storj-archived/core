@@ -4,7 +4,7 @@ var expect = require('chai').expect;
 var sinon = require('sinon');
 var Transport = require('../../lib/network/transport');
 var Contact = require('../../lib/network/contact');
-var KeyPair = require('../../lib/keypair');
+var KeyPair = require('../../lib/crypto-tools/keypair');
 var proxyquire = require('proxyquire');
 var kad = require('kad');
 
@@ -79,7 +79,7 @@ describe('Network/Transport', function() {
       var _check = sinon.stub().callsArg(1);
       var StubbedTransport = proxyquire('../../lib/network/transport', {
         ip: { isPrivate: sinon.stub().returns(false) },
-        './contactchecker': sinon.stub().returns({
+        './contact-checker': sinon.stub().returns({
           check: _check
         })
       });
@@ -94,7 +94,7 @@ describe('Network/Transport', function() {
       var _check = sinon.stub().callsArgWith(1, null);
       var StubbedTransport = proxyquire('../../lib/network/transport', {
         ip: { isPrivate: sinon.stub().returns(false) },
-        './contactchecker': sinon.stub().returns({
+        './contact-checker': sinon.stub().returns({
           check: _check
         })
       });
@@ -110,7 +110,7 @@ describe('Network/Transport', function() {
       var _check = sinon.stub().callsArgWith(1, new Error('Failed'));
       var StubbedTransport = proxyquire('../../lib/network/transport', {
         ip: { isPrivate: sinon.stub().returns(false) },
-        './contactchecker': sinon.stub().returns({
+        './contact-checker': sinon.stub().returns({
           check: _check
         })
       });

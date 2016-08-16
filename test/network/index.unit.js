@@ -6,23 +6,31 @@ var expect = require('chai').expect;
 var proxyquire = require('proxyquire');
 var EventEmitter = require('events').EventEmitter;
 var Network = proxyquire('../../lib/network', {
-  './contactchecker': function() {
+  './contact-checker': function() {
     var emitter = new EventEmitter();
     emitter.check = sinon.stub().callsArgWith(1, null);
     return emitter;
   }
 });
-var Manager = require('../../lib/manager');
-var KeyPair = require('../../lib/keypair');
+var Manager = require('../../lib/storage/manager');
+var KeyPair = require('../../lib/crypto-tools/keypair');
 var RAMStorageAdapter = require('../../lib/storage/adapters/ram');
 var kad = require('kad');
 var version = require('../../lib/version');
 var utils = require('../../lib/utils');
-var version = require('../../lib/version');
 var Contact = require('../../lib/network/contact');
 var constants = require('../../lib/constants');
 
+var _ntp = null;
+
 describe('Network (public)', function() {
+
+  before(function() {
+    _ntp = sinon.stub(utils, 'ensureNtpClockIsSynchronized').callsArgWith(
+      0,
+      null
+    );
+  });
 
   describe('@constructor', function() {
 
@@ -99,7 +107,7 @@ describe('Network (public)', function() {
         tunport: 0,
         noforward: true
       });
-      var _open = sinon.stub(net._manager, 'open').callsArgWith(
+      var _open = sinon.stub(net.manager, 'open').callsArgWith(
         0,
         new Error('Failed')
       );
@@ -125,9 +133,9 @@ describe('Network (public)', function() {
         tunport: 0,
         noforward: true
       });
-      net._node = { disconnect: sinon.stub() };
+      net.node = { disconnect: sinon.stub() };
       net.leave();
-      expect(net._node.disconnect.called).to.equal(true);
+      expect(net.node.disconnect.called).to.equal(true);
     });
 
     it('should close the tunnel client if it is open', function() {
@@ -141,11 +149,11 @@ describe('Network (public)', function() {
         noforward: true
       });
       net._tunclient = {
-        status: 1,
+        readyState: 1,
         close: sinon.stub(),
         removeAllListeners: sinon.stub()
       };
-      net._node = { disconnect: sinon.stub() };
+      net.node = { disconnect: sinon.stub() };
       net.leave();
       expect(net._tunclient.close.called).to.equal(true);
     });
@@ -161,7 +169,7 @@ describe('Network (public)', function() {
         tunport: 0,
         noforward: true
       });
-      var _close = sinon.stub(net._manager, 'close').callsArgWith(
+      var _close = sinon.stub(net.manager, 'close').callsArgWith(
         0,
         new Error('Failed')
       );
@@ -184,7 +192,7 @@ describe('Network (private)', function() {
     it('should return an error if the contact is invalid', function(done) {
       var _removeContact = sinon.stub();
       var _validateContact = Network.prototype._validateContact.bind({
-        _router: {
+        router: {
           removeContact: _removeContact
         }
       });
@@ -207,7 +215,7 @@ describe('Network (private)', function() {
     it('should fail if incompatible version', function(done) {
       var _removeContact = sinon.stub();
       var verify = Network.prototype._verifyMessage.bind({
-        _router: {
+        router: {
           removeContact: _removeContact
         },
         _validateContact: Network.prototype._validateContact
@@ -264,7 +272,7 @@ describe('Network (private)', function() {
         params: {}
       };
       Network.prototype._signMessage.call({
-        _keypair: KeyPair()
+        keypair: KeyPair()
       }, msg, function() {});
 
       verify({
@@ -297,7 +305,7 @@ describe('Network (private)', function() {
         params: {}
       };
 
-      var StubbedKeyPair = proxyquire('../../lib/keypair', {
+      var StubbedKeyPair = proxyquire('../../lib/crypto-tools/keypair', {
           'bitcore-message': function() {
             return {
               sign: sinon.stub().throws(
@@ -308,7 +316,7 @@ describe('Network (private)', function() {
       });
 
       Network.prototype._signMessage.call({
-        _keypair: StubbedKeyPair()
+        keypair: StubbedKeyPair()
       }, msg, function(err) {
         expect(err.message).to.equal('Point does not lie on the curve');
         done();
@@ -350,7 +358,7 @@ describe('Network (private)', function() {
         noforward: true
       });
       var _isLimited = sinon.stub(net._limiter, 'isLimited').returns(true);
-      var _send = sinon.stub(net._transport, 'send');
+      var _send = sinon.stub(net.transport, 'send');
       net._checkRateLimiter(kad.Message({
         method: 'PING',
         params: {}
@@ -378,7 +386,7 @@ describe('Network (private)', function() {
       });
       var emitter = new EventEmitter();
       var _hasTunnel = sinon.stub(
-        net._transport._tunserver,
+        net.transport._tunserver,
         'hasTunnelAvailable'
       ).returns(false);
       var _pub = sinon.stub(net._pubsub, 'publish');
@@ -494,7 +502,7 @@ describe('Network (private)', function() {
         noforward: true,
         bridge: false
       });
-      net._transport._isPublic = false;
+      net.transport._isPublic = false;
       net._setupTunnelClient(function(err) {
         expect(err.message).to.equal(
           'Could not find a neighbor to query for probe'
@@ -514,7 +522,7 @@ describe('Network (private)', function() {
         tunport: 0,
         noforward: true
       });
-      var _bridge = sinon.stub(net._bridge, 'getInfo').callsArgWith(0, null, {
+      var bridge = sinon.stub(net.bridge, 'getInfo').callsArgWith(0, null, {
         info: {
           'x-network-seeds': [
             'storj://127.0.0.1:8080/' + utils.rmd160('nodeid')
@@ -522,9 +530,9 @@ describe('Network (private)', function() {
         }
       });
       var _probe = sinon.stub(net, '_requestProbe').callsArgWith(1, null, {});
-      net._transport._isPublic = false;
+      net.transport._isPublic = false;
       net._setupTunnelClient(function() {
-        _bridge.restore();
+        bridge.restore();
         _probe.restore();
         expect(_probe.called).to.equal(true);
         done();
@@ -542,13 +550,13 @@ describe('Network (private)', function() {
         tunport: 0,
         noforward: true
       });
-      var _bridge = sinon.stub(net._bridge, 'getInfo').callsArgWith(
+      var bridge = sinon.stub(net.bridge, 'getInfo').callsArgWith(
         0,
         new Error('Failed')
       );
-      net._transport._isPublic = false;
+      net.transport._isPublic = false;
       net._setupTunnelClient(function(err) {
-        _bridge.restore();
+        bridge.restore();
         expect(err.message).to.equal('Failed to get seeds for probe');
         done();
       });
@@ -568,8 +576,8 @@ describe('Network (private)', function() {
         tunport: 0,
         noforward: true
       });
-      net._transport._isPublic = false;
-      var _send = sinon.stub(net._transport, 'send').callsArgWith(
+      net.transport._isPublic = false;
+      var _send = sinon.stub(net.transport, 'send').callsArgWith(
         2,
         null,
         { error: true }
@@ -596,8 +604,8 @@ describe('Network (private)', function() {
         tunport: 0,
         noforward: true
       });
-      net._transport._isPublic = false;
-      var _send = sinon.stub(net._transport, 'send').callsArgWith(
+      net.transport._isPublic = false;
+      var _send = sinon.stub(net.transport, 'send').callsArgWith(
         2,
         null,
         {}
@@ -626,7 +634,7 @@ describe('Network (private)', function() {
         tunport: 0,
         noforward: true
       });
-      var _send = sinon.stub(net._transport, 'send').callsArg(2);
+      var _send = sinon.stub(net.transport, 'send').callsArg(2);
       var contact = { address: '127.0.0.1', port: 1337 };
       net._requestProbe(contact, function() {
         _send.restore();
@@ -669,7 +677,7 @@ describe('Network (private)', function() {
         tunport: 0,
         noforward: true
       });
-      var _send = sinon.stub(net._transport, 'send').callsArgWith(
+      var _send = sinon.stub(net.transport, 'send').callsArgWith(
         2,
         null,
         { result: { tunnels: [] } }
@@ -696,7 +704,7 @@ describe('Network (private)', function() {
         tunport: 0,
         noforward: true
       });
-      var _send = sinon.stub(net._transport, 'send').callsArgWith(
+      var _send = sinon.stub(net.transport, 'send').callsArgWith(
         2,
         new Error('Not reachable')
       );
@@ -744,7 +752,7 @@ describe('Network (private)', function() {
         tunport: 0,
         noforward: true
       });
-      var _send = sinon.stub(net._transport, 'send').callsArgWith(
+      var _send = sinon.stub(net.transport, 'send').callsArgWith(
         2,
         new Error('Failed')
       );
@@ -772,12 +780,12 @@ describe('Network (private)', function() {
         tunport: 0,
         noforward: true
       });
-      var _send = sinon.stub(net._transport, 'send').callsArgWith(
+      var _send = sinon.stub(net.transport, 'send').callsArgWith(
         2,
         null,
         { result: { tunnel: true, alias: true } }
       );
-      var _addr = sinon.stub(net._transport._server, 'address').returns(null);
+      var _addr = sinon.stub(net.transport._server, 'address').returns(null);
       net._establishTunnel([{
         address: '127.0.0.1',
         port: 1337,
@@ -789,6 +797,54 @@ describe('Network (private)', function() {
           'Local transport not initialized, refusing to establish new tunnel'
         );
         done();
+      });
+    });
+
+    it('should recurse with callback if not already called', function(done) {
+      var emitter = new EventEmitter();
+      var calledOnce = false;
+      emitter.open = function() {
+        if (calledOnce) {
+          return emitter.emit('open');
+        }
+        emitter.emit('error', new Error('Failed'));
+      };
+      var TunClientStubNetwork = proxyquire('../../lib/network', {
+        '../tunnel/client': function() {
+          return emitter;
+        },
+        './contact-checker': function() {
+          var emitter = new EventEmitter();
+          emitter.check = sinon.stub().callsArgWith(1, null);
+          return emitter;
+        }
+      });
+      var net = TunClientStubNetwork({
+        keypair: KeyPair(),
+        manager: Manager(RAMStorageAdapter()),
+        logger: kad.Logger(0),
+        seeds: [],
+        address: '127.0.0.1',
+        port: 0,
+        tunport: 0,
+        noforward: true
+      });
+      var _send = sinon.stub(net.transport, 'send').callsArgWith(
+        2,
+        null,
+        { result: { tunnel: true, alias: true } }
+      );
+      var _establishTunnel = sinon.spy(net, '_establishTunnel');
+      net._establishTunnel([{
+        address: '127.0.0.1',
+        port: 1337,
+        nodeID: utils.rmd160('nodeid')
+      }], function() {
+        _send.restore();
+        setImmediate(function() {
+          expect(_establishTunnel.callCount).to.equal(2);
+          done();
+        });
       });
     });
 
@@ -804,7 +860,7 @@ describe('Network (private)', function() {
         '../tunnel/client': function() {
           return emitter;
         },
-        './contactchecker': function() {
+        './contact-checker': function() {
           var emitter = new EventEmitter();
           emitter.check = sinon.stub().callsArgWith(1, new Error('Failed'));
           return emitter;
@@ -820,7 +876,7 @@ describe('Network (private)', function() {
         tunport: 0,
         noforward: true
       });
-      var _send = sinon.stub(net._transport, 'send').callsArgWith(
+      var _send = sinon.stub(net.transport, 'send').callsArgWith(
         2,
         null,
         { result: { tunnel: true, alias: true } }
@@ -857,7 +913,7 @@ describe('Network (private)', function() {
         '../tunnel/client': function() {
           return emitter;
         },
-        './contactchecker': function() {
+        './contact-checker': function() {
           var emitter = new EventEmitter();
           emitter.check = sinon.stub().callsArgWith(1, null);
           return emitter;
@@ -873,7 +929,7 @@ describe('Network (private)', function() {
         tunport: 0,
         noforward: true
       });
-      var _send = sinon.stub(net._transport, 'send').callsArgWith(
+      var _send = sinon.stub(net.transport, 'send').callsArgWith(
         2,
         null,
         { result: { tunnel: true, alias: true } }
@@ -903,7 +959,7 @@ describe('Network (private)', function() {
         '../tunnel/client': function() {
           return emitter;
         },
-        './contactchecker': function() {
+        './contact-checker': function() {
           var emitter = new EventEmitter();
           emitter.check = sinon.stub().callsArgWith(1, null);
           return emitter;
@@ -919,7 +975,7 @@ describe('Network (private)', function() {
         tunport: 0,
         noforward: true
       });
-      var _send = sinon.stub(net._transport, 'send').callsArgWith(
+      var _send = sinon.stub(net.transport, 'send').callsArgWith(
         2,
         null,
         { result: { tunnel: true, alias: true } }
@@ -957,7 +1013,7 @@ describe('Network (private)', function() {
       });
       var _setupTunnel = sinon.stub(net, '_setupTunnelClient').callsArg(0);
       var _getContactList = sinon.stub(
-        net._bridge,
+        net.bridge,
         'getContactList'
       ).callsArgWith(1, new Error('connection refused'));
       net.join(function(err) {
@@ -971,7 +1027,7 @@ describe('Network (private)', function() {
     });
 
     it('should use bridge to get seeds and use them', function(done) {
-      this.timeout(4000);
+      this.timeout(12000);
       var net = Network({
         keypair: KeyPair(),
         manager: Manager(RAMStorageAdapter()),
@@ -984,7 +1040,7 @@ describe('Network (private)', function() {
       });
       var _setupTunnel = sinon.stub(net, '_setupTunnelClient').callsArg(0);
       var _getContactList = sinon.stub(
-        net._bridge,
+        net.bridge,
         'getContactList'
       ).callsArgWith(1, null, []);
       net.join(function() {
@@ -1093,21 +1149,21 @@ describe('Network (private/jobs)', function() {
         tunport: 0,
         noforward: true
       });
-      net._router._buckets[0] = new kad.Bucket();
-      net._router._buckets[2] = new kad.Bucket();
-      net._router._buckets[0].addContact(Contact({
+      net.router._buckets[0] = new kad.Bucket();
+      net.router._buckets[2] = new kad.Bucket();
+      net.router._buckets[0].addContact(Contact({
         address: 'some.public.ip',
         port: 80,
         nodeID: kad.utils.createID('node1'),
         protocol: version.protocol
       }));
-      net._router._buckets[2].addContact(Contact({
+      net.router._buckets[2].addContact(Contact({
         address: 'some.public.ip',
         port: 81,
         nodeID: kad.utils.createID('node2'),
         protocol: '0.0.0'
       }));
-      net._router._buckets[2].addContact(Contact({
+      net.router._buckets[2].addContact(Contact({
         address: '127.0.0.1',
         port: 0,
         nodeID: kad.utils.createID('node3'),
@@ -1115,11 +1171,14 @@ describe('Network (private/jobs)', function() {
       }));
       var dropped = net._cleanRoutingTable();
       expect(dropped).to.have.lengthOf(2);
-      expect(net._router._buckets[0].getSize()).to.equal(1);
-      expect(net._router._buckets[2].getSize()).to.equal(0);
+      expect(net.router._buckets[0].getSize()).to.equal(1);
+      expect(net.router._buckets[2].getSize()).to.equal(0);
     });
 
   });
 
+  after(function() {
+    _ntp.restore();
+  });
 
 });

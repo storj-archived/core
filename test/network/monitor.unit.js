@@ -4,9 +4,9 @@ var Network = require('../../lib/network');
 var Monitor = require('../../lib/network/monitor');
 var expect = require('chai').expect;
 var kad = require('kad');
-var Manager = require('../../lib/manager');
+var Manager = require('../../lib/storage/manager');
 var RAMStorageAdapter = require('../../lib/storage/adapters/ram');
-var KeyPair = require('../../lib/keypair');
+var KeyPair = require('../../lib/crypto-tools/keypair');
 var sinon = require('sinon');
 var proxyquire = require('proxyquire');
 var EventEmitter = require('events').EventEmitter;
@@ -32,7 +32,7 @@ describe('Network/Monitor', function() {
     });
 
     after(function(done) {
-      net._transport.close(done);
+      net.transport.close(done);
     });
 
   });
@@ -63,7 +63,7 @@ describe('Network/Monitor', function() {
     });
 
     after(function(done) {
-      net._transport.close(done);
+      net.transport.close(done);
     });
 
   });
@@ -96,7 +96,7 @@ describe('Network/Monitor', function() {
     });
 
     after(function(done) {
-      net._transport.close(done);
+      net.transport.close(done);
     });
 
   });
@@ -116,7 +116,7 @@ describe('Network/Monitor', function() {
     });
 
     after(function(done) {
-      net._transport.close(done);
+      net.transport.close(done);
     });
 
   });
@@ -152,7 +152,7 @@ describe('Network/Monitor', function() {
     });
 
     after(function(done) {
-      net._transport.close(done);
+      net.transport.close(done);
     });
 
   });
@@ -182,7 +182,7 @@ describe('Network/Monitor', function() {
     });
 
     after(function(done) {
-      net._transport.close(done);
+      net.transport.close(done);
     });
 
   });
@@ -193,7 +193,7 @@ describe('Monitor#getConnectedPeers', function() {
 
   it('should return the number of peers', function(done) {
     Monitor.getConnectedPeers({
-      _router: {
+      router: {
         _buckets: {
           0: { getSize: sinon.stub().returns(3) },
           1: { getSize: sinon.stub().returns(3) },
@@ -213,7 +213,7 @@ describe('Monitor#getDiskUtilization', function() {
 
   it('should return the free and used space', function(done) {
     Monitor.getDiskUtilization({
-      _manager: {
+      manager: {
         _options: { maxCapacity: 2048 },
         _storage: { size: sinon.stub().callsArgWith(0, null, 1024) }
       }
@@ -226,7 +226,7 @@ describe('Monitor#getDiskUtilization', function() {
 
   it('should return the free and used space if error', function(done) {
     Monitor.getDiskUtilization({
-      _manager: {
+      manager: {
         _options: { maxCapacity: 2048 },
         _storage: { size: sinon.stub().callsArgWith(0, new Error('Failed')) }
       }
@@ -252,7 +252,7 @@ describe('Monitor#getPaymentAddressBalances', function() {
       }
     });
     StubbedMonitor.getPaymentAddressBalances({
-      _keypair: kp,
+      keypair: kp,
       _options: {}
     }, done);
   });
@@ -268,7 +268,7 @@ describe('Monitor#getPaymentAddressBalances', function() {
       }
     });
     StubbedMonitor.getPaymentAddressBalances({
-      _keypair: kp,
+      keypair: kp,
       _options: { payment: { address: '1234' } }
     }, done);
   });
@@ -281,7 +281,7 @@ describe('Monitor#getPaymentAddressBalances', function() {
       }
     });
     StubbedMonitor.getPaymentAddressBalances({
-      _keypair: kp,
+      keypair: kp,
       _options: { payment: { address: '1234' } }
     }, function(err, stats) {
       expect(stats.payments.balances.sjcx).to.equal(0);
@@ -298,7 +298,7 @@ describe('Monitor#getPaymentAddressBalances', function() {
       }
     });
     StubbedMonitor.getPaymentAddressBalances({
-      _keypair: kp,
+      keypair: kp,
       _options: { payment: { address: '1234' } }
     }, function(err, stats) {
       expect(stats.payments.balances.sjcx).to.equal(0);
@@ -328,7 +328,7 @@ describe('Monitor#getPaymentAddressBalances', function() {
       }
     });
     StubbedMonitor.getPaymentAddressBalances({
-      _keypair: kp,
+      keypair: kp,
       _options: { payment: { address: '1234' } }
     }, function(err, stats) {
       expect(stats.payments.balances.sjcx).to.equal(25000);
@@ -348,7 +348,7 @@ describe('Monitor#getPaymentAddressBalances', function() {
       }
     });
     StubbedMonitor.getPaymentAddressBalances({
-      _keypair: kp,
+      keypair: kp,
       _options: { payment: { address: '1234' } }
     }, function(err, stats) {
       expect(stats.payments.balances.sjcx).to.equal(0);
@@ -364,7 +364,7 @@ describe('Monitor#getContractsDetails', function() {
   it('should return the number of contracts', function(done) {
     var stream = new EventEmitter();
     Monitor.getContractsDetails({
-      _manager: {
+      manager: {
         _storage: {
           createReadStream: function() {
             return stream;
@@ -386,7 +386,7 @@ describe('Monitor#getContractsDetails', function() {
   it('should return 0 contracts', function(done) {
     var stream = new EventEmitter();
     Monitor.getContractsDetails({
-      _manager: {
+      manager: {
         _storage: {
           createReadStream: function() {
             return stream;

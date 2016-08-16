@@ -201,6 +201,23 @@ describe('TunnelClient', function() {
       emitter.emit('error', new Error('Socket error'));
     });
 
+    it('should send to existing socket if exists', function() {
+      var emitter = new EventEmitter();
+      var StubbedTunnelClient = proxyquire('../../lib/tunnel/client', {
+        ws: function() {
+          return emitter;
+        }
+      });
+      var client = new StubbedTunnelClient('', '');
+      var _send = sinon.stub(client, '_sendToExistingSocket');
+      client._channels.test = {};
+      client._handleDataChannel({
+        flags: { quid: 'test' }
+      });
+      _send.restore();
+      expect(_send.called).to.equal(true);
+    });
+
   });
 
   describe('#_sendToExistingSocket', function() {

@@ -4,7 +4,7 @@ var expect = require('chai').expect;
 var utils = require('../lib/utils');
 var semver = require('semver');
 var version = require('../lib/version');
-var KeyPair = require('../lib/keypair');
+var KeyPair = require('../lib/crypto-tools/keypair');
 var proxyquire = require('proxyquire');
 var sinon = require('sinon');
 var constants = require('../lib/constants');
@@ -95,6 +95,16 @@ describe('utils', function() {
 
     it('should return false if no contact is supplied', function() {
       expect(utils.isValidContact(null)).to.equal(false);
+    });
+
+  });
+
+  describe('#sha1whirlpool', function() {
+
+    it('should return the hex encoded hash', function() {
+      expect(utils.sha1whirlpool('test')).to.equal(
+        '43144cac0a406eb72f4d3be7292438ac15725e1d'
+      );
     });
 
   });
@@ -200,6 +210,40 @@ describe('utils', function() {
         expect(err.message).to.equal(
           'System clock is not syncronized with NTP'
         );
+        done();
+      });
+    });
+
+    it('should return no error if delta is within range', function(done) {
+      var time = new Date();
+      time.setTime(time.getTime() + constants.NONCE_EXPIRE - 2000);
+      var stubbedUtils = proxyquire('../lib/utils', {
+        'ntp-client': {
+          getNetworkTime: sinon.stub().callsArgWith(2, null, time)
+        }
+      });
+      stubbedUtils.ensureNtpClockIsSynchronized(function(err) {
+        expect(err).to.equal(null);
+        done();
+      });
+    });
+
+  });
+
+  describe('#createStreamTrimmer', function() {
+
+    it('should trim the stream to the specified length', function(done) {
+      var noise = require('noisegen')({
+        length: 5 * (1024 * 1024),
+        size: 64 * 1024
+      });
+      var trimmer = utils.createStreamTrimmer(100 * 1024, 1024 * 1024);
+      var bytes = 0;
+
+      noise.pipe(trimmer).on('data', function(data) {
+        bytes += data.length;
+      }).on('end', function() {
+        expect(bytes).to.equal(1024 * 1024);
         done();
       });
     });

@@ -6,24 +6,26 @@ var sinon = require('sinon');
 var storj = require('../../');
 var kad = require('kad');
 var Contract = require('../../lib/contract');
-var AuditStream = require('../../lib/auditstream');
+var AuditStream = require('../../lib/audit-tools/audit-stream');
 var Contact = require('../../lib/network/contact');
 var utils = require('../../lib/utils');
-var DataChannelClient = require('../../lib/datachannel/client');
+var DataChannelClient = require('../../lib/data-channels/client');
 var StorageItem = require('../../lib/storage/item');
-var Verification = require('../../lib/verification');
+var Verification = require('../../lib/audit-tools/verification');
 var memdown = require('memdown');
-var DataChannelPointer = require('../../lib/datachannel/pointer');
+var DataChannelPointer = require('../../lib/data-channels/pointer');
 
 kad.constants.T_RESPONSETIMEOUT = 2000;
 
 var NODE_LIST = [];
 var STARTING_PORT = 64535;
 
+var _ntp = null;
+
 function createNode(opcodes, tunnels) {
   var node = null;
   var kp = new storj.KeyPair();
-  var manager = new storj.Manager(new storj.LevelDBStorageAdapter(
+  var manager = new storj.StorageManager(new storj.LevelDBStorageAdapter(
     (Math.floor(Math.random() * 24)).toString(), memdown
   ));
   var port = STARTING_PORT--;
@@ -31,7 +33,10 @@ function createNode(opcodes, tunnels) {
   var options = {
     keypair: kp,
     manager: manager,
-    logger: kad.Logger(0),
+    logger: kad.Logger(
+      0,
+      (opcodes.length ? 'farmer-' : 'renter-') + kp.getNodeID()
+    ),
     seeds: NODE_LIST.length ? [NODE_LIST[0]] : NODE_LIST,
     address: '127.0.0.1',
     port: port,
@@ -39,7 +44,8 @@ function createNode(opcodes, tunnels) {
     noforward: true,
     tunnels: tunnels,
     tunport: 0,
-    backend: memdown
+    backend: memdown,
+    storage: { path: (Math.floor(Math.random() * 24)).toString() }
   };
 
   if (opcodes.length) {
@@ -63,30 +69,8 @@ function createFarmer() {
   return createNode(['0f01010202'], 0);
 }
 
-var renters = [createRenter(), createRenter()];
-var farmers = [createFarmer()];
-
-before(function(done) {
-  this.timeout(35000);
-  var _requestProbeCalled = false;
-
-  sinon.stub(farmers[0], '_requestProbe', function(c, cb) {
-    if (!_requestProbeCalled) {
-      _requestProbeCalled = true;
-      return cb(new Error('Probe failed'));
-    }
-    cb(null, {});
-  }); // NB: Force tunneling
-
-  async.each(renters, function(node, next) {
-    node.join(function noop() {});
-    next();
-  }, function() {
-    farmers[0]._transport._isPublic = false;
-    farmers[0].join(done);
-  });
-});
-
+var renters = [createRenter()];
+var farmers = [createFarmer(), createFarmer()];
 var contract = null;
 var farmer = null;
 var shard = new Buffer('hello storj');
@@ -99,8 +83,35 @@ describe('Network/Integration/Tunnelling', function() {
   var renter = renters[renters.length - 1];
 
   before(function(done) {
-    audit.end(shard);
-    setImmediate(done);
+    this.timeout(35000);
+    var _requestProbeCalled = false;
+
+    _ntp = sinon.stub(utils, 'ensureNtpClockIsSynchronized').callsArgWith(
+      0,
+      null
+    );
+
+    sinon.stub(farmers[0], '_requestProbe', function(c, cb) {
+      if (!_requestProbeCalled) {
+        _requestProbeCalled = true;
+        return cb(new Error('Probe failed'));
+      }
+      cb(null, {});
+    }); // NB: Force tunneling
+
+    async.each(renters, function(node, next) {
+      node.join(function noop() {});
+      next();
+    }, function() {
+      farmers[0].transport._isPublic = false;
+      farmers[0].join(function() {
+        audit.end(shard);
+        farmers[1].transport._isPublic = false;
+        farmers[1].join(function() {
+          done();
+        });
+      });
+    });
   });
 
   describe('#getStorageOffer', function() {
@@ -108,7 +119,7 @@ describe('Network/Integration/Tunnelling', function() {
     it('should receive an offer for the published contract', function(done) {
       this.timeout(12000);
       contract = new Contract({
-        renter_id: renter._keypair.getNodeID(),
+        renter_id: renter.keypair.getNodeID(),
         data_size: shard.length,
         data_hash: utils.rmd160sha256(shard),
         store_begin: Date.now(),
@@ -201,15 +212,16 @@ describe('Network/Integration/Tunnelling', function() {
 
     before(function(done) {
       this.timeout(10000);
-      createFarmer().join(done);
+      done();
     });
 
     it('should get successful mirrors', function(done) {
       this.timeout(12000);
       kad.constants.T_RESPONSETIMEOUT = 6000;
-      var _negotiator = sinon.stub(farmers[0], '_negotiator').returns(false);
-      renter.getStorageOffer(contract, function(err, _farmer) {
-        _negotiator.restore();
+      renter.getStorageOffer(contract, [
+        farmer.nodeID
+      ], function(err, _farmer) {
+        expect(err).to.equal(null);
         renter.getRetrieveToken(farmer, contract, function(err, token) {
           expect(err).to.equal(null);
           var pointers = [new DataChannelPointer(
@@ -226,6 +238,10 @@ describe('Network/Integration/Tunnelling', function() {
       });
     });
 
+  });
+
+  after(function() {
+    _ntp.restore();
   });
 
 });

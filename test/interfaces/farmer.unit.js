@@ -57,6 +57,36 @@ describe('FarmerInterface', function() {
       });
     });
 
+    it('should not send an offer if negotiator cannot get farmer free space',
+      function(done) {
+
+      var farmer = new FarmerInterface({
+        keypair: KeyPair(),
+        port: 0,
+        tunport: 0,
+        noforward: true,
+        negotiator: function(contract, callback) {
+          callback(false);
+        },
+        logger: kad.Logger(0),
+        backend: require('memdown')
+      });
+
+      var _size = sinon.stub(
+        farmer._manager._storage,
+        'size'
+      ).callsArgWith(0, new Error('Cannot get farmer disk space'));
+
+      var _addTo = sinon.stub(farmer, '_addContractToPendingList');
+      farmer._handleContractPublication(Contract({}));
+      _size.restore();
+      setImmediate(function() {
+        expect(_addTo.called).to.equal(false);
+
+        done();
+      });
+    });
+
     it('should not send an offer if concurrency is exceeded', function(done) {
       var farmer = new FarmerInterface({
         keypair: KeyPair(),

@@ -74,7 +74,7 @@ describe('FarmerInterface', function() {
       });
 
       var _size = sinon.stub(
-        farmer._manager._storage,
+        farmer.manager._storage,
         'size'
       ).callsArgWith(0, new Error('Cannot get farmer disk space'));
 

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Storj Core Tutorial: File Encryption Standards</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+	<script src="scripts/highlight.min.js"></script>
+
+	<link type="text/css" rel="stylesheet" href="styles/site.storj.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top ">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">Storj Core</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="module-storj.html">storj</a></li><li><a href="module-storj_constants.html">storj/constants</a></li><li><a href="module-storj_datachannel_errors.html">storj/datachannel/errors</a></li><li><a href="module-storj_deps.html">storj/deps</a></li><li><a href="module-storj_patches.html">storj/patches</a></li><li><a href="module-storj_sips.html">storj/sips</a></li><li><a href="module-storj_sips_0003.html">storj/sips/0003</a></li><li><a href="module-storj_tunnel_errors.html">storj/tunnel/errors</a></li><li><a href="module-storj_utils.html">storj/utils</a></li><li><a href="module-storj_version.html">storj/version</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="AuditStream.html">AuditStream</a></li><li><a href="BridgeClient.html">BridgeClient</a></li><li><a href="Contact.html">Contact</a></li><li><a href="ContactChecker.html">ContactChecker</a></li><li><a href="Contract.html">Contract</a></li><li><a href="DataChannelClient.html">DataChannelClient</a></li><li><a href="DataChannelPointer.html">DataChannelPointer</a></li><li><a href="DataChannelServer.html">DataChannelServer</a></li><li><a href="DataCipherKeyIv.html">DataCipherKeyIv</a></li><li><a href="DecryptStream.html">DecryptStream</a></li><li><a href="EncryptStream.html">EncryptStream</a></li><li><a href="FarmerInterface.html">FarmerInterface</a></li><li><a href="FileDemuxer.html">FileDemuxer</a></li><li><a href="FileMuxer.html">FileMuxer</a></li><li><a href="KeyPair.html">KeyPair</a></li><li><a href="KeyRing.html">KeyRing</a></li><li><a href="LevelDBFileStore.html">LevelDBFileStore</a></li><li><a href="LevelDBStorageAdapter.html">LevelDBStorageAdapter</a></li><li><a href="Monitor.html">Monitor</a></li><li><a href="Network.html">Network</a></li><li><a href="Padder.html">Padder</a></li><li><a href="ProofStream.html">ProofStream</a></li><li><a href="Protocol.html">Protocol</a></li><li><a href="RAMStorageAdapter.html">RAMStorageAdapter</a></li><li><a href="RateLimiter.html">RateLimiter</a></li><li><a href="RenterInterface.html">RenterInterface</a></li><li><a href="StorageAdapter.html">StorageAdapter</a></li><li><a href="StorageItem.html">StorageItem</a></li><li><a href="StorageManager.html">StorageManager</a></li><li><a href="StorageMigration.html">StorageMigration</a></li><li><a href="Transport.html">Transport</a></li><li><a href="TriggerManager.html">TriggerManager</a></li><li><a href="TunnelClient.html">TunnelClient</a></li><li><a href="TunnelDemuxer.html">TunnelDemuxer</a></li><li><a href="TunnelerInterface.html">TunnelerInterface</a></li><li><a href="TunnelGateway.html">TunnelGateway</a></li><li><a href="TunnelMuxer.html">TunnelMuxer</a></li><li><a href="TunnelServer.html">TunnelServer</a></li><li><a href="Unpadder.html">Unpadder</a></li><li><a href="UploadState.html">UploadState</a></li><li><a href="Verification.html">Verification</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="events.list.html" class="dropdown-toggle" data-toggle="dropdown">Events<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="AuditStream.html#event:finish">AuditStream#event:finish</a></li><li><a href="DataChannelClient.html#event:error">DataChannelClient#event:error</a></li><li><a href="DataChannelClient.html#event:open">DataChannelClient#event:open</a></li><li><a href="DataChannelServer.html#event:connection">DataChannelServer#event:connection</a></li><li><a href="DataChannelServer.html#event:error">DataChannelServer#event:error</a></li><li><a href="DataChannelServer.html#event:shardDownloaded">DataChannelServer#event:shardDownloaded</a></li><li><a href="DataChannelServer.html#event:shardUploaded">DataChannelServer#event:shardUploaded</a></li><li><a href="DecryptStream.html#event:data">DecryptStream#event:data</a></li><li><a href="DecryptStream.html#event:end">DecryptStream#event:end</a></li><li><a href="EncryptStream.html#event:data">EncryptStream#event:data</a></li><li><a href="EncryptStream.html#event:end">EncryptStream#event:end</a></li><li><a href="FarmerInterface.html#event:ready">FarmerInterface#event:ready</a></li><li><a href="FarmerInterface.html#event:unhandledOffer">FarmerInterface#event:unhandledOffer</a></li><li><a href="FileDemuxer.html#event:finish">FileDemuxer#event:finish</a></li><li><a href="FileDemuxer.html#event:shard">FileDemuxer#event:shard</a></li><li><a href="FileMuxer.html#event:drain">FileMuxer#event:drain</a></li><li><a href="LevelDBStorageAdapter.html#event:add">LevelDBStorageAdapter#event:add</a></li><li><a href="LevelDBStorageAdapter.html#event:delete">LevelDBStorageAdapter#event:delete</a></li><li><a href="LevelDBStorageAdapter.html#event:update">LevelDBStorageAdapter#event:update</a></li><li><a href="Monitor.html#event:update">Monitor#event:update</a></li><li><a href="Network.html#event:ready">Network#event:ready</a></li><li><a href="Network.html#event:unhandledOffer">Network#event:unhandledOffer</a></li><li><a href="RAMStorageAdapter.html#event:add">RAMStorageAdapter#event:add</a></li><li><a href="RAMStorageAdapter.html#event:delete">RAMStorageAdapter#event:delete</a></li><li><a href="RAMStorageAdapter.html#event:update">RAMStorageAdapter#event:update</a></li><li><a href="RenterInterface.html#event:ready">RenterInterface#event:ready</a></li><li><a href="RenterInterface.html#event:unhandledOffer">RenterInterface#event:unhandledOffer</a></li><li><a href="StorageAdapter.html#event:add">StorageAdapter#event:add</a></li><li><a href="StorageAdapter.html#event:delete">StorageAdapter#event:delete</a></li><li><a href="StorageAdapter.html#event:update">StorageAdapter#event:update</a></li><li><a href="StorageManager.html#event:locked">StorageManager#event:locked</a></li><li><a href="StorageManager.html#event:unlocked">StorageManager#event:unlocked</a></li><li><a href="TunnelClient.html#event:close">TunnelClient#event:close</a></li><li><a href="TunnelClient.html#event:open">TunnelClient#event:open</a></li><li><a href="TunnelerInterface.html#event:ready">TunnelerInterface#event:ready</a></li><li><a href="TunnelerInterface.html#event:unhandledOffer">TunnelerInterface#event:unhandledOffer</a></li><li><a href="TunnelGateway.html#event:close">TunnelGateway#event:close</a></li><li><a href="TunnelGateway.html#event:message/datachannel">TunnelGateway#event:message/datachannel</a></li><li><a href="TunnelGateway.html#event:message/rpc">TunnelGateway#event:message/rpc</a></li><li><a href="TunnelGateway.html#event:open">TunnelGateway#event:open</a></li><li><a href="TunnelServer.html#event:locked">TunnelServer#event:locked</a></li><li><a href="TunnelServer.html#event:ready">TunnelServer#event:ready</a></li><li><a href="TunnelServer.html#event:unlocked">TunnelServer#event:unlocked</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="tutorials.list.html" class="dropdown-toggle" data-toggle="dropdown">Tutorials<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="tutorial-command-line-interface.html">Using the Command Line Tools</a></li><li><a href="tutorial-contract-topics.html">Publishing Storage Contracts</a></li><li><a href="tutorial-data-channels.html">Transferring File Shards</a></li><li><a href="tutorial-environment-variables.html">Environment Variables</a></li><li><a href="tutorial-file-encryption.html">File Encryption Standards</a></li><li><a href="tutorial-private-testnet.html">Running a Test Network</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li><li><a href="tutorial-renting-data.html">Renting Data to the Network</a></li><li><a href="tutorial-tunnel-connections.html">Tunnelling Connections</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+		<div class="col-sm-3 col-md-4">
+            <form class="navbar-form" role="search">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                    <div class="input-group-btn">
+                        <button class="btn btn-primary" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                    </div>
+                </div>
+            </form>
+        </div>
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			<section class="tutorial-section">
+
+<header>
+    
+
+    <h2>File Encryption Standards</h2>
+</header>
+
+<article>
+    <p>This document serves to provide a detailed account of how files are encrypted
+by default by Storj Core to promote interoperability between different
+implementations of clients.</p>
+<h4>Sharding and Encryption Scheme</h4><p>Before data is stored in the network, the Storj Core library automatically
+handles file encryption, sharding, and key management for you.</p>
+<p>In order of operations:</p>
+<ol>
+<li>Complete file is encrypted with a unique key and initialization vector</li>
+<li>File is demultiplexed (or &quot;sharded&quot;) into individual chunks</li>
+<li>Each shard is offered to the network and transferred</li>
+<li>Key and IV is encrypted with a passphrase and stored locally</li>
+</ol>
+<h4>Key and Initialization Vector Generation</h4><p>Files are encrypted using
+<a href="https://en.wikipedia.org/wiki/Advanced_Encryption_Standard">AES-256-CTR</a>. The
+<code>key</code> is the result of a generated
+<a href="https://en.wikipedia.org/wiki/PBKDF2">PBKDF2</a>. To generate the PBKDF2 value,
+you will need a password and a salt. These two values are the result of some
+randomly generated bytes:</p>
+<ul>
+<li>Password: 512 random bytes</li>
+<li>Salt: 32 random bytes</li>
+</ul>
+<p>The key length of the PBKDF2 is 512 bytes, should use 25000 iterations, and use
+SHA-512 as the digest. To create the cipher/decipher and initialization vector,
+derive the SHA-256 hash of the resulting PBKDF2 for the cipher/decipher <code>key</code>
+and use the first 16 bytes of the original salt as the <code>iv</code>.</p>
+<p>The <a href="KeyRing.html">KeyRing</a> class stores the original <code>password</code> and <code>salt</code> in an
+encrypted JSON document (using a user supplied passphrase) keyed by the
+ObjectId returned from <a href="https://github.com/Storj/bridge">Storj Bridge</a> for the
+file object. The cleartext JSON document has two properties: <code>pass</code> and <code>salt</code>.</p>
+<pre class="prettyprint source"><code>{
+  &quot;pass&quot;: &quot;c7c311ee213d10baefd620a004d76485190d82...&quot;,
+  &quot;salt&quot;: &quot;6d33490c999e9d613ccf4b146446763df15de2...&quot;
+}</code></pre><p>This JSON string is encrypted with AES-256-CBC and encoded as
+<a href="https://en.wikipedia.org/wiki/Base58">Base58</a>. Each of those encrypted JSON
+documents is stored in a directory called <code>key.ring/</code> and the file name is
+the ObjectId returned from <a href="https://github.com/Storj/bridge">Storj Bridge</a> for
+the file object.</p>
+<h4>Portable Key Ring Format</h4><p>A <a href="KeyRing.html">KeyRing</a> created by Storj Core can be exported into a portable format,
+which is simply a gzipped tape archive (<code>.tar.gz</code> or <code>.tgz</code>). Importing this
+archive simply entails:</p>
+<ol>
+<li>Decompress and unpack the archive</li>
+<li>Decrypt each JSON document using the original passphrase</li>
+<li>Encrypt each document with the passphrase of the target keyring</li>
+<li>Move the files into the target keyring, optionally overwriting conflicts</li>
+</ol>
+<h4>References</h4><ul>
+<li><a href="DataCipherKeyIv.html">DataCipherKeyIv</a></li>
+<li><a href="EncryptStream.html">EncryptStream</a></li>
+<li><a href="DecryptStream.html">DecryptStream</a></li>
+<li><a href="KeyRing.html">KeyRing</a></li>
+</ul>
+</article>
+
+</section>
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+<div class="modal fade" id="searchResults">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Search results</h4>
+      </div>
+      <div class="modal-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div>
+
+<footer>
+
+
+	<span class="copyright">
+	Copyright 2016 Storj Labs
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a>
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+<script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	$('pre').each(function(i, block) {
+		hljs.highlightBlock(block);
+	});
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			var id = $( heading ).attr( "id" );
+			return id && id.replace(/\~/g, '-inner-').replace(/\./g, '-static-') || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		SearcherDisplay.init();
+	});
+</script>
+
+</body>
+</html>

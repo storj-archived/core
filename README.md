@@ -27,7 +27,7 @@ storj --help
 
 Installation and Guides
 -------------------------
-  - [Install Guide for Windows, Mac, and Linux](install.md)
+  - [Install Guide for Windows, Mac, and Linux](INSTALL.md)
   - [Getting Started with a Storj Account](http://docs.storj.io/docs/getting-started)
   - [Upload/Downloading Cats with the CLI tools](http://docs.storj.io/docs/uploading-and-downloading-cats)
 

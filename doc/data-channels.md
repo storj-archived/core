@@ -33,26 +33,17 @@ associated with that token before sending or receiving any other data.
 If the authorization fails, the farmer must close the data channel, optionally
 responding with a status message.
 
-### Status Messages
+### Status Codes
 
-Farmers can communicate their status or the result of an operation by sending
-JSON formatted messages including `code` (HTTP status code) and `message`.
+Farmers can communicate the result of an operation by sending back a special
+status code and message when closing the connection.
 
-```
-{
-  "code": 200,
-  "message": "Data consigned successfully"
-}
-```
-
-```
-{
-  "code": 401,
-  "message": "Failed to authorize channel"
-}
-```
-
-> Status message frames must use opcode `0x1` (textual).
+* `NORMAL`: 1000
+* `UNEXPECTED`: 1011
+* `INVALID_MESSAGE`: 3100
+* `UNAUTHORIZED_TOKEN`: 3101
+* `FAILED_INTEGRITY`: 3102
+* `INVALID_OPERATION`: 3103
 
 ### Consigning a Shard
 

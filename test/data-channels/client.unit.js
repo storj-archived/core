@@ -76,6 +76,9 @@ describe('DataChannelClient', function() {
         ws.write(Buffer('hello'));
         ws.write(Buffer('storj'));
         ws.end();
+        setImmediate(function() {
+          dc._client.emit('close', 1000);
+        });
       });
     });
 
@@ -106,7 +109,7 @@ describe('DataChannelClient', function() {
       });
       dc._client.readyState = 3;
       var ws = dc.createWriteStream();
-      dc.once('error', function(err) {
+      ws.once('error', function(err) {
         expect(err.message).to.equal('Remote host terminated early');
         done();
       });
@@ -130,7 +133,7 @@ describe('DataChannelClient', function() {
         ws.write(Buffer('hay gurl hay'));
         ws.end();
         setImmediate(function() {
-          dc._client.emit('close');
+          dc._client.emit('close', 1000);
         });
       });
     });

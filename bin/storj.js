@@ -100,7 +100,7 @@ function PublicClient() {
 }
 
 function getKeyRing(callback) {
-  var keypass = program.keypass || process.env.STORJ_PASS || null;
+  var keypass = program.keypass || process.env.STORJ_KEYPASS || null;
   if (keypass) {
     var keyring;
 

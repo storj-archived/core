@@ -27,7 +27,7 @@ set this variable.
 This works well with the CLI (see {@tutorial command-line-interface}) when
 testing against other bridges.
 
-#### `STORJ_PASS`
+#### `STORJ_KEYPASS`
 
 This variable will set the `--keypass` used to unlock the keyring.
 

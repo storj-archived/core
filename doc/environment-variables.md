@@ -26,3 +26,9 @@ set this variable.
 
 This works well with the CLI (see {@tutorial command-line-interface}) when
 testing against other bridges.
+
+#### `STORJ_KEYPASS`
+
+This variable will set the `--keypass` used to unlock the keyring.
+
+Setting your password will make it so other users can't grep it with `ps -a`.

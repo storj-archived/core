@@ -7,6 +7,7 @@ var noisegen = require('noisegen');
 var os = require('os');
 var fs = require('fs');
 var path = require('path');
+var utils = require('../../lib/utils');
 var filePathEven = path.join(os.tmpdir(), 'storjfiledmxtest-even.data');
 var filePathOdd = path.join(os.tmpdir(), 'storjfiledmxtest-odd.data');
 var filePathEmpty = path.join(os.tmpdir(), 'storjfiledmxtest-empty.data');
@@ -14,7 +15,7 @@ var filePathEmpty = path.join(os.tmpdir(), 'storjfiledmxtest-empty.data');
 before(function(done) {
   this.timeout(6000);
 
-  if (fs.existsSync(filePathEven)) {
+  if (utils.existsSync(filePathEven)) {
     fs.unlinkSync(filePathEven);
   }
 
@@ -22,7 +23,7 @@ before(function(done) {
   var tmpfile = fs.createWriteStream(filePathEven);
 
   tmpfile.on('finish', function() {
-    if (fs.existsSync(filePathOdd)) {
+    if (utils.existsSync(filePathOdd)) {
       fs.unlinkSync(filePathOdd);
     }
 

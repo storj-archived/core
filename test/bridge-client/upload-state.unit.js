@@ -21,8 +21,10 @@ describe('UploadState', function() {
       var unlinkSync = sinon.stub();
       var StubUploadState = proxyquire('../../lib/bridge-client/upload-state', {
         fs: {
-          existsSync: sinon.stub().returns(true),
           unlinkSync: unlinkSync
+        },
+        '../utils': {
+          existsSync: sinon.stub().returns(true)
         }
       });
       var uploadState = new StubUploadState();

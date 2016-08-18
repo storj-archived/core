@@ -9,6 +9,7 @@ var crypto = require('crypto');
 var sinon = require('sinon');
 var rimraf = require('rimraf');
 var os = require('os');
+var utils = require('../../lib/utils');
 
 var cleanup = [];
 
@@ -48,7 +49,7 @@ describe('KeyRing', function() {
       var folder = path.join(tmp, 'key.ring');
       rimraf.sync(folder);
       KeyRing(tmp, 'test');
-      expect(fs.existsSync(folder)).to.equal(true);
+      expect(utils.existsSync(folder)).to.equal(true);
     });
 
     it('should delete old keyring if it is too big to parse', function() {
@@ -75,7 +76,7 @@ describe('KeyRing', function() {
 
       _JSON.restore();
       _verify.restore();
-      expect(fs.existsSync(path.join(tmp, 'keyring'))).to.equal(false);
+      expect(utils.existsSync(path.join(tmp, 'keyring'))).to.equal(false);
     });
 
     it('should run migrations if old file exists.', function() {
@@ -93,7 +94,7 @@ describe('KeyRing', function() {
         path.join(tmp, 'keyring'),
         encrypt(JSON.stringify({'test3':{'junk':'junk'},'test4':{'a':'b'}}))
       );
-      if (!fs.existsSync(path.join(tmp, 'key.ring'))) {
+      if (!utils.existsSync(path.join(tmp, 'key.ring'))) {
         fs.mkdirSync(path.join(tmp, 'key.ring'));
       }
       fs.writeFileSync(
@@ -102,7 +103,7 @@ describe('KeyRing', function() {
       );
       KeyRing(tmp, 'testpass');
       var newFile = path.join(tmp, 'key.ring/test3');
-      expect(fs.existsSync(newFile)).to.equal(true);
+      expect(utils.existsSync(newFile)).to.equal(true);
     });
 
   });
@@ -139,7 +140,7 @@ describe('KeyRing', function() {
       );
       keyring.del('test5');
       expect(
-        fs.existsSync(path.join(tmp, 'key.ring/test5'))
+        utils.existsSync(path.join(tmp, 'key.ring/test5'))
       ).to.equal(false);
     });
 
@@ -148,7 +149,7 @@ describe('KeyRing', function() {
       var keyring = new KeyRing(tmp);
       keyring.del('test5');
       expect(
-        fs.existsSync(path.join(tmp, 'key.ring/test5'))
+        utils.existsSync(path.join(tmp, 'key.ring/test5'))
       ).to.equal(false);
     });
 
@@ -173,7 +174,7 @@ describe('KeyRing', function() {
       rimraf.sync(keypath);
       rimraf.sync(tar);
 
-      if (!fs.existsSync(keypath)) {
+      if (!utils.existsSync(keypath)) {
         fs.mkdirSync(keypath);
       }
 
@@ -183,7 +184,7 @@ describe('KeyRing', function() {
       kr.generate('testkey3');
       kr.export(tar, function() {
         expect(
-          fs.existsSync(tar)
+          utils.existsSync(tar)
         ).to.equal(true);
       });
     });
@@ -255,11 +256,11 @@ describe('KeyRing', function() {
 
     before(function(done) {
       this.timeout(6000); // ),:
-      if (!fs.existsSync(fldr1)) {
+      if (!utils.existsSync(fldr1)) {
         fs.mkdirSync(fldr1);
       }
 
-      if (!fs.existsSync(fldr2)) {
+      if (!utils.existsSync(fldr2)) {
         fs.mkdirSync(fldr2);
       }
 
@@ -293,7 +294,7 @@ describe('KeyRing', function() {
         'password',
         function() {
           expect(
-            fs.existsSync(path.join(fldr2, 'key.ring', 'testkey2'))
+            utils.existsSync(path.join(fldr2, 'key.ring', 'testkey2'))
           ).to.equal(true);
           done();
         }

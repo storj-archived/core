@@ -19,7 +19,7 @@ var HOME = platform !== 'win32' ? process.env.HOME : process.env.USERPROFILE;
 var DATADIR = path.join(HOME, '.storjcli');
 var KEYPATH = path.join(DATADIR, 'id_ecdsa');
 
-if (!fs.existsSync(DATADIR)) {
+if (!storj.utils.existSync(DATADIR)) {
   fs.mkdirSync(DATADIR);
 }
 
@@ -80,7 +80,7 @@ function makeTempDir(callback) {
 }
 
 function loadKeyPair() {
-  if (!fs.existsSync(KEYPATH)) {
+  if (!storj.utils.existSync(KEYPATH)) {
     log('error', 'You have not authenticated, please login.');
     process.exit(1);
   }
@@ -113,7 +113,7 @@ function getKeyRing(callback) {
     return callback(keyring);
   }
 
-  var description = fs.existsSync(DATADIR) ?
+  var description = storj.utils.existSync(DATADIR) ?
                     'Enter your passphrase to unlock your keyring' :
                     'Enter a passphrase to protect your keyring';
 
@@ -228,7 +228,7 @@ var ACTIONS = {
     });
   },
   login: function login() {
-    if (fs.existsSync(KEYPATH)) {
+    if (storj.utils.existSync(KEYPATH)) {
       return log('error', 'This device is already paired.');
     }
 
@@ -455,7 +455,7 @@ var ACTIONS = {
     destroyFile();
   },
   uploadfile: function uploadfile(bucket, filepath, env) {
-    if (!fs.existsSync(filepath)) {
+    if (!storj.utils.existSync(filepath)) {
       return log('error', 'No file found at %s', filepath);
     }
 
@@ -662,7 +662,7 @@ var ACTIONS = {
     destroyFrame();
   },
   downloadfile: function downloadfile(bucket, id, filepath, env) {
-    if (fs.existsSync(filepath)) {
+    if (storj.utils.existSync(filepath)) {
       return log('error', 'Refusing to overwrite file at %s', filepath);
     }
 
@@ -843,7 +843,7 @@ var ACTIONS = {
           log('info', 'Key will be encrypted with supplied passphrase');
         }
 
-        if (fs.existsSync(env.save)) {
+        if (storj.utils.existSync(env.save)) {
           return log('error', 'Save path already exists, refusing overwrite');
         }
 

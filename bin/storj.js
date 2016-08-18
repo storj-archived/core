@@ -100,11 +100,12 @@ function PublicClient() {
 }
 
 function getKeyRing(callback) {
-  if (program.keypass) {
+  var keypass = program.keypass || process.env.STORJ_PASS || null;
+  if (keypass) {
     var keyring;
 
     try {
-      keyring = storj.KeyRing(DATADIR, program.keypass);
+      keyring = storj.KeyRing(DATADIR, keypass);
     } catch (err) {
       return log('error', 'Could not unlock keyring, bad password?');
     }

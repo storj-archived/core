@@ -152,7 +152,13 @@ describe('Network/Integration/Tunnelling', function() {
       var dcx = DataChannelClient(farmer);
       dcx.on('open', function() {
         var stream = dcx.createWriteStream(ctoken, utils.rmd160sha256(shard));
-        stream.on('finish', done).on('error', done);
+        stream.on('finish', function() {
+          console.log('finish');
+          done();
+        }).on('error', function(err) {
+          console.log('error', err);
+          done();
+        });
         stream.write(shard);
         stream.end();
       });

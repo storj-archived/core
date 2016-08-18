@@ -1,3 +1,9 @@
+### Prerequisites
+
+* Node.js LTS (v4.x.x)
+* Python 2.7
+* Git 2.x.x
+
 ### Installing on GNU/Linux & Mac OSX
 
 Install Node.js and it's package manager NPM using Node Version Manager:

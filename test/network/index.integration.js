@@ -153,7 +153,6 @@ describe('Network/Integration/Tunnelling', function() {
       dcx.on('open', function() {
         var stream = dcx.createWriteStream(ctoken, utils.rmd160sha256(shard));
         stream.on('finish', function() {
-          console.log('finish');
           done();
         }).on('error', function(err) {
           console.log('error', err);

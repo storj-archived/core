@@ -138,6 +138,46 @@ describe('Network (public)', function() {
       expect(net.node.disconnect.called).to.equal(true);
     });
 
+    it('should callback with error if Node#disconnect fails', function(done) {
+      var net = Network({
+        keypair: KeyPair(),
+        manager: Manager(RAMStorageAdapter()),
+        logger: kad.Logger(0),
+        seeds: [],
+        address: '127.0.0.1',
+        port: 0,
+        tunport: 0,
+        noforward: true
+      });
+      net.node = {
+        disconnect: sinon.stub().callsArgWith(0, new Error('Failed'))
+      };
+      net.leave(function(err) {
+        expect(err.message).to.equal('Failed');
+        done();
+      });
+    });
+
+    it('should callback on successful disconnect', function(done) {
+      var net = Network({
+        keypair: KeyPair(),
+        manager: Manager(RAMStorageAdapter()),
+        logger: kad.Logger(0),
+        seeds: [],
+        address: '127.0.0.1',
+        port: 0,
+        tunport: 0,
+        noforward: true
+      });
+      net.node = {
+        disconnect: sinon.stub().callsArgWith(0, null)
+      };
+      net.leave(function(err) {
+        expect(err).to.equal(null);
+        done();
+      });
+    });
+
     it('should close the tunnel client if it is open', function() {
       var net = Network({
         keypair: KeyPair(),
@@ -433,13 +473,13 @@ describe('Network (private)', function() {
         protocol: version.protocol
       }));
       var _subscribe = sinon.stub(net._pubsub, 'subscribe', function(t, cb) {
-        if (t === '0e01') {
+        if (t.indexOf('0e01') !== -1) {
           cb({
             address: '127.0.0.1',
             port: 1337,
             nodeID: utils.rmd160('nodeid'),
             protocol: version.protocol
-          });
+          }, '0e01');
         }
       });
       net._listenForTunnelers();
@@ -468,13 +508,13 @@ describe('Network (private)', function() {
       });
       var _removeContact = sinon.stub(net._tunnelers, 'removeContact');
       var _subscribe = sinon.stub(net._pubsub, 'subscribe', function(t, cb) {
-        if (t === '0e00') {
+        if (t.indexOf('0e00') !== -1) {
           cb({
             address: '127.0.0.1',
             port: 1337,
             nodeID: utils.rmd160('nodeid'),
             protocol: version.protocol
-          });
+          }, '0e00');
         }
       });
       net._listenForTunnelers();
@@ -587,34 +627,6 @@ describe('Network (private)', function() {
         _send.restore();
         _findTunnel.restore();
         expect(_findTunnel.called).to.equal(true);
-        done();
-      });
-    });
-
-    it('should listen for tunnelers if probe succeeds', function(done) {
-      var net = Network({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
-        logger: kad.Logger(0),
-        seeds: [
-          'storj://127.0.0.1:1337/adc83b19e793491b1c6ea0fd8b46cd9f32e592fc'
-        ],
-        address: '127.0.0.1',
-        port: 0,
-        tunport: 0,
-        noforward: true
-      });
-      net.transport._isPublic = false;
-      var _send = sinon.stub(net.transport, 'send').callsArgWith(
-        2,
-        null,
-        {}
-      );
-      var _listen = sinon.stub(net, '_listenForTunnelers');
-      net._setupTunnelClient(function() {
-        _listen.restore();
-        _send.restore();
-        expect(_listen.called).to.equal(true);
         done();
       });
     });
@@ -1064,10 +1076,10 @@ describe('Network (private)', function() {
         noforward: true
       });
       var _setupTunnel = sinon.stub(net, '_setupTunnelClient').callsArg(0);
-      net.join(function() {
+      net.on('connected', function() {
         _setupTunnel.restore();
         done();
-      });
+      }).join();
     });
 
     it('should try all seeds before failing to connect', function(done) {

@@ -1,7 +1,13 @@
 'use strict';
 
+module.exports.account = require('./actions/account');
+
 module.exports.buckets = require('./actions/buckets');
 
-module.exports.account = require('./actions/account');
+module.exports.contact = require('./actions/contact');
+
+module.exports.files = require('./actions/files');
+
+module.exports.frames = require('./actions/frames');
 
 module.exports.keys = require('./actions/keys');

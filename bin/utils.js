@@ -7,6 +7,7 @@ var platform = require('os').platform();
 var prompt = require('prompt');
 var os = require('os');
 var tmp = require('tmp');
+var assert = require('assert');
 
 var HOME = platform !== 'win32' ? process.env.HOME : process.env.USERPROFILE;
 var DATADIR = path.join(HOME, '.storjcli');
@@ -128,4 +129,143 @@ module.exports.getKeyRing = function(keypass, callback) {
 
     callback(keyring);
   });
+};
+
+module.exports.importkeyring = function(keypass, path) {
+  this.getKeyRing(keypass, function(keyring) {
+    try {
+      fs.statSync(path);
+    } catch(err) {
+      if (err.code === 'ENOENT') {
+        return log('error', 'The supplied tarball does not exist');
+      } else {
+        return log('error', err.message);
+      }
+    }
+
+    this.getNewPassword(
+      'Enter password for the keys to be imported',
+      function(err, result) {
+        if (err) {
+          return log('error', err.message);
+        }
+
+        keyring.import(path, result.password, function(err) {
+          if (err) {
+            return log('error', err.message);
+          }
+
+          log('info', 'Key ring imported successfully');
+        });
+      }
+    );
+  });
+};
+
+module.exports.exportkeyring = function(keypass, directory) {
+  this.getKeyRing(keypass, function(keyring) {
+    try {
+      var stat = fs.statSync(directory);
+      assert(stat.isDirectory(), 'The path must be a directory');
+    } catch(err) {
+      if (err.code === 'ENOENT') {
+        return log('error', 'The supplied directory does not exist');
+      } else {
+        return log('error', err.message);
+      }
+    }
+
+    var tarball = path.join(directory, 'keyring.bak.' + Date.now() + '.tgz');
+
+    keyring.export(tarball, function(err) {
+      if (err) {
+        return log('error', err.message);
+      }
+
+      log('info', 'Key ring backed up to %s', [tarball]);
+      log('info', 'Don\'t forget the password for this keyring!');
+    });
+  });
+};
+
+module.exports.resetkeyring = function(keypass) {
+  this.getKeyRing(keypass, function(keyring) {
+    prompt.start();
+    prompt.get({
+      properties: {
+        passphrase: {
+          description: 'Enter a new password for your keyring',
+          replace: '*',
+          hidden: true,
+          default: ''
+        }
+      }
+    }, function(err, result) {
+      if (err) {
+        return log('error', err.message);
+      }
+
+      keyring.reset(result.passphrase, function(err) {
+        if (err) {
+          return log('error', err.message);
+        }
+
+        log('info', 'Password for keyring has been reset.');
+      });
+    });
+  });
+};
+
+module.exports.generatekey = function(env) {
+  var keypair = storj.KeyPair();
+
+  log('info', 'Private: %s', [keypair.getPrivateKey()]);
+  log('info', 'Public:  %s', [keypair.getPublicKey()]);
+  log('info', 'NodeID:  %s', [keypair.getNodeID()]);
+  log('info', 'Address: %s', [keypair.getAddress()]);
+
+  function savePrivateKey() {
+    if (env.save) {
+      log('info', '');
+
+      var privkey = keypair.getPrivateKey();
+
+      if (env.encrypt) {
+        privkey = storj.utils.simpleEncrypt(env.encrypt, privkey);
+
+        log('info', 'Key will be encrypted with supplied passphrase');
+      }
+
+      if (storj.utils.existsSync(env.save)) {
+        return log('error', 'Save path already exists, refusing overwrite');
+      }
+
+      fs.writeFileSync(env.save, privkey);
+      log('info', 'Key saved to %s', [env.save]);
+    }
+  }
+
+  return savePrivateKey();
+};
+
+module.exports.signmessage = function(privatekey, message, compact) {
+  var keypair;
+  var signature;
+
+  try {
+    keypair = storj.KeyPair(privatekey);
+  } catch (err) {
+    return log('error', 'Invalid private key supplied');
+  }
+
+  try {
+    signature = keypair.sign(message, { compact: compact });
+  } catch (err) {
+    return log('error', 'Failed to sign message, reason: %s', [err.message]);
+  }
+
+  log('info', 'Signature (%s): %s', [
+    compact ? 'compact' : 'complete',
+    signature
+  ]);
 };

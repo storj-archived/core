@@ -8,10 +8,8 @@ var platform = require('os').platform();
 var path = require('path');
 var prompt = require('prompt');
 var colors = require('colors/safe');
-var through = require('through');
 var storj = require('..');
 var merge = require('merge');
-var assert = require('assert');
 var log = require('./logger')().log;
 var utils = require('./utils');
 var actions = require('./index');
@@ -85,309 +83,45 @@ var ACTIONS = {
   updatebucket: function updatebucket(id, name, storage, transfer) {
     actions.buckets.update(PrivateClient(), id, name, storage, transfer);
   },
-  listfiles: function listfiles(id) {
-    PrivateClient().listFilesInBucket(id, function(err, files) {
-      if (err) {
-        return log('error', err.message);
-      }
-
-      if (!files.length) {
-        return log('warn', 'There are no files in this bucket.');
-      }
-
-      files.forEach(function(file) {
-        log(
-          'info',
-          'Name: %s, Type: %s, Size: %s bytes, ID: %s',
-          [file.filename, file.mimetype, file.size, file.id]
-        );
-      });
-    });
+  listfiles: function listfiles(bucketid) {
+    actions.files.list(PrivateClient(), bucketid);
   },
   removefile: function removefile(id, fileId, env) {
-    function destroyFile() {
-      utils.getKeyRing(getKeyPass(), function(keyring) {
-        PrivateClient().removeFileFromBucket(id, fileId, function(err) {
-          if (err) {
-            return log('error', err.message);
-          }
-
-          log('info', 'File was successfully removed from bucket.');
-          keyring.del(fileId);
-        });
-      });
-    }
-
-    if (!env.force) {
-      return utils.getConfirmation(
-        'Are you sure you want to destroy the file?',
-        destroyFile
-      );
-    }
-
-    destroyFile();
+    actions.files.remove(PrivateClient(), getKeyPass(), id, fileId, env);
   },
   uploadfile: function uploadfile(bucket, filepath, env) {
-    if (!storj.utils.existsSync(filepath)) {
-      return log('error', 'No file found at %s', filepath);
-    }
-
-    var secret = new storj.DataCipherKeyIv();
-    var encrypter = new storj.EncryptStream(secret);
-
-    utils.getKeyRing(getKeyPass(), function(keyring) {
-      log('info', 'Generating encryption key...');
-      log('info', 'Encrypting file "%s"', [filepath]);
-
-      utils.makeTempDir(function(err, tmpDir, tmpCleanup) {
-        if (err) {
-          return log('error', err.message);
-        }
-
-        var tmppath = path.join(tmpDir, path.basename(filepath) + '.crypt');
-
-        function cleanup() {
-          log('info', 'Cleaning up...');
-          tmpCleanup();
-          log('info', 'Finished cleaning!');
-        }
-
-        fs.createReadStream(filepath)
-          .pipe(encrypter)
-          .pipe(fs.createWriteStream(tmppath)).on('finish', function() {
-            log('info', 'Encryption complete!');
-            log('info', 'Creating storage token...');
-            PrivateClient().createToken(
-              bucket,
-              'PUSH',
-              function(err, token) {
-                if (err) {
-                  log('error', err.message);
-                  return cleanup();
-                }
-
-                log('info', 'Storing file, hang tight!');
-
-                PrivateClient({
-                  concurrency: env.concurrency ? parseInt(env.concurrency) : 6
-                }).storeFileInBucket(
-                  bucket,
-                  token.token,
-                  tmppath,
-                  function(err, file) {
-                    if (err) {
-                      log('warn', 'Error occurred. Triggering cleanup...');
-                      cleanup();
-                      return log('error', err.message);
-                    }
-
-                    keyring.set(file.id, secret);
-                    cleanup();
-                    log('info', 'Encryption key saved to keyring.');
-                    log('info', 'File successfully stored in bucket.');
-                    log(
-                      'info',
-                      'Name: %s, Type: %s, Size: %s bytes, ID: %s',
-                      [file.filename, file.mimetype, file.size, file.id]
-                    );
-
-                    if (env.redundancy) {
-                      return ACTIONS.createmirrors(bucket, file.id, env);
-                    }
-
-                    process.exit();
-                  }
-                );
-              }
-            );
-          }
-        );
-      });
-    });
+    var privateClient = {
+      concurrency: env.concurrency ? parseInt(env.concurrency) : 6
+    };
+    actions.files.upload(privateClient, getKeyPass(), bucket, filepath, env);
   },
   createmirrors: function createmirrors(bucket, file, env) {
-    log(
-      'info',
-      'Establishing %s mirrors per shard for redundancy',
-      [env.redundancy]
-    );
-    log('info', 'This can take a while, so grab a cocktail...');
-    PrivateClient().replicateFileFromBucket(
-      bucket,
-      file,
-      parseInt(env.redundancy),
-      function(err, replicas) {
-        if (err) {
-          return log('error', err.message);
-        }
-
-        replicas.forEach(function(shard) {
-          log('info', 'Shard %s mirrored by %s nodes', [
-            shard.hash,
-            shard.mirrors.length
-          ]);
-        });
-
-        process.exit();
-      }
-    );
+    actions.files.mirror(PrivateClient(), bucket, file, env);
   },
   getpointers: function getpointers(bucket, id, env) {
-    PrivateClient().createToken(bucket, 'PULL', function(err, token) {
-      if (err) {
-        return log('error', err.message);
-      }
-
-      var skip = Number(env.skip);
-      var limit = Number(env.limit);
-
-      PrivateClient().getFilePointers({
-        bucket: bucket,
-        file: id,
-        token: token.token,
-        skip: skip,
-        limit: limit
-      }, function(err, pointers) {
-        if (err) {
-          return log('error', err.message);
-        }
-
-        if (!pointers.length) {
-          return log('warn', 'There are no pointers to return for that range');
-        }
-
-        log('info', 'Listing pointers for shards %s - %s', [
-          skip, skip + pointers.length - 1
-        ]);
-        log('info', '-----------------------------------------');
-        log('info', '');
-        pointers.forEach(function(location, i) {
-          log('info', 'Index:  %s', [skip + i]);
-          log('info', 'Hash:   %s', [location.hash]);
-          log('info', 'Token:  %s', [location.token]);
-          log('info', 'Farmer: %s', [
-            storj.utils.getContactURL(location.farmer)
-          ]);
-          log('info', '');
-        });
-      });
-    });
+    actions.files.getpointers(PrivateClient(), bucket, id, env);
   },
   addframe: function addframe() {
-    PrivateClient().createFileStagingFrame(function(err, frame) {
-      if (err) {
-        return log('error', err.message);
-      }
-
-      log('info', 'ID: %s, Created: %s', [frame.id, frame.created]);
-    });
+    actions.frames.add(PrivateClient());
   },
   listframes: function listframes() {
-    PrivateClient().getFileStagingFrames(function(err, frames) {
-      if (err) {
-        return log('error', err.message);
-      }
-
-      if (!frames.length) {
-        return log('warn', 'There are no frames to list.');
-      }
-
-      frames.forEach(function(frame) {
-        log(
-          'info',
-          'ID: %s, Created: %s, Shards: %s',
-          [frame.id, frame.created, frame.shards.length]
-        );
-      });
-    });
+    actions.frames.list(PrivateClient());
   },
   getframe: function getframe(frame) {
-    PrivateClient().getFileStagingFrameById(frame, function(err, frame) {
-      if (err) {
-        return log('error', err.message);
-      }
-
-      log(
-        'info',
-        'ID: %s, Created: %s, Shards: %s',
-        [frame.id, frame.created, frame.shards.length]
-      );
-    });
+    actions.frames.get(PrivateClient, frame);
   },
   removeframe: function removeframe(frame, env) {
-    function destroyFrame() {
-      PrivateClient().destroyFileStagingFrameById(frame, function(err) {
-        if (err) {
-          return log('error', err.message);
-        }
-
-        log('info', 'Frame was successfully removed.');
-      });
-    }
-
-    if (!env.force) {
-      return utils.getConfirmation(
-        'Are your sure you want to destroy this frame?',
-        destroyFrame
-      );
-    }
-
-    destroyFrame();
+    actions.frames.remove(PrivateClient, frame, env);
   },
   downloadfile: function downloadfile(bucket, id, filepath, env) {
-    if (storj.utils.existsSync(filepath)) {
-      return log('error', 'Refusing to overwrite file at %s', filepath);
-    }
-
-    utils.getKeyRing(getKeyPass(), function(keyring) {
-      var target = fs.createWriteStream(filepath);
-      var secret = keyring.get(id);
-
-      if (!secret) {
-        return log('error', 'No decryption key found in key ring!');
-      }
-
-      var decrypter = new storj.DecryptStream(secret);
-      var received = 0;
-      var exclude = env.exclude.split(',');
-
-      target.on('finish', function() {
-        log('info', 'File downloaded and written to %s.', [filepath]);
-      }).on('error', function(err) {
-        log('error', err.message);
-      });
-
-      PrivateClient().createFileStream(bucket, id, {
-        exclude: exclude
-      },function(err, stream) {
-        if (err) {
-          return log('error', err.message);
-        }
-
-        stream.on('error', function(err) {
-          log('warn', 'Failed to download shard, reason: %s', [err.message]);
-          fs.unlink(filepath, function(unlinkFailed) {
-            if (unlinkFailed) {
-              return log('error', 'Failed to unlink partial file.');
-            }
-
-            if (!err.pointer) {
-              return;
-            }
-
-            log('info', 'Retrying download from other mirrors...');
-            exclude.push(err.pointer.farmer.nodeID);
-            ACTIONS.downloadfile(bucket, id, filepath, {
-              exclude: env.exclude.join(',')
-            });
-          });
-        }).pipe(through(function(chunk) {
-          received += chunk.length;
-          log('info', 'Received %s of %s bytes', [received, stream._length]);
-          this.queue(chunk);
-        })).pipe(decrypter).pipe(target);
-      });
-    });
+    actions.files.download(
+      PrivateClient(),
+      getKeyPass(),
+      bucket,
+      id,
+      filepath,
+      env
+    );
   },
   createtoken: function createtoken(bucket, operation) {
     PrivateClient().createToken(bucket, operation, function(err, token) {
@@ -404,149 +138,26 @@ var ACTIONS = {
     });
   },
   streamfile: function streamfile(bucket, id, env) {
-    utils.getKeyRing(getKeyPass(), function(keyring) {
-      var secret = keyring.get(id);
-
-      if (!secret) {
-        return log('error', 'No decryption key found in key ring!');
-      }
-
-      var decrypter = new storj.DecryptStream(secret);
-      var exclude = env.exclude.split(',');
-
-      PrivateClient({
-        logger: storj.deps.kad.Logger(0)
-      }).createFileStream(bucket, id, function(err, stream) {
-        if (err) {
-          return process.stderr.write(err.message);
-        }
-
-        stream.on('error', function(err) {
-          log('warn', 'Failed to download shard, reason: %s', [err.message]);
-
-          if (!err.pointer) {
-            return;
-          }
-
-          log('info', 'Retrying download from other mirrors...');
-          exclude.push(err.pointer.farmer.nodeID);
-          ACTIONS.streamfile(bucket, id, {
-            exclude: env.exclude.join(',')
-          });
-        }).pipe(decrypter).pipe(process.stdout);
-      });
+    var privateClient = PrivateClient({
+      logger: storj.deps.kad.Logger(0)
     });
+    actions.files.stream(privateClient, getKeyPass(), bucket, id, env);
   },
   resetkeyring: function resetkeyring() {
-    utils.getKeyRing(getKeyPass(), function(keyring) {
-      prompt.start();
-      prompt.get({
-        properties: {
-          passphrase: {
-            description: 'Enter a new password for your keyring',
-            replace: '*',
-            hidden: true,
-            default: ''
-          }
-        }
-      }, function(err, result) {
-        if (err) {
-          return log('error', err.message);
-        }
-
-        keyring.reset(result.passphrase, function(err) {
-          if (err) {
-            return log('error', err.message);
-          }
-
-          log('info', 'Password for keyring has been reset.');
-        });
-      });
-    });
+    utils.resetkeyring(getKeyPass());
   },
   listcontacts: function listcontacts(page) {
-    PublicClient().getContactList({
-      page: page,
-      connected: this.connected
-    }, function(err, contacts) {
-      if (err) {
-        return log('error', err.message);
-      }
-
-      if (!contacts.length) {
-        return log('warn', 'There are no contacts to show');
-      }
-
-      contacts.forEach(function(contact) {
-        log('info', 'Contact:   ' + storj.utils.getContactURL(contact));
-        log('info', 'Last Seen: ' + contact.lastSeen);
-        log('info', 'Protocol:  ' + (contact.protocol || '?'));
-        log('info', '');
-      });
-    });
+    actions.contacts.list(PublicClient(), page);
   },
   getcontact: function getcontact(nodeid) {
-    PublicClient().getContactByNodeId(nodeid, function(err, contact) {
-      if (err) {
-        return log('error', err.message);
-      }
+    actions.contacts.list(PublicClient(), nodeid);
 
-      log('info', 'Contact:   %s', [storj.utils.getContactURL(contact)]);
-      log('info', 'Last Seen: %s', [contact.lastSeen]);
-      log('info', 'Protocol:  %s', [(contact.protocol || '?')]);
-    });
   },
   generatekey: function generatekey(env) {
-    var keypair = storj.KeyPair();
-
-    log('info', 'Private: %s', [keypair.getPrivateKey()]);
-    log('info', 'Public:  %s', [keypair.getPublicKey()]);
-    log('info', 'NodeID:  %s', [keypair.getNodeID()]);
-    log('info', 'Address: %s', [keypair.getAddress()]);
-
-    function savePrivateKey() {
-      if (env.save) {
-        log('info', '');
-
-        var privkey = keypair.getPrivateKey();
-
-        if (env.encrypt) {
-          privkey = storj.utils.simpleEncrypt(env.encrypt, privkey);
-
-          log('info', 'Key will be encrypted with supplied passphrase');
-        }
-
-        if (storj.utils.existsSync(env.save)) {
-          return log('error', 'Save path already exists, refusing overwrite');
-        }
-
-        fs.writeFileSync(env.save, privkey);
-        log('info', 'Key saved to %s', [env.save]);
-      }
-    }
-
-    return savePrivateKey();
+    utils.generatekey(env);
   },
   signmessage: function signmessage(privatekey, message) {
-    var keypair;
-    var signature;
-
-    try {
-      keypair = storj.KeyPair(privatekey);
-    } catch (err) {
-      return log('error', 'Invalid private key supplied');
-    }
-
-    try {
-      signature = keypair.sign(message, { compact: this.compact });
-    } catch (err) {
-      return log('error', 'Failed to sign message, reason: %s', [err.message]);
-    }
-
-    log('info', 'Signature (%s): %s', [
-      this.compact ? 'compact' : 'complete',
-      signature
-    ]);
+    utils.signmessage(privatekey, message, this.compact);
   },
   prepareaudits: function prepareaudits(num, filepath) {
     var auditgen;
@@ -639,6 +250,12 @@ var ACTIONS = {
       log('error', 'The proof response is not valid');
     }
   },
+  exportkeyring: function(directory) {
+    utils.exportkeyring(getKeyPass(), directory);
+  },
+  importkeyring: function(path) {
+    utils.importkeyring(getKeyPass(), path);
+  },
   fallthrough: function(command) {
     log(
       'error',
@@ -646,61 +263,6 @@ var ACTIONS = {
       command
     );
     program.help();
-  },
-  exportkeyring: function(directory) {
-    utils.getKeyRing(getKeyPass(), function(keyring) {
-      try {
-        var stat = fs.statSync(directory);
-        assert(stat.isDirectory(), 'The path must be a directory');
-      } catch(err) {
-        if (err.code === 'ENOENT') {
-          return log('error', 'The supplied directory does not exist');
-        } else {
-          return log('error', err.message);
-        }
-      }
-
-      var tarball = path.join(directory, 'keyring.bak.' + Date.now() + '.tgz');
-
-      keyring.export(tarball, function(err) {
-        if (err) {
-          return log('error', err.message);
-        }
-
-        log('info', 'Key ring backed up to %s', [tarball]);
-        log('info', 'Don\'t forget the password for this keyring!');
-      });
-    });
-  },
-  importkeyring: function(path) {
-    utils.getKeyRing(getKeyPass(), function(keyring) {
-      try {
-        fs.statSync(path);
-      } catch(err) {
-        if (err.code === 'ENOENT') {
-          return log('error', 'The supplied tarball does not exist');
-        } else {
-          return log('error', err.message);
-        }
-      }
-
-      utils.getNewPassword(
-        'Enter password for the keys to be imported',
-        function(err, result) {
-          if (err) {
-            return log('error', err.message);
-          }
-
-          keyring.import(path, result.password, function(err) {
-            if (err) {
-              return log('error', err.message);
-            }
-
-            log('info', 'Key ring imported successfully');
-          });
-        }
-      );
-    });
   }
 };
 

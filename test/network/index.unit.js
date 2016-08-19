@@ -424,21 +424,23 @@ describe('Network (private)', function() {
         noforward: true,
         tunnels: 1
       });
-      var emitter = new EventEmitter();
-      var _hasTunnel = sinon.stub(
-        net.transport._tunserver,
-        'hasTunnelAvailable'
-      ).returns(false);
-      var _pub = sinon.stub(net._pubsub, 'publish');
-      var _sub = sinon.stub(net._pubsub, 'subscribe');
-      net._listenForTunnelers();
-      emitter.emit('unlocked');
-      setImmediate(function() {
-        _hasTunnel.restore();
-        _pub.restore();
-        _sub.restore();
-        expect(_pub.args[0][0]).to.equal('0e00');
-        done();
+      net.on('ready', function() {
+        var emitter = new EventEmitter();
+        var _hasTunnel = sinon.stub(
+          net.transport._tunserver,
+          'hasTunnelAvailable'
+        ).returns(false);
+        var _pub = sinon.stub(net._pubsub, 'publish');
+        var _sub = sinon.stub(net._pubsub, 'subscribe');
+        net._listenForTunnelers();
+        emitter.emit('unlocked');
+        setImmediate(function() {
+          _hasTunnel.restore();
+          _pub.restore();
+          _sub.restore();
+          expect(_pub.args[0][0]).to.equal('0e00');
+          done();
+        });
       });
     });
 
@@ -472,25 +474,27 @@ describe('Network (private)', function() {
         nodeID: utils.rmd160('nodeid1'),
         protocol: version.protocol
       }));
-      var _subscribe = sinon.stub(net._pubsub, 'subscribe', function(t, cb) {
-        if (t.indexOf('0e01') !== -1) {
-          cb({
-            address: '127.0.0.1',
-            port: 1337,
-            nodeID: utils.rmd160('nodeid'),
-            protocol: version.protocol
-          }, '0e01');
-        }
-      });
-      net._listenForTunnelers();
-      setImmediate(function() {
-        _getSize.restore();
-        _addContact.restore();
-        _subscribe.restore();
-        _indexOf.restore();
-        expect(_removeContact.called).to.equal(true);
-        expect(_addContact.callCount).to.equal(2);
-        done();
+      net.on('ready', function() {
+        var _subscribe = sinon.stub(net._pubsub, 'subscribe', function(t, cb) {
+          if (t.indexOf('0e01') !== -1) {
+            cb({
+              address: '127.0.0.1',
+              port: 1337,
+              nodeID: utils.rmd160('nodeid'),
+              protocol: version.protocol
+            }, '0e01');
+          }
+        });
+        net._listenForTunnelers();
+        setImmediate(function() {
+          _getSize.restore();
+          _addContact.restore();
+          _subscribe.restore();
+          _indexOf.restore();
+          expect(_removeContact.called).to.equal(true);
+          expect(_addContact.callCount).to.equal(2);
+          done();
+        });
       });
     });
 
@@ -507,22 +511,24 @@ describe('Network (private)', function() {
         tunnels: 0
       });
       var _removeContact = sinon.stub(net._tunnelers, 'removeContact');
-      var _subscribe = sinon.stub(net._pubsub, 'subscribe', function(t, cb) {
-        if (t.indexOf('0e00') !== -1) {
-          cb({
-            address: '127.0.0.1',
-            port: 1337,
-            nodeID: utils.rmd160('nodeid'),
-            protocol: version.protocol
-          }, '0e00');
-        }
-      });
-      net._listenForTunnelers();
-      setImmediate(function() {
-        _removeContact.restore();
-        _subscribe.restore();
-        expect(_removeContact.called).to.equal(true);
-        done();
+      net.on('ready', function() {
+        var _subscribe = sinon.stub(net._pubsub, 'subscribe', function(t, cb) {
+          if (t.indexOf('0e00') !== -1) {
+            cb({
+              address: '127.0.0.1',
+              port: 1337,
+              nodeID: utils.rmd160('nodeid'),
+              protocol: version.protocol
+            }, '0e00');
+          }
+        });
+        net._listenForTunnelers();
+        setImmediate(function() {
+          _removeContact.restore();
+          _subscribe.restore();
+          expect(_removeContact.called).to.equal(true);
+          done();
+        });
       });
     });
 

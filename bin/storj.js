@@ -13,8 +13,8 @@ var storj = require('..');
 var merge = require('merge');
 var assert = require('assert');
 var log = require('./logger')().log;
-var actions = require('./actions');
 var utils = require('./utils');
+var actions = require('./index');
 
 var HOME = platform !== 'win32' ? process.env.HOME : process.env.USERPROFILE;
 var DATADIR = path.join(HOME, '.storjcli');
@@ -47,164 +47,43 @@ function getKeyPass() {
 
 var ACTIONS = {
   getinfo: function getInfo() {
-    actions.getinfo(PublicClient());
+    actions.account.getinfo(PublicClient());
   },
   register: function register() {
-    actions.register(PublicClient());
+    actions.account.register(PublicClient());
   },
   login: function login() {
-    actions.login(program.url);
+    actions.account.login(program.url);
   },
   logout: function logout() {
-    actions.logout(PrivateClient());
+    actions.account.logout(PrivateClient());
   },
   resetpassword: function resetpassword(email) {
-    utils.getNewPassword(
-      'Enter your new desired password',
-      function(err, result) {
-        PublicClient().resetPassword({
-          email: email,
-          password: result.password
-        }, function(err) {
-          if (err) {
-            return log('error', 'Failed to request password reset, reason: %s',[
-              err.message
-            ]);
-          }
-
-          log(
-            'info',
-            'Password reset request processed, check your email to continue.'
-          );
-        }
-      );
-    });
+    actions.account.resetpassword(PublicClient(), email);
   },
   listkeys: function listkeys() {
-    PrivateClient().getPublicKeys(function(err, keys) {
-      if (err) {
-        return log('error', err.message);
-      }
-
-      keys.forEach(function(key) {
-        log('info', key.key);
-      });
-    });
+    actions.keys.list(PrivateClient());
   },
   addkey: function addkey(pubkey) {
-    PrivateClient().addPublicKey(pubkey, function(err) {
-      if (err) {
-        return log('error', err.message);
-      }
-
-      log('info', 'Key successfully registered.');
-    });
+    actions.keys.add(PrivateClient(), pubkey);
   },
   removekey: function removekey(pubkey, env) {
-    function destroyKey() {
-      PrivateClient().destroyPublicKey(pubkey, function(err) {
-        if (err) {
-          return log('error', err.message);
-        }
-
-        log('info', 'Key successfully revoked.');
-      });
-    }
-
-    if (!env.force) {
-      return utils.getConfirmation(
-        'Are you sure you want to invalidate the public key?',
-        destroyKey
-      );
-    }
-
-    destroyKey();
+    actions.keys.remove(PrivateClient(), pubkey, env);
   },
   listbuckets: function listbuckets() {
-    PrivateClient().getBuckets(function(err, buckets) {
-      if (err) {
-        return log('error', err.message);
-      }
-
-      if (!buckets.length) {
-        return log('warn', 'You have not created any buckets.');
-      }
-
-      buckets.forEach(function(bucket) {
-        log(
-          'info',
-          'ID: %s, Name: %s, Storage: %s, Transfer: %s',
-          [bucket.id, bucket.name, bucket.storage, bucket.transfer]
-        );
-      });
-    });
+    actions.buckets.list(PrivateClient());
   },
   getbucket: function showbucket(id) {
-    PrivateClient().getBucketById(id, function(err, bucket) {
-      if (err) {
-        return log('error', err.message);
-      }
-
-      log(
-        'info',
-        'ID: %s, Name: %s, Storage: %s, Transfer: %s',
-        [bucket.id, bucket.name, bucket.storage, bucket.transfer]
-      );
-    });
+    actions.buckets.get(PrivateClient(), id);
   },
   removebucket: function removebucket(id, env) {
-    function destroyBucket() {
-      PrivateClient().destroyBucketById(id, function(err) {
-        if (err) {
-          return log('error', err.message);
-        }
-
-        log('info', 'Bucket successfully destroyed.');
-      });
-    }
-
-    if (!env.force) {
-      return utils.getConfirmation(
-        'Are you sure you want to destroy this bucket?',
-        destroyBucket
-      );
-    }
-
-    destroyBucket();
+    actions.buckets.remove(PrivateClient(), id, env);
   },
   addbucket: function addbucket(name, storage, transfer) {
-    PrivateClient().createBucket({
-      name: name,
-      storage: storage,
-      transfer: transfer
-    }, function(err, bucket) {
-      if (err) {
-        return log('error', err.message);
-      }
-
-      log(
-        'info',
-        'ID: %s, Name: %s, Storage: %s, Transfer: %s',
-        [bucket.id, bucket.name, bucket.storage, bucket.transfer]
-      );
-    });
+    actions.buckets.add(PrivateClient(), name, storage, transfer);
   },
   updatebucket: function updatebucket(id, name, storage, transfer) {
-    PrivateClient().updateBucketById(id, {
-      name: name,
-      storage: storage,
-      transfer: transfer
-    }, function(err, bucket) {
-      if (err) {
-        return log('error', err.message);
-      }
-
-      log(
-        'info',
-        'ID: %s, Name: %s, Storage: %s, Transfer: %s',
-        [bucket.id, bucket.name, bucket.storage, bucket.transfer]
-      );
-    });
+    actions.buckets.update(PrivateClient(), id, name, storage, transfer);
   },
   listfiles: function listfiles(id) {
     PrivateClient().listFilesInBucket(id, function(err, files) {

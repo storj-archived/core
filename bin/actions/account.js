@@ -1,10 +1,10 @@
 'use strict';
-var log = require('./logger')().log;
-var utils = require('./utils');
+var log = require('./../logger')().log;
+var utils = require('./../utils');
 var path = require('path');
 var fs = require('fs');
 var platform = require('os').platform();
-var storj = require('..');
+var storj = require('../..');
 
 var HOME = platform !== 'win32' ? process.env.HOME : process.env.USERPROFILE;
 var DATADIR = path.join(HOME, '.storjcli');
@@ -84,5 +84,28 @@ module.exports.logout = function(client) {
 
     fs.unlinkSync(KEYPATH);
     log('info', 'This device has been successfully unpaired.');
+  });
+};
+
+module.exports.resetpassword = function(client, email) {
+  utils.getNewPassword(
+    'Enter your new desired password',
+    function(err, result) {
+      client.resetPassword({
+        email: email,
+        password: result.password
+      }, function(err) {
+        if (err) {
+          return log('error', 'Failed to request password reset, reason: %s',[
+            err.message
+          ]);
+        }
+
+        log(
+          'info',
+          'Password reset request processed, check your email to continue.'
+        );
+      }
+    );
   });
 };

@@ -10,14 +10,14 @@ var prompt = require('prompt');
 var colors = require('colors/safe');
 var through = require('through');
 var storj = require('..');
-var os = require('os');
-var tmp = require('tmp');
 var merge = require('merge');
 var assert = require('assert');
+var log = require('./logger')().log;
+var actions = require('./actions');
+var utils = require('./utils');
 
 var HOME = platform !== 'win32' ? process.env.HOME : process.env.USERPROFILE;
 var DATADIR = path.join(HOME, '.storjcli');
-var KEYPATH = path.join(DATADIR, 'id_ecdsa');
 
 if (!storj.utils.existsSync(DATADIR)) {
   fs.mkdirSync(DATADIR);
@@ -30,67 +30,9 @@ program.version(require('../package').version);
 program.option('-u, --url <url>', 'set the base url for the api');
 program.option('-k, --keypass <password>', 'unlock keyring without prompt');
 
-function log(type, message, args) {
-  switch (type) {
-    case 'debug':
-      message = colors.bold.magenta(' [debug]  ') + message;
-      break;
-    case 'info':
-      message = colors.bold.cyan(' [info]   ') + message;
-      break;
-    case 'warn':
-      message = colors.bold.yellow(' [warn]   ') + message;
-      break;
-    case 'error':
-      message = colors.bold.red(' [error]  ') + message;
-      break;
-  }
-
-  message = colors.bold.gray(' [' + new Date() + ']') + message;
-  console.log.apply(console, [message].concat(args || []));
-}
-
-log._logger = function() {
-  var type = arguments[0];
-  var message = arguments[1];
-  var values = Array.prototype.slice.call(arguments, 2);
-
-  log(type, message, values);
-};
-
-log.info = log._logger.bind(null, 'info');
-log.debug = log._logger.bind(null, 'debug');
-log.warn = log._logger.bind(null, 'warn');
-log.error = log._logger.bind(null, 'error');
-
-function makeTempDir(callback) {
-  var opts = {
-    dir: os.tmpdir(),
-    prefix: 'storj-',
-    // 0700.
-    mode: 448,
-    // require manual cleanup.
-    keep: true,
-    unsafeCleanup: true
-  };
-
-  tmp.dir(opts, function(err, path, cleanupCallback) {
-    callback(err, path, cleanupCallback);
-  });
-}
-
-function loadKeyPair() {
-  if (!storj.utils.existsSync(KEYPATH)) {
-    log('error', 'You have not authenticated, please login.');
-    process.exit(1);
-  }
-
-  return storj.KeyPair(fs.readFileSync(KEYPATH).toString());
-}
-
 function PrivateClient(options) {
   return storj.BridgeClient(program.url, merge({
-    keypair: loadKeyPair(),
+    keypair: utils.loadKeyPair(),
     logger: log
   }, options));
 }
@@ -99,191 +41,43 @@ function PublicClient() {
   return storj.BridgeClient(program.url, { logger: log });
 }
 
-function getKeyRing(callback) {
-  var keypass = program.keypass || process.env.STORJ_KEYPASS || null;
-  if (keypass) {
-    var keyring;
-
-    try {
-      keyring = storj.KeyRing(DATADIR, keypass);
-    } catch (err) {
-      return log('error', 'Could not unlock keyring, bad password?');
-    }
-
-    return callback(keyring);
-  }
-
-  var description = storj.utils.existsSync(DATADIR) ?
-                    'Enter your passphrase to unlock your keyring' :
-                    'Enter a passphrase to protect your keyring';
-
-  prompt.start();
-  prompt.get({
-    properties: {
-      passphrase: {
-        description: description,
-        replace: '*',
-        hidden: true,
-        default: '',
-        required: true
-      }
-    }
-  }, function(err, result) {
-    if (err) {
-      return log('error', err.message);
-    }
-
-    var keyring;
-
-    try {
-      keyring = storj.KeyRing(DATADIR, result.passphrase);
-    } catch (err) {
-      return log('error', 'Could not unlock keyring, bad password?');
-    }
-
-    callback(keyring);
-  });
-}
-
-function getNewPassword(msg, callback) {
-  prompt.start();
-  prompt.get({
-    properties: {
-      password: {
-        description: msg,
-        required: true,
-        replace: '*',
-        hidden: true
-      }
-    }
-  }, callback);
-}
-
-function getCredentials(callback) {
-  prompt.start();
-  prompt.get({
-    properties: {
-      email: {
-        description: 'Enter your email address',
-        required: true
-      },
-      password: {
-        description: 'Enter your password',
-        required: true,
-        replace: '*',
-        hidden: true
-      }
-    }
-  }, callback);
-}
-
-function getConfirmation(msg, callback) {
-  prompt.start();
-  prompt.get({
-    properties: {
-      confirm: {
-        description: msg + ' (y/n)',
-        required: true
-      }
-    }
-  }, function(err, result) {
-    if (result && ['y', 'yes'].indexOf(result.confirm.toLowerCase()) !== -1) {
-      callback();
-    }
-  });
+function getKeyPass() {
+  return program.keypass || process.env.STORJ_KEYPASS || null;
 }
 
 var ACTIONS = {
-  getinfo: function getinfo() {
-    PublicClient().getInfo(function(err, info) {
-      if (err) {
-        return log('error', err.message);
-      }
-
-      log('info', 'Title:             %s', [info.info.title]);
-      log('info', 'Description:       %s', [info.info.description]);
-      log('info', 'Version:           %s', [info.info.version]);
-      log('info', 'Host:              %s', [info.host]);
-      info.info['x-network-seeds'].forEach(function(seed, i) {
-        log('info', 'Network Seed (%s):  %s', [i, seed]);
-      });
-    });
+  getinfo: function getInfo() {
+    actions.getinfo(PublicClient());
   },
   register: function register() {
-    getCredentials(function(err, result) {
-      if (err) {
-        return log('error', err.message);
-      }
-
-      PublicClient().createUser({
-        email: result.email,
-        password: result.password
-      }, function(err) {
-        if (err) {
-          return log('error', err.message);
-        }
-
-        log('info', 'Registered! Check your email to activate your account.');
-      });
-    });
+    actions.register(PublicClient());
   },
   login: function login() {
-    if (storj.utils.existsSync(KEYPATH)) {
-      return log('error', 'This device is already paired.');
-    }
-
-    getCredentials(function(err, result) {
-      if (err) {
-        return log('error', err.message);
-      }
-
-      var client = storj.BridgeClient(program.url, {
-        basicauth: result
-      });
-      var keypair = storj.KeyPair();
-
-      client.addPublicKey(keypair.getPublicKey(), function(err) {
-        if (err) {
-          return log('error', err.message);
-        }
-
-        fs.writeFileSync(KEYPATH, keypair.getPrivateKey());
-        log('info', 'This device has been successfully paired.');
-      });
-    });
+    actions.login(program.url);
   },
   logout: function logout() {
-    var keypair = loadKeyPair();
-
-    PrivateClient().destroyPublicKey(keypair.getPublicKey(), function(err) {
-      if (err) {
-        log('info', 'This device has been successfully unpaired.');
-        log('warn', 'Failed to revoke key, you may need to do it manually.');
-        log('warn', 'Reason: ' + err.message);
-        return fs.unlinkSync(KEYPATH);
-      }
-
-      fs.unlinkSync(KEYPATH);
-      log('info', 'This device has been successfully unpaired.');
-    });
+    actions.logout(PrivateClient());
   },
   resetpassword: function resetpassword(email) {
-    getNewPassword('Enter your new desired password', function(err, result) {
-      PublicClient().resetPassword({
-        email: email,
-        password: result.password
-      }, function(err) {
-        if (err) {
-          return log('error', 'Failed to request password reset, reason: %s', [
-            err.message
-          ]);
-        }
+    utils.getNewPassword(
+      'Enter your new desired password',
+      function(err, result) {
+        PublicClient().resetPassword({
+          email: email,
+          password: result.password
+        }, function(err) {
+          if (err) {
+            return log('error', 'Failed to request password reset, reason: %s',[
+              err.message
+            ]);
+          }
 
-        log(
-          'info',
-          'Password reset request processed, check your email to continue.'
-        );
-      });
+          log(
+            'info',
+            'Password reset request processed, check your email to continue.'
+          );
+        }
+      );
     });
   },
   listkeys: function listkeys() {
@@ -318,7 +112,7 @@ var ACTIONS = {
     }
 
     if (!env.force) {
-      return getConfirmation(
+      return utils.getConfirmation(
         'Are you sure you want to invalidate the public key?',
         destroyKey
       );
@@ -370,7 +164,7 @@ var ACTIONS = {
     }
 
     if (!env.force) {
-      return getConfirmation(
+      return utils.getConfirmation(
         'Are you sure you want to destroy this bucket?',
         destroyBucket
       );
@@ -433,7 +227,7 @@ var ACTIONS = {
   },
   removefile: function removefile(id, fileId, env) {
     function destroyFile() {
-      getKeyRing(function(keyring) {
+      utils.getKeyRing(getKeyPass(), function(keyring) {
         PrivateClient().removeFileFromBucket(id, fileId, function(err) {
           if (err) {
             return log('error', err.message);
@@ -446,7 +240,7 @@ var ACTIONS = {
     }
 
     if (!env.force) {
-      return getConfirmation(
+      return utils.getConfirmation(
         'Are you sure you want to destroy the file?',
         destroyFile
       );
@@ -462,11 +256,11 @@ var ACTIONS = {
     var secret = new storj.DataCipherKeyIv();
     var encrypter = new storj.EncryptStream(secret);
 
-    getKeyRing(function(keyring) {
+    utils.getKeyRing(getKeyPass(), function(keyring) {
       log('info', 'Generating encryption key...');
       log('info', 'Encrypting file "%s"', [filepath]);
 
-      makeTempDir(function(err, tmpDir, tmpCleanup) {
+      utils.makeTempDir(function(err, tmpDir, tmpCleanup) {
         if (err) {
           return log('error', err.message);
         }
@@ -653,7 +447,7 @@ var ACTIONS = {
     }
 
     if (!env.force) {
-      return getConfirmation(
+      return utils.getConfirmation(
         'Are your sure you want to destroy this frame?',
         destroyFrame
       );
@@ -666,7 +460,7 @@ var ACTIONS = {
       return log('error', 'Refusing to overwrite file at %s', filepath);
     }
 
-    getKeyRing(function(keyring) {
+    utils.getKeyRing(getKeyPass(), function(keyring) {
       var target = fs.createWriteStream(filepath);
       var secret = keyring.get(id);
 
@@ -731,7 +525,7 @@ var ACTIONS = {
     });
   },
   streamfile: function streamfile(bucket, id, env) {
-    getKeyRing(function(keyring) {
+    utils.getKeyRing(getKeyPass(), function(keyring) {
       var secret = keyring.get(id);
 
       if (!secret) {
@@ -765,7 +559,7 @@ var ACTIONS = {
     });
   },
   resetkeyring: function resetkeyring() {
-    getKeyRing(function(keyring) {
+    utils.getKeyRing(getKeyPass(), function(keyring) {
       prompt.start();
       prompt.get({
         properties: {
@@ -975,7 +769,7 @@ var ACTIONS = {
     program.help();
   },
   exportkeyring: function(directory) {
-    getKeyRing(function(keyring) {
+    utils.getKeyRing(getKeyPass(), function(keyring) {
       try {
         var stat = fs.statSync(directory);
         assert(stat.isDirectory(), 'The path must be a directory');
@@ -1000,7 +794,7 @@ var ACTIONS = {
     });
   },
   importkeyring: function(path) {
-    getKeyRing(function(keyring) {
+    utils.getKeyRing(getKeyPass(), function(keyring) {
       try {
         fs.statSync(path);
       } catch(err) {
@@ -1011,7 +805,7 @@ var ACTIONS = {
         }
       }
 
-      getNewPassword(
+      utils.getNewPassword(
         'Enter password for the keys to be imported',
         function(err, result) {
           if (err) {
@@ -1228,6 +1022,7 @@ program
 
 program.parse(process.argv);
 
+// Awwwww <3
 if (process.argv.length < 3) {
   return program.help();
 }

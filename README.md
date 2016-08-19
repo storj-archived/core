@@ -12,7 +12,7 @@ and Git installed. [Complete documentation can be found here](http://storj.githu
 
 Demo
 ----
-![doc/assets/demo.gif](Demo GIF)
+![doc/assets/demo.gif](doc/assets/demo.gif)
 
 Quick Start (Command Line Interface)
 ------------------------------------

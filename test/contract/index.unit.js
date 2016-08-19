@@ -56,20 +56,20 @@ describe('Contract#MATRIX', function() {
 
     it('should return medium degree', function() {
       expect(Contract.MATRIX.size(
-        16 * 1024 * 1024
+        64 * 1024 * 1024
       )).to.equal(constants.OPCODE_DEG_MED);
     });
 
     it('should return high degree', function() {
       expect(Contract.MATRIX.size(
-        32 * 1024 * 1024
+        1024 * 1024 * 1024
       )).to.equal(constants.OPCODE_DEG_HIGH);
     });
 
     it('should return null degree', function() {
       expect(Contract.MATRIX.size(
-        64 * 1024 * 1024
-      )).to.equal(null);
+        8192 * 1024 * 1024
+      )).to.equal(constants.OPCODE_DEG_HIGH);
     });
 
   });
@@ -97,7 +97,7 @@ describe('Contract#MATRIX', function() {
     it('should return null degree', function() {
       expect(Contract.MATRIX.duration(
         ms('365d')
-      )).to.equal(null);
+      )).to.equal(constants.OPCODE_DEG_HIGH);
     });
 
   });
@@ -125,7 +125,7 @@ describe('Contract#MATRIX', function() {
     it('should return null degree', function() {
       expect(Contract.MATRIX.availability(
         2
-      )).to.equal(null);
+      )).to.equal(constants.OPCODE_DEG_HIGH);
     });
 
   });
@@ -145,7 +145,7 @@ describe('Contract#MATRIX', function() {
     });
 
     it('should return null degree', function() {
-      expect(Contract.MATRIX.speed(64)).to.equal(null);
+      expect(Contract.MATRIX.speed(64)).to.equal(constants.OPCODE_DEG_HIGH);
     });
 
   });

@@ -10,6 +10,10 @@ This package exposes a module that provides all of the tools needed to
 integrate with the Storj network. You must have Node.js v4.x.x, Python v2.x.x,
 and Git installed. [Complete documentation can be found here](http://storj.github.io/core).
 
+Demo
+----
+![doc/assets/demo.gif](Demo GIF)
+
 Quick Start (Command Line Interface)
 ------------------------------------
 

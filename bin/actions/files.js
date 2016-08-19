@@ -91,7 +91,7 @@ module.exports.upload = function(privateClient, keypass, bucket, filepath, env) 
 
               log('info', 'Storing file, hang tight!');
 
-              privateClient().storeFileInBucket(
+              privateClient.storeFileInBucket(
                 bucket,
                 token.token,
                 tmppath,

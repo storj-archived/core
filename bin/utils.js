@@ -269,3 +269,97 @@ module.exports.signmessage = function(privatekey, message, compact) {
     signature
   ]);
 };
+
+module.exports.prepareaudits = function(num, filepath) {
+  var auditgen;
+  var input;
+
+  try {
+    auditgen = storj.AuditStream(Number(num));
+    input = fs.createReadStream(filepath);
+  } catch (err) {
+    return log('error', err.message);
+  }
+
+  log('info', 'Generating challenges and merkle tree...');
+
+  auditgen.on('finish', function() {
+    log('info', '');
+    log('info', 'Merkle Root');
+    log('info', '-----------');
+    log('info', auditgen.getPrivateRecord().root);
+    log('info', '');
+    log('info', 'Challenges');
+    log('info', '----------');
+    auditgen.getPrivateRecord().challenges.forEach(function(chal) {
+      log('info', chal);
+    });
+    log('info', '');
+    log('info', 'Merkle Leaves');
+    log('info', '-------------');
+    auditgen.getPublicRecord().forEach(function(leaf) {
+      log('info', leaf);
+    });
+  });
+
+  auditgen.on('error', function(err) {
+    log('error', err.message);
+  });
+
+  input.pipe(auditgen);
+};
+
+module.exports.provefile = function(leaves, challenge, filepath) {
+  var proofgen;
+  var input;
+  var tree = leaves.split(',');
+
+  try {
+    proofgen = storj.ProofStream(tree, challenge);
+    input = fs.createReadStream(filepath);
+  } catch (err) {
+    return log('error', err.message);
+  }
+
+  log('info', 'Generating proof of possession...');
+
+  proofgen.once('data', function(result) {
+    log('info', '');
+    log('info', 'Challenge Response');
+    log('info', '------------------');
+    log('info', JSON.stringify(result));
+  });
+
+  proofgen.on('error', function(err) {
+    log('error', err.message);
+  });
+
+  input.pipe(proofgen);
+};
+
+module.exports.verifyproof = function(root, depth, resp) {
+  var verifier;
+  var result;
+
+  log('info', 'Verfifying proof response...');
+
+  try {
+    verifier = storj.Verification(JSON.parse(resp));
+    result = verifier.verify(root, Number(depth));
+  } catch (err) {
+    return log('error', err.message);
+  }
+
+  (function() {
+    log('info', '');
+    log('info', 'Expected: %s', [result[1]]);
+    log('info', 'Actual:   %s', [result[0]]);
+    log('info', '');
+  })();
+
+  if (result[0] === result[1]) {
+    log('info', 'The proof response is valid');
+  } else {
+    log('error', 'The proof response is not valid');
+  }
+};

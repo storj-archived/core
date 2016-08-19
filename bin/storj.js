@@ -503,7 +503,7 @@ var ACTIONS = {
                   tmppath,
                   function(err, file) {
                     if (err) {
-                      log('warn', 'Error occured. Triggering cleanup...');
+                      log('warn', 'Error occurred. Triggering cleanup...');
                       cleanup();
                       return log('error', err.message);
                     }

@@ -475,7 +475,7 @@ describe('BridgeClient', function() {
             _demuxer.DEFAULTS = { shardSize: 32 };
             return _demuxer;
           },
-          request: sinon.stub()
+          request: sinon.stub().returns({})
         });
         var _createFrame = sinon.stub(
           StubbedClient.prototype,
@@ -507,7 +507,7 @@ describe('BridgeClient', function() {
             port: 8080,
             nodeID: utils.rmd160('nodeid')
           }
-        });
+        }).returns({ cancel: sinon.stub() });
         var _request = sinon.stub(
           StubbedClient.prototype,
           '_request'
@@ -944,6 +944,26 @@ describe('BridgeClient', function() {
         });
       });
 
+      it('should set retries to 0 and abort if cancelled', function() {
+        var _abort = sinon.stub();
+        var opt = { retry: 6 };
+        var _request = sinon.stub(
+          BridgeClient.prototype,
+          '_request'
+        ).callsArgWith(
+          3,
+          new Error('Request failed')
+        ).returns({ abort: _abort });
+        var client = new BridgeClient();
+        var req = client.addShardToFileStagingFrame('myframe', {
+          meta: 'data'
+        }, opt, function() {});
+        req.cancel();
+        _request.restore();
+        expect(opt.retry).to.equal(0);
+        expect(_abort.called).to.equal(true);
+      });
+
     });
 
   });
@@ -1370,6 +1390,7 @@ describe('BridgeClient', function() {
         });
         var client = new StubbedClient();
         var emitter = new EventEmitter();
+        var state = new EventEmitter();
         var pointer = {
           farmer: {
             address: '127.0.0.1',
@@ -1377,7 +1398,7 @@ describe('BridgeClient', function() {
             nodeID: utils.rmd160('nodeid')
           }
         };
-        client._transferShard(emitter, 'name', pointer);
+        client._transferShard(emitter, 'name', pointer, state);
         emitter.once('retry', function(name, pointer2) {
           expect(name).to.equal('name');
           expect(pointer).to.equal(pointer2);
@@ -1409,7 +1430,7 @@ describe('BridgeClient', function() {
           client,
           '_shardTransferComplete'
         ).callsArg(2);
-        client._startTransfer(pointer, {}, {
+        client._startTransfer(pointer, new EventEmitter(), {
           frame: 'frame',
           tmpName: 'tmpname',
           size: 0,
@@ -1435,6 +1456,9 @@ describe('BridgeClient', function() {
         var _transferStatus = new EventEmitter();
         var _kill = sinon.stub();
         var client = new BridgeClient();
+        var state = new EventEmitter();
+        state.queue = { kill: _kill };
+        state.callback = sinon.stub();
         var pointer = {
           farmer: {
             address: '127.0.0.1',
@@ -1450,10 +1474,10 @@ describe('BridgeClient', function() {
           '_shardTransferComplete'
         ).callsArg(2);
         var _retry = sinon.stub(client, '_handleShardTmpFileFinish');
-        client._startTransfer(pointer, {
-          queue: { kill: _kill },
-          callback: sinon.stub()
-        }, { excludeFarmers: [], transferRetries: 3 });
+        client._startTransfer(pointer, state, {
+          excludeFarmers: [],
+          transferRetries: 3
+        });
         setImmediate(function() {
           _transferStatus.emit('retry');
           setImmediate(function() {
@@ -1496,6 +1520,45 @@ describe('BridgeClient', function() {
           'addShardToFileStagingFrame'
         ).callsArg(2);
         state.cleanup();
+        client._handleShardTmpFileFinish(state, {
+          frame: {},
+          hash: utils.sha256('')
+        }, function() {
+          _addShardToFileStagingFrame.restore();
+          done();
+        });
+      });
+
+      it('should callback early if the queue is killed', function(done) {
+        var StubbedClient = proxyquire('../../lib/bridge-client', {
+          fs: {
+            createReadStream: function() {
+              var wasRead = false;
+              return new stream.Readable({
+                read: function() {
+                  if (wasRead) {
+                    return this.push(null);
+                  }
+
+                  wasRead = true;
+                  this.push(Buffer('test'));
+                }
+              });
+            }
+          }
+        });
+        var client = new StubbedClient();
+        var state = new UploadState({
+          worker: utils.noop
+        });
+        var _addShardToFileStagingFrame = sinon.stub(
+          client,
+          'addShardToFileStagingFrame',
+          function(id, data, cb) {
+            state.cleanup();
+            cb();
+          }
+        );
         client._handleShardTmpFileFinish(state, {
           frame: {},
           hash: utils.sha256('')

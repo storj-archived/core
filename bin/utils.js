@@ -132,6 +132,8 @@ module.exports.getKeyRing = function(keypass, callback) {
 };
 
 module.exports.importkeyring = function(keypass, path) {
+  var self = this;
+
   this.getKeyRing(keypass, function(keyring) {
     try {
       fs.statSync(path);
@@ -143,7 +145,7 @@ module.exports.importkeyring = function(keypass, path) {
       }
     }
 
-    this.getNewPassword(
+    self.getNewPassword(
       'Enter password for the keys to be imported',
       function(err, result) {
         if (err) {

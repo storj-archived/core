@@ -108,10 +108,10 @@ var ACTIONS = {
     actions.frames.list(PrivateClient());
   },
   getframe: function getframe(frame) {
-    actions.frames.get(PrivateClient, frame);
+    actions.frames.get(PrivateClient(), frame);
   },
   removeframe: function removeframe(frame, env) {
-    actions.frames.remove(PrivateClient, frame, env);
+    actions.frames.remove(PrivateClient(), frame, env);
   },
   downloadfile: function downloadfile(bucket, id, filepath, env) {
     actions.files.download(
@@ -150,7 +150,7 @@ var ACTIONS = {
     actions.contacts.list(PublicClient(), page);
   },
   getcontact: function getcontact(nodeid) {
-    actions.contacts.list(PublicClient(), nodeid);
+    actions.contacts.get(PublicClient(), nodeid);
 
   },
   generatekey: function generatekey(env) {
@@ -267,6 +267,12 @@ program
   .action(ACTIONS.getframe);
 
 program
+  .command('remove-frame <frame-id>')
+  .option('-f, --force', 'skip confirmation prompt')
+  .description('removes the file staging frame by id')
+  .action(ACTIONS.removeframe);
+
+program
   .command('export-keyring <directory>')
   .description('compresses and exports keyring to specific directory')
   .action(ACTIONS.exportkeyring);
@@ -275,12 +281,6 @@ program
   .command('import-keyring <path>')
   .description('imports keyring tarball into current keyring')
   .action(ACTIONS.importkeyring);
-
-program
-  .command('remove-frame <frame-id>')
-  .option('-f, --force', 'skip confirmation prompt')
-  .description('removes the file staging frame by id')
-  .action(ACTIONS.removeframe);
 
 program
   .command('list-files <bucket-id>')

@@ -4,7 +4,7 @@ module.exports.account = require('./actions/account');
 
 module.exports.buckets = require('./actions/buckets');
 
-module.exports.contact = require('./actions/contacts');
+module.exports.contacts = require('./actions/contacts');
 
 module.exports.files = require('./actions/files');
 

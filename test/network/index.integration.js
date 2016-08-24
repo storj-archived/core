@@ -100,14 +100,18 @@ describe('Network/Integration/Tunnelling', function() {
     }); // NB: Force tunneling
 
     async.each(renters, function(node, next) {
+      node.transport._isPublic = true;
       node.join(function noop() {});
       next();
     }, function() {
       farmers[0].transport._isPublic = false;
+      console.log("before join");
       farmers[0].join(function() {
+        console.log("first farmer join");
         audit.end(shard);
         farmers[1].transport._isPublic = false;
         farmers[1].join(function() {
+          console.log("second farmer join");
           done();
         });
       });
@@ -140,6 +144,7 @@ describe('Network/Integration/Tunnelling', function() {
   describe('#getConsignToken', function() {
 
     it('should be issued an consign token from the farmer', function(done) {
+      this.timeout(6000);
       renter.getConsignToken(farmer, contract, audit, function(err, token) {
         expect(err).to.equal(null);
         expect(typeof token).to.equal('string');
@@ -155,8 +160,7 @@ describe('Network/Integration/Tunnelling', function() {
         stream.on('finish', function() {
           done();
         }).on('error', function(err) {
-          console.log('error', err);
-          done();
+          done(err);
         });
         stream.write(shard);
         stream.end();

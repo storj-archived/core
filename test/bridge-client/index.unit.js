@@ -461,6 +461,7 @@ describe('BridgeClient', function() {
                   cb(null);
                 }
               });
+              ws.destroy = sinon.stub();
               setTimeout(function() {
                 ws.emit('end');
               }, 200);
@@ -921,7 +922,7 @@ describe('BridgeClient', function() {
           meta: 'data'
         }, function() {
           _request.restore();
-          expect(_request.callCount).to.equal(7);
+          expect(_request.callCount).to.equal(25);
           done();
         });
       });

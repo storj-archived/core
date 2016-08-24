@@ -64,6 +64,7 @@
     "colors": "^1.1.2",
     "commander": "^2.9.0",
     "flushwritable": "^1.0.0",
+    "glob": "^7.0.5",
     "ip": "^1.1.2",
     "jsen": "^0.6.0",
     "json-stable-stringify": "^1.0.1",

@@ -93,7 +93,13 @@ var ACTIONS = {
     var privateClient = PrivateClient({
       concurrency: env.concurrency ? parseInt(env.concurrency) : 6
     });
-    actions.files.upload(privateClient, getKeyPass(), bucket, filepath, env);
+
+    var filepaths = process.argv;
+    var firstFileIndex = filepaths.indexOf(filepath);
+
+    filepaths.splice(0,firstFileIndex);
+
+    actions.files.upload(privateClient, getKeyPass(), bucket, filepaths, env);
   },
   createmirrors: function createmirrors(bucket, file, env) {
     actions.files.mirror(PrivateClient(), bucket, file, env);
@@ -295,7 +301,8 @@ program
 
 program
   .command('upload-file <bucket-id> <filepath>')
-  .option('-c, --concurrency <count>', 'max upload concurrency')
+  .option('-c, --concurrency <count>', 'max shard upload concurrency')
+  .option('-C, --fileconcurrency <count>', 'max file upload concurrency', 1)
   .option('-r, --redundancy <mirrors>', 'number of mirrors to create for file')
   .description('upload a file to the network and track in a bucket')
   .action(ACTIONS.uploadfile);

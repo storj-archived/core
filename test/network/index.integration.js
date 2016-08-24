@@ -105,13 +105,10 @@ describe('Network/Integration/Tunnelling', function() {
       next();
     }, function() {
       farmers[0].transport._isPublic = false;
-      console.log("before join");
       farmers[0].join(function() {
-        console.log("first farmer join");
         audit.end(shard);
         farmers[1].transport._isPublic = false;
         farmers[1].join(function() {
-          console.log("second farmer join");
           done();
         });
       });

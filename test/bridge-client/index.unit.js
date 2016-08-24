@@ -2,6 +2,7 @@
 
 'use strict';
 
+var ReadableStream = require('readable-stream');
 var BridgeClient = require('../../lib/bridge-client');
 var proxyquire = require('proxyquire');
 var sinon = require('sinon');
@@ -1385,9 +1386,9 @@ describe('BridgeClient', function() {
         var clientEmitter = new EventEmitter();
         var StubbedClient = proxyquire('../../lib/bridge-client', {
           fs: {
-            createReadStream: sinon.stub().returns({}),
-            '../data-channels/client': sinon.stub().returns(clientEmitter)
-          }
+            createReadStream: sinon.stub().returns({})
+          },
+          '../data-channels/client': sinon.stub().returns(clientEmitter)
         });
         var client = new StubbedClient();
         var emitter = new EventEmitter();
@@ -1407,6 +1408,49 @@ describe('BridgeClient', function() {
         });
         setImmediate(function() {
           clientEmitter.emit('error', new Error('FAIL'));
+        });
+      });
+
+      it('should cleanup when state killed', function(done) {
+        var clientEmitter = new EventEmitter();
+        var ws = new ReadableStream.Writable({});
+        ws.destroy = sinon.stub();
+        ws.end = sinon.stub();
+        clientEmitter.createWriteStream = function() {
+          return ws;
+        };
+        var StubbedClient = proxyquire('../../lib/bridge-client', {
+          fs: {
+            createReadStream: sinon.stub().returns(new ReadableStream({
+              read: utils.noop
+            }))
+          },
+          '../data-channels/client': sinon.stub().returns(clientEmitter)
+        });
+        var client = new StubbedClient();
+        var emitter = new EventEmitter();
+        var state = new EventEmitter();
+        state.dataChannels = [];
+        var pointer = {
+          farmer: {
+            address: '127.0.0.1',
+            port: 1337,
+            nodeID: utils.rmd160('nodeid')
+          }
+        };
+        client._transferShard(emitter, 'name', pointer, state);
+        emitter.on('finish', function() {
+          expect(ws.destroy.called).to.equal(true);
+          expect(ws.end.called).to.equal(true);
+          done();
+        });
+        setImmediate(function() {
+          setImmediate(function() {
+            clientEmitter.emit('open');
+            setImmediate(function() {
+              state.emit('killed');
+            });
+          });
         });
       });
 

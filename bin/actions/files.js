@@ -130,7 +130,7 @@ module.exports.upload = function(privateClient, keypass, bucket, filepaths, env)
                       return cleanup();
                     }
 
-                    log('info', '[ %s] Storing file, hang tight!', filename);
+                    log('info', '[ %s ] Storing file, hang tight!', filename);
 
                     privateClient.storeFileInBucket(
                       bucket,
@@ -162,7 +162,7 @@ module.exports.upload = function(privateClient, keypass, bucket, filepaths, env)
 
                         log(
                           'info',
-                          '[ %s ]File successfully stored in bucket.',
+                          '[ %s ] File successfully stored in bucket.',
                           filename
                         );
 
@@ -182,16 +182,18 @@ module.exports.upload = function(privateClient, keypass, bucket, filepaths, env)
 
                         uploadedCount++;
 
-                        if (uploadedCount === fileCount) {
-                          log(
-                            'info',
-                            '%s files uploaded. Done',
-                            [ uploadedCount ]
-                          );
+                        log(
+                          'info',
+                          '%s of %s files uploaded',
+                          [ uploadedCount, fileCount ]
+                        );
 
-                          process.exit();
+                        if (uploadedCount === fileCount) {
+                          log( 'info', 'Done.');
                         }
+
                         callback(null, filepath);
+
                       }
                     );
                   }
@@ -207,7 +209,7 @@ module.exports.upload = function(privateClient, keypass, bucket, filepaths, env)
             );
           }
 
-          log('info', 'Successfully uploaded %s files!', [ uploadedCount ]);
+          process.exit();
         }
       );
     });

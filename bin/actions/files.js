@@ -90,38 +90,45 @@ module.exports.upload = function(privateClient, keypass, bucket, filepaths, env)
 
         utils.makeTempDir(function(err, tmpDir, tmpCleanup) {
           if (err) {
-            return log('error', 'Unable to create temp directory for file %s: %s', [ filepath, err.message ]);
+            return log('error',
+                       'Unable to create temp directory for file %s: %s',
+                       [ filepath, err.message ]
+                      );
           }
 
           log('info', 'Encrypting file "%s"', [filepath]);
 
           var secret = new storj.DataCipherKeyIv();
           var encrypter = new storj.EncryptStream(secret);
+          var filename = path.basename(filepath);
 
-
-          var tmppath = path.join(tmpDir, path.basename(filepath) + '.crypt');
+          var tmppath = path.join(tmpDir, filename + '.crypt');
 
           function cleanup() {
-            log('info', '[ %s ] Cleaning up...', path.basename(filepath));
+            log('info', '[ %s ] Cleaning up...', filename);
             tmpCleanup();
-            log('info', '[ %s ] Finished cleaning!', filepath);
+            log('info', '[ %s ] Finished cleaning!', filename);
           }
 
           fs.createReadStream(filepath)
             .pipe(encrypter)
             .pipe(fs.createWriteStream(tmppath)).on('finish', function() {
-              log('info', '[ %s ] Encryption complete!', path.basename(filepath));
-              log('info', '[ %s ] Creating storage token...', path.basename(filepath));
+              log('info',
+                  '[ %s ] Encryption complete!',
+                  filename);
+              log('info',
+                  '[ %s ] Creating storage token...',
+                  filename);
               privateClient.createToken(
                 bucket,
                 'PUSH',
                 function(err, token) {
                   if (err) {
-                    log('[ %s ] error: %s', [ path.basename(filepath), err.message ]);
+                    log('[ %s ] error: %s', [ filename, err.message ]);
                     return cleanup();
                   }
 
-                  log('info', '[ %s] Storing file, hang tight!', path.basename(filepath));
+                  log('info', '[ %s] Storing file, hang tight!', filename);
 
                   privateClient.storeFileInBucket(
                     bucket,
@@ -129,17 +136,26 @@ module.exports.upload = function(privateClient, keypass, bucket, filepaths, env)
                     tmppath,
                     function(err, file) {
                       if (err) {
-                        log('warn', '[ %s ] Error occurred. Triggering cleanup...', path.basename(filepath));
+                        log('warn',
+                            '[ %s ] Error occurred. Triggering cleanup...',
+                            filename
+                           );
                         cleanup();
                         callback(err, filepath);
                         // Should retry this file
-                        return log('[ %s ] error: %s', [ path.basename(filepath), err.message ]);
+                        return log('[ %s ] error: %s',
+                                   [ filename, err.message ]
+                                  );
                       }
 
                       keyring.set(file.id, secret);
                       cleanup();
-                      log('info', '[ %s ] Encryption key saved to keyring.', path.basename(filepath));
-                      log('info', '[ %s ]File successfully stored in bucket.', path.basename(filepath));
+                      log('info',
+                          '[ %s ] Encryption key saved to keyring.',
+                          filename);
+                      log('info',
+                          '[ %s ]File successfully stored in bucket.',
+                          filename);
                       log(
                         'info',
                         'Name: %s, Type: %s, Size: %s bytes, ID: %s',
@@ -147,13 +163,19 @@ module.exports.upload = function(privateClient, keypass, bucket, filepaths, env)
                       );
 
                       if (env.redundancy) {
-                        return this.mirrors(privateClient, bucket, file.id, env);
+                        return this.mirrors(
+                          privateClient,
+                          bucket,
+                          file.id,
+                          env);
                       }
 
                       uploadedCount++;
 
                       if (uploadedCount === fileCount) {
-                        log('info', '%s files uploaded. Done', [ uploadedCount ]);
+                        log('info',
+                            '%s files uploaded. Done',
+                            [ uploadedCount ]);
                         process.exit();
                       }
                       callback(null, filepath);

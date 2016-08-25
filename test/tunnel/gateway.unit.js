@@ -118,6 +118,24 @@ describe('TunnelGateway', function() {
       req.emit('end');
     });
 
+    it('should log an error from the incoming message', function(done) {
+      var gw = TunnelGateway();
+      gw._logger.error = sinon.stub();
+      var req = new events.EventEmitter();
+      var res = {
+        writeHead: function(code) {
+          expect(code).to.equal(400);
+        },
+        end: done
+      };
+      gw._handleRPC(req, res);
+      setImmediate(function() {
+        req.emit('error', new Error('socket hang up'));
+        expect(gw._logger.error.called).to.equal(true);
+        done();
+      });
+    });
+
   });
 
   describe('#open', function() {

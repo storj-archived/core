@@ -88,10 +88,11 @@ module.exports.upload = function(privateClient, keypass, bucket, filepaths, env)
 
         utils.makeTempDir(function(err, tmpDir, tmpCleanup) {
           if (err) {
-            return log('error',
-                       'Unable to create temp directory for file %s: %s',
-                       [ filepath, err.message ]
-                      );
+            return log(
+              'error',
+              'Unable to create temp directory for file %s: %s',
+              [ filepath, err.message ]
+            );
           }
 
           log('info', 'Encrypting file "%s"', [filepath]);
@@ -111,12 +112,18 @@ module.exports.upload = function(privateClient, keypass, bucket, filepaths, env)
           fs.createReadStream(filepath)
             .pipe(encrypter)
             .pipe(fs.createWriteStream(tmppath)).on('finish', function() {
-              log('info',
-                  '[ %s ] Encryption complete!',
-                  filename);
-              log('info',
-                  '[ %s ] Creating storage token...',
-                  filename);
+              log(
+                'info',
+                '[ %s ] Encryption complete!',
+                filename
+              );
+
+              log(
+                'info',
+                '[ %s ] Creating storage token...',
+                filename
+              );
+
               privateClient.createToken(
                 bucket,
                 'PUSH',
@@ -134,26 +141,34 @@ module.exports.upload = function(privateClient, keypass, bucket, filepaths, env)
                     tmppath,
                     function(err, file) {
                       if (err) {
-                        log('warn',
-                            '[ %s ] Error occurred. Triggering cleanup...',
-                            filename
-                           );
+                        log(
+                          'warn',
+                          '[ %s ] Error occurred. Triggering cleanup...',
+                          filename
+                         );
                         cleanup();
                         callback(err, filepath);
                         // Should retry this file
-                        return log('[ %s ] error: %s',
-                                   [ filename, err.message ]
-                                  );
+                        return log(
+                          '[ %s ] error: %s',
+                          [ filename, err.message ]
+                        );
                       }
 
                       keyring.set(file.id, secret);
                       cleanup();
-                      log('info',
-                          '[ %s ] Encryption key saved to keyring.',
-                          filename);
-                      log('info',
-                          '[ %s ]File successfully stored in bucket.',
-                          filename);
+                      log(
+                        'info',
+                        '[ %s ] Encryption key saved to keyring.',
+                        filename
+                      );
+
+                      log(
+                        'info',
+                        '[ %s ]File successfully stored in bucket.',
+                        filename
+                      );
+
                       log(
                         'info',
                         'Name: %s, Type: %s, Size: %s bytes, ID: %s',
@@ -171,9 +186,12 @@ module.exports.upload = function(privateClient, keypass, bucket, filepaths, env)
                       uploadedCount++;
 
                       if (uploadedCount === fileCount) {
-                        log('info',
-                            '%s files uploaded. Done',
-                            [ uploadedCount ]);
+                        log(
+                          'info',
+                          '%s files uploaded. Done',
+                          [ uploadedCount ]
+                        );
+
                         process.exit();
                       }
                       callback(null, filepath);

@@ -2,6 +2,7 @@
 
 'use strict';
 
+var proxyquire = require('proxyquire');
 var sinon = require('sinon');
 var expect = require('chai').expect;
 var Protocol = require('../../lib/network/protocol');
@@ -12,6 +13,10 @@ var constants = require('../../lib/constants');
 var StorageItem = require('../../lib/storage/item');
 var utils = require('../../lib/utils');
 var TriggerManager = require('../../lib/sips/0003').TriggerManager;
+var EventEmitter = require('events').EventEmitter;
+var rs = require('readable-stream');
+var ReadableStream = rs.Readable;
+var WritableStream = rs.Writable;
 
 describe('Protocol', function() {
 
@@ -409,6 +414,43 @@ describe('Protocol', function() {
       });
       proto._handleMirror({}, function(err) {
         expect(err.message).to.equal('Failed');
+        done();
+      });
+    });
+
+    it('should callback with error if channel cannot open', function(done) {
+      var dcx = new EventEmitter();
+      dcx.createReadStream = function() {
+        return new ReadableStream({ read: utils.noop });
+      };
+      var StubbedProtocol = proxyquire('../../lib/network/protocol', {
+        '../data-channels/client': function() {
+          return dcx;
+        }
+      });
+      var proto = new StubbedProtocol({
+        network: {
+          _logger: Logger(0),
+          manager: {
+            load: function(hash, callback) {
+              callback(null, {
+                contracts: {
+                  '4e1243bd22c66e76c2ba9eddc1f91394e57f9f83': {}
+                },
+                shard: new WritableStream({ write: utils.noop })
+              });
+              setImmediate(function() {
+                dcx.emit('error', new Error('Failed to open channel'));
+              });
+            }
+          }
+        }
+      });
+      proto._handleMirror({
+        contact: { nodeID: '4e1243bd22c66e76c2ba9eddc1f91394e57f9f83' },
+        data_hash: '4e1243bd22c66e76c2ba9eddc1f91394e57f9f83'
+      }, function(err) {
+        expect(err.message).to.equal('Failed to open channel');
         done();
       });
     });

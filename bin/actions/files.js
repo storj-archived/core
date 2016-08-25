@@ -53,7 +53,6 @@ module.exports.remove = function(keypass, privateClient, id, fileId, env) {
 };
 
 module.exports.upload = function(privateClient, keypass, bucket, filepaths, env) {
-  console.log('filepaths before eachOfSeries', filepaths);
   var expandedFilepaths = [];
 
   async.eachOfSeries(filepaths, function(origFilepath, index, callback) {

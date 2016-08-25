@@ -67,7 +67,7 @@
     "ip": "^1.1.2",
     "jsen": "^0.6.0",
     "json-stable-stringify": "^1.0.1",
-    "kad": "^1.5.16",
+    "kad": "^1.5.17",
     "kad-logger-json": "^0.1.2",
     "kad-quasar": "^0.2.0",
     "knuth-shuffle": "^1.0.1",

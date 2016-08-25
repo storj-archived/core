@@ -7,6 +7,7 @@ var EventEmitter = require('events').EventEmitter;
 var proxyquire = require('proxyquire');
 var sinon = require('sinon');
 var TunnelErrors = require('../../lib/tunnel/error-codes');
+var kad = require('kad');
 
 describe('TunnelServer', function() {
 
@@ -32,7 +33,8 @@ describe('TunnelServer', function() {
         _server: {
           close: sinon.stub().callsArgWith(0, new Error('Failed to close'))
         },
-        _shutdownGateways: sinon.stub().callsArg(0)
+        _shutdownGateways: sinon.stub().callsArg(0),
+        _logger: kad.Logger(0)
       }, function(err) {
         expect(err.message).to.equal('Failed to close');
         done();
@@ -50,7 +52,8 @@ describe('TunnelServer', function() {
         test3: { close: sinon.stub().callsArg(0) },
       };
       TunnelServer.prototype._shutdownGateways.call({
-        _gateways: _gateways
+        _gateways: _gateways,
+        _logger: kad.Logger(0)
       }, function() {
         expect(_gateways.test1.close.called).to.equal(true);
         expect(_gateways.test2.close.called).to.equal(true);

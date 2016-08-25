@@ -138,6 +138,24 @@ describe('TunnelGateway', function() {
 
   });
 
+  describe('#_handleDataChannel', function() {
+
+    it('should log errors to the logger', function(done) {
+      var _error = sinon.stub();
+      var gw = TunnelGateway({ logger: { error: _error } });
+      var socket = new events.EventEmitter();
+      gw._handleDataChannel(socket);
+      setImmediate(function() {
+        socket.emit('error', new Error('Failed'));
+        setImmediate(function() {
+          expect(_error.called).to.equal(true);
+          done();
+        });
+      });
+    });
+
+  });
+
   describe('#open', function() {
 
     it('should open the gateway on a random port', function(done) {

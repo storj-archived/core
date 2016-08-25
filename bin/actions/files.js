@@ -5,7 +5,7 @@ var fs = require('fs');
 var path = require('path');
 var through = require('through');
 var storj = require('../..');
-var glob = require('glob');
+var globule = require('globule');
 var async = require('async');
 
 module.exports.list = function(privateClient, bucketid) {
@@ -55,20 +55,18 @@ module.exports.remove = function(keypass, privateClient, id, fileId, env) {
 module.exports.upload = function(privateClient, keypass, bucket, filepaths, env) {
   async.eachOfSeries(filepaths, function(origFilepath, index, callback) {
     // In *NIX the wildcard is already parsed so this will cover other OS's
-    glob(origFilepath, function(err, parsedFileArray) {
-      if (err) {
-        return log('error', 'Invalid path or file %s', [ err ]);
-      }
+    var parsedFileArray = globule.find(origFilepath);
 
-      var newPathFound = ( filepaths.indexOf(parsedFileArray[0]) === -1 );
-      var pathWasParsed = (( parsedFileArray.length > 1 ) || newPathFound );
+    console.log('parsedFileArray: ', parsedFileArray);
 
-      if (pathWasParsed) {
-        filepaths.splice(index, 1, parsedFileArray);
-      }
+    var newPathFound = ( filepaths.indexOf(parsedFileArray[0]) === -1 );
+    var pathWasParsed = (( parsedFileArray.length > 1 ) || newPathFound );
 
-      callback();
-    });
+    if (pathWasParsed) {
+      filepaths.splice(index, 1, parsedFileArray);
+    }
+
+    callback();
   }, function(err) {
     if (err) {
       return log('error', 'Problem parsing file paths');

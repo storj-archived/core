@@ -95,7 +95,6 @@ var ACTIONS = {
     });
 
     var filepaths = process.argv.slice();
-    console.log('filepaths is: ', filepaths);
     var firstFileIndex = filepaths.indexOf(filepath);
 
     filepaths.splice(0,firstFileIndex);

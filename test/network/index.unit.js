@@ -226,8 +226,32 @@ describe('Network (public)', function() {
 
 describe('Network (private)', function() {
 
-  describe('#_validateContact', function() {
+  describe('#_warnIfClockNotSynced', function() {
 
+    it('should warn if there is an error with ntp server', function(done) {
+      var _warn = sinon.stub();
+      var StubNet = proxyquire('../../lib/network', {
+        '../utils': {
+          ensureNtpClockIsSynchronized: sinon.stub().callsArgWith(
+            0,
+            new Error('Timeout')
+          )
+        }
+      });
+      var _warnIfClockNotSynced = StubNet.prototype._warnIfClockNotSynced.bind(
+        {
+          _logger: { warn: _warn }
+        }
+      );
+      _warnIfClockNotSynced(function() {
+        expect(_warn.called).to.equal(true);
+        done();
+      });
+    });
+
+  });
+
+  describe('#_validateContact', function() {
 
     it('should return an error if the contact is invalid', function(done) {
       var _removeContact = sinon.stub();

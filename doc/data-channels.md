@@ -76,11 +76,9 @@ channel.addEventListener('open', function() {
   channel.send(new Blob([/* ... */]));
 });
 
-channel.addEventListener('message', function(e) {
-  var data = JSON.parse(e.data);
-
-  if (data.code && data.code !== 200) {
-    console.error('Error consigning data:', data.message);
+channel.addEventListener('close', function(e) {
+  if (e.code !== 1000) {
+    console.error('Error consigning data:', e.reason);
   } else {
     console.log('Successfully consigned data!');
   }
@@ -116,11 +114,15 @@ channel.addEventListener('message', function(e) {
   fileparts.push(e.data);
 });
 
-channel.addEventListener('close', function() {
-  var file = new Blob(fileparts, { type: '<mime_type>' });
-  var url = URL.createObjectURL(file);
+channel.addEventListener('close', function(e) {
+  if (e.code !== 1000) {
+    console.error(e.reason);
+  } else {
+    var file = new Blob(fileparts, { type: '<mime_type>' });
+    var url = URL.createObjectURL(file);
 
-  location.href = url;
+    location.href = url;
+  }
 });
 ```
 

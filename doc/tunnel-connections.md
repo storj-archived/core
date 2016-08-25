@@ -23,6 +23,7 @@ nodes do not need to use the tunnel to contact other nodes on the network, but
 rather only *to be contacted*.
 
 ### Tunneling Diagram
+
 ![assets/tunneling.png](assets/tunneling.png)
 
 ### Announcing Willingness
@@ -207,6 +208,25 @@ the tunnel client, which is responsible for converting the data into the
 appropriate signal format and write the result back to the tunnel server. The
 tunnel server must then use the signal metadata to multiplex the streams out to
 their respective data channel originators.
+
+When the loopback data channel connection is terminated on the farmer side, a
+special message needs to be sent to the tunneler to indicate that the
+connection should be closed. In this case the tunneled node will send a JSON
+payload as the last frame that includes a `code` and `message`. This frame
+should be tagged as a textual frame to differentiate it from previous parts of
+the transferred data.
+
+An example of this JSON in the termination signal might be:
+
+```
+{"code":1000,"message":"Finished"}
+```
+
+So serialized in the multiplexed tunnel format, that would look like:
+
+```
+<Buffer 0d 01 9d b4 a0 58 5f 31 65 22 3a 22 46 69 6e 69 73 68 65 64 22 7d ... >
+```
 
 ### Reference
 

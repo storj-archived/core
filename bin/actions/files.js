@@ -53,15 +53,14 @@ module.exports.remove = function(keypass, privateClient, id, fileId, env) {
 };
 
 module.exports.upload = function(privateClient, keypass, bucket, filepaths, env) {
+  console.log('filepaths before eachOfSeries', filepaths);
+  var expandedFilepaths = [];
+
   async.eachOfSeries(filepaths, function(origFilepath, index, callback) {
     // In *NIX the wildcard is already parsed so this will cover other OS's
     var parsedFileArray = globule.find(origFilepath);
-    var newPathFound = ( filepaths.indexOf(parsedFileArray[0]) === -1 );
-    var pathWasParsed = (( parsedFileArray.length > 1 ) || newPathFound );
 
-    if (pathWasParsed) {
-      filepaths.splice(index, 1, parsedFileArray);
-    }
+    expandedFilepaths = expandedFilepaths.concat(parsedFileArray);
 
     callback();
   }, function(err) {
@@ -69,7 +68,7 @@ module.exports.upload = function(privateClient, keypass, bucket, filepaths, env)
       return log('error', 'Problem parsing file paths');
     }
 
-    var fileCount = filepaths.length;
+    var fileCount = expandedFilepaths.length;
     var uploadedCount = 0;
     var fileConcurrency = env.fileconcurrency;
 
@@ -77,134 +76,141 @@ module.exports.upload = function(privateClient, keypass, bucket, filepaths, env)
 
     utils.getKeyRing(keypass, function(keyring) {
       log('info', 'Generating encryption key...');
+      async.eachLimit(
+        expandedFilepaths,
+        fileConcurrency,
+        function(filepath, callback) {
+          if (!storj.utils.existsSync(filepath)) {
+            return log('error', 'No file found at %s', filepath);
+          }
 
-      async.eachLimit(filepaths, fileConcurrency, function(filepath, callback) {
-        if (!storj.utils.existsSync(filepath)) {
-          return log('error', 'No file found at %s', filepath);
-        }
+          utils.makeTempDir(function(err, tmpDir, tmpCleanup) {
+            if (err) {
+              return log(
+                'error',
+                'Unable to create temp directory for file %s: %s',
+                [ filepath, err.message ]
+              );
+            }
 
-        utils.makeTempDir(function(err, tmpDir, tmpCleanup) {
+            log('info', 'Encrypting file "%s"', [filepath]);
+
+            var secret = new storj.DataCipherKeyIv();
+            var encrypter = new storj.EncryptStream(secret);
+            var filename = path.basename(filepath);
+
+            var tmppath = path.join(tmpDir, filename + '.crypt');
+
+            function cleanup() {
+              log('info', '[ %s ] Cleaning up...', filename);
+              tmpCleanup();
+              log('info', '[ %s ] Finished cleaning!', filename);
+            }
+
+            fs.createReadStream(filepath)
+              .pipe(encrypter)
+              .pipe(fs.createWriteStream(tmppath)).on('finish', function() {
+                log(
+                  'info',
+                  '[ %s ] Encryption complete!',
+                  filename
+                );
+
+                log(
+                  'info',
+                  '[ %s ] Creating storage token...',
+                  filename
+                );
+
+                privateClient.createToken(
+                  bucket,
+                  'PUSH',
+                  function(err, token) {
+                    if (err) {
+                      log('[ %s ] error: %s', [ filename, err.message ]);
+                      return cleanup();
+                    }
+
+                    log('info', '[ %s] Storing file, hang tight!', filename);
+
+                    privateClient.storeFileInBucket(
+                      bucket,
+                      token.token,
+                      tmppath,
+                      function(err, file) {
+                        if (err) {
+                          log(
+                            'warn',
+                            '[ %s ] Error occurred. Triggering cleanup...',
+                            filename
+                           );
+                          cleanup();
+                          callback(err, filepath);
+                          // Should retry this file
+                          return log(
+                            '[ %s ] error: %s',
+                            [ filename, err.message ]
+                          );
+                        }
+
+                        keyring.set(file.id, secret);
+                        cleanup();
+                        log(
+                          'info',
+                          '[ %s ] Encryption key saved to keyring.',
+                          filename
+                        );
+
+                        log(
+                          'info',
+                          '[ %s ]File successfully stored in bucket.',
+                          filename
+                        );
+
+                        log(
+                          'info',
+                          'Name: %s, Type: %s, Size: %s bytes, ID: %s',
+                          [file.filename, file.mimetype, file.size, file.id]
+                        );
+
+                        if (env.redundancy) {
+                          return this.mirrors(
+                            privateClient,
+                            bucket,
+                            file.id,
+                            env);
+                        }
+
+                        uploadedCount++;
+
+                        if (uploadedCount === fileCount) {
+                          log(
+                            'info',
+                            '%s files uploaded. Done',
+                            [ uploadedCount ]
+                          );
+
+                          process.exit();
+                        }
+                        callback(null, filepath);
+                      }
+                    );
+                  }
+                );
+              });
+          });
+        }, function(err, filepath) {
           if (err) {
-            return log(
+            log(
               'error',
-              'Unable to create temp directory for file %s: %s',
-              [ filepath, err.message ]
+              '[ %s ] A file has failed to upload: %s',
+              [ filepath, err ]
             );
           }
 
-          log('info', 'Encrypting file "%s"', [filepath]);
-
-          var secret = new storj.DataCipherKeyIv();
-          var encrypter = new storj.EncryptStream(secret);
-          var filename = path.basename(filepath);
-
-          var tmppath = path.join(tmpDir, filename + '.crypt');
-
-          function cleanup() {
-            log('info', '[ %s ] Cleaning up...', filename);
-            tmpCleanup();
-            log('info', '[ %s ] Finished cleaning!', filename);
-          }
-
-          fs.createReadStream(filepath)
-            .pipe(encrypter)
-            .pipe(fs.createWriteStream(tmppath)).on('finish', function() {
-              log(
-                'info',
-                '[ %s ] Encryption complete!',
-                filename
-              );
-
-              log(
-                'info',
-                '[ %s ] Creating storage token...',
-                filename
-              );
-
-              privateClient.createToken(
-                bucket,
-                'PUSH',
-                function(err, token) {
-                  if (err) {
-                    log('[ %s ] error: %s', [ filename, err.message ]);
-                    return cleanup();
-                  }
-
-                  log('info', '[ %s] Storing file, hang tight!', filename);
-
-                  privateClient.storeFileInBucket(
-                    bucket,
-                    token.token,
-                    tmppath,
-                    function(err, file) {
-                      if (err) {
-                        log(
-                          'warn',
-                          '[ %s ] Error occurred. Triggering cleanup...',
-                          filename
-                         );
-                        cleanup();
-                        callback(err, filepath);
-                        // Should retry this file
-                        return log(
-                          '[ %s ] error: %s',
-                          [ filename, err.message ]
-                        );
-                      }
-
-                      keyring.set(file.id, secret);
-                      cleanup();
-                      log(
-                        'info',
-                        '[ %s ] Encryption key saved to keyring.',
-                        filename
-                      );
-
-                      log(
-                        'info',
-                        '[ %s ]File successfully stored in bucket.',
-                        filename
-                      );
-
-                      log(
-                        'info',
-                        'Name: %s, Type: %s, Size: %s bytes, ID: %s',
-                        [file.filename, file.mimetype, file.size, file.id]
-                      );
-
-                      if (env.redundancy) {
-                        return this.mirrors(
-                          privateClient,
-                          bucket,
-                          file.id,
-                          env);
-                      }
-
-                      uploadedCount++;
-
-                      if (uploadedCount === fileCount) {
-                        log(
-                          'info',
-                          '%s files uploaded. Done',
-                          [ uploadedCount ]
-                        );
-
-                        process.exit();
-                      }
-                      callback(null, filepath);
-                    }
-                  );
-                }
-              );
-            });
-        });
-      }, function(err, filepath) {
-        if (err) {
-          log('error', '[ %s ] A file has failed to upload: %s', [ filepath, err ]);
+          log('info', 'Successfully uploaded %s files!', [ uploadedCount ]);
         }
-
-        log('info', 'Successfully uploaded %s files!', [ uploadedCount ]);
-      });
+      );
     });
   });
 };

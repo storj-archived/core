@@ -10,7 +10,8 @@ var prompt = require('prompt');
 var colors = require('colors/safe');
 var storj = require('..');
 var merge = require('merge');
-var log = require('./logger')().log;
+var logger = require('./logger');
+var log = logger().log;
 var utils = require('./utils');
 var actions = require('./index');
 
@@ -27,16 +28,21 @@ prompt.delimiter = colors.cyan('  > ');
 program.version(require('../package').version);
 program.option('-u, --url <url>', 'set the base url for the api');
 program.option('-k, --keypass <password>', 'unlock keyring without prompt');
+program.option('-d, --debug', 'display debug data', 4);
 
 function PrivateClient(options) {
+  var loglevel = program.debug || 3;
+
   return storj.BridgeClient(program.url, merge({
     keypair: utils.loadKeyPair(),
-    logger: log
+    logger: logger(loglevel).log
   }, options));
 }
 
 function PublicClient() {
-  return storj.BridgeClient(program.url, { logger: log });
+  var loglevel = program.debug || 3;
+
+  return storj.BridgeClient(program.url, { logger: logger(loglevel).log });
 }
 
 function getKeyPass() {

@@ -1,19 +1,23 @@
 'use strict';
 var colors = require('colors/safe');
 
-function Logger() {
+function Logger(loglevel) {
   if (!(this instanceof Logger)) {
-    return new Logger();
+    return new Logger(loglevel);
   }
 
   var self = this;
+
+  this._loglevel = loglevel || 3;
 
   this.log._logger = function() {
     var type = arguments[0];
     var message = arguments[1];
     var values = Array.prototype.slice.call(arguments, 2);
-
-    self.log(type, message, values);
+    
+    if (self._shouldLog(type) === true) {
+      self.log(type, message, values);
+    }
   };
 
   this.log.info = this.log._logger.bind(null, 'info');
@@ -24,6 +28,7 @@ function Logger() {
 }
 
 Logger.prototype.log = function(type, message, args) {
+
   switch (type) {
     case 'debug':
       message = colors.bold.magenta(' [debug]  ') + message;
@@ -41,6 +46,21 @@ Logger.prototype.log = function(type, message, args) {
 
   message = colors.bold.gray(' [' + new Date() + ']') + message;
   console.log.apply(console, [message].concat(args || []));
+};
+
+Logger.prototype._shouldLog = function(type) {
+  var level = this._loglevel;
+
+  if (
+    (type === 'error' && level >= 1) ||
+    (type === 'warn' && level >= 2) ||
+    (type === 'info' && level >= 3) ||
+    (type === 'debug' && level >= 4)
+  ) {
+    return true;
+  }
+
+  return false;
 };
 
 module.exports = Logger;

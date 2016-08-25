@@ -26,7 +26,7 @@ module.exports.list = function(privateClient, bucketid) {
   });
 };
 
-module.exports.remove = function(keypass, privateClient, id, fileId, env) {
+module.exports.remove = function(privateClient, keypass, id, fileId, env) {
   function destroyFile() {
     utils.getKeyRing(keypass, function(keyring) {
       privateClient.removeFileFromBucket(id, fileId, function(err) {

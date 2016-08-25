@@ -56,9 +56,6 @@ module.exports.upload = function(privateClient, keypass, bucket, filepaths, env)
   async.eachOfSeries(filepaths, function(origFilepath, index, callback) {
     // In *NIX the wildcard is already parsed so this will cover other OS's
     var parsedFileArray = globule.find(origFilepath);
-
-    console.log('parsedFileArray: ', parsedFileArray);
-
     var newPathFound = ( filepaths.indexOf(parsedFileArray[0]) === -1 );
     var pathWasParsed = (( parsedFileArray.length > 1 ) || newPathFound );
 
@@ -203,7 +200,7 @@ module.exports.upload = function(privateClient, keypass, bucket, filepaths, env)
         });
       }, function(err, filepath) {
         if (err) {
-          log('error', 'A file has failed to upload: %s', [ filepath ]);
+          log('error', '[ %s ] A file has failed to upload: %s', [ filepath, err ]);
         }
 
         log('info', 'Successfully uploaded %s files!', [ uploadedCount ]);

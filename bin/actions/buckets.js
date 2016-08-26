@@ -2,8 +2,10 @@
 var log = require('./../logger')().log;
 var utils = require('./../utils');
 
-module.exports.list = function(privateClient) {
-  privateClient.getBuckets(function(err, buckets) {
+module.exports.list = function() {
+  var client = this._storj.PrivateClient();
+
+  client.getBuckets(function(err, buckets) {
     if (err) {
       return log('error', err.message);
     }
@@ -22,8 +24,10 @@ module.exports.list = function(privateClient) {
   });
 };
 
-module.exports.get = function(privateClient, id) {
-  privateClient.getBucketById(id, function(err, bucket) {
+module.exports.get = function(id) {
+  var client = this._storj.PrivateClient();
+
+  client.getBucketById(id, function(err, bucket) {
     if (err) {
       return log('error', err.message);
     }
@@ -36,9 +40,11 @@ module.exports.get = function(privateClient, id) {
   });
 };
 
-module.exports.remove = function(privateClient, id, env) {
+module.exports.remove = function(id, env) {
+  var client = this._storj.PrivateClient();
+
   function destroyBucket() {
-    privateClient.destroyBucketById(id, function(err) {
+    client.destroyBucketById(id, function(err) {
       if (err) {
         return log('error', err.message);
       }
@@ -57,8 +63,10 @@ module.exports.remove = function(privateClient, id, env) {
   destroyBucket();
 };
 
-module.exports.add = function(privateClient, name, storage, transfer) {
-  privateClient.createBucket({
+module.exports.add = function(name, storage, transfer) {
+  var client = this._storj.PrivateClient();
+
+  client.createBucket({
     name: name,
     storage: storage,
     transfer: transfer
@@ -75,8 +83,10 @@ module.exports.add = function(privateClient, name, storage, transfer) {
   });
 };
 
-module.exports.update = function(privateClient, id, name, storage, transfer) {
-  privateClient.updateBucketById(id, {
+module.exports.update = function(id, name, storage, transfer) {
+  var client = this._storj.PrivateClient();
+
+  client.updateBucketById(id, {
     name: name,
     storage: storage,
     transfer: transfer
@@ -89,6 +99,23 @@ module.exports.update = function(privateClient, id, name, storage, transfer) {
       'info',
       'ID: %s, Name: %s, Storage: %s, Transfer: %s',
       [bucket.id, bucket.name, bucket.storage, bucket.transfer]
+    );
+  });
+};
+
+module.exports.createtoken = function(bucket, operation) {
+  var client = this._storj.PrivateClient();
+
+  client.createToken(bucket, operation, function(err, token) {
+    if (err) {
+      return log('error', err.message);
+    }
+
+    log('info', 'Token successfully created.');
+    log(
+      'info',
+      'Token: %s, Bucket: %s, Operation: %s',
+      [token.token, token.bucket, token.operation]
     );
   });
 };

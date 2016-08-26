@@ -2,8 +2,10 @@
 var log = require('./../logger')().log;
 var utils = require('./../utils');
 
-module.exports.list = function(privateClient) {
-  privateClient.getPublicKeys(function(err, keys) {
+module.exports.list = function() {
+  var client = this._storj.PrivateClient();
+
+  client.getPublicKeys(function(err, keys) {
     if (err) {
       return log('error', err.message);
     }
@@ -14,8 +16,10 @@ module.exports.list = function(privateClient) {
   });
 };
 
-module.exports.add = function(privateClient, pubkey) {
-  privateClient.addPublicKey(pubkey, function(err) {
+module.exports.add = function(pubkey) {
+  var client = this._storj.PrivateClient();
+
+  client.addPublicKey(pubkey, function(err) {
     if (err) {
       return log('error', err.message);
     }
@@ -24,9 +28,11 @@ module.exports.add = function(privateClient, pubkey) {
   });
 };
 
-module.exports.remove = function(privateClient, pubkey, env) {
+module.exports.remove = function(pubkey, env) {
+  var client = this._storj.PrivateClient();
+
   function destroyKey() {
-    privateClient.destroyPublicKey(pubkey, function(err) {
+    client.destroyPublicKey(pubkey, function(err) {
       if (err) {
         return log('error', err.message);
       }

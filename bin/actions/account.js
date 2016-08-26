@@ -10,7 +10,9 @@ var HOME = platform !== 'win32' ? process.env.HOME : process.env.USERPROFILE;
 var DATADIR = path.join(HOME, '.storjcli');
 var KEYPATH = path.join(DATADIR, 'id_ecdsa');
 
-module.exports.getInfo =  function(client) {
+module.exports.getInfo =  function() {
+  var client = this._storj.PublicClient();
+
   client.getInfo(function(err, info) {
      if (err) {
        return log('error', err.message);
@@ -26,7 +28,9 @@ module.exports.getInfo =  function(client) {
    });
 };
 
-module.exports.register = function(client) {
+module.exports.register = function() {
+  var client = this._storj.PublicClient();
+
   utils.getCredentials(function(err, result) {
     if (err) {
       return log('error', err.message);
@@ -46,6 +50,7 @@ module.exports.register = function(client) {
 };
 
 module.exports.login = function(url) {
+
   if (storj.utils.existsSync(KEYPATH)) {
     return log('error', 'This device is already paired.');
   }
@@ -71,7 +76,8 @@ module.exports.login = function(url) {
   });
 };
 
-module.exports.logout = function(client) {
+module.exports.logout = function() {
+  var client = this._storj.PrivateClient();
   var keypair = utils.loadKeyPair();
 
   client.destroyPublicKey(keypair.getPublicKey(), function(err) {
@@ -87,7 +93,9 @@ module.exports.logout = function(client) {
   });
 };
 
-module.exports.resetpassword = function(client, email) {
+module.exports.resetpassword = function(email) {
+  var client = this._storj.PrivateClient();
+
   utils.getNewPassword(
     'Enter your new desired password',
     function(err, result) {

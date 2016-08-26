@@ -6,8 +6,10 @@ var path = require('path');
 var through = require('through');
 var storj = require('../..');
 
-module.exports.list = function(privateClient, bucketid) {
-  privateClient.listFilesInBucket(bucketid, function(err, files) {
+module.exports.list = function(bucketid) {
+  var client = this._storj.PrivateClient();
+
+  client.listFilesInBucket(bucketid, function(err, files) {
     if (err) {
       return log('error', err.message);
     }
@@ -26,10 +28,13 @@ module.exports.list = function(privateClient, bucketid) {
   });
 };
 
-module.exports.remove = function(privateClient, keypass, id, fileId, env) {
+module.exports.remove = function(id, fileId, env) {
+  var client = this._storj.PrivateClient();
+  var keypass = this._storj.getKeyPass();
+
   function destroyFile() {
     utils.getKeyRing(keypass, function(keyring) {
-      privateClient.removeFileFromBucket(id, fileId, function(err) {
+      client.removeFileFromBucket(id, fileId, function(err) {
         if (err) {
           return log('error', err.message);
         }
@@ -50,7 +55,13 @@ module.exports.remove = function(privateClient, keypass, id, fileId, env) {
   destroyFile();
 };
 
-module.exports.upload = function(privateClient, keypass, bucket, filepath, env) {
+module.exports.upload = function(bucket, filepath, env) {
+  var self = this;
+  var client = this._storj.PrivateClient({
+    concurrency: env.concurrency ? parseInt(env.concurrency) : 6
+  });
+  var keypass = this._storj.getKeyPass();
+
   if (!storj.utils.existsSync(filepath)) {
     return log('error', 'No file found at %s', filepath);
   }
@@ -80,7 +91,7 @@ module.exports.upload = function(privateClient, keypass, bucket, filepath, env) 
         .pipe(fs.createWriteStream(tmppath)).on('finish', function() {
           log('info', 'Encryption complete!');
           log('info', 'Creating storage token...');
-          privateClient.createToken(
+          client.createToken(
             bucket,
             'PUSH',
             function(err, token) {
@@ -91,7 +102,7 @@ module.exports.upload = function(privateClient, keypass, bucket, filepath, env) 
 
               log('info', 'Storing file, hang tight!');
 
-              privateClient.storeFileInBucket(
+              client.storeFileInBucket(
                 bucket,
                 token.token,
                 tmppath,
@@ -113,7 +124,13 @@ module.exports.upload = function(privateClient, keypass, bucket, filepath, env) 
                   );
 
                   if (env.redundancy) {
-                    return this.mirrors(privateClient, bucket, file.id, env);
+                    return module.exports.mirror.call(
+                      self,
+                      client,
+                      bucket,
+                      file.id,
+                      env
+                    );
                   }
 
                   process.exit();
@@ -127,14 +144,16 @@ module.exports.upload = function(privateClient, keypass, bucket, filepath, env) 
   });
 };
 
-module.exports.mirror = function(privateClient, bucket, file, env) {
+module.exports.mirror = function(bucket, file, env) {
+  var client = this._storj.PrivateClient();
+
   log(
     'info',
     'Establishing %s mirrors per shard for redundancy',
     [env.redundancy]
   );
   log('info', 'This can take a while, so grab a cocktail...');
-  privateClient.replicateFileFromBucket(
+  client.replicateFileFromBucket(
     bucket,
     file,
     parseInt(env.redundancy),
@@ -155,7 +174,11 @@ module.exports.mirror = function(privateClient, bucket, file, env) {
   );
 };
 
-module.exports.download = function(privateClient, keypass, bucket, id, filepath, env) {
+module.exports.download = function(bucket, id, filepath, env) {
+  var self = this;
+  var client = this._storj.PrivateClient();
+  var keypass = this._storj.getKeyPass();
+
   if (storj.utils.existsSync(filepath)) {
     return log('error', 'Refusing to overwrite file at %s', filepath);
   }
@@ -178,7 +201,7 @@ module.exports.download = function(privateClient, keypass, bucket, id, filepath,
       log('error', err.message);
     });
 
-    privateClient.createFileStream(bucket, id, {
+    client.createFileStream(bucket, id, {
       exclude: exclude
     },function(err, stream) {
       if (err) {
@@ -198,9 +221,13 @@ module.exports.download = function(privateClient, keypass, bucket, id, filepath,
 
           log('info', 'Retrying download from other mirrors...');
           exclude.push(err.pointer.farmer.nodeID);
-          this.downloadfile(bucket, id, filepath, {
-            exclude: env.exclude.join(',')
-          });
+          module.exports.download.call(
+            self,
+            bucket,
+            id,
+            filepath,
+            { exclude: env.exclude.join(',')}
+          );
         });
       }).pipe(through(function(chunk) {
         received += chunk.length;
@@ -211,7 +238,13 @@ module.exports.download = function(privateClient, keypass, bucket, id, filepath,
   });
 };
 
-module.exports.stream = function(privateClient, keypass, bucket, id, env) {
+module.exports.stream = function(bucket, id, env) {
+  var self = this;
+  var client = this._storj.PrivateClient({
+    logger: storj.deps.kad.Logger(0)
+  });
+  var keypass = this._storj.getKeyPass();
+
   utils.getKeyRing(keypass, function(keyring) {
     var secret = keyring.get(id);
 
@@ -222,7 +255,7 @@ module.exports.stream = function(privateClient, keypass, bucket, id, env) {
     var decrypter = new storj.DecryptStream(secret);
     var exclude = env.exclude.split(',');
 
-    privateClient.createFileStream(bucket, id, function(err, stream) {
+    client.createFileStream(bucket, id, function(err, stream) {
       if (err) {
         return process.stderr.write(err.message);
       }
@@ -236,16 +269,21 @@ module.exports.stream = function(privateClient, keypass, bucket, id, env) {
 
         log('info', 'Retrying download from other mirrors...');
         exclude.push(err.pointer.farmer.nodeID);
-        this.stream(privateClient, keypass, bucket, id, {
-          exclude: env.exclude.join(',')
-        });
+        module.exports.stream.call(
+          self,
+          bucket,
+          id,
+          { exclude: env.exclude.join(',') }
+        );
       }).pipe(decrypter).pipe(process.stdout);
     });
   });
 };
 
-module.exports.getpointers = function(privateClient, bucket, id, env) {
-  privateClient.createToken(bucket, 'PULL', function(err, token) {
+module.exports.getpointers = function(bucket, id, env) {
+  var client = this._storj.PrivateClient();
+
+  client.createToken(bucket, 'PULL', function(err, token) {
     if (err) {
       return log('error', err.message);
     }
@@ -253,7 +291,7 @@ module.exports.getpointers = function(privateClient, bucket, id, env) {
     var skip = Number(env.skip);
     var limit = Number(env.limit);
 
-    privateClient.getFilePointers({
+    client.getFilePointers({
       bucket: bucket,
       file: id,
       token: token.token,

@@ -131,8 +131,9 @@ module.exports.getKeyRing = function(keypass, callback) {
   });
 };
 
-module.exports.importkeyring = function(keypass, path) {
+module.exports.importkeyring = function(path) {
   var self = this;
+  var keypass = this._storj.getKeyRing();
 
   this.getKeyRing(keypass, function(keyring) {
     try {
@@ -164,7 +165,9 @@ module.exports.importkeyring = function(keypass, path) {
   });
 };
 
-module.exports.exportkeyring = function(keypass, directory) {
+module.exports.exportkeyring = function(directory) {
+  var keypass = this._storj.getKeyRing();
+
   this.getKeyRing(keypass, function(keyring) {
     try {
       var stat = fs.statSync(directory);
@@ -190,7 +193,9 @@ module.exports.exportkeyring = function(keypass, directory) {
   });
 };
 
-module.exports.resetkeyring = function(keypass) {
+module.exports.resetkeyring = function() {
+  var keypass = this._storj.getKeyPass();
+
   this.getKeyRing(keypass, function(keyring) {
     prompt.start();
     prompt.get({
@@ -250,9 +255,10 @@ module.exports.generatekey = function(env) {
   return savePrivateKey();
 };
 
-module.exports.signmessage = function(privatekey, message, compact) {
+module.exports.signmessage = function(privatekey, message, env) {
   var keypair;
   var signature;
+  var compact = env.compact;
 
   try {
     keypair = storj.KeyPair(privatekey);

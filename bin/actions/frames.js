@@ -2,8 +2,10 @@
 var log = require('./../logger')().log;
 var utils = require('./../utils');
 
-module.exports.add = function(privateClient) {
-  privateClient.createFileStagingFrame(function(err, frame) {
+module.exports.add = function() {
+  var client = this._storj.PrivateClient();
+
+  client.createFileStagingFrame(function(err, frame) {
     if (err) {
       return log('error', err.message);
     }
@@ -12,8 +14,10 @@ module.exports.add = function(privateClient) {
   });
 };
 
-module.exports.list = function(privateClient) {
-  privateClient.getFileStagingFrames(function(err, frames) {
+module.exports.list = function() {
+  var client = this._storj.PrivateClient();
+
+  client.getFileStagingFrames(function(err, frames) {
     if (err) {
       return log('error', err.message);
     }
@@ -32,8 +36,10 @@ module.exports.list = function(privateClient) {
   });
 };
 
-module.exports.get = function(privateClient, frame) {
-  privateClient.getFileStagingFrameById(frame, function(err, frame) {
+module.exports.get = function(frame) {
+  var client = this._storj.PrivateClient();
+
+  client.getFileStagingFrameById(frame, function(err, frame) {
     if (err) {
       return log('error', err.message);
     }
@@ -46,9 +52,11 @@ module.exports.get = function(privateClient, frame) {
   });
 };
 
-module.exports.remove = function(privateClient, frame, env) {
+module.exports.remove = function(frame, env) {
+  var client = this._storj.PrivateClient();
+
   function destroyFrame() {
-    privateClient.destroyFileStagingFrameById(frame, function(err) {
+    client.destroyFileStagingFrameById(frame, function(err) {
       if (err) {
         return log('error', err.message);
       }

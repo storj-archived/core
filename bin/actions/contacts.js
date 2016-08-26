@@ -3,7 +3,9 @@ var log = require('./../logger')().log;
 var storj = require('../..');
 
 module.exports.list = function(publicClient, page) {
-  publicClient.getContactList({
+  var client = this._storj.PublicClient();
+
+  client.getContactList({
     page: page,
     connected: this.connected
   }, function(err, contacts) {
@@ -25,7 +27,9 @@ module.exports.list = function(publicClient, page) {
 };
 
 module.exports.get = function(publicClient, nodeid) {
-  publicClient.getContactByNodeId(nodeid, function(err, contact) {
+  var client = this._storj.PublicClient();
+
+  client.getContactByNodeId(nodeid, function(err, contact) {
     if (err) {
       return log('error', err.message);
     }

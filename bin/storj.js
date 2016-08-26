@@ -304,7 +304,9 @@ program
   .option('-c, --concurrency <count>', 'max shard upload concurrency')
   .option('-C, --fileconcurrency <count>', 'max file upload concurrency', 1)
   .option('-r, --redundancy <mirrors>', 'number of mirrors to create for file')
-  .description('upload a file to the network and track in a bucket')
+  .description('upload a file or files to the network and track in a bucket')
+  .description('<filepath> can be a path with wildcard or a space separated')
+  .description('  list of files')
   .action(ACTIONS.uploadfile);
 
 program

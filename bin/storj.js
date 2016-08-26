@@ -30,19 +30,19 @@ program.option('-u, --url <url>', 'set the base url for the api');
 program.option('-k, --keypass <password>', 'unlock keyring without prompt');
 program.option('-d, --debug', 'display debug data', 4);
 
-function PrivateClient(options) {
-  var loglevel = program.debug || 3;
+function loglevel() {
+  return program.debug || 3;
+}
 
+function PrivateClient(options) {
   return storj.BridgeClient(program.url, merge({
     keypair: utils.loadKeyPair(),
-    logger: logger(loglevel).log
+    logger: logger(loglevel()).log
   }, options));
 }
 
 function PublicClient() {
-  var loglevel = program.debug || 3;
-
-  return storj.BridgeClient(program.url, { logger: logger(loglevel).log });
+  return storj.BridgeClient(program.url, { logger: logger(loglevel()).log });
 }
 
 function getKeyPass() {

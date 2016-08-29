@@ -66,11 +66,7 @@ module.exports.upload = function(bucket, filepath, env) {
 
   var filepaths = process.argv.slice();
   var firstFileIndex = filepaths.indexOf(filepath);
-
   filepaths.splice(0,firstFileIndex);
-
-  console.log(filepaths);
-
   var expandedFilepaths = [];
 
   async.eachOfSeries(filepaths, function(origFilepath, index, callback) {

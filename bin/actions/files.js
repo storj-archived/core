@@ -192,7 +192,6 @@ module.exports.upload = function(bucket, filepath, env) {
                         if (env.redundancy) {
                           return module.exports.mirror.call(
                             self,
-                            client,
                             bucket,
                             file.id,
                             env

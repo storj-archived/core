@@ -2,7 +2,7 @@
 var log = require('./../logger')().log;
 var storj = require('../..');
 
-module.exports.list = function(publicClient, page) {
+module.exports.list = function(page) {
   var client = this._storj.PublicClient();
 
   client.getContactList({
@@ -26,7 +26,7 @@ module.exports.list = function(publicClient, page) {
   });
 };
 
-module.exports.get = function(publicClient, nodeid) {
+module.exports.get = function(nodeid) {
   var client = this._storj.PublicClient();
 
   client.getContactByNodeId(nodeid, function(err, contact) {

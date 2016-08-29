@@ -5,6 +5,8 @@ var fs = require('fs');
 var path = require('path');
 var through = require('through');
 var storj = require('../..');
+var globule = require('globule');
+var async = require('async');
 
 module.exports.list = function(bucketid) {
   var client = this._storj.PrivateClient();
@@ -62,82 +64,172 @@ module.exports.upload = function(bucket, filepath, env) {
   });
   var keypass = this._storj.getKeyPass();
 
-  if (!storj.utils.existsSync(filepath)) {
-    return log('error', 'No file found at %s', filepath);
-  }
+  var filepaths = process.argv.slice();
+  var firstFileIndex = filepaths.indexOf(filepath);
 
-  var secret = new storj.DataCipherKeyIv();
-  var encrypter = new storj.EncryptStream(secret);
+  filepaths.splice(0,firstFileIndex);
 
-  utils.getKeyRing(keypass, function(keyring) {
-    log('info', 'Generating encryption key...');
-    log('info', 'Encrypting file "%s"', [filepath]);
+  console.log(filepaths);
 
-    utils.makeTempDir(function(err, tmpDir, tmpCleanup) {
-      if (err) {
-        return log('error', err.message);
-      }
+  var expandedFilepaths = [];
 
-      var tmppath = path.join(tmpDir, path.basename(filepath) + '.crypt');
+  async.eachOfSeries(filepaths, function(origFilepath, index, callback) {
+    // In *NIX the wildcard is already parsed so this will cover other OS's
+    var parsedFileArray = globule.find(origFilepath);
 
-      function cleanup() {
-        log('info', 'Cleaning up...');
-        tmpCleanup();
-        log('info', 'Finished cleaning!');
-      }
+    expandedFilepaths = expandedFilepaths.concat(parsedFileArray);
 
-      fs.createReadStream(filepath)
-        .pipe(encrypter)
-        .pipe(fs.createWriteStream(tmppath)).on('finish', function() {
-          log('info', 'Encryption complete!');
-          log('info', 'Creating storage token...');
-          client.createToken(
-            bucket,
-            'PUSH',
-            function(err, token) {
-              if (err) {
-                log('error', err.message);
-                return cleanup();
-              }
+    callback();
+  }, function(err) {
+    if (err) {
+      return log('error', 'Problem parsing file paths');
+    }
 
-              log('info', 'Storing file, hang tight!');
+    var fileCount = expandedFilepaths.length;
+    var uploadedCount = 0;
+    var fileConcurrency = env.fileconcurrency;
 
-              client.storeFileInBucket(
-                bucket,
-                token.token,
-                tmppath,
-                function(err, file) {
-                  if (err) {
-                    log('warn', 'Error occurred. Triggering cleanup...');
-                    cleanup();
-                    return log('error', err.message);
-                  }
+    log('info', '%s file(s) to upload.', [ fileCount ]);
 
-                  keyring.set(file.id, secret);
-                  cleanup();
-                  log('info', 'Encryption key saved to keyring.');
-                  log('info', 'File successfully stored in bucket.');
-                  log(
-                    'info',
-                    'Name: %s, Type: %s, Size: %s bytes, ID: %s',
-                    [file.filename, file.mimetype, file.size, file.id]
-                  );
+    utils.getKeyRing(keypass, function(keyring) {
+      log('info', 'Generating encryption key...');
+      async.eachLimit(
+        expandedFilepaths,
+        fileConcurrency,
+        function(filepath, callback) {
+          if (!storj.utils.existsSync(filepath)) {
+            return log('error', 'No file found at %s', filepath);
+          }
 
-                  if (env.redundancy) {
-                    return module.exports.mirror.call(
-                      self,
-                      client,
-                      bucket,
-                      file.id,
-                      env
-                    );
-                  }
-
-                  process.exit();
-                }
+          utils.makeTempDir(function(err, tmpDir, tmpCleanup) {
+            if (err) {
+              return log(
+                'error',
+                'Unable to create temp directory for file %s: %s',
+                [ filepath, err.message ]
               );
             }
-          );
+
+            log('info', 'Encrypting file "%s"', [filepath]);
+
+            var secret = new storj.DataCipherKeyIv();
+            var encrypter = new storj.EncryptStream(secret);
+            var filename = path.basename(filepath);
+
+            var tmppath = path.join(tmpDir, filename + '.crypt');
+
+            function cleanup() {
+              log('info', '[ %s ] Cleaning up...', filename);
+              tmpCleanup();
+              log('info', '[ %s ] Finished cleaning!', filename);
+            }
+
+            fs.createReadStream(filepath)
+              .pipe(encrypter)
+              .pipe(fs.createWriteStream(tmppath)).on('finish', function() {
+                log(
+                  'info',
+                  '[ %s ] Encryption complete!',
+                  filename
+                );
+
+                log(
+                  'info',
+                  '[ %s ] Creating storage token...',
+                  filename
+                );
+
+                client.createToken(
+                  bucket,
+                  'PUSH',
+                  function(err, token) {
+                    if (err) {
+                      log('[ %s ] error: %s', [ filename, err.message ]);
+                      return cleanup();
+                    }
+
+                    log('info', '[ %s ] Storing file, hang tight!', filename);
+
+                    client.storeFileInBucket(
+                      bucket,
+                      token.token,
+                      tmppath,
+                      function(err, file) {
+                        if (err) {
+                          log(
+                            'warn',
+                            '[ %s ] Error occurred. Triggering cleanup...',
+                            filename
+                           );
+                          cleanup();
+                          callback(err, filepath);
+                          // Should retry this file
+                          return log(
+                            '[ %s ] error: %s',
+                            [ filename, err.message ]
+                          );
+                        }
+
+                        keyring.set(file.id, secret);
+                        cleanup();
+                        log(
+                          'info',
+                          '[ %s ] Encryption key saved to keyring.',
+                          filename
+                        );
+
+                        log(
+                          'info',
+                          '[ %s ] File successfully stored in bucket.',
+                          filename
+                        );
+
+                        log(
+                          'info',
+                          'Name: %s, Type: %s, Size: %s bytes, ID: %s',
+                          [file.filename, file.mimetype, file.size, file.id]
+                        );
+
+                        if (env.redundancy) {
+                          return module.exports.mirror.call(
+                            self,
+                            client,
+                            bucket,
+                            file.id,
+                            env
+                          );
+                        }
+
+                        uploadedCount++;
+
+                        log(
+                          'info',
+                          '%s of %s files uploaded',
+                          [ uploadedCount, fileCount ]
+                        );
+
+                        if (uploadedCount === fileCount) {
+                          log( 'info', 'Done.');
+                        }
+
+                        callback(null, filepath);
+
+                      }
+                    );
+                  }
+                );
+              });
+          });
+        }, function(err, filepath) {
+          if (err) {
+            log(
+              'error',
+              '[ %s ] A file has failed to upload: %s',
+              [ filepath, err ]
+            );
+          }
+
+          process.exit();
         }
       );
     });

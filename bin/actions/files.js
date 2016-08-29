@@ -57,6 +57,8 @@ module.exports.remove = function(id, fileId, env) {
   destroyFile();
 };
 
+/* jshint maxstatements: 50 */
+// TODO: refactor this to shorter statements
 module.exports.upload = function(bucket, filepath, env) {
   var self = this;
   var client = this._storj.PrivateClient({

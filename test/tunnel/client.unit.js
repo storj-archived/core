@@ -116,13 +116,9 @@ describe('TunnelClient', function() {
 
   describe('#close', function() {
 
-    it('should emit error if tunnel is not open', function(done) {
+    it('should return false if tunnel is not open', function() {
       var client = new TunnelClient('', '');
-      client.on('error', function(err) {
-        expect(err.message).to.equal('Tunnel is not open');
-        done();
-      });
-      client.close();
+      expect(client.close()).to.equal(false);
     });
 
     it('should close the tunnel if it is open', function(done) {
@@ -141,7 +137,7 @@ describe('TunnelClient', function() {
         done();
       });
       setImmediate(function() {
-        client.close();
+        expect(client.close()).to.equal(true);
       });
     });
 

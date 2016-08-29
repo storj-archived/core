@@ -226,8 +226,32 @@ describe('Network (public)', function() {
 
 describe('Network (private)', function() {
 
-  describe('#_validateContact', function() {
+  describe('#_warnIfClockNotSynced', function() {
 
+    it('should warn if there is an error with ntp server', function(done) {
+      var _warn = sinon.stub();
+      var StubNet = proxyquire('../../lib/network', {
+        '../utils': {
+          ensureNtpClockIsSynchronized: sinon.stub().callsArgWith(
+            0,
+            new Error('Timeout')
+          )
+        }
+      });
+      var _warnIfClockNotSynced = StubNet.prototype._warnIfClockNotSynced.bind(
+        {
+          _logger: { warn: _warn }
+        }
+      );
+      _warnIfClockNotSynced(function() {
+        expect(_warn.called).to.equal(true);
+        done();
+      });
+    });
+
+  });
+
+  describe('#_validateContact', function() {
 
     it('should return an error if the contact is invalid', function(done) {
       var _removeContact = sinon.stub();
@@ -273,10 +297,13 @@ describe('Network (private)', function() {
     });
 
     it('should fail if nonce is expired', function(done) {
+      var _removeContact = sinon.stub();
       var verify = Network.prototype._verifyMessage.bind({
-        _validateContact: Network.prototype._validateContact
+        router: {
+          removeContact: _removeContact
+        },
+        _validateContact: sinon.stub().callsArg(1)
       });
-
       verify({
         method: 'PING',
         id: 'test',
@@ -314,7 +341,6 @@ describe('Network (private)', function() {
       Network.prototype._signMessage.call({
         keypair: KeyPair()
       }, msg, function() {});
-
       verify({
         signobj: Network.prototype._createSignatureObject(
           msg.params.signature
@@ -329,6 +355,53 @@ describe('Network (private)', function() {
         address: KeyPair().getAddress()
       }, function(err) {
         expect(err.message).to.equal('Signature verification failed');
+        done();
+      });
+    });
+
+    it('should callback with error if #toPublicKey throws', function(done) {
+      var StubbedNetwork = proxyquire('../../lib/network', {
+        'bitcore-lib': {
+          crypto: {
+            ECDSA: function() {
+              return {
+                toPublicKey: sinon.stub().throws(
+                  new Error('Something about points and curves...')
+                )
+              };
+            },
+            Signature: {
+              fromCompact: sinon.stub().returns({})
+            }
+          }
+        }
+      });
+      var verify = StubbedNetwork.prototype._verifySignature.bind({
+        _pubkeys: {}
+      });
+      var msg = {
+        method: 'PING',
+        id: '123456',
+        params: {}
+      };
+      StubbedNetwork.prototype._signMessage.call({
+        keypair: KeyPair()
+      }, msg, function() {});
+      verify({
+        signobj: StubbedNetwork.prototype._createSignatureObject(
+          msg.params.signature
+        ),
+        message: {
+          id: '123456',
+          method: 'PING',
+          params: { signature: msg.params.signature }
+        },
+        nonce: 12345,
+        contact: { nodeID: 'nodeid' },
+        signature: msg.params.signature,
+        address: KeyPair().getAddress()
+      }, function(err) {
+        expect(err.message).to.equal('Something about points and curves...');
         done();
       });
     });
@@ -607,7 +680,6 @@ describe('Network (private)', function() {
         done();
       });
     });
-
 
     it('should try to find a tunnel if probe fails', function(done) {
       var net = Network({

@@ -132,10 +132,9 @@ module.exports.getKeyRing = function(keypass, callback) {
 };
 
 module.exports.importkeyring = function(path) {
-  var self = this;
-  var keypass = this._storj.getKeyRing();
+  var keypass = this._storj.getKeyPass();
 
-  this.getKeyRing(keypass, function(keyring) {
+  module.exports.getKeyRing(keypass, function(keyring) {
     try {
       fs.statSync(path);
     } catch(err) {
@@ -146,7 +145,7 @@ module.exports.importkeyring = function(path) {
       }
     }
 
-    self.getNewPassword(
+    module.exports.getNewPassword(
       'Enter password for the keys to be imported',
       function(err, result) {
         if (err) {
@@ -166,9 +165,9 @@ module.exports.importkeyring = function(path) {
 };
 
 module.exports.exportkeyring = function(directory) {
-  var keypass = this._storj.getKeyRing();
+  var keypass = this._storj.getKeyPass();
 
-  this.getKeyRing(keypass, function(keyring) {
+  module.exports.getKeyRing(keypass, function(keyring) {
     try {
       var stat = fs.statSync(directory);
       assert(stat.isDirectory(), 'The path must be a directory');
@@ -196,7 +195,7 @@ module.exports.exportkeyring = function(directory) {
 module.exports.resetkeyring = function() {
   var keypass = this._storj.getKeyPass();
 
-  this.getKeyRing(keypass, function(keyring) {
+  module.exports.getKeyRing(keypass, function(keyring) {
     prompt.start();
     prompt.get({
       properties: {

@@ -74,8 +74,9 @@ module.exports.upload = function(bucket, filepath, env) {
   async.eachOfSeries(filepaths, function(origFilepath, index, callback) {
     // In *NIX the wildcard is already parsed so this will cover other OS's
     var parsedFileArray = globule.find(origFilepath);
-
-    expandedFilepaths = expandedFilepaths.concat(parsedFileArray);
+    if (fs.statSync(parsedFileArray[0]).isFile() === true) {
+      expandedFilepaths = expandedFilepaths.concat(parsedFileArray);
+    }
 
     callback();
   }, function(err) {

@@ -8,6 +8,7 @@ var prompt = require('prompt');
 var os = require('os');
 var tmp = require('tmp');
 var assert = require('assert');
+var rimraf = require('rimraf');
 
 var HOME = platform !== 'win32' ? process.env.HOME : process.env.USERPROFILE;
 var DATADIR = path.join(HOME, '.storjcli');
@@ -192,7 +193,7 @@ module.exports.exportkeyring = function(directory) {
   });
 };
 
-module.exports.resetkeyring = function() {
+module.exports.changekeyring = function() {
   var keypass = this._storj.getKeyPass();
 
   module.exports.getKeyRing(keypass, function(keyring) {
@@ -220,6 +221,40 @@ module.exports.resetkeyring = function() {
       });
     });
   });
+};
+
+module.exports.resetkeyring = function() {
+
+  log('info', 'You may lose access to all your stored data if you do this.');
+  log('info', 'I recommend you run `storj keyring-export` before deletion.');
+
+  function destroyKeyRing() {
+    rimraf.sync(path.join(DATADIR, 'key.ring/'));
+    module.exports.getNewPassword(
+      'Enter a password for your new keyring',
+      function(err, result) {
+        try {
+          storj.KeyRing(DATADIR, result.password);
+        } catch (err) {
+          return log('error', 'Could not create keyring, bad password?');
+        }
+        log('info', 'Successfully created a new key ring.');
+      }
+    );
+  }
+
+  function confirm() {
+      module.exports.getConfirmation(
+      'Are REALLY you sure you want to destroy your keyring?',
+      destroyKeyRing
+    );
+  }
+
+  module.exports.getConfirmation(
+  'Are you sure you want to destroy your keyring?',
+  confirm
+);
+
 };
 
 module.exports.generatekey = function(env) {

@@ -642,6 +642,19 @@ describe('BridgeClient', function() {
         });
       });
 
+      it('should return error if file is unsupported size', function(done) {
+        var StubbedClient = proxyquire('../../lib/bridge-client', {
+          fs: {
+            statSync: sinon.stub().returns({ size: 0 })
+          }
+        });
+        var client = new StubbedClient();
+        client.storeFileInBucket('bucket', 'token', 'file', function(err) {
+          expect(err.message).to.equal('0 bytes is not a supported file size.');
+          done();
+        });
+      });
+
     });
 
     describe('#replicateFileFromBucket', function() {

@@ -79,7 +79,7 @@ module.exports.upload = function(bucket, filepath, env) {
         expandedFilepaths = expandedFilepaths.concat(parsedFileArray);
       }
     } else {
-      return log('error', origFilepath + ' could not be found');
+      return log('error', '%s could not be found', origFilepath);
     }
     callback();
   }, function(err) {
@@ -274,6 +274,10 @@ module.exports.download = function(bucket, id, filepath, env) {
 
   if (storj.utils.existsSync(filepath)) {
     return log('error', 'Refusing to overwrite file at %s', filepath);
+  }
+
+  if (!storj.utils.existsSync(path.dirname(filepath))) {
+    return log('error', '%s is not an existing folder', path.dirname(filepath));
   }
 
   utils.getKeyRing(keypass, function(keyring) {

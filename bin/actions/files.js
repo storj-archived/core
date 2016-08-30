@@ -74,10 +74,13 @@ module.exports.upload = function(bucket, filepath, env) {
   async.eachOfSeries(filepaths, function(origFilepath, index, callback) {
     // In *NIX the wildcard is already parsed so this will cover other OS's
     var parsedFileArray = globule.find(origFilepath);
-    if (fs.statSync(parsedFileArray[0]).isFile() === true) {
-      expandedFilepaths = expandedFilepaths.concat(parsedFileArray);
+    if (storj.utils.existsSync(parsedFileArray[0])) {
+      if (fs.statSync(parsedFileArray[0]).isFile() === true) {
+        expandedFilepaths = expandedFilepaths.concat(parsedFileArray);
+      }
+    } else {
+      return log('error', origFilepath + ' could not be found');
     }
-
     callback();
   }, function(err) {
     if (err) {

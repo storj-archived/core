@@ -88,8 +88,15 @@ module.exports.remove = function(id, fileId, env) {
 // TODO: refactor this to shorter statements
 module.exports.upload = function(bucket, filepath, env) {
   var self = this;
+
+  var concurrency = env.concurrency ? parseInt(env.concurrency) : 6;
+
+  if (concurrency < 1) {
+    return log('error', 'Concurrency cannot be less than 1');
+  }
+
   var client = this._storj.PrivateClient({
-    concurrency: env.concurrency ? parseInt(env.concurrency) : 6
+    concurrency: concurrency
   });
   var keypass = this._storj.getKeyPass();
 

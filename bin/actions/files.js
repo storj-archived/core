@@ -91,6 +91,10 @@ module.exports.upload = function(bucket, filepath, env) {
 
   var concurrency = env.concurrency ? parseInt(env.concurrency) : 6;
 
+  if (parseInt(env.redundancy) > 12 || parseInt(env.redundancy) < 1) {
+    return log('error', '%s is an invalid Redundancy value.', env.redundancy);
+  }
+
   if (concurrency < 1) {
     return log('error', 'Concurrency cannot be less than 1');
   }

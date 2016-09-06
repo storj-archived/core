@@ -313,7 +313,7 @@ module.exports.download = function(bucket, id, filepath, env) {
   var self = this;
   var client = this._storj.PrivateClient();
   var keypass = this._storj.getKeyPass();
-
+  var destination = filepath;
 
   if (storj.utils.existsSync(filepath) && fs.statSync(filepath).isFile()) {
     return log('error', 'Refusing to overwrite file at %s', filepath);
@@ -321,20 +321,35 @@ module.exports.download = function(bucket, id, filepath, env) {
 
   if (!storj.utils.existsSync(path.dirname(filepath))) {
     return log('error', '%s is not an existing folder', path.dirname(filepath));
+  } else if(fs.statSync(path.dirname(filepath)).isDirectory() === false) {
+    return log('error', '%s is not an existing folder', path.dirname(filepath));
   }
 
   module.exports.getInfo.call(self, bucket, id, function(file) {
     var target;
 
-    if (fs.statSync(filepath).isDirectory() === true && file !== null) {
+    // Check if path is an existing path
+    if (storj.utils.existsSync(filepath) === true ) {
+      // Check if given path is a directory
+      if (fs.statSync(filepath).isDirectory() && file !== null) {
 
-      var fullpath = path.join(filepath,file.filename);
+        // use the file name as the name of the file to be downloaded to
+        var fullpath = path.join(filepath,file.filename);
 
-      if (storj.utils.existsSync(fullpath)) {
-        return log('error', 'Refusing to overwrite file at %s', fullpath);
+        // Make sure fullpath doesn't already exist
+        if (storj.utils.existsSync(fullpath)) {
+          return log('error', 'Refusing to overwrite file at %s', fullpath);
+        }
+
+        destination = fullpath;
+        target = fs.createWriteStream(fullpath);
+      } else {
+        target = fs.createWriteStream(filepath);
       }
-      target = fs.createWriteStream(fullpath);
     } else {
+      if(filepath.slice(-1) === path.sep) {
+        return log('error', '%s is not an existing folder', filepath);
+      }
       target = fs.createWriteStream(filepath);
     }
 
@@ -350,7 +365,7 @@ module.exports.download = function(bucket, id, filepath, env) {
       var exclude = env.exclude.split(',');
 
       target.on('finish', function() {
-        log('info', 'File downloaded and written to %s.', [filepath]);
+        log('info', 'File downloaded and written to %s.', [destination]);
       }).on('error', function(err) {
         log('error', err.message);
       });

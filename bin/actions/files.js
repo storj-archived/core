@@ -30,6 +30,33 @@ module.exports.list = function(bucketid) {
   });
 };
 
+module.exports.getInfo = function(bucketid, fileid, callback) {
+  var client = this._storj.PrivateClient();
+
+  client.listFilesInBucket(bucketid, function(err, files) {
+    if (err) {
+      log('error', err.message);
+      return callback(null);
+    }
+
+    if (!files.length) {
+      log('warn', 'There are no files in this bucket.');
+      return callback(null);
+    }
+
+    files.forEach(function(file) {
+      if (fileid === file.id) {
+        log(
+          'info',
+          'Name: %s, Type: %s, Size: %s bytes, ID: %s',
+          [file.filename, file.mimetype, file.size, file.id]
+        );
+        return callback(file);
+      }
+    });
+  });
+};
+
 module.exports.remove = function(id, fileId, env) {
   var client = this._storj.PrivateClient();
   var keypass = this._storj.getKeyPass();
@@ -61,8 +88,19 @@ module.exports.remove = function(id, fileId, env) {
 // TODO: refactor this to shorter statements
 module.exports.upload = function(bucket, filepath, env) {
   var self = this;
+
+  var concurrency = env.concurrency ? parseInt(env.concurrency) : 6;
+
+  if (parseInt(env.redundancy) > 12 || parseInt(env.redundancy) < 1) {
+    return log('error', '%s is an invalid Redundancy value.', env.redundancy);
+  }
+
+  if (concurrency < 1) {
+    return log('error', 'Concurrency cannot be less than 1');
+  }
+
   var client = this._storj.PrivateClient({
-    concurrency: env.concurrency ? parseInt(env.concurrency) : 6
+    concurrency: concurrency
   });
   var keypass = this._storj.getKeyPass();
 
@@ -74,10 +112,13 @@ module.exports.upload = function(bucket, filepath, env) {
   async.eachOfSeries(filepaths, function(origFilepath, index, callback) {
     // In *NIX the wildcard is already parsed so this will cover other OS's
     var parsedFileArray = globule.find(origFilepath);
-    if (fs.statSync(parsedFileArray[0]).isFile() === true) {
-      expandedFilepaths = expandedFilepaths.concat(parsedFileArray);
+    if (storj.utils.existsSync(parsedFileArray[0])) {
+      if (fs.statSync(parsedFileArray[0]).isFile() === true) {
+        expandedFilepaths = expandedFilepaths.concat(parsedFileArray);
+      }
+    } else {
+      return log('error', '%s could not be found', origFilepath);
     }
-
     callback();
   }, function(err) {
     if (err) {
@@ -237,6 +278,10 @@ module.exports.upload = function(bucket, filepath, env) {
 module.exports.mirror = function(bucket, file, env) {
   var client = this._storj.PrivateClient();
 
+  if (parseInt(env.redundancy) > 12 || parseInt(env.redundancy) < 1) {
+    return log('error', '%s is an invalid Redundancy value.', env.redundancy);
+  }
+
   log(
     'info',
     'Establishing %s mirrors per shard for redundancy',
@@ -269,63 +314,84 @@ module.exports.download = function(bucket, id, filepath, env) {
   var client = this._storj.PrivateClient();
   var keypass = this._storj.getKeyPass();
 
-  if (storj.utils.existsSync(filepath)) {
+
+  if (storj.utils.existsSync(filepath) && fs.statSync(filepath).isFile()) {
     return log('error', 'Refusing to overwrite file at %s', filepath);
   }
 
-  utils.getKeyRing(keypass, function(keyring) {
-    var target = fs.createWriteStream(filepath);
-    var secret = keyring.get(id);
+  if (!storj.utils.existsSync(path.dirname(filepath))) {
+    return log('error', '%s is not an existing folder', path.dirname(filepath));
+  }
 
-    if (!secret) {
-      return log('error', 'No decryption key found in key ring!');
+  module.exports.getInfo.call(self, bucket, id, function(file) {
+    var target;
+
+    if (fs.statSync(filepath).isDirectory() === true && file !== null) {
+
+      var fullpath = path.join(filepath,file.filename);
+
+      if (storj.utils.existsSync(fullpath)) {
+        return log('error', 'Refusing to overwrite file at %s', fullpath);
+      }
+      target = fs.createWriteStream(fullpath);
+    } else {
+      target = fs.createWriteStream(filepath);
     }
 
-    var decrypter = new storj.DecryptStream(secret);
-    var received = 0;
-    var exclude = env.exclude.split(',');
+    utils.getKeyRing(keypass, function(keyring) {
+      var secret = keyring.get(id);
 
-    target.on('finish', function() {
-      log('info', 'File downloaded and written to %s.', [filepath]);
-    }).on('error', function(err) {
-      log('error', err.message);
-    });
-
-    client.createFileStream(bucket, id, {
-      exclude: exclude
-    },function(err, stream) {
-      if (err) {
-        return log('error', err.message);
+      if (!secret) {
+        return log('error', 'No decryption key found in key ring!');
       }
 
-      stream.on('error', function(err) {
-        log('warn', 'Failed to download shard, reason: %s', [err.message]);
-        fs.unlink(filepath, function(unlinkFailed) {
-          if (unlinkFailed) {
-            return log('error', 'Failed to unlink partial file.');
-          }
+      var decrypter = new storj.DecryptStream(secret);
+      var received = 0;
+      var exclude = env.exclude.split(',');
 
-          if (!err.pointer) {
-            return;
-          }
+      target.on('finish', function() {
+        log('info', 'File downloaded and written to %s.', [filepath]);
+      }).on('error', function(err) {
+        log('error', err.message);
+      });
 
-          log('info', 'Retrying download from other mirrors...');
-          exclude.push(err.pointer.farmer.nodeID);
-          module.exports.download.call(
-            self,
-            bucket,
-            id,
-            filepath,
-            { exclude: env.exclude.join(',')}
-          );
-        });
-      }).pipe(through(function(chunk) {
-        received += chunk.length;
-        log('info', 'Received %s of %s bytes', [received, stream._length]);
-        this.queue(chunk);
-      })).pipe(decrypter).pipe(target);
+      client.createFileStream(bucket, id, {
+        exclude: exclude
+      },function(err, stream) {
+        if (err) {
+          return log('error', err.message);
+        }
+
+        stream.on('error', function(err) {
+          log('warn', 'Failed to download shard, reason: %s', [err.message]);
+          fs.unlink(filepath, function(unlinkFailed) {
+            if (unlinkFailed) {
+              return log('error', 'Failed to unlink partial file.');
+            }
+
+            if (!err.pointer) {
+              return;
+            }
+
+            log('info', 'Retrying download from other mirrors...');
+            exclude.push(err.pointer.farmer.nodeID);
+            module.exports.download.call(
+              self,
+              bucket,
+              id,
+              filepath,
+              { exclude: env.exclude.join(',')}
+            );
+          });
+        }).pipe(through(function(chunk) {
+          received += chunk.length;
+          log('info', 'Received %s of %s bytes', [received, stream._length]);
+          this.queue(chunk);
+        })).pipe(decrypter).pipe(target);
+      });
     });
   });
+
 };
 
 module.exports.stream = function(bucket, id, env) {

@@ -26,7 +26,7 @@ positional parameters are not supported. Example:
       "address": "10.0.0.2",
       "port": 1337,
       "nodeID": "89cc3ddb4209c6e7e301c10c0257adf4fd85f253",
-      "protocol": "0.3.0"
+      "protocol": "0.8.1"
     },
     "nonce": 1455216323786,
     "signature": "3045022100de2e162d017a1e9d0ebfe2a94df3fc847b68281a9882..."
@@ -46,7 +46,7 @@ the recipient's contact information and required `signature` and `nonce`:
       "address": "10.0.0.3",
       "port": 1337,
       "nodeID": "48dc026fa01ae26822bfb23f98e725444d6775b0",
-      "protocol": "0.3.0"
+      "protocol": "0.8.1"
     },
     "nonce": 1455216323786,
     "signature": "304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c..."
@@ -66,7 +66,7 @@ property of the response:
       "address": "10.0.0.3",
       "port": 1337,
       "nodeID": "48dc026fa01ae26822bfb23f98e725444d6775b0",
-      "protocol": "0.3.0"
+      "protocol": "0.8.1"
     },
     "nonce": 1455216323786,
     "signature": "304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c..."
@@ -210,7 +210,7 @@ maintain a record of known nodes that are willing to tunnel, by subscribing to
       "address": "10.0.0.3",
       "port": 1337,
       "nodeID": "48dc026fa01ae26822bfb23f98e725444d6775b0",
-      "protocol": "0.3.0"
+      "protocol": "0.8.1"
     },
     "nonce": 1455216323786,
     "signature": "304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c..."
@@ -380,7 +380,7 @@ joining the network, this value is *your own `nodeID`*.
       "address": "10.0.0.3",
       "port": 1337,
       "nodeID": "48dc026fa01ae26822bfb23f98e725444d6775b0",
-      "protocol": "0.3.0"
+      "protocol": "0.8.1"
     },
     "nonce": 1455216323786,
     "signature": "304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c..."
@@ -405,26 +405,26 @@ the requester to it's own routing table to later inform other requesters.
         "address": "10.0.0.4",
         "port": 1337,
         "nodeID": "58dc026fa01ae26822bfb23f98e725444d6775b0",
-        "protocol": "0.3.0"
+        "protocol": "0.8.1"
       },
       {
         "address": "10.0.0.5",
         "port": 1337,
         "nodeID": "68dc026fa01ae26822bfb23f98e725444d6775b0",
-        "protocol": "0.3.0"
+        "protocol": "0.8.1"
       },
       {
         "address": "10.0.0.6",
         "port": 1337,
         "nodeID": "78dc026fa01ae26822bfb23f98e725444d6775b0",
-        "protocol": "0.3.0"
+        "protocol": "0.8.1"
       }
     ],
     "contact": {
       "address": "10.0.0.3",
       "port": 1337,
       "nodeID": "48dc026fa01ae26822bfb23f98e725444d6775b0",
-      "protocol": "0.3.0"
+      "protocol": "0.8.1"
     },
     "nonce": 1455216323786,
     "signature": "304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c..."
@@ -467,7 +467,7 @@ is closest to ours and we issue a `SUBSCRIBE` message to each of them:
       "address": "10.0.0.2",
       "port": 1337,
       "nodeID": "48dc026fa01ae26822bfb23f98e725444d6775b0",
-      "protocol": "0.3.0"
+      "protocol": "0.8.1"
     },
     "nonce": 1455216323786,
     "signature": "304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c..."
@@ -493,7 +493,7 @@ subscribed 3 "hops" away.
       "address": "10.0.0.3",
       "port": 1337,
       "nodeID": "58dc026fa01ae26822bfb23f98e725444d6775b0",
-      "protocol": "0.3.0"
+      "protocol": "0.8.1"
     },
     "nonce": 1455216323786,
     "signature": "304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c..."
@@ -526,7 +526,7 @@ subscriptions by providing it's own attenuated bloom filter:
       "address": "10.0.0.2",
       "port": 1337,
       "nodeID": "48dc026fa01ae26822bfb23f98e725444d6775b0",
-      "protocol": "0.3.0"
+      "protocol": "0.8.1"
     },
     "nonce": 1455216323786,
     "signature": "304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c..."
@@ -584,7 +584,7 @@ information on how to choose a valid contract type for your storage needs.
       "address": "10.0.0.2",
       "port": 1337,
       "nodeID": "48dc026fa01ae26822bfb23f98e725444d6775b0",
-      "protocol": "0.3.0"
+      "protocol": "0.8.1"
     },
     "nonce": 1455216323786,
     "signature": "304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c..."
@@ -617,7 +617,7 @@ should acknowledge receipt of the publication to the forwarder:
       "address": "10.0.0.2",
       "port": 1337,
       "nodeID": "48dc026fa01ae26822bfb23f98e725444d6775b0",
-      "protocol": "0.3.0"
+      "protocol": "0.8.1"
     },
     "nonce": 1455216323786,
     "signature": "304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c..."
@@ -677,7 +677,7 @@ original offer:
       "address": "10.0.0.2",
       "port": 1337,
       "nodeID": "48dc026fa01ae26822bfb23f98e725444d6775b0",
-      "protocol": "0.3.0"
+      "protocol": "0.8.1"
     },
     "nonce": 1455216323786,
     "signature": "304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c..."
@@ -712,7 +712,7 @@ by adding it's signature to the `renter_signature` field:
       "address": "10.0.0.2",
       "port": 1337,
       "nodeID": "48dc026fa01ae26822bfb23f98e725444d6775b0",
-      "protocol": "0.3.0"
+      "protocol": "0.8.1"
     },
     "nonce": 1455216323786,
     "signature": "304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c..."
@@ -771,7 +771,7 @@ a Storage Contract** below).
       "address": "10.0.0.2",
       "port": 1337,
       "nodeID": "48dc026fa01ae26822bfb23f98e725444d6775b0",
-      "protocol": "0.3.0"
+      "protocol": "0.8.1"
     },
     "nonce": 1455216323786,
     "signature": "304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c..."
@@ -806,7 +806,7 @@ done this, it must acknowledge the renter to confirm:
       "address": "10.0.0.2",
       "port": 1337,
       "nodeID": "48dc026fa01ae26822bfb23f98e725444d6775b0",
-      "protocol": "0.3.0"
+      "protocol": "0.8.1"
     },
     "nonce": 1455216323786,
     "signature": "304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c..."
@@ -856,13 +856,13 @@ RPC message to the farmer after contract negotiation is complete:
       "address": "remote.farmer.host",
       "port": 4000,
       "nodeID": "e77e46ceb7f8dbf2904eff254a479f90a4f8ddbd",
-      "protocol": "0.8.0"
+      "protocol": "0.8.1"
     },
     "contact": {
       "address": "10.0.0.2",
       "port": 1337,
       "nodeID": "48dc026fa01ae26822bfb23f98e725444d6775b0",
-      "protocol": "0.8.0"
+      "protocol": "0.8.1"
     },
     "nonce": 1455216323786,
     "signature": "304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c..."
@@ -887,7 +887,7 @@ indicate that the mirror operation was successfully initiated.
       "address": "10.0.0.2",
       "port": 1337,
       "nodeID": "48dc026fa01ae26822bfb23f98e725444d6775b0",
-      "protocol": "0.8.0"
+      "protocol": "0.8.1"
     },
     "nonce": 1455216323786,
     "signature": "304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c..."
@@ -940,7 +940,7 @@ secret pre-calculated challenges:
       "address": "10.0.0.2",
       "port": 1337,
       "nodeID": "48dc026fa01ae26822bfb23f98e725444d6775b0",
-      "protocol": "0.3.0"
+      "protocol": "0.8.1"
     },
     "nonce": 1455216323786,
     "signature": "304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c..."
@@ -976,7 +976,7 @@ of nested JSON arrays:
       "address": "10.0.0.2",
       "port": 1337,
       "nodeID": "48dc026fa01ae26822bfb23f98e725444d6775b0",
-      "protocol": "0.3.0"
+      "protocol": "0.8.1"
     },
     "nonce": 1455216323786,
     "signature": "304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c..."
@@ -1039,7 +1039,7 @@ storing the data:
       "address": "10.0.0.2",
       "port": 1337,
       "nodeID": "48dc026fa01ae26822bfb23f98e725444d6775b0",
-      "protocol": "0.3.0"
+      "protocol": "0.8.1"
     },
     "nonce": 1455216323786,
     "signature": "304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c..."
@@ -1068,7 +1068,7 @@ next audit).
       "address": "10.0.0.2",
       "port": 1337,
       "nodeID": "48dc026fa01ae26822bfb23f98e725444d6775b0",
-      "protocol": "0.3.0"
+      "protocol": "0.8.1"
     },
     "nonce": 1455216323786,
     "signature": "304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c..."

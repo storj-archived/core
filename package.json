@@ -1,6 +1,6 @@
 {
   "name": "storj",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "implementation of the storj protocol for node.js and the browser",
   "main": "index.js",
   "directories": {
@@ -86,6 +86,7 @@
     "prompt": "^1.0.0",
     "readable-stream": "^2.0.6",
     "request": "^2.70.0",
+    "rimraf": "^2.5.3",
     "semver": "^5.1.0",
     "through": "^2.3.8",
     "tmp": "0.0.28",
@@ -105,7 +106,6 @@
     "noisegen": "^1.0.0",
     "pem": "^1.8.1",
     "proxyquire": "^1.7.3",
-    "rimraf": "^2.5.3",
     "sinon": "^1.14.1"
   }
 }

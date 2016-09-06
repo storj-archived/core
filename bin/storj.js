@@ -236,9 +236,14 @@ program
   .action(utils.provefile.bind(program));
 
 program
-  .command('reset-keyring')
-  .description('reset the keyring password')
-  .action(utils.resetkeyring.bind(program));
+  .command('change-keyring')
+  .description('change the keyring password')
+  .action(utils.changekeyring.bind(program));
+
+  program
+    .command('reset-keyring')
+    .description('delete the current keyring and start a new one')
+    .action(utils.resetkeyring.bind(program));
 
 program
   .command('sign-message <privatekey> <message>')

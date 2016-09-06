@@ -278,6 +278,10 @@ module.exports.upload = function(bucket, filepath, env) {
 module.exports.mirror = function(bucket, file, env) {
   var client = this._storj.PrivateClient();
 
+  if (parseInt(env.redundancy) > 12 || parseInt(env.redundancy) < 1) {
+    return log('error', '%s is an invalid Redundancy value.', env.redundancy);
+  }
+
   log(
     'info',
     'Establishing %s mirrors per shard for redundancy',

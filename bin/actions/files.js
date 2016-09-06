@@ -347,7 +347,7 @@ module.exports.download = function(bucket, id, filepath, env) {
         target = fs.createWriteStream(filepath);
       }
     } else {
-      if(filepath.slice(-1) === path.sep) {
+      if (filepath.slice(-1) === path.sep) {
         return log('error', '%s is not an existing folder', filepath);
       }
       target = fs.createWriteStream(filepath);

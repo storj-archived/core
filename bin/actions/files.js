@@ -54,6 +54,8 @@ module.exports.getInfo = function(bucketid, fileid, callback) {
         return callback(file);
       }
     });
+
+    return callback(null);
   });
 };
 
@@ -326,7 +328,12 @@ module.exports.download = function(bucket, id, filepath, env) {
   }
 
   module.exports.getInfo.call(self, bucket, id, function(file) {
+
     var target;
+
+    if (file === null) {
+      return log('error', 'file %s does not exist in bucket %s', [id, bucket]);
+    }
 
     // Check if path is an existing path
     if (storj.utils.existsSync(filepath) === true ) {

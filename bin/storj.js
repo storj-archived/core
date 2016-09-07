@@ -178,9 +178,12 @@ program
   .option('-c, --concurrency <count>', 'max shard upload concurrency')
   .option('-C, --fileconcurrency <count>', 'max file upload concurrency', 1)
   .option('-r, --redundancy <mirrors>', 'number of mirrors to create for file')
-  .description('upload a file or files to the network and track in a bucket')
-  .description('<filepath> can be a path with wildcard or a space separated')
-  .description('  list of files')
+  .description('upload a file or files to the network and track in a bucket.' +
+               '\n  upload all files in a single directory using "/path/*"\n' +
+               '  or upload recursively using "/path/**/*".\n' +
+               '  <filepath> can be a path with wildcard or a space separated' +
+               ' list of files.'
+             )
   .action(actions.files.upload.bind(program));
 
 program

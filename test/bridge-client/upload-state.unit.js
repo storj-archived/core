@@ -18,10 +18,10 @@ describe('UploadState', function() {
   describe('#cleanup', function() {
 
     it('should unlink the tmpfile if it exists', function() {
-      var unlinkSync = sinon.stub();
+      var rimrafSync = sinon.stub();
       var StubUploadState = proxyquire('../../lib/bridge-client/upload-state', {
-        fs: {
-          unlinkSync: unlinkSync
+        rimraf: {
+          sync: rimrafSync
         },
         '../utils': {
           existsSync: sinon.stub().returns(true)
@@ -30,7 +30,7 @@ describe('UploadState', function() {
       var uploadState = new StubUploadState();
       uploadState.cleanQueue.push('/some/tmp/file');
       uploadState.cleanup();
-      expect(unlinkSync.called).to.equal(true);
+      expect(rimrafSync.called).to.equal(true);
     });
 
   });

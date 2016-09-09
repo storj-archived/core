@@ -70,6 +70,7 @@ module.exports.upload = function(bucket, filepath, env) {
   var firstFileIndex = filepaths.indexOf(filepath);
   filepaths.splice(0,firstFileIndex);
   var expandedFilepaths = [];
+  var bucketName = null;
 
   async.eachOfSeries(filepaths, function(origFilepath, index, callback) {
     // In *NIX the wildcard is already parsed so this will cover other OS's
@@ -123,108 +124,114 @@ module.exports.upload = function(bucket, filepath, env) {
               log('info', '[ %s ] Finished cleaning!', filename);
             }
 
-            fs.createReadStream(filepath)
-              .pipe(encrypter)
-              .pipe(fs.createWriteStream(tmppath)).on('finish', function() {
-                log(
-                  'info',
-                  '[ %s ] Encryption complete!',
-                  filename
-                );
+            utils.resolveBucketRef(client, bucket, function(err, bucketId) {
+              if (err) {
+                return log('error', err);
+              }
 
-                log(
-                  'info',
-                  '[ %s ] Creating storage token...',
-                  filename
-                );
+              fs.createReadStream(filepath)
+                .pipe(encrypter)
+                .pipe(fs.createWriteStream(tmppath)).on('finish', function() {
+                  log(
+                    'info',
+                    '[ %s ] Encryption complete!',
+                    filename
+                  );
 
-                client.createToken(
-                  bucket,
-                  'PUSH',
-                  function(err, token) {
-                    if (err) {
-                      log('[ %s ] error: %s', [ filename, err.message ]);
-                      return cleanup();
-                    }
+                  log(
+                    'info',
+                    '[ %s ] Creating storage token...',
+                    filename
+                  );
 
-                    log('info', '[ %s ] Storing file, hang tight!', filename);
-
-                    client.storeFileInBucket(
-                      bucket,
-                      token.token,
-                      tmppath,
-                      function(err, file) {
-                        if (err) {
-                          log(
-                            'warn',
-                            '[ %s ] Error occurred. Triggering cleanup...',
-                            filename
-                           );
-                          cleanup();
-                          callback(err, filepath);
-                          // Should retry this file
-                          return log(
-                            '[ %s ] error: %s',
-                            [ filename, err.message ]
-                          );
-                        }
-
-                        keyring.set(file.id, secret);
-                        cleanup();
-                        log(
-                          'info',
-                          '[ %s ] Encryption key saved to keyring.',
-                          filename
-                        );
-
-                        log(
-                          'info',
-                          '[ %s ] File successfully stored in bucket.',
-                          filename
-                        );
-
-                        log(
-                          'info',
-                          'Name: %s, Type: %s, Size: %s bytes, ID: %s',
-                          [file.filename, file.mimetype, file.size, file.id]
-                        );
-
-                        if (env.redundancy) {
-                          return module.exports.mirror.call(
-                            self,
-                            bucket,
-                            file.id,
-                            env
-                          );
-                        }
-
-                        uploadedCount++;
-
-                        log(
-                          'info',
-                          '%s of %s files uploaded',
-                          [ uploadedCount, fileCount ]
-                        );
-
-                        if (uploadedCount === fileCount) {
-                          log( 'info', 'Done.');
-                        }
-
-                        callback(null, filepath);
-
+                  client.createToken(
+                    bucketId,
+                    'PUSH',
+                    function(err, token) {
+                      if (err) {
+                        log('[ %s ] error: %s', [ filename, err.message ]);
+                        return cleanup();
                       }
-                    );
-                  }
-                );
+
+                      log('info', '[ %s ] Storing file, hang tight!', filename);
+
+                      client.storeFileInBucket(
+                        bucketId,
+                        token.token,
+                        tmppath,
+                        function(err, file) {
+                          if (err) {
+                            log(
+                              'warn',
+                              '[ %s ] Error occurred. Triggering cleanup...',
+                              filename
+                             );
+                            cleanup();
+                            callback(err, filepath);
+                            // Should retry this file
+                            return log(
+                              '[ %s ] error: %s',
+                              [ filename, err.message ]
+                            );
+                          }
+
+                          keyring.set(file.id, secret);
+                          cleanup();
+                          log(
+                            'info',
+                            '[ %s ] Encryption key saved to keyring.',
+                            filename
+                          );
+
+                          log(
+                            'info',
+                            '[ %s ] File successfully stored in bucket.',
+                            filename
+                          );
+
+                          log(
+                            'info',
+                            'Name: %s, Type: %s, Size: %s bytes, ID: %s',
+                            [file.filename, file.mimetype, file.size, file.id]
+                          );
+
+                          if (env.redundancy) {
+                            return module.exports.mirror.call(
+                              self,
+                              bucketId,
+                              file.id,
+                              env
+                            );
+                          }
+
+                          uploadedCount++;
+
+                          log(
+                            'info',
+                            '%s of %s files uploaded',
+                            [ uploadedCount, fileCount ]
+                          );
+
+                          if (uploadedCount === fileCount) {
+                            log( 'info', 'Done.');
+                          }
+
+                          callback(null, filepath);
+
+                        }
+                      );
+                    }
+                  );
+                });
               });
-          });
-        }, function(err, filepath) {
-          if (err) {
-            log(
-              'error',
-              '[ %s ] A file has failed to upload: %s',
-              [ filepath, err ]
-            );
+            });
+          }, function(err, filepath) {
+            if (err) {
+              log(
+                'error',
+                '[ %s ] A file has failed to upload: %s',
+                [ filepath, err ]
+              );
           }
 
           process.exit();
@@ -233,6 +240,44 @@ module.exports.upload = function(bucket, filepath, env) {
     });
   });
 };
+
+
+module.exports.checkForBucketName = function(client, bucketReference, callback) {
+  // Determine if we have a bucket name or bucketid
+  var bucketId = null;
+  var isValidBucketId = new RegExp('^[0-9a-fA-F]{24}$');
+  var referenceById = isValidBucketId.test(bucketReference);
+
+  if (!referenceById) {
+    // Get a list of buckets
+    client.getBuckets(function(err, bucketObjects) {
+      if (err) {
+        return callback(err.message);
+      }
+
+      if (!bucketObjects.length) {
+        return callback('You have not created any buckets.');
+      }
+
+      var foundBucket = false;
+
+      bucketObjects.forEach(function(bucketObject) {
+        if (bucketObject.name === bucketReference) {
+          foundBucket = true;
+
+          bucketId = bucketObject.id;
+        }
+      });
+
+      if (!foundBucket) {
+        return callback('Could not find the requested bucket');
+      }
+
+      callback(err, bucketId);
+    });
+  }
+};
+
 
 module.exports.mirror = function(bucket, file, env) {
   var client = this._storj.PrivateClient();
@@ -275,55 +320,68 @@ module.exports.download = function(bucket, id, filepath, env) {
 
   utils.getKeyRing(keypass, function(keyring) {
     var target = fs.createWriteStream(filepath);
-    var secret = keyring.get(id);
 
-    if (!secret) {
-      return log('error', 'No decryption key found in key ring!');
-    }
-
-    var decrypter = new storj.DecryptStream(secret);
-    var received = 0;
-    var exclude = env.exclude.split(',');
-
-    target.on('finish', function() {
-      log('info', 'File downloaded and written to %s.', [filepath]);
-    }).on('error', function(err) {
-      log('error', err.message);
-    });
-
-    client.createFileStream(bucket, id, {
-      exclude: exclude
-    },function(err, stream) {
+    utils.resolveBucketRef(client, bucket, function(err, bucketId) {
       if (err) {
-        return log('error', err.message);
+        return log('error', err);
       }
 
-      stream.on('error', function(err) {
-        log('warn', 'Failed to download shard, reason: %s', [err.message]);
-        fs.unlink(filepath, function(unlinkFailed) {
-          if (unlinkFailed) {
-            return log('error', 'Failed to unlink partial file.');
-          }
+      utils.resolveFileRef(client, bucketId, id, function(err, fileId) {
+        if (err) {
+          return log('error', err);
+        }
 
-          if (!err.pointer) {
-            return;
-          }
+        var secret = keyring.get(fileId);
 
-          log('info', 'Retrying download from other mirrors...');
-          exclude.push(err.pointer.farmer.nodeID);
-          module.exports.download.call(
-            self,
-            bucket,
-            id,
-            filepath,
-            { exclude: env.exclude.join(',')}
-          );
+        if (!secret) {
+          return log('error', 'No decryption key found in key ring!');
+        }
+
+        var decrypter = new storj.DecryptStream(secret);
+        var received = 0;
+        var exclude = env.exclude.split(',');
+
+        target.on('finish', function() {
+          log('info', 'File downloaded and written to %s.', [filepath]);
+        }).on('error', function(err) {
+          log('error', err.message);
         });
-      }).pipe(through(function(chunk) {
-        received += chunk.length;
-        log('info', 'Received %s of %s bytes', [received, stream._length]);
-        this.queue(chunk);
-      })).pipe(decrypter).pipe(target);
+
+        client.createFileStream(bucketId, fileId, {
+          exclude: exclude
+        },function(err, stream) {
+          if (err) {
+            return log('error', err.message);
+          }
+
+          stream.on('error', function(err) {
+            log('warn', 'Failed to download shard, reason: %s', [err.message]);
+            fs.unlink(filepath, function(unlinkFailed) {
+              if (unlinkFailed) {
+                return log('error', 'Failed to unlink partial file.');
+              }
+
+              if (!err.pointer) {
+                return;
+              }
+
+              log('info', 'Retrying download from other mirrors...');
+              exclude.push(err.pointer.farmer.nodeID);
+              module.exports.download.call(
+                self,
+                bucketId,
+                fileId,
+                filepath,
+                { exclude: env.exclude.join(',')}
+              );
+            });
+          }).pipe(through(function(chunk) {
+            received += chunk.length;
+            log('info', 'Received %s of %s bytes', [received, stream._length]);
+            this.queue(chunk);
+          })).pipe(decrypter).pipe(target);
+        });
+      });
     });
   });
 };

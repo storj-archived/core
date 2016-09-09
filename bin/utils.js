@@ -131,6 +131,81 @@ module.exports.getKeyRing = function(keypass, callback) {
   });
 };
 
+module.exports.resolveBucketRef = function(client, bucketRef, callback) {
+  // Determine if we have a bucket name or bucketid
+  var bucketId = bucketRef;
+  var isValidBucketId = new RegExp('^[0-9a-fA-F]{24}$');
+  var referenceById = isValidBucketId.test(bucketRef);
+
+  if (!referenceById) {
+    // Get a list of buckets
+    client.getBuckets(function(err, bucketObjects) {
+      if (err) {
+        return callback(err.message);
+      }
+
+      if (!bucketObjects.length) {
+        return callback('You have not created any buckets.');
+      }
+
+      var foundBucket = false;
+
+      // Check to see if there is a bucket by this name
+      bucketObjects.forEach(function(bucketObject) {
+        if (bucketObject.name === bucketRef) {
+          foundBucket = true;
+
+          bucketId = bucketObject.id;
+        }
+      });
+
+      if (!foundBucket) {
+        return callback('Could not find the requested bucket');
+      }
+
+      return callback(err, bucketId);
+    });
+  } else {
+    return callback(null, bucketId);
+  }
+};
+
+module.exports.resolveFileRef = function(client, bucketId, fileRef, callback) {
+  // Determine if we have a file name or file id
+  var fileId = fileRef;
+
+  log('info', 'File ref before check: %s', fileRef);
+
+  client.listFilesInBucket(bucketId, function(err, files) {
+    if (err) {
+      return callback(err.message);
+    }
+
+    if (!files.length) {
+      return callback('No files found in bucket');
+    }
+
+    var foundFile = false;
+
+    log('info', 'Files found is: ', files);
+
+    // Check to see if there is a bucket by this name
+    files.forEach(function(file) {
+      if (file.filename === fileRef) {
+        foundFile = true;
+        fileId = file.id;
+      }
+    });
+
+    if (!foundFile) {
+      return callback('Could not find the requested file');
+    }
+
+    log('info', 'File ref before check: %s', fileRef);
+    callback(err, fileId);
+  });
+};
+
 module.exports.importkeyring = function(path) {
   var keypass = this._storj.getKeyPass();
 

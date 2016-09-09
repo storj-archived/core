@@ -201,6 +201,7 @@ program
   .option('-C, --fileconcurrency <count>', 'max file upload concurrency', 1)
   .option('-r, --redundancy <mirrors>', 'number of mirrors to create for file')
   .description('upload a file or files to the network and track in a bucket')
+  .description('<bucket-id> can also be the bucket name')
   .description('<filepath> can be a path with wildcard or a space separated')
   .description('  list of files')
   .action(actions.files.upload.bind(program));
@@ -217,6 +218,8 @@ program
   .alias('df')
   .option('-x, --exclude <nodeID,nodeID...>', 'mirrors to create for file', '')
   .description('download a file from the network with a pointer from a bucket')
+  .description('<bucket-id> can also be the bucket name')
+  .description('<file-id> can also be the file name')
   .action(actions.files.download.bind(program));
 
 program

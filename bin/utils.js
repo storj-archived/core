@@ -131,8 +131,9 @@ module.exports.getKeyRing = function(keypass, callback) {
   });
 };
 
-module.exports.resolveBucketRef = function(client, bucketRef, callback) {
+module.exports.resolveBucketRef = function(bucketRef, callback) {
   // Determine if we have a bucket name or bucketid
+  var client = this;
   var bucketId = bucketRef;
   var isValidBucketId = new RegExp('^[0-9a-fA-F]{24}$');
   var referenceById = isValidBucketId.test(bucketRef);
@@ -170,11 +171,10 @@ module.exports.resolveBucketRef = function(client, bucketRef, callback) {
   }
 };
 
-module.exports.resolveFileRef = function(client, bucketId, fileRef, callback) {
+module.exports.resolveFileRef = function(bucketId, fileRef, callback) {
   // Determine if we have a file name or file id
+  var client = this;
   var fileId = fileRef;
-
-  log('info', 'File ref before check: %s', fileRef);
 
   client.listFilesInBucket(bucketId, function(err, files) {
     if (err) {
@@ -186,8 +186,6 @@ module.exports.resolveFileRef = function(client, bucketId, fileRef, callback) {
     }
 
     var foundFile = false;
-
-    log('info', 'Files found is: ', files);
 
     // Check to see if there is a bucket by this name
     files.forEach(function(file) {
@@ -201,7 +199,6 @@ module.exports.resolveFileRef = function(client, bucketId, fileRef, callback) {
       return callback('Could not find the requested file');
     }
 
-    log('info', 'File ref before check: %s', fileRef);
     callback(err, fileId);
   });
 };

@@ -8,24 +8,30 @@ var storj = require('../..');
 var globule = require('globule');
 var async = require('async');
 
-module.exports.list = function(bucketid) {
+module.exports.list = function(bucketRef) {
   var client = this._storj.PrivateClient();
 
-  client.listFilesInBucket(bucketid, function(err, files) {
+  utils.resolveBucketRef.call(client, bucketRef, function(err, bucketid) {
     if (err) {
       return log('error', err.message);
     }
 
-    if (!files.length) {
-      return log('warn', 'There are no files in this bucket.');
-    }
+    client.listFilesInBucket(bucketid, function(err, files) {
+      if (err) {
+        return log('error', err.message);
+      }
 
-    files.forEach(function(file) {
-      log(
-        'info',
-        'Name: %s, Type: %s, Size: %s bytes, ID: %s',
-        [file.filename, file.mimetype, file.size, file.id]
-      );
+      if (!files.length) {
+        return log('warn', 'There are no files in this bucket.');
+      }
+
+      files.forEach(function(file) {
+        log(
+          'info',
+          'Name: %s, Type: %s, Size: %s bytes, ID: %s',
+          [file.filename, file.mimetype, file.size, file.id]
+        );
+      });
     });
   });
 };
@@ -70,7 +76,6 @@ module.exports.upload = function(bucket, filepath, env) {
   var firstFileIndex = filepaths.indexOf(filepath);
   filepaths.splice(0,firstFileIndex);
   var expandedFilepaths = [];
-  var bucketName = null;
 
   async.eachOfSeries(filepaths, function(origFilepath, index, callback) {
     // In *NIX the wildcard is already parsed so this will cover other OS's
@@ -124,7 +129,7 @@ module.exports.upload = function(bucket, filepath, env) {
               log('info', '[ %s ] Finished cleaning!', filename);
             }
 
-            utils.resolveBucketRef(client, bucket, function(err, bucketId) {
+            utils.resolveBucketRef.call(client, bucket, function(err, bucketId) {
               if (err) {
                 return log('error', err);
               }
@@ -321,12 +326,12 @@ module.exports.download = function(bucket, id, filepath, env) {
   utils.getKeyRing(keypass, function(keyring) {
     var target = fs.createWriteStream(filepath);
 
-    utils.resolveBucketRef(client, bucket, function(err, bucketId) {
+    utils.resolveBucketRef.call(client, bucket, function(err, bucketId) {
       if (err) {
         return log('error', err);
       }
 
-      utils.resolveFileRef(client, bucketId, id, function(err, fileId) {
+      utils.resolveFileRef.call(client, bucketId, id, function(err, fileId) {
         if (err) {
           return log('error', err);
         }

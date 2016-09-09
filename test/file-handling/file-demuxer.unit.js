@@ -125,61 +125,111 @@ describe('FileDemuxer#getOptimalShardSize', function() {
 
   it('should return 8 for 8', function() {
     expect(
-      FileDemuxerStub.getOptimalShardSize(3 * (1024 * 1024))
+      FileDemuxerStub.getOptimalShardSize(
+        {
+          fileSize: 3 * (1024 * 1024),
+          shardConcurrency: 3
+        }
+      )
     ).to.equal(8 * (1024 * 1024));
   });
 
   it('should return 8 for 16', function() {
     expect(
-      FileDemuxerStub.getOptimalShardSize(16 * (1024 * 1024))
+      FileDemuxerStub.getOptimalShardSize(
+        {
+          fileSize: 16 * (1024 * 1024),
+          shardConcurrency: 3
+        }
+      )
     ).to.equal(8 * (1024 * 1024));
   });
 
   it('should return 8 for 32', function() {
     expect(
-      FileDemuxerStub.getOptimalShardSize(32 * (1024 * 1024))
+      FileDemuxerStub.getOptimalShardSize(
+        {
+          fileSize: 32 * (1024 * 1024),
+          shardConcurrency: 3
+        }
+      )
     ).to.equal(8 * (1024 * 1024));
   });
 
   it('should return 8 for 64', function() {
     expect(
-      FileDemuxerStub.getOptimalShardSize(64 * (1024 * 1024))
+      FileDemuxerStub.getOptimalShardSize(
+        {
+          fileSize: 64 * (1024 * 1024),
+          shardConcurrency: 3
+        }
+      )
     ).to.equal(8 * (1024 * 1024));
   });
 
   it('should return 8 for 128', function() {
     expect(
-      FileDemuxerStub.getOptimalShardSize(128 * (1024 * 1024))
+      FileDemuxerStub.getOptimalShardSize(
+        {
+          fileSize: 128 * (1024 * 1024),
+          shardConcurrency: 3
+        }
+      )
     ).to.equal(8 * (1024 * 1024));
   });
 
   it('should return 8 for 256', function() {
     expect(
-      FileDemuxerStub.getOptimalShardSize(256 * (1024 * 1024))
+      FileDemuxerStub.getOptimalShardSize(
+        {
+          fileSize: 256 * (1024 * 1024),
+          shardConcurrency: 3
+        }
+      )
     ).to.equal(8 * (1024 * 1024));
   });
 
   it('should return 16 for 512', function() {
     expect(
-      FileDemuxerStub.getOptimalShardSize(512 * (1024 * 1024))
+      FileDemuxerStub.getOptimalShardSize(
+        {
+          fileSize: 512 * (1024 * 1024),
+          shardConcurrency: 3
+        }
+      )
     ).to.equal(16 * (1024 * 1024));
   });
 
   it('should return 32 for 1024', function() {
     expect(
-      FileDemuxerStub.getOptimalShardSize(1024 * (1024 * 1024))
+      FileDemuxerStub.getOptimalShardSize(
+        {
+          fileSize: 1024 * (1024 * 1024),
+          shardConcurrency: 3
+        }
+      )
     ).to.equal(32 * (1024 * 1024));
   });
 
   it('should return 64 for 2048', function() {
     expect(
-      FileDemuxerStub.getOptimalShardSize(2048 * (1024 * 1024))
+      FileDemuxerStub.getOptimalShardSize(
+        {
+          fileSize: 2048 * (1024 * 1024),
+          shardConcurrency: 3
+        }
+      )
     ).to.equal(64 * (1024 * 1024));
   });
 
   it('should return 128 for 4096', function() {
     expect(
-      FileDemuxerStub.getOptimalShardSize(4096 * (1024 * 1024))
+      FileDemuxerStub.getOptimalShardSize(
+        {
+          fileSize: 4096 * (1024 * 1024),
+          shardConcurrency: 3
+        }
+      )
     ).to.equal(128 * (1024 * 1024));
   });
 
@@ -193,7 +243,12 @@ describe('FileDemuxer#getOptimalShardSize', function() {
     });
 
     expect(
-      LowMemDemuxer.getOptimalShardSize(4096 * (1024 * 1024))
+      LowMemDemuxer.getOptimalShardSize(
+        {
+          fileSize: 4096 * (1024 * 1024),
+          shardConcurrency: 3
+        }
+      )
     ).to.equal(8 * (1024 * 1024));
   });
 

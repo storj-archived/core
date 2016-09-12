@@ -122,6 +122,7 @@ module.exports.upload = function(bucket, filepath, env) {
       if (fs.statSync(parsedFileArray[0]).isFile() === true) {
         expandedFilepaths = expandedFilepaths.concat(parsedFileArray);
       }
+
       try {
         fs.accessSync(parsedFileArray[0], fs.R_OK);
       } catch (err) {
@@ -130,6 +131,7 @@ module.exports.upload = function(bucket, filepath, env) {
     } else {
       return log('error', '%s could not be found', origFilepath);
     }
+
     callback();
   }, function(err) {
     if (err) {

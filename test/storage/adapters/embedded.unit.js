@@ -27,14 +27,13 @@ var item = new StorageItem({
   shard: new Buffer('test')
 });
 
-before(function(done) {
+before(function() {
   if (utils.existsSync(TMP_DIR)) {
     rimraf.sync(TMP_DIR);
   }
   mkdirp.sync(TMP_DIR);
   audit.end(Buffer('test'));
   store = new EmbeddedStorageAdapter(tmpdir());
-  store.on('ready', done);
 });
 
 describe('EmbeddedStorageAdapter', function() {

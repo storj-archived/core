@@ -12,22 +12,29 @@ var utils = require('../../lib/utils');
 var DataChannelClient = require('../../lib/data-channels/client');
 var StorageItem = require('../../lib/storage/item');
 var Verification = require('../../lib/audit-tools/verification');
-var memdown = require('memdown');
 var DataChannelPointer = require('../../lib/data-channels/pointer');
+var path = require('path');
+var os = require('os');
+var mkdirp = require('mkdirp');
+var rimraf = require('rimraf');
+var crypto = require('crypto');
 
 kad.constants.T_RESPONSETIMEOUT = 2000;
 
 var NODE_LIST = [];
 var STARTING_PORT = 64535;
+var TMP_DIR = path.join(os.tmpdir(), 'STORJ_INTEGRATION_TESTS-NET');
 
 var _ntp = null;
 
-function createNode(opcodes, tunnels) {
+function createNode(opcodes, tunnels, callback) {
   var node = null;
   var kp = new storj.KeyPair();
-  var manager = new storj.StorageManager(new storj.LevelDBStorageAdapter(
-    (Math.floor(Math.random() * 24)).toString(), memdown
-  ));
+  var adapter = new storj.EmbeddedStorageAdapter(
+    path.join(TMP_DIR, crypto.randomBytes(32).toString('hex')),
+    'createNode'
+  );
+  var manager = new storj.StorageManager(adapter);
   var port = STARTING_PORT--;
 
   var options = {
@@ -44,43 +51,74 @@ function createNode(opcodes, tunnels) {
     noforward: true,
     tunnels: tunnels,
     tunport: 0,
-    backend: memdown,
-    storage: { path: (Math.floor(Math.random() * 24)).toString() }
+    storage: {
+      path: path.join(TMP_DIR, crypto.randomBytes(32).toString('hex'))
+    }
   };
 
   if (opcodes.length) {
     node = storj.FarmerInterface(options);
+    node.manager._storage.once('ready', function() {
+      console.log('firing callback for farmer')
+      callback(null, node);
+    });
   } else {
     node = storj.RenterInterface(options);
+    adapter.once('ready', function() {
+      console.log('firing callback for renter')
+      callback(null, node);
+    });
   }
 
   NODE_LIST.push([
     'storj://127.0.0.1:', port, '/', kp.getNodeID()
   ].join(''));
-
-  return node;
 }
 
-function createRenter() {
-  return createNode([], 3);
+function createRenter(callback) {
+  return createNode([], 3, callback);
 }
 
-function createFarmer() {
-  return createNode(['0f01010202'], 0);
+function createFarmer(callback) {
+  return createNode(['0f01010202'], 0, callback);
 }
 
-var renters = [createRenter()];
-var farmers = [createFarmer(), createFarmer()];
+var renters = [];
+var farmers = [];
 var contract = null;
 var farmer = null;
 var shard = new Buffer('hello storj');
 var audit = new AuditStream(12);
 var ctoken = null;
 var rtoken = null;
+var renter;
+
+before(function(done) {
+  if (storj.utils.existsSync(TMP_DIR)) {
+    rimraf.sync(TMP_DIR);
+  }
+  mkdirp.sync(TMP_DIR);
+  async.times(2, function(n, next) {
+    createFarmer(function(err, farmer) {
+      farmers.push(farmer);
+      console.log('created farmer')
+      next();
+    });
+  }, function() {
+    async.times(1, function(n, next) {
+      createRenter(function(err, renter) {
+        renters.push(renter);
+        console.log('created renter')
+        next();
+      });
+    }, function() {
+      renter = renters[renters.length - 1];
+      done();
+    });
+  });
+});
 
 describe('Network/Integration/Tunnelling', function() {
-
-  var renter = renters[renters.length - 1];
 
   before(function(done) {
     this.timeout(35000);
@@ -250,4 +288,8 @@ describe('Network/Integration/Tunnelling', function() {
     _ntp.restore();
   });
 
+});
+
+after(function() {
+  rimraf.sync(TMP_DIR);
 });

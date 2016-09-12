@@ -11,26 +11,33 @@ var utils = require('../../../lib/utils');
 var DataChannelClient = require('../../../lib/data-channels/client');
 var StorageItem = require('../../../lib/storage/item');
 var Verification = require('../../../lib/audit-tools/verification');
-var memdown = require('memdown');
 var KeyPair = require('../../../lib/crypto-tools/keypair');
 var Manager = require('../../../lib/storage/manager');
-var LevelDBStorageAdapter = require('../../../lib/storage/adapters/level');
+var EmbeddedStorageAdapter = require('../../../lib/storage/adapters/embedded');
 var FarmerInterface = require('../../../lib/network/interfaces/farmer');
 var RenterInterface = require('../../../lib/network/interfaces/renter');
+var path = require('path');
+var os = require('os');
+var mkdirp = require('mkdirp');
+var rimraf = require('rimraf');
+var crypto = require('crypto');
+var async = require('async');
 
 kad.constants.T_RESPONSETIMEOUT = 5000;
 
 var NODE_LIST = [];
 var STARTING_PORT = 65535;
+var TMP_DIR = path.join(os.tmpdir(), 'STORJ_INTEGRATION_TESTS-IFACES');
 
 var _ntp = null;
 
-function createNode(opcodes) {
+function createNode(opcodes, callback) {
   var node = null;
   var kp = new KeyPair();
-  var manager = new Manager(new LevelDBStorageAdapter(
-    (Math.floor(Math.random() * 24)).toString(), memdown
-  ));
+  var adapter = new EmbeddedStorageAdapter(
+    path.join(TMP_DIR, crypto.randomBytes(32).toString('hex'))
+  );
+  var manager = new Manager(adapter);
   var port = STARTING_PORT--;
 
   var options = {
@@ -43,7 +50,6 @@ function createNode(opcodes) {
     tunport: 0,
     opcodes: opcodes,
     noforward: true,
-    backend: memdown,
     bridge: false
   };
 
@@ -57,23 +63,21 @@ function createNode(opcodes) {
     'storj://127.0.0.1:', port, '/', kp.getNodeID()
   ].join(''));
 
-  return node;
+  adapter.on('ready', function() {
+    callback(null, node);
+  });
 }
 
-function createRenter() {
-  return createNode([]);
+function createRenter(cb) {
+  return createNode([], cb);
 }
 
-function createFarmer() {
-  return createNode(['0f01010202']);
+function createFarmer(cb) {
+  return createNode(['0f01010202'], cb);
 }
 
-var farmers = Array.apply(null, Array(2)).map(function() {
-  return createFarmer();
-});
-var renters = Array.apply(null, Array(2)).map(function() {
-  return createRenter();
-});
+var farmers = [];
+var renters = [];
 
 var contract = null;
 var farmer = null;
@@ -81,6 +85,30 @@ var shard = new Buffer('hello storj');
 var audit = new AuditStream(12);
 var ctoken = null;
 var rtoken = null;
+var renter;
+
+before(function(done) {
+  if (utils.existsSync(TMP_DIR)) {
+    rimraf.sync(TMP_DIR);
+  }
+  mkdirp.sync(TMP_DIR);
+  async.times(2, function(n, next) {
+    createFarmer(function(err, farmer) {
+      farmers.push(farmer);
+      next();
+    });
+  }, function() {
+    async.times(2, function(n, next) {
+      createRenter(function(err, renter) {
+        renters.push(renter);
+        next();
+      });
+    }, function() {
+      renter = renters[renters.length - 1];
+      done();
+    });
+  });
+});
 
 describe('Interfaces/Farmer+Renter/Integration', function() {
 
@@ -106,8 +134,6 @@ describe('Interfaces/Farmer+Renter/Integration', function() {
     });
 
   });
-
-  var renter = renters[renters.length - 1];
 
   describe('#getStorageOffer', function() {
 
@@ -210,4 +236,8 @@ describe('Interfaces/Farmer+Renter/Integration', function() {
     _ntp.restore();
   });
 
+});
+
+after(function() {
+  rimraf.sync(TMP_DIR);
 });

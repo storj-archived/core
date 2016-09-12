@@ -11,6 +11,27 @@ var Contact = require('../../../lib/network/contact');
 var utils = require('../../../lib/utils');
 var StorageItem = require('../../../lib/storage/item');
 var EventEmitter = require('events').EventEmitter;
+var path = require('path');
+var os = require('os');
+var TMP_DIR = path.join(os.tmpdir(), 'STORJ_INTEGRATION_TESTS');
+var crypto = require('crypto');
+var rimraf = require('rimraf');
+var mkdirp = require('mkdirp');
+
+function _randomPath() {
+  return path.join(TMP_DIR, crypto.randomBytes(32).toString('hex'));
+}
+
+before(function() {
+  if (utils.existsSync(TMP_DIR)) {
+    rimraf.sync(TMP_DIR);
+  }
+  mkdirp.sync(TMP_DIR);
+});
+
+after(function() {
+  rimraf.sync(TMP_DIR);
+});
 
 describe('FarmerInterface', function() {
 
@@ -27,8 +48,7 @@ describe('FarmerInterface', function() {
           return false;
         },
         payment: { address: keypair.getAddress() },
-        logger: kad.Logger(0),
-        backend: require('memdown')
+        logger: kad.Logger(0)
       });
       expect(farmer.getPaymentAddress()).to.equal(keypair.getAddress());
     });
@@ -46,8 +66,7 @@ describe('FarmerInterface', function() {
         negotiator: function(contract, callback) {
           callback(false);
         },
-        logger: kad.Logger(0),
-        backend: require('memdown')
+        logger: kad.Logger(0)
       });
       var _addTo = sinon.stub(farmer, '_addContractToPendingList');
       farmer._handleContractPublication(Contract({}));
@@ -69,8 +88,7 @@ describe('FarmerInterface', function() {
         negotiator: function(contract, callback) {
           callback(false);
         },
-        logger: kad.Logger(0),
-        backend: require('memdown')
+        logger: kad.Logger(0)
       });
 
       var _size = sinon.stub(
@@ -98,7 +116,6 @@ describe('FarmerInterface', function() {
           callback(true);
         },
         logger: kad.Logger(0),
-        backend: require('memdown'),
         concurrency: 0
       });
       var _addTo = sinon.stub(farmer, '_addContractToPendingList');
@@ -148,8 +165,7 @@ describe('FarmerInterface', function() {
         tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
-        backend: require('memdown'),
-        storage: { path: 'test' }
+        storage: { path: _randomPath() }
       });
       var _getContactByNodeID = sinon.stub(
         farmer.router,
@@ -181,8 +197,7 @@ describe('FarmerInterface', function() {
         tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
-        backend: require('memdown'),
-        storage: { path: 'test' }
+        storage: { path: _randomPath() }
       });
       var _remove = sinon.stub(farmer, '_removeContractFromPendingList');
       var _getContactByNodeID = sinon.stub(
@@ -212,8 +227,7 @@ describe('FarmerInterface', function() {
         tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
-        backend: require('memdown'),
-        storage: { path: 'test' }
+        storage: { path: _randomPath() }
       });
       var _save = sinon.stub(farmer.manager, 'save').callsArgWith(
         1,
@@ -250,8 +264,7 @@ describe('FarmerInterface', function() {
         tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
-        backend: require('memdown'),
-        storage: { path: 'test' }
+        storage: { path: _randomPath() }
       });
       var _remove = sinon.stub(farmer, '_removeContractFromPendingList');
       var _getContactByNodeID = sinon.stub(
@@ -300,8 +313,7 @@ describe('FarmerInterface', function() {
         tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
-        backend: require('memdown'),
-        storage: { path: 'test' }
+        storage: { path: _randomPath() }
       });
       var _getContactByNodeID = sinon.stub(
         farmer.router,
@@ -330,8 +342,7 @@ describe('FarmerInterface', function() {
         tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
-        backend: require('memdown'),
-        storage: { path: 'test' }
+        storage: { path: _randomPath() }
       });
       var _join = sinon.stub(Network.prototype, 'join').callsArgWith(
         0,
@@ -355,8 +366,7 @@ describe('FarmerInterface', function() {
         tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
-        backend: require('memdown'),
-        storage: { path: 'test' }
+        storage: { path: _randomPath() }
       });
       var _send = sinon.stub(farmer.transport, 'send').callsArgWith(
         2,
@@ -382,8 +392,7 @@ describe('FarmerInterface', function() {
         tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
-        backend: require('memdown'),
-        storage: { path: 'test' }
+        storage: { path: _randomPath() }
       });
       var _send = sinon.stub(farmer.transport, 'send').callsArgWith(
         2,
@@ -430,8 +439,7 @@ describe('FarmerInterface', function() {
         tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
-        backend: require('memdown'),
-        storage: { path: 'test' }
+        storage: { path: _randomPath() }
       });
       var _warn = sinon.stub(farmer._logger, 'warn');
       farmer._handleOfferRes({ result: { contract: { version: '12'} } });
@@ -451,8 +459,7 @@ describe('FarmerInterface', function() {
         tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
-        backend: require('memdown'),
-        storage: { path: 'test' }
+        storage: { path: _randomPath() }
       });
       var _warn = sinon.stub(farmer._logger, 'warn');
       farmer._handleOfferRes({
@@ -476,8 +483,7 @@ describe('FarmerInterface', function() {
         tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
-        backend: require('memdown'),
-        storage: { path: 'test' }
+        storage: { path: _randomPath() }
       });
       var _load = sinon.stub(farmer.manager, 'load').callsArgWith(1, {});
       var _save = sinon.stub(farmer.manager, 'save');
@@ -507,8 +513,7 @@ describe('FarmerInterface', function() {
         tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
-        backend: require('memdown'),
-        storage: { path: 'test' }
+        storage: { path: _randomPath() }
       });
       var manager = new EventEmitter();
       farmer._listenForCapacityChanges(manager);
@@ -526,8 +531,7 @@ describe('FarmerInterface', function() {
         tunport: 0,
         noforward: true,
         logger: kad.Logger(0),
-        backend: require('memdown'),
-        storage: { path: 'test' }
+        storage: { path: _randomPath() }
       });
       var manager = new EventEmitter();
       farmer._listenForCapacityChanges(manager);
@@ -547,8 +551,7 @@ describe('FarmerInterface', function() {
         tunport: 0,
         noforward: true,
         logger: logger,
-        backend: require('memdown'),
-        storage: { path: 'test' }
+        storage: { path: _randomPath() }
       });
       var manager = new EventEmitter();
       farmer._listenForCapacityChanges(manager);

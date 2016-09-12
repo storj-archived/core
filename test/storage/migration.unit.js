@@ -2,11 +2,26 @@
 
 var StorageItem = require('../../lib/storage/item');
 var StorageMigration = require('../../lib/storage/migration');
-var LevelDBStorageAdapter = require('../../lib/storage/adapters/level');
+var EmbeddedStorageAdapter = require('../../lib/storage/adapters/embedded');
 var expect = require('chai').expect;
 var sinon = require('sinon');
 var utils = require('../../lib/utils');
-var memdown = require('memdown');
+var os = require('os');
+var rimraf = require('rimraf');
+var path = require('path');
+var TMP_DIR = path.join(os.tmpdir(), 'STORJ_INTEGRATION_TESTS');
+var mkdirp = require('mkdirp');
+
+before(function() {
+  if (utils.existsSync(TMP_DIR)) {
+    rimraf.sync(TMP_DIR);
+  }
+  mkdirp.sync(TMP_DIR);
+});
+
+function _p(n) {
+  return path.join(TMP_DIR, n);
+}
 
 describe('StorageMigration', function() {
 
@@ -14,15 +29,15 @@ describe('StorageMigration', function() {
 
     it('should create an instance without the new keyword', function() {
       expect(StorageMigration(
-        LevelDBStorageAdapter('t1', memdown),
-        LevelDBStorageAdapter('t2', memdown)
+        EmbeddedStorageAdapter(_p('t1')),
+        EmbeddedStorageAdapter(_p('t2'))
       )).to.be.instanceOf(StorageMigration);
     });
 
     it('should create an instance with the new keyword', function() {
       expect(new StorageMigration(
-        LevelDBStorageAdapter('t3', memdown),
-        LevelDBStorageAdapter('t4', memdown)
+        EmbeddedStorageAdapter(_p('t3')),
+        EmbeddedStorageAdapter(_p('t4'))
       )).to.be.instanceOf(StorageMigration);
     });
 
@@ -36,8 +51,8 @@ describe('StorageMigration', function() {
 
   describe('#start', function() {
 
-    var source = new LevelDBStorageAdapter('t5', memdown);
-    var target = new LevelDBStorageAdapter('t6', memdown);
+    var source = new EmbeddedStorageAdapter(_p('t5'));
+    var target = new EmbeddedStorageAdapter(_p('t6'));
 
     before(function(done) {
       source.put(StorageItem({
@@ -47,6 +62,7 @@ describe('StorageMigration', function() {
           hash: utils.rmd160('item two')
         }), function() {
           source.get(utils.rmd160('item one'), function(err, item) {
+            expect(err).to.equal(null);
             item.shard.write(Buffer('item one'));
             item.shard.end();
             source.get(utils.rmd160('item two'), function(err, item) {
@@ -111,8 +127,8 @@ describe('StorageMigration', function() {
   describe('#stop', function() {
 
     it('should null the source stream and remove listeners', function() {
-      var source = new LevelDBStorageAdapter('t7', memdown);
-      var target = new LevelDBStorageAdapter('t8', memdown);
+      var source = new EmbeddedStorageAdapter(_p('t7'));
+      var target = new EmbeddedStorageAdapter(_p('t8'));
       var migration = new StorageMigration(source, target);
       migration._sourceStream = { removeAllListeners: function() {} };
       migration.readyState = StorageMigration.STARTED;
@@ -130,8 +146,8 @@ describe('StorageMigration', function() {
   describe('#_handleSourceError', function() {
 
     it('should bubble errors passed to _handleSourceError', function(done) {
-      var source = new LevelDBStorageAdapter('t9', memdown);
-      var target = new LevelDBStorageAdapter('t10', memdown);
+      var source = new EmbeddedStorageAdapter(_p('t9'));
+      var target = new EmbeddedStorageAdapter(_p('t10'));
       var migration = new StorageMigration(source, target);
       migration.on('error', function(err) {
         expect(err.message).to.equal('Source error');
@@ -145,8 +161,8 @@ describe('StorageMigration', function() {
   describe('#_handleSourceObject', function() {
 
     it('should resume stream if there is no readable shard', function(done) {
-      var source = new LevelDBStorageAdapter('t11', memdown);
-      var target = new LevelDBStorageAdapter('t12', memdown);
+      var source = new EmbeddedStorageAdapter(_p('t11'));
+      var target = new EmbeddedStorageAdapter(_p('t12'));
       var _sourcePut = sinon.stub(source, 'put').callsArg(1);
       var _targetGet = sinon.stub(target, 'get').callsArg(1);
       var _sourceGet = sinon.stub(source, 'get').callsArgWith(1, null, {
@@ -170,8 +186,8 @@ describe('StorageMigration', function() {
     });
 
     it('should emit error if source#get fails', function(done) {
-      var source = new LevelDBStorageAdapter('t11', memdown);
-      var target = new LevelDBStorageAdapter('t12', memdown);
+      var source = new EmbeddedStorageAdapter(_p('t13'));
+      var target = new EmbeddedStorageAdapter(_p('t14'));
       var _sourcePut = sinon.stub(source, 'put').callsArg(1);
       var _targetGet = sinon.stub(target, 'get').callsArg(1);
       var _sourceGet = sinon.stub(source, 'get').callsArgWith(

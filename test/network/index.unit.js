@@ -1,4 +1,5 @@
 'use strict';
+
 /* jshint maxstatements: false */
 
 var sinon = require('sinon');

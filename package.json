@@ -7,10 +7,6 @@
     "test": "test",
     "lib": "lib",
     "doc": "doc",
-    "bin": "bin"
-  },
-  "bin": {
-    "storj": "bin/storj.js"
   },
   "scripts": {
     "test": "npm run testsuite && npm run linter",

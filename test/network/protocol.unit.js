@@ -28,7 +28,7 @@ describe('Protocol', function() {
 
   });
 
-  describe('#_handleOffer', function() {
+  describe('#handleOffer', function() {
 
     it('should fail with invalid contract', function(done) {
       var proto = new Protocol({
@@ -36,7 +36,7 @@ describe('Protocol', function() {
           _logger: Logger(0)
         }
       });
-      proto._handleOffer({
+      proto.handleOffer({
         contract: { version: '100' },
         contact: {
           address: '127.0.0.1',
@@ -63,7 +63,7 @@ describe('Protocol', function() {
         }
       });
       var _verify = sinon.stub(proto, '_verifyContract').callsArg(2);
-      proto._handleOffer({
+      proto.handleOffer({
         contract: { data_hash: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
         contact: {
           address: '127.0.0.1',
@@ -164,7 +164,7 @@ describe('Protocol', function() {
 
   });
 
-  describe('#_handleAudit', function() {
+  describe('#handleAudit', function() {
 
     it('should fail if invalid audit list supplied', function(done) {
       var proto = new Protocol({
@@ -172,7 +172,7 @@ describe('Protocol', function() {
           _logger: Logger(0)
         }
       });
-      proto._handleAudit({
+      proto.handleAudit({
         audits: null,
         contact: { nodeID: '' }
       }, function(err) {
@@ -191,7 +191,7 @@ describe('Protocol', function() {
         3,
         new Error('Failed')
       );
-      proto._handleAudit({
+      proto.handleAudit({
         audits: [{}],
         contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' }
       }, function(err) {
@@ -254,7 +254,7 @@ describe('Protocol', function() {
 
   });
 
-  describe('#_handleConsign', function() {
+  describe('#handleConsign', function() {
 
     it('should error if it cannot load shard item', function(done) {
       var proto = new Protocol({
@@ -265,7 +265,7 @@ describe('Protocol', function() {
           }
         }
       });
-      proto._handleConsign({
+      proto.handleConsign({
         contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' }
       }, function(err) {
         expect(err.message).to.equal('Failed');
@@ -282,7 +282,7 @@ describe('Protocol', function() {
           }
         }
       });
-      proto._handleConsign({
+      proto.handleConsign({
         contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' }
       }, function(err) {
         expect(err.message).to.equal('Consignment is not authorized');
@@ -316,7 +316,7 @@ describe('Protocol', function() {
           }
         }
       });
-      proto._handleConsign({
+      proto.handleConsign({
         contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' }
       }, function(err) {
         expect(err.message).to.equal(
@@ -353,7 +353,7 @@ describe('Protocol', function() {
           }
         }
       });
-      proto._handleConsign({
+      proto.handleConsign({
         contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' }
       }, function(err) {
         expect(err.message).to.equal('Failed');
@@ -363,7 +363,7 @@ describe('Protocol', function() {
 
   });
 
-  describe('#_handleRetrieve', function() {
+  describe('#handleRetrieve', function() {
 
     it('should error if it fails to load', function(done) {
       var proto = new Protocol({
@@ -374,7 +374,7 @@ describe('Protocol', function() {
           }
         }
       });
-      proto._handleRetrieve({
+      proto.handleRetrieve({
         data_hash: utils.rmd160('')
       }, function(err) {
         expect(err.message).to.equal('Failed');
@@ -391,7 +391,7 @@ describe('Protocol', function() {
           }
         }
       });
-      proto._handleRetrieve({
+      proto.handleRetrieve({
         data_hash: 'butts'
       }, function(err) {
         expect(err.message).to.equal('Invalid data hash provided: butts');
@@ -401,7 +401,7 @@ describe('Protocol', function() {
 
   });
 
-  describe('#_handleMirror', function() {
+  describe('#handleMirror', function() {
 
     it('should error if it fails to load', function(done) {
       var proto = new Protocol({
@@ -412,7 +412,7 @@ describe('Protocol', function() {
           }
         }
       });
-      proto._handleMirror({}, function(err) {
+      proto.handleMirror({}, function(err) {
         expect(err.message).to.equal('Failed');
         done();
       });
@@ -446,7 +446,7 @@ describe('Protocol', function() {
           }
         }
       });
-      proto._handleMirror({
+      proto.handleMirror({
         contact: { nodeID: '4e1243bd22c66e76c2ba9eddc1f91394e57f9f83' },
         data_hash: '4e1243bd22c66e76c2ba9eddc1f91394e57f9f83'
       }, function(err) {
@@ -464,7 +464,7 @@ describe('Protocol', function() {
           }
         }
       });
-      proto._handleMirror({
+      proto.handleMirror({
         contact: { nodeID: 'test' }
       }, function(err) {
         expect(err.message).to.equal('No contract found for shard');
@@ -486,7 +486,7 @@ describe('Protocol', function() {
           }
         }
       });
-      proto._handleMirror({
+      proto.handleMirror({
         contact: { nodeID: 'test' }
       }, function(err) {
         expect(err).to.equal(null);
@@ -496,7 +496,7 @@ describe('Protocol', function() {
 
   });
 
-  describe('#_handleProbe', function() {
+  describe('#handleProbe', function() {
 
     it('should respond with an error if probe fails', function(done) {
       var _send = sinon.stub().callsArgWith(2, new Error('ECONNREFUSED'));
@@ -508,7 +508,7 @@ describe('Protocol', function() {
           }
         }
       });
-      proto._handleProbe({
+      proto.handleProbe({
         contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' }
       }, function(err) {
         expect(err.message).to.equal('Probe failed, you are not addressable');
@@ -526,7 +526,7 @@ describe('Protocol', function() {
           }
         }
       });
-      proto._handleProbe({
+      proto.handleProbe({
         contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' }
       }, function(err) {
         expect(err).to.equal(null);
@@ -536,7 +536,7 @@ describe('Protocol', function() {
 
   });
 
-  describe('#_handleFindTunnel', function() {
+  describe('#handleFindTunnel', function() {
 
     it('should ask neighbors for tunnels if none known', function(done) {
       var proto = new Protocol({
@@ -557,7 +557,7 @@ describe('Protocol', function() {
         }
       });
       var _ask = sinon.stub(proto, '_askNeighborsForTunnels').callsArg(1);
-      proto._handleFindTunnel({
+      proto.handleFindTunnel({
         contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
         relayers: []
       }, function() {
@@ -585,7 +585,7 @@ describe('Protocol', function() {
           }
         }
       });
-      proto._handleFindTunnel({
+      proto.handleFindTunnel({
         contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
         relayers: [
           'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc',
@@ -751,7 +751,7 @@ describe('Protocol', function() {
 
   });
 
-  describe('#_handleOpenTunnel', function() {
+  describe('#handleOpenTunnel', function() {
 
     it('should error if it fails to open gateway', function(done) {
       var _createGateway = sinon.stub().callsArgWith(0, new Error('Failed'));
@@ -765,7 +765,7 @@ describe('Protocol', function() {
           }
         }
       });
-      proto._handleOpenTunnel({
+      proto.handleOpenTunnel({
         contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' }
       }, function(err) {
         expect(err.message).to.equal('Failed');
@@ -798,7 +798,7 @@ describe('Protocol', function() {
           }
         }
       });
-      proto._handleOpenTunnel({
+      proto.handleOpenTunnel({
         contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' }
       }, function() {
         expect(_createPortMapping.called).to.equal(true);
@@ -834,7 +834,7 @@ describe('Protocol', function() {
           }
         }
       });
-      proto._handleOpenTunnel({
+      proto.handleOpenTunnel({
         contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' }
       }, function(err) {
         expect(err.message).to.equal('Failed');
@@ -844,7 +844,7 @@ describe('Protocol', function() {
 
   });
 
-  describe('#_handleTrigger', function() {
+  describe('#handleTrigger', function() {
 
     it('should call TriggerManager#process', function(done) {
       var triggers = new TriggerManager();
@@ -859,7 +859,7 @@ describe('Protocol', function() {
           triggers: triggers
         }
       });
-      proto._handleTrigger({
+      proto.handleTrigger({
         contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
         behavior: 'test'
       }, function(err, result) {

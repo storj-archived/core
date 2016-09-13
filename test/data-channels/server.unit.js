@@ -20,7 +20,7 @@ describe('DataChannelServer', function() {
     it('should create an instance without the new keyword', function() {
       expect(DataChannelServer({
         server: http.createServer(function noop() {}),
-        manager: Manager(RAMStorageAdapter()),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: Logger(0)
       })).to.be.instanceOf(DataChannelServer);
     });
@@ -32,7 +32,7 @@ describe('DataChannelServer', function() {
     it('should not try to close a client that does not exist', function() {
       var dcs = DataChannelServer({
         server: http.createServer(function noop() {}),
-        manager: Manager(RAMStorageAdapter()),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: Logger(0)
       });
       dcs._allowed.token = { client: null };
@@ -43,7 +43,7 @@ describe('DataChannelServer', function() {
     it('should close a client that does exist', function() {
       var dcs = DataChannelServer({
         server: http.createServer(function noop() {}),
-        manager: Manager(RAMStorageAdapter()),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: Logger(0)
       });
       var _close = sinon.stub();
@@ -60,7 +60,7 @@ describe('DataChannelServer', function() {
     it('should close the underlying server', function() {
       var dcs = DataChannelServer({
         server: http.createServer(function noop() {}),
-        manager: Manager(RAMStorageAdapter()),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: Logger(0)
       });
       dcs._server = { close: sinon.stub() };
@@ -75,7 +75,7 @@ describe('DataChannelServer', function() {
     it('should close the socket on error', function(done) {
       var dcs = DataChannelServer({
         server: http.createServer(function noop() {}),
-        manager: Manager(RAMStorageAdapter()),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: Logger(0)
       });
       var socket = new EventEmitter();
@@ -93,7 +93,7 @@ describe('DataChannelServer', function() {
     it('should close the socket if invalid json is sent', function(done) {
       var dcs = DataChannelServer({
         server: http.createServer(function noop() {}),
-        manager: Manager(RAMStorageAdapter()),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: Logger(0)
       });
       var socket = new EventEmitter();
@@ -111,7 +111,7 @@ describe('DataChannelServer', function() {
     it('should close the socket if auth fails', function(done) {
       var dcs = DataChannelServer({
         server: http.createServer(function noop() {}),
-        manager: Manager(RAMStorageAdapter()),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: Logger(0)
       });
       var socket = new EventEmitter();
@@ -132,7 +132,7 @@ describe('DataChannelServer', function() {
     it('should close the socket if bad operation', function(done) {
       var dcs = DataChannelServer({
         server: http.createServer(function noop() {}),
-        manager: Manager(RAMStorageAdapter()),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: Logger(0)
       });
       dcs._allowed.token = {
@@ -163,7 +163,7 @@ describe('DataChannelServer', function() {
     it('should emit an error if the underlying server does', function(done) {
       var dcs = DataChannelServer({
         server: http.createServer(function noop() {}),
-        manager: Manager(RAMStorageAdapter()),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: Logger(0)
       }).on('error', function(err) {
         expect(err.message).to.equal('BOOM');
@@ -180,7 +180,7 @@ describe('DataChannelServer', function() {
       var manager = Manager(RAMStorageAdapter());
       var dcs = DataChannelServer({
         server: http.createServer(function noop() {}),
-        manager: manager,
+        storageManager: manager,
         logger: Logger(0)
       });
       var _load = sinon.stub(manager, 'load').callsArgWith(
@@ -208,7 +208,7 @@ describe('DataChannelServer', function() {
       var manager = Manager(RAMStorageAdapter());
       var dcs = DataChannelServer({
         server: http.createServer(function noop() {}),
-        manager: manager,
+        storageManager: manager,
         logger: Logger(0)
       });
       var _load = sinon.stub(manager, 'load').callsArgWith(
@@ -237,7 +237,7 @@ describe('DataChannelServer', function() {
       var manager = Manager(RAMStorageAdapter());
       var dcs = DataChannelServer({
         server: http.createServer(function noop() {}),
-        manager: manager,
+        storageManager: manager,
         logger: Logger(0)
       });
       var _load = sinon.stub(manager, 'load').callsArgWith(
@@ -260,7 +260,7 @@ describe('DataChannelServer', function() {
       var manager = Manager(RAMStorageAdapter());
       var dcs = DataChannelServer({
         server: http.createServer(function noop() {}),
-        manager: manager,
+        storageManager: manager,
         logger: Logger(0)
       });
       var _load = sinon.stub(manager, 'load').callsArgWith(
@@ -310,7 +310,7 @@ describe('DataChannelServer', function() {
       });
       var dcs = BadHashDataChannelS({
         server: http.createServer(function noop() {}),
-        manager: manager,
+        storageManager: manager,
         logger: Logger(0)
       });
       var item = StorageItem({
@@ -369,7 +369,7 @@ describe('DataChannelServer', function() {
       });
       var dcs = PTDataChannelS({
         server: http.createServer(function noop() {}),
-        manager: manager,
+        storageManager: manager,
         logger: Logger(0)
       });
       var item = StorageItem({
@@ -419,7 +419,7 @@ describe('DataChannelServer', function() {
       var manager = Manager(RAMStorageAdapter());
       var dcs = DataChannelServer({
         server: http.createServer(function noop() {}),
-        manager: manager,
+        storageManager: manager,
         logger: Logger(0)
       });
       var item = StorageItem({

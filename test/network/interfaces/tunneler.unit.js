@@ -12,18 +12,18 @@ describe('TunnelerInterface', function() {
 
     it('should create instance with the new keyword', function() {
       expect(new TunnelerInterface({
-        keypair: KeyPair(),
-        port: 0,
-        tunport: 0,
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
         logger: kad.Logger(0)
       })).to.be.instanceOf(TunnelerInterface);
     });
 
     it('should create instance without the new keyword', function() {
       expect(new TunnelerInterface({
-        keypair: KeyPair(),
-        port: 0,
-        tunport: 0,
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
         logger: kad.Logger(0)
       })).to.be.instanceOf(TunnelerInterface);
     });
@@ -36,9 +36,9 @@ describe('TunnelerInterface', function() {
 
     it('should inherit from network', function() {
       expect(new TunnelerInterface({
-        keypair: KeyPair(),
-        port: 0,
-        tunport: 0,
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
         logger: kad.Logger(0)
       })).to.be.instanceOf(Network);
     });

@@ -9,14 +9,13 @@ var crypto = require('crypto');
 var sinon = require('sinon');
 var rimraf = require('rimraf');
 var os = require('os');
+var mkdirp = require('mkdirp');
 var utils = require('../../lib/utils');
-
-var cleanup = [];
+var TMP_DIR = path.join(os.tmpdir(), 'STORJ_KEYRING_TEST');
 
 var tmpfolder = function() {
-  var folder = path.join(os.tmpdir(), Date.now().toString());
-  fs.mkdirSync(folder);
-  cleanup.push(folder);
+  var folder = path.join(TMP_DIR, Date.now().toString());
+  mkdirp.sync(folder);
   return folder;
 };
 
@@ -24,9 +23,7 @@ describe('KeyRing', function() {
   this.timeout(6000);
 
   after(function() {
-    cleanup.forEach(function(folder){
-      rimraf.sync(folder);
-    });
+    rimraf.sync(TMP_DIR);
   });
 
   describe('@constructor', function() {

@@ -54,7 +54,7 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          manager: {
+          storageManager: {
             save: _save
           },
           _pendingContracts: {
@@ -224,7 +224,7 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          manager: {
+          storageManager: {
             load: sinon.stub().callsArgWith(1, new Error('Failed'))
           }
         }
@@ -239,7 +239,7 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          manager: {
+          storageManager: {
             load: sinon.stub().callsArgWith(1, null, {
               shard: new stream.Writable()
             })
@@ -260,7 +260,7 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          manager: {
+          storageManager: {
             load: sinon.stub().callsArgWith(1, new Error('Failed'))
           }
         }
@@ -277,7 +277,7 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          manager: {
+          storageManager: {
             load: sinon.stub().callsArgWith(1, null, StorageItem({}))
           }
         }
@@ -294,7 +294,7 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          manager: {
+          storageManager: {
             load: sinon.stub().callsArgWith(1, null, {
               trees: {
                 adc83b19e793491b1c6ea0fd8b46cd9f32e592fc: null
@@ -330,7 +330,7 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          manager: {
+          storageManager: {
             load: sinon.stub().callsArgWith(1, null, {
               trees: {
                 adc83b19e793491b1c6ea0fd8b46cd9f32e592fc: null
@@ -369,7 +369,7 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          manager: {
+          storageManager: {
             load: sinon.stub().callsArgWith(1, new Error('Failed'))
           }
         }
@@ -386,7 +386,7 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          manager: {
+          storageManager: {
             load: sinon.stub().callsArgWith(1, new Error('Failed'))
           }
         }
@@ -407,7 +407,7 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          manager: {
+          storageManager: {
             load: sinon.stub().callsArgWith(1, new Error('Failed'))
           }
         }
@@ -431,7 +431,7 @@ describe('Protocol', function() {
       var proto = new StubbedProtocol({
         network: {
           _logger: Logger(0),
-          manager: {
+          storageManager: {
             load: function(hash, callback) {
               callback(null, {
                 contracts: {
@@ -459,7 +459,7 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          manager: {
+          storageManager: {
             load: sinon.stub().callsArgWith(1, null, { contracts: {} })
           }
         }
@@ -476,7 +476,7 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          manager: {
+          storageManager: {
             load: sinon.stub().callsArgWith(1, null, {
               contracts: {
                 test: {}
@@ -547,7 +547,7 @@ describe('Protocol', function() {
           },
           contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
           transport: {
-            _tunserver: {
+            tunnelServer: {
               hasTunnelAvailable: sinon.stub().returns(false)
             }
           },
@@ -576,7 +576,7 @@ describe('Protocol', function() {
           },
           contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
           transport: {
-            _tunserver: {
+            tunnelServer: {
               hasTunnelAvailable: sinon.stub().returns(false)
             }
           },
@@ -759,7 +759,7 @@ describe('Protocol', function() {
         network: {
           _logger: Logger(0),
           transport: {
-            _tunserver: {
+            tunnelServer: {
               createGateway: _createGateway
             }
           }
@@ -790,7 +790,7 @@ describe('Protocol', function() {
           transport: {
             _requiresTraversal: true,
             _isPublic: true,
-            _tunserver: {
+            tunnelServer: {
               createGateway: _createGateway,
               getListeningPort: sinon.stub().returns(0)
             },
@@ -826,7 +826,7 @@ describe('Protocol', function() {
           transport: {
             _requiresTraversal: true,
             _isPublic: true,
-            _tunserver: {
+            tunnelServer: {
               createGateway: _createGateway,
               getListeningPort: sinon.stub().returns(0)
             },

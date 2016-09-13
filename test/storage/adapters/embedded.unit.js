@@ -1,6 +1,5 @@
 'use strict';
 
-var crypto = require('crypto');
 var EmbeddedStorageAdapter = require('../../../lib/storage/adapters/embedded');
 var StorageItem = require('../../../lib/storage/item');
 var expect = require('chai').expect;
@@ -11,7 +10,7 @@ var sinon = require('sinon');
 var os = require('os');
 var rimraf = require('rimraf');
 var path = require('path');
-var TMP_DIR = path.join(os.tmpdir(), 'STORJ_INTEGRATION_TESTS');
+var TMP_DIR = path.join(os.tmpdir(), 'STORJ_EMBEDDED_ADAPTER_TEST');
 var mkdirp = require('mkdirp');
 
 function tmpdir() {
@@ -27,16 +26,16 @@ var item = new StorageItem({
   shard: new Buffer('test')
 });
 
-before(function() {
-  if (utils.existsSync(TMP_DIR)) {
-    rimraf.sync(TMP_DIR);
-  }
-  mkdirp.sync(TMP_DIR);
-  audit.end(Buffer('test'));
-  store = new EmbeddedStorageAdapter(tmpdir());
-});
-
 describe('EmbeddedStorageAdapter', function() {
+
+  before(function() {
+    if (utils.existsSync(TMP_DIR)) {
+      rimraf.sync(TMP_DIR);
+    }
+    mkdirp.sync(TMP_DIR);
+    audit.end(Buffer('test'));
+    store = new EmbeddedStorageAdapter(tmpdir());
+  });
 
   describe('@constructor', function() {
 
@@ -147,8 +146,8 @@ describe('EmbeddedStorageAdapter', function() {
       });
     });
 
-    it('should return error if reset fails', function(done) {
-      var _storereset = sinon.stub(store._fs, 'reset').callsArgWith(
+    it('should return error if unlink fails', function(done) {
+      var _storereset = sinon.stub(store._fs, 'unlink').callsArgWith(
         1,
         new Error('Failed to delete')
       );

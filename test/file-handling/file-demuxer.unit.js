@@ -8,35 +8,40 @@ var os = require('os');
 var fs = require('fs');
 var path = require('path');
 var utils = require('../../lib/utils');
-var filePathEven = path.join(os.tmpdir(), 'storjfiledmxtest-even.data');
-var filePathOdd = path.join(os.tmpdir(), 'storjfiledmxtest-odd.data');
-var filePathEmpty = path.join(os.tmpdir(), 'storjfiledmxtest-empty.data');
-
-before(function(done) {
-  this.timeout(6000);
-
-  if (utils.existsSync(filePathEven)) {
-    fs.unlinkSync(filePathEven);
-  }
-
-  var randomEven = noisegen({ length: 1024 * 1024 * 8 });
-  var tmpfile = fs.createWriteStream(filePathEven);
-
-  tmpfile.on('finish', function() {
-    if (utils.existsSync(filePathOdd)) {
-      fs.unlinkSync(filePathOdd);
-    }
-
-    var randomOdd = noisegen({ length: (1024 * 1024 * 16) + 512 });
-    var tmpfile = fs.createWriteStream(filePathOdd);
-
-    tmpfile.on('finish', done);
-    randomOdd.pipe(tmpfile);
-  });
-  randomEven.pipe(tmpfile);
-});
+var TMP_DIR = path.join(os.tmpdir(), 'STORJ_FILEDEMUXER_TEST');
+var filePathEven = path.join(TMP_DIR, 'storjfiledmxtest-even.data');
+var filePathOdd = path.join(TMP_DIR, 'storjfiledmxtest-odd.data');
+var filePathEmpty = path.join(TMP_DIR, 'storjfiledmxtest-empty.data');
+var rimraf = require('rimraf');
+var mkdirp = require('mkdirp');
 
 describe('FileDemuxer', function() {
+
+  before(function(done) {
+    this.timeout(6000);
+
+    if (utils.existsSync(TMP_DIR)) {
+      rimraf.sync(TMP_DIR);
+    }
+
+    mkdirp.sync(TMP_DIR);
+
+    var randomEven = noisegen({ length: 1024 * 1024 * 8 });
+    var tmpfile = fs.createWriteStream(filePathEven);
+
+    tmpfile.on('finish', function() {
+      var randomOdd = noisegen({ length: (1024 * 1024 * 16) + 512 });
+      var tmpfile = fs.createWriteStream(filePathOdd);
+
+      tmpfile.on('finish', done);
+      randomOdd.pipe(tmpfile);
+    });
+    randomEven.pipe(tmpfile);
+  });
+
+  after(function() {
+    rimraf.sync(TMP_DIR);
+  });
 
   describe('@constructor', function() {
 

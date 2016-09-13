@@ -9,21 +9,21 @@ var utils = require('../../lib/utils');
 var os = require('os');
 var rimraf = require('rimraf');
 var path = require('path');
-var TMP_DIR = path.join(os.tmpdir(), 'STORJ_INTEGRATION_TESTS');
+var TMP_DIR = path.join(os.tmpdir(), 'STORJ_MIGRATION_TEST');
 var mkdirp = require('mkdirp');
-
-before(function() {
-  if (utils.existsSync(TMP_DIR)) {
-    rimraf.sync(TMP_DIR);
-  }
-  mkdirp.sync(TMP_DIR);
-});
 
 function _p(n) {
   return path.join(TMP_DIR, n);
 }
 
 describe('StorageMigration', function() {
+
+  before(function() {
+    if (utils.existsSync(TMP_DIR)) {
+      rimraf.sync(TMP_DIR);
+    }
+    mkdirp.sync(TMP_DIR);
+  });
 
   describe('@constructor', function() {
 
@@ -51,10 +51,12 @@ describe('StorageMigration', function() {
 
   describe('#start', function() {
 
-    var source = new EmbeddedStorageAdapter(_p('t5'));
-    var target = new EmbeddedStorageAdapter(_p('t6'));
+    var source, target;
 
     before(function(done) {
+      source = new EmbeddedStorageAdapter(_p('t5'));
+      target = new EmbeddedStorageAdapter(_p('t6'));
+
       source.put(StorageItem({
         hash: utils.rmd160('item one')
       }), function() {
@@ -93,7 +95,8 @@ describe('StorageMigration', function() {
             });
           });
         });
-      }).start();
+      });
+      migration.start();
     });
 
     it('should bubble errors from target#put', function(done) {
@@ -106,7 +109,8 @@ describe('StorageMigration', function() {
         expect(err.message).to.equal('Failed to put item');
         _put.restore();
         done();
-      }).start();
+      });
+      migration.start();
     });
 
     it('should bubble errors from target#get', function(done) {
@@ -119,7 +123,8 @@ describe('StorageMigration', function() {
         expect(err.message).to.equal('Failed to get item');
         _get.restore();
         done();
-      }).start();
+      });
+      migration.start();
     });
 
   });
@@ -212,6 +217,10 @@ describe('StorageMigration', function() {
       });
     });
 
+  });
+
+  after(function() {
+    rimraf.sync(TMP_DIR);
   });
 
 });

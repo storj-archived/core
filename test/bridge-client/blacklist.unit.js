@@ -8,6 +8,7 @@ var Blacklist = require('../../lib/bridge-client/blacklist');
 var fs = require('fs');
 var expect = require('chai').expect;
 var utils = require('../../lib/utils');
+var sinon = require('sinon');
 
 var tmpfolder = require('os').tmpdir();
 
@@ -46,6 +47,25 @@ describe('Blacklist', function() {
       blacklist.push('hi2');
       blacklist.push('hi3');
       expect(blacklist.toObject()).to.include('hi', 'hi2', 'hi3');
+      fs.unlinkSync(blacklist.blacklistFile);
+    });
+
+  });
+
+  describe('_reap', function() {
+
+    it('should reap old nodeids', function() {
+      var blacklist = new Blacklist(tmpfolder);
+      blacklist.push('hi');
+      var clock = sinon.useFakeTimers();
+      clock.tick(86400001);
+      blacklist.push('hi2');
+      blacklist.push('hi3');
+      blacklist._reap(blacklist.blacklist);
+      expect(blacklist.toObject()).to.not.include('hi');
+      expect(blacklist.toObject()).to.include('hi2');
+
+      clock.restore();
       fs.unlinkSync(blacklist.blacklistFile);
     });
 

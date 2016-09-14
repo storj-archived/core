@@ -45,14 +45,8 @@ module.exports.getNewPassword = function(msg, callback) {
 };
 
 module.exports.makeTempDir = function(callback) {
-  var dir = process.env.STORJ_TEMP;
-  
-  if (!dir || (typeof dir === 'undefined')) {
-    dir = os.tmpdir();
-  }
-
   var opts = {
-    dir: dir,
+    dir: storj.utils.tmpdir(),
     prefix: 'storj-',
     // 0700.
     mode: 448,

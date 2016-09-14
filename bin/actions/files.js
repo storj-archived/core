@@ -4,7 +4,7 @@ var utils = require('./../utils');
 var fs = require('fs');
 var path = require('path');
 var through = require('through');
-var storj = require('storj');
+var storj = require('../..');
 var globule = require('globule');
 var async = require('async');
 
@@ -125,7 +125,7 @@ module.exports.upload = function(bucket, filepath, env) {
         } catch (err) {
           return log('error', err.message);
         }
-        
+
         expandedFilepaths = expandedFilepaths.concat(parsedFileArray);
       }
     } else {

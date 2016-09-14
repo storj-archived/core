@@ -1,6 +1,6 @@
 'use strict';
 var log = require('./../logger')().log;
-var storj = require('storj');
+var storj = require('../..');
 
 module.exports.list = function(page) {
   var client = this._storj.PublicClient();

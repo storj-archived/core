@@ -1,5 +1,5 @@
 'use strict';
-var storj = require('storj');
+var storj = require('../..');
 var log = require('./../logger')().log;
 var utils = require('./../utils');
 var path = require('path');

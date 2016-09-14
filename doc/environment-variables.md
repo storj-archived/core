@@ -35,6 +35,5 @@ Setting your password will make it so other users can't grep it with `ps -a`.
 
 #### `STORJ_TEMP`
 
-This variable will set the `--keypass` used to unlock the keyring.
-
-Setting your password will make it so other users can't grep it with `ps -a`.
+This variable will set the folder to which the encrypted file will be placed
+when uploading a file. Shards will also be placed in this folder during upload.

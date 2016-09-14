@@ -32,3 +32,9 @@ testing against other bridges.
 This variable will set the `--keypass` used to unlock the keyring.
 
 Setting your password will make it so other users can't grep it with `ps -a`.
+
+#### `STORJ_TEMP`
+
+This variable will set the `--keypass` used to unlock the keyring.
+
+Setting your password will make it so other users can't grep it with `ps -a`.

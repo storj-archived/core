@@ -3,9 +3,9 @@ var storj = require('..');
 var log = require('./logger')().log;
 var path = require('path');
 var fs = require('fs');
-var platform = require('os').platform();
 var prompt = require('prompt');
 var os = require('os');
+var platform = os.platform();
 var tmp = require('tmp');
 var assert = require('assert');
 var rimraf = require('rimraf');
@@ -45,8 +45,13 @@ module.exports.getNewPassword = function(msg, callback) {
 };
 
 module.exports.makeTempDir = function(callback) {
+  var dir = process.env.STORJ_TEMP;
+  if (!dir || (typeof dir === 'undefined')) {
+    dir = os.tmpdir();
+  }
+
   var opts = {
-    dir: os.tmpdir(),
+    dir: dir,
     prefix: 'storj-',
     // 0700.
     mode: 448,

@@ -4,7 +4,8 @@
 
 var program = require('commander');
 var fs = require('fs');
-var platform = require('os').platform();
+var os = require('os');
+var platform = os.platform();
 var path = require('path');
 var prompt = require('prompt');
 var colors = require('colors/safe');

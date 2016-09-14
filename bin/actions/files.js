@@ -54,6 +54,8 @@ module.exports.getInfo = function(bucketid, fileid, callback) {
         return callback(file);
       }
     });
+
+    return callback(null);
   });
 };
 
@@ -89,6 +91,10 @@ module.exports.remove = function(id, fileId, env) {
 module.exports.upload = function(bucket, filepath, env) {
   var self = this;
 
+  if (env.concurrency > 6) {
+    log('warn', 'A concurrency of %s may result in issues!', env.concurrency);
+  }
+
   var concurrency = env.concurrency ? parseInt(env.concurrency) : 6;
 
   if (parseInt(env.redundancy) > 12 || parseInt(env.redundancy) < 1) {
@@ -114,11 +120,18 @@ module.exports.upload = function(bucket, filepath, env) {
     var parsedFileArray = globule.find(origFilepath);
     if (storj.utils.existsSync(parsedFileArray[0])) {
       if (fs.statSync(parsedFileArray[0]).isFile() === true) {
+        try {
+          fs.accessSync(parsedFileArray[0], fs.R_OK);
+        } catch (err) {
+          return log('error', err.message);
+        }
+
         expandedFilepaths = expandedFilepaths.concat(parsedFileArray);
       }
     } else {
       return log('error', '%s could not be found', origFilepath);
     }
+
     callback();
   }, function(err) {
     if (err) {
@@ -327,6 +340,10 @@ module.exports.download = function(bucket, id, filepath, env) {
 
   module.exports.getInfo.call(self, bucket, id, function(file) {
     var target;
+
+    if (file === null) {
+      return log('error', 'file %s does not exist in bucket %s', [id, bucket]);
+    }
 
     // Check if path is an existing path
     if (storj.utils.existsSync(filepath) === true ) {

@@ -46,6 +46,7 @@ module.exports.getNewPassword = function(msg, callback) {
 
 module.exports.makeTempDir = function(callback) {
   var dir = process.env.STORJ_TEMP;
+  
   if (!dir || (typeof dir === 'undefined')) {
     dir = os.tmpdir();
   }

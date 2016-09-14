@@ -339,7 +339,6 @@ module.exports.download = function(bucket, id, filepath, env) {
   }
 
   module.exports.getInfo.call(self, bucket, id, function(file) {
-
     var target;
 
     if (file === null) {

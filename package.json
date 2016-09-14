@@ -99,7 +99,7 @@
     "chai": "^2.2.0",
     "coveralls": "^2.11.2",
     "gh-pages": "^0.9.0",
-    "ink-docstrap": "boshevski/docstrap",
+    "ink-docstrap": "bookchin/docstrap",
     "istanbul": "^0.3.13",
     "jsdoc": "^3.4.0",
     "jshint": "2.8.0",

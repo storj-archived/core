@@ -16,7 +16,7 @@ Start by importing the `storj` module and instantiating these objects:
 ```
 var storj = require('storj');
 var keypair = new storj.KeyPair();
-var persistence = new storj.LevelDBStorageAdapter('/path/to/datadir');
+var persistence = new storj.EmbeddedStorageAdapter('/path/to/datadir');
 var manager = new storj.StorageManager(persistence);
 ```
 
@@ -26,10 +26,10 @@ network.
 
 ```
 var renter = new storj.RenterInterface({
-  keypair: keypair,
-  manager: manager,
-  address: 'ip.or.hostname',
-  port: 1337
+  keyPair: keypair,
+  storageManager: manager,
+  rpcAddress: 'ip.or.hostname',
+  rpcPort: 1337
 });
 
 renter.join(function(err) {

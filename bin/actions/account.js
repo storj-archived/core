@@ -1,10 +1,10 @@
 'use strict';
+var storj = require('../..');
 var log = require('./../logger')().log;
 var utils = require('./../utils');
 var path = require('path');
 var fs = require('fs');
 var platform = require('os').platform();
-var storj = require('../..');
 
 var HOME = platform !== 'win32' ? process.env.HOME : process.env.USERPROFILE;
 var DATADIR = path.join(HOME, '.storjcli');

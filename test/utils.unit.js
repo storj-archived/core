@@ -8,6 +8,7 @@ var KeyPair = require('../lib/crypto-tools/keypair');
 var proxyquire = require('proxyquire');
 var sinon = require('sinon');
 var constants = require('../lib/constants');
+var os = require('os');
 
 describe('utils', function() {
 
@@ -248,6 +249,19 @@ describe('utils', function() {
       });
     });
 
+  });
+
+  describe('#tmpdir', function() {
+
+    it('should use STORJ_TEMP env if set', function() {
+      process.env.STORJ_TEMP = '';
+      expect(utils.tmpdir()).to.equal(os.tmpdir());
+    });
+
+    it('should trim the stream to the specified length', function() {
+      process.env.STORJ_TEMP = '/path/to/temp';
+      expect(utils.tmpdir()).to.equal('/path/to/temp');
+    });
   });
 
 });

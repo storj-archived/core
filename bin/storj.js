@@ -4,7 +4,8 @@
 
 var program = require('commander');
 var fs = require('fs');
-var platform = require('os').platform();
+var os = require('os');
+var platform = os.platform();
 var path = require('path');
 var prompt = require('prompt');
 var colors = require('colors/safe');
@@ -36,6 +37,11 @@ program._storj.loglevel = function() {
 };
 
 program._storj.PrivateClient = function(options) {
+  if (typeof options === 'undefined') {
+    options = {};
+  }
+  options.blacklistFolder = DATADIR;
+
   return storj.BridgeClient(program.url, merge({
     keypair: utils.loadKeyPair(),
     logger: logger(program._storj.loglevel()).log
@@ -178,9 +184,12 @@ program
   .option('-c, --concurrency <count>', 'max shard upload concurrency')
   .option('-C, --fileconcurrency <count>', 'max file upload concurrency', 1)
   .option('-r, --redundancy <mirrors>', 'number of mirrors to create for file')
-  .description('upload a file or files to the network and track in a bucket')
-  .description('<filepath> can be a path with wildcard or a space separated')
-  .description('  list of files')
+  .description('upload a file or files to the network and track in a bucket.' +
+               '\n  upload all files in a single directory using "/path/*"\n' +
+               '  or upload recursively using "/path/**/*".\n' +
+               '  <filepath> can be a path with wildcard or a space separated' +
+               ' list of files.'
+             )
   .action(actions.files.upload.bind(program));
 
 program

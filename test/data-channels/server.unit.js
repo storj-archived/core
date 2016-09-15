@@ -12,6 +12,7 @@ var sinon = require('sinon');
 var EventEmitter = require('events').EventEmitter;
 var http = require('http');
 var StorageItem = require('../../lib/storage/item');
+var utils = require('../../lib/utils');
 
 describe('DataChannelServer', function() {
 
@@ -23,6 +24,20 @@ describe('DataChannelServer', function() {
         storageManager: Manager(RAMStorageAdapter()),
         logger: Logger(0)
       })).to.be.instanceOf(DataChannelServer);
+    });
+
+  });
+
+  describe('#accept', function() {
+
+    it('should should add the token/hash to the accepted list', function() {
+      var dcs = new DataChannelServer({
+        server: http.createServer(function noop() {}),
+        storageManager: Manager(RAMStorageAdapter()),
+        logger: Logger(0)
+      });
+      dcs.accept('token', 'filehash');
+      expect(dcs._allowed.token.hash).to.equal('filehash');
     });
 
   });
@@ -156,6 +171,62 @@ describe('DataChannelServer', function() {
       });
     });
 
+    it('should handle the consign stream', function(done) {
+      var msg = JSON.stringify({
+        token: 'token',
+        hash: 'hash',
+        operation: 'PUSH'
+      });
+      var dcs = DataChannelServer({
+        server: http.createServer(function noop() {}),
+        storageManager: Manager(RAMStorageAdapter()),
+        logger: Logger(0)
+      });
+      dcs._allowed.token = {
+        client: null,
+        hash: 'hash',
+        expires: Date.now() + 12000
+      };
+      var _handleConsignStream = sinon.stub(dcs, '_handleConsignStream');
+      var socket = new EventEmitter();
+      dcs._handleConnection(socket);
+      setImmediate(function() {
+        socket.emit('message', msg);
+        setImmediate(function() {
+          expect(_handleConsignStream.called).to.equal(true);
+          done();
+        });
+      });
+    });
+
+    it('should handle the retrieve stream', function(done) {
+      var msg = JSON.stringify({
+        token: 'token',
+        hash: 'hash',
+        operation: 'PULL'
+      });
+      var dcs = DataChannelServer({
+        server: http.createServer(function noop() {}),
+        storageManager: Manager(RAMStorageAdapter()),
+        logger: Logger(0)
+      });
+      dcs._allowed.token = {
+        client: null,
+        hash: 'hash',
+        expires: Date.now() + 12000
+      };
+      var socket = new EventEmitter();
+      var _handleRetrieveStream = sinon.stub(dcs, '_handleRetrieveStream');
+      dcs._handleConnection(socket);
+      setImmediate(function() {
+        socket.emit('message', msg);
+        setImmediate(function() {
+          expect(_handleRetrieveStream.called).to.equal(true);
+          done();
+        });
+      });
+    });
+
   });
 
   describe('#_handleError', function() {
@@ -225,6 +296,42 @@ describe('DataChannelServer', function() {
           expect(shard.removeAllListeners.called).to.equal(true);
           expect(dcs._allowed.token).to.equal(undefined);
           done();
+        });
+      });
+    });
+
+    it('should send the data and close when finished', function(done) {
+      var shard = new EventEmitter();
+      var socket = new EventEmitter();
+      socket.readyState = 1;
+      socket.send = sinon.stub().callsArg(2);
+      shard.pause = sinon.stub();
+      shard.resume = sinon.stub();
+      shard.removeAllListeners = sinon.stub();
+      var manager = Manager(RAMStorageAdapter());
+      var dcs = DataChannelServer({
+        server: http.createServer(function noop() {}),
+        storageManager: manager,
+        logger: Logger(0)
+      });
+      var _load = sinon.stub(manager, 'load').callsArgWith(
+        1,
+        null,
+        { shard: shard }
+      );
+      var _closeSock = sinon.stub(dcs, '_closeSocketSuccess');
+      dcs._allowed.token = { hash: 'hash' };
+      dcs._handleRetrieveStream(socket, 'token');
+      setImmediate(function() {
+        _load.restore();
+        shard.emit('data', new Buffer('ohai'));
+        setImmediate(function() {
+          expect(socket.send.called).to.equal(true);
+          shard.emit('end');
+          setImmediate(function() {
+            expect(_closeSock.called).to.equal(true);
+            done();
+          });
         });
       });
     });
@@ -356,6 +463,60 @@ describe('DataChannelServer', function() {
       dcs._handleConsignStream(socket, 'token');
     });
 
+    it('should close the socket with success if hash is good', function(done) {
+      var manager = Manager(RAMStorageAdapter());
+      var dcs = DataChannelServer({
+        server: http.createServer(function noop() {}),
+        storageManager: manager,
+        logger: Logger(0)
+      });
+      var data = new Buffer('hello');
+      var hash = utils.rmd160sha256(data);
+      var item = StorageItem({
+        hash: hash,
+        contracts: {
+          nodeid2: {
+            renter_id: 'dd2f8bdfb1769ccafb943c7c29a1bcc13a850b8f',
+            data_size: data.length,
+            data_hash: hash,
+            store_begin: Date.now(),
+            store_end: Date.now() + 2500,
+            audit_count: 2,
+            renter_signature: 'signaturegoeshere',
+            farmer_id: '4da1b82394f83847ee9a412af9d01b05dea54a0b',
+            farmer_signature: 'signaturegoeshere',
+            payment_storage_price: 0,
+            payment_download_price: 0,
+            payment_destination: '12PzSwsCT5LBT3nhW6GoCJQpAJAZ7CkpBg'
+          }
+        }
+      });
+      item.shard = {
+        end: function() {},
+        write: function() {},
+        destroy: function() {}
+      };
+      var _load = sinon.stub(manager, 'load', function(a ,cb) {
+        cb(null, item);
+      });
+      var socket = new EventEmitter();
+      socket.readyState = 1;
+      (function() {
+        socket.close = function(code, message) {
+          _load.restore();
+          expect(code).to.equal(1000);
+          expect(message).to.equal('Consignment completed');
+          done();
+        };
+        socket.resume = sinon.stub();
+      })();
+      dcs._allowed.token = { hash: hash };
+      dcs._handleConsignStream(socket, 'token');
+      setImmediate(function() {
+        socket.emit('message', data);
+      });
+    });
+
     it('should end the passthrough if received too much data', function(done) {
       var emitter = new PassThrough();
       emitter.end = sinon.stub();
@@ -457,6 +618,20 @@ describe('DataChannelServer', function() {
           done();
         });
       });
+    });
+
+  });
+
+  describe('#_closeSocketSuccess', function() {
+
+    it('should call the socket close method and reject the token', function() {
+      var reject = sinon.stub();
+      var socket = { close: sinon.stub() };
+      DataChannelServer.prototype._closeSocketSuccess.call({
+        reject: reject
+      }, socket);
+      expect(socket.close.called).to.equal(true);
+      expect(reject.called).to.equal(true);
     });
 
   });

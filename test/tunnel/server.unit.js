@@ -48,6 +48,16 @@ describe('TunnelServer', function() {
 
   });
 
+  describe('#hasTunnelAvailable', function() {
+
+    it('should return a true if there are tunnels available', function() {
+      var ts = TunnelServer({ serverPort: 0 });
+      CLEANUP.push(ts);
+      expect(ts.hasTunnelAvailable()).to.equal(true);
+    });
+
+  });
+
   describe('#_shutdownGateways', function() {
 
     it('should close each gateway in the tunnel server', function(done) {

@@ -17,6 +17,56 @@ describe('ReadableDataChannelStream', function() {
 
   });
 
+  describe('#_read', function() {
+
+    it('should send the auth frame if not authenticated', function(done) {
+      var channel = new EventEmitter();
+      channel._client = new EventEmitter();
+      channel._client.send = sinon.stub().callsArg(1);
+      channel._client.terminate = sinon.stub();
+      var rs = new ReadableStream(channel);
+      rs.read();
+      setImmediate(function() {
+        rs.destroy();
+        expect(channel._client.send.called).to.equal(true);
+        done();
+      });
+    });
+
+    it('should do nothing if already authenticated', function(done) {
+      var channel = new EventEmitter();
+      channel._client = new EventEmitter();
+      channel._client.send = sinon.stub().callsArg(1);
+      channel._client.terminate = sinon.stub();
+      var rs = new ReadableStream(channel);
+      rs.isAuthenticated = true;
+      rs.read();
+      setImmediate(function() {
+        rs.destroy();
+        expect(channel._client.send.called).to.equal(false);
+        done();
+      });
+    });
+
+    it('should emit error if no data is read by TTFB', function(done) {
+      var channel = new EventEmitter();
+      channel._client = new EventEmitter();
+      channel._client.send = sinon.stub().callsArg(1);
+      channel._client.terminate = sinon.stub();
+      ReadableStream.MAX_TTFB = 5;
+      var rs = new ReadableStream(channel);
+      rs.read();
+      rs.on('error', function(err) {
+        ReadableStream.MAX_TTFB = 5000;
+        expect(err.message).to.equal(
+          'Did not receive data within max Time-To-First-Byte'
+        );
+        done();
+      });
+    });
+
+  });
+
   describe('#destroy', function() {
 
     it('should call terminate and set isDestroyed', function() {

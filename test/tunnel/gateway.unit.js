@@ -35,6 +35,19 @@ describe('TunnelGateway', function() {
 
   });
 
+  describe('#_checkForTerminationSignal', function() {
+
+    it('should return true if there is a code and message', function() {
+      expect(TunnelGateway.prototype._checkForTerminationSignal(
+        JSON.stringify({
+          code: 1000,
+          message: 'Consignment completed'
+        })
+      ).isTerminationSignal).to.equal(true);
+    });
+
+  });
+
   describe('#respond', function() {
 
     it('should return false if no pending request', function() {
@@ -67,6 +80,17 @@ describe('TunnelGateway', function() {
       var gw = new TunnelGateway();
       gw._channels.test = {/* not a valid sock object */};
       expect(gw.transfer('test', 'data')).to.equal(false);
+    });
+
+    it('should call #terminate if data is termsig', function() {
+      var gw = new TunnelGateway();
+      var _term = sinon.stub(gw, 'terminate').returns(true);
+      gw._channels.test = {};
+      gw.transfer('test', JSON.stringify({
+        code: 1000,
+        message: 'Consignment completed'
+      }));
+      expect(_term.called).to.equal(true);
     });
 
   });

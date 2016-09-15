@@ -224,7 +224,6 @@ describe('Protocol', function() {
     });
 
     it('should fail if unhandled', function(done) {
-      var callback = utils.noop;
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
@@ -251,7 +250,6 @@ describe('Protocol', function() {
     });
 
     it('should succeed and callback without error', function(done) {
-      var callback = utils.noop;
       var pendingCb = function() {};
       pendingCb.blacklist = [];
       var proto = new Protocol({

@@ -78,6 +78,7 @@ describe('RenterInterface', function() {
       expect(renter._pendingContracts[
         Object.keys(renter._pendingContracts)[0]
       ].blacklist).to.have.lengthOf(0);
+      publish.restore();
     });
 
     it('should do nothing if the callback was already called', function(done) {

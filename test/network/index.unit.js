@@ -461,7 +461,7 @@ describe('Network (private)', function() {
         id: '12345',
         params: {}
       };
-      var kp = KeyPair()
+      var kp = KeyPair();
       Network.prototype._signMessage.call({
         keyPair: kp
       }, msg, function() {});
@@ -1007,7 +1007,8 @@ describe('Network (private)', function() {
           cb();
         }
       );
-      net._findTunnel([contact, contact], function(err) {
+      net._findTunnel([contact, contact], function() {
+        _establishTunnel.restore();
         _send.restore();
         done();
       });

@@ -77,6 +77,67 @@ describe('Protocol', function() {
       });
     });
 
+    it('should succeed and start consignment', function(done) {
+      var _save = sinon.stub().callsArg(1);
+      var _doConsign = sinon.stub();
+      var proto = new Protocol({
+        network: {
+          _logger: Logger(0),
+          storageManager: {
+            save: _save
+          },
+          _pendingContracts: {
+            adc83b19e793491b1c6ea0fd8b46cd9f32e592fc: _doConsign
+          }
+        }
+      });
+      var _verify = sinon.stub(proto, '_verifyContract').callsArgWith(
+        2
+      );
+      proto.handleOffer({
+        contract: { data_hash: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
+        contact: {
+          address: '127.0.0.1',
+          port: 1337,
+          nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc'
+        }
+      }, function(err) {
+        _verify.restore();
+        expect(err).to.equal(null);
+        setImmediate(function() {
+          expect(_doConsign.called).to.equal(true);
+          done();
+        });
+      });
+    });
+
+    it('should bubble error from #_verifyContract', function(done) {
+      var proto = new Protocol({
+        network: {
+          _logger: Logger(0),
+          _pendingContracts: {
+            adc83b19e793491b1c6ea0fd8b46cd9f32e592fc: function() {}
+          }
+        }
+      });
+      var _verify = sinon.stub(proto, '_verifyContract').callsArgWith(
+        2,
+        new Error('Failed')
+      );
+      proto.handleOffer({
+        contract: { data_hash: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
+        contact: {
+          address: '127.0.0.1',
+          port: 1337,
+          nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc'
+        }
+      }, function(err) {
+        _verify.restore();
+        expect(err.message).to.equal('Failed');
+        done();
+      });
+    });
+
   });
 
   describe('#_verifyContract', function() {
@@ -162,6 +223,63 @@ describe('Protocol', function() {
       });
     });
 
+    it('should fail if unhandled', function(done) {
+      var callback = utils.noop;
+      var proto = new Protocol({
+        network: {
+          _logger: Logger(0),
+          keypair: KeyPair(),
+          _pendingContracts: {},
+          emit: sinon.stub()
+        }
+      });
+      var contract = {
+        get: sinon.stub().returns('adc83b19e793491b1c6ea0fd8b46cd9f32e592fc'),
+        verify: sinon.stub().returns(true),
+        isComplete: sinon.stub().returns(true),
+        sign: sinon.stub()
+      };
+      var contact = {
+        address: '127.0.0.1',
+        port: 1337,
+        nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc'
+      };
+      proto._verifyContract(contract, contact, function(err) {
+        expect(err.message).to.equal('Contract no longer open to offers');
+        done();
+      });
+    });
+
+    it('should succeed and callback without error', function(done) {
+      var callback = utils.noop;
+      var pendingCb = function() {};
+      pendingCb.blacklist = [];
+      var proto = new Protocol({
+        network: {
+          _logger: Logger(0),
+          keypair: KeyPair(),
+          _pendingContracts: {
+            adc83b19e793491b1c6ea0fd8b46cd9f32e592fc: pendingCb
+          }
+        }
+      });
+      var contract = {
+        get: sinon.stub().returns('adc83b19e793491b1c6ea0fd8b46cd9f32e592fc'),
+        verify: sinon.stub().returns(true),
+        isComplete: sinon.stub().returns(true),
+        sign: sinon.stub()
+      };
+      var contact = {
+        address: '127.0.0.1',
+        port: 1337,
+        nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc'
+      };
+      proto._verifyContract(contract, contact, function(err) {
+        expect(err).to.equal(null);
+        done();
+      });
+    });
+
   });
 
   describe('#handleAudit', function() {
@@ -197,6 +315,27 @@ describe('Protocol', function() {
       }, function(err) {
         _prove.restore();
         expect(err.message).to.equal('Failed');
+        done();
+      });
+    });
+
+    it('should prove shard existence', function(done) {
+      var proto = new Protocol({
+        network: {
+          _logger: Logger(0)
+        }
+      });
+      var _prove = sinon.stub(proto, '_proveShardExistence').callsArgWith(
+        3,
+        null,
+        'PROOF'
+      );
+      proto.handleAudit({
+        audits: [{}],
+        contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' }
+      }, function(err, result) {
+        _prove.restore();
+        expect(result.proofs[0]).to.equal('PROOF');
         done();
       });
     });
@@ -248,6 +387,38 @@ describe('Protocol', function() {
       });
       proto._proveShardExistence(true, true, '', function(err) {
         expect(err.message).to.equal('Shard not found');
+        done();
+      });
+    });
+
+    it('should create the storage proof and return it', function(done) {
+      var e = new stream.Writable({ write: utils.noop });
+      var StubbedProtocol = proxyquire('../../lib/network/protocol', {
+        '../audit-tools/proof-stream': function() {
+          e.getProofResult = sinon.stub().returns('PROOF RESULT');
+          return e;
+        }
+      });
+      var proto = new StubbedProtocol({
+        network: {
+          _logger: Logger(0),
+          storageManager: {
+            load: function(key, cb) {
+              cb(null, {
+                shard: new stream.Readable({ read: utils.noop }),
+                trees: {
+                  id: []
+                }
+              });
+              setImmediate(function() {
+                e.emit('finish');
+              });
+            }
+          }
+        }
+      });
+      proto._proveShardExistence(true, true, 'id', function(err, result) {
+        expect(result).to.equal('PROOF RESULT');
         done();
       });
     });
@@ -361,6 +532,46 @@ describe('Protocol', function() {
       });
     });
 
+    it('should accept the consignment and issue a token', function(done) {
+      var _accept = sinon.stub();
+      var proto = new Protocol({
+        network: {
+          dataChannelServer: {
+            accept: _accept
+          },
+          _logger: Logger(0),
+          storageManager: {
+            load: sinon.stub().callsArgWith(1, null, {
+              trees: {
+                adc83b19e793491b1c6ea0fd8b46cd9f32e592fc: null
+              },
+              contracts: {
+                adc83b19e793491b1c6ea0fd8b46cd9f32e592fc: {
+                  get: function(key) {
+                    if (key === 'renter_id') {
+                      return 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc';
+                    } else if (key === 'store_begin') {
+                      return Date.now() - 100;
+                    } else {
+                      return Date.now() + 100;
+                    }
+                  }
+                }
+              }
+            }),
+            save: sinon.stub().callsArgWith(1, null)
+          }
+        }
+      });
+      proto.handleConsign({
+        contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' }
+      }, function(err, result) {
+        expect(typeof result.token).to.equal('string');
+        expect(_accept.called).to.equal(true);
+        done();
+      });
+    });
+
   });
 
   describe('#handleRetrieve', function() {
@@ -395,6 +606,29 @@ describe('Protocol', function() {
         data_hash: 'butts'
       }, function(err) {
         expect(err.message).to.equal('Invalid data hash provided: butts');
+        done();
+      });
+    });
+
+    it('should issue a datachannel token', function(done) {
+      var _accept = sinon.stub();
+      var proto = new Protocol({
+        network: {
+          dataChannelServer: {
+            accept: _accept
+          },
+          _logger: Logger(0),
+          storageManager: {
+            load: sinon.stub().callsArgWith(1, null, {})
+          }
+        }
+      });
+      proto.handleRetrieve({
+        data_hash: utils.rmd160(''),
+        contact: { nodeID: 'nodeid' }
+      }, function(err, result) {
+        expect(typeof result.token).to.equal('string');
+        expect(_accept.called).to.equal(true);
         done();
       });
     });
@@ -494,6 +728,53 @@ describe('Protocol', function() {
       });
     });
 
+    it('should open the channel and destroy a failed shard', function(done) {
+      var dcx = new EventEmitter();
+      var _rs = new ReadableStream({ read: utils.noop });
+      dcx.createReadStream = function() {
+        return _rs;
+      };
+      var StubbedProtocol = proxyquire('../../lib/network/protocol', {
+        '../data-channels/client': function() {
+          return dcx;
+        }
+      });
+      var _shard = new WritableStream({ write: utils.noop });
+      _shard.destroy = sinon.stub();
+      var proto = new StubbedProtocol({
+        network: {
+          _logger: Logger(0),
+          storageManager: {
+            load: function(hash, callback) {
+              callback(null, {
+                contracts: {
+                  '4e1243bd22c66e76c2ba9eddc1f91394e57f9f83': {}
+                },
+                shard: _shard
+              });
+              setImmediate(function() {
+                dcx.emit('open');
+                setImmediate(function() {
+                  _rs.emit('error', new Error('Failed'));
+                });
+              });
+            }
+          }
+        }
+      });
+      proto.handleMirror({
+        contact: { nodeID: '4e1243bd22c66e76c2ba9eddc1f91394e57f9f83' },
+        data_hash: '4e1243bd22c66e76c2ba9eddc1f91394e57f9f83'
+      }, function(err) {
+        expect(err).to.equal(null);
+        setTimeout(function() {
+          expect(_shard.destroy.called).to.equal(true);
+          done();
+        }, 10);
+      });
+
+    });
+
   });
 
   describe('#handleProbe', function() {
@@ -565,6 +846,34 @@ describe('Protocol', function() {
         expect(_ask.called).to.equal(true);
         done();
       });
+    });
+
+    it('should return the known tunnelers', function(done) {
+      var proto = new Protocol({
+        network: {
+          _logger: Logger(0),
+          router: {
+            getNearestContacts: sinon.stub().returns([{}])
+          },
+          contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
+          transport: {
+            tunnelServer: {
+              hasTunnelAvailable: sinon.stub().returns(true)
+            }
+          },
+          _tunnelers: {
+            getContactList: sinon.stub().returns([])
+          }
+        }
+      });
+      proto.handleFindTunnel({
+        contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
+        relayers: []
+      }, function(err, result) {
+        expect(result.tunnels).to.have.lengthOf(1);
+        done();
+      });
+
     });
 
     it('should not ask neighbors if max relays reached', function(done) {
@@ -769,6 +1078,39 @@ describe('Protocol', function() {
         contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' }
       }, function(err) {
         expect(err.message).to.equal('Failed');
+        done();
+      });
+    });
+
+    it('should not try to create a port mapping if public', function(done) {
+      var _createPortMapping = sinon.stub().callsArg(1);
+      var _createGateway = sinon.stub().callsArgWith(0, null, {
+        getEntranceToken: function() {
+          return 'sometoken';
+        },
+        getEntranceAddress: function() {
+          return { address: '0.0.0.0', port: 0 };
+        }
+      });
+      var proto = new Protocol({
+        network: {
+          _logger: Logger(0),
+          contact: {},
+          transport: {
+            _requiresTraversal: false,
+            _isPublic: true,
+            tunnelServer: {
+              createGateway: _createGateway,
+              getListeningPort: sinon.stub().returns(0)
+            },
+            createPortMapping: _createPortMapping
+          }
+        }
+      });
+      proto.handleOpenTunnel({
+        contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' }
+      }, function() {
+        expect(_createPortMapping.called).to.equal(false);
         done();
       });
     });

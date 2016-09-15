@@ -22,9 +22,7 @@ var utils = require('../../lib/utils');
 var Contact = require('../../lib/network/contact');
 var constants = require('../../lib/constants');
 var async = require('async');
-
 var _ntp = null;
-
 var CLEANUP = [];
 
 describe('Network (public)', function() {
@@ -55,6 +53,45 @@ describe('Network (public)', function() {
 
   });
 
+  describe('#connect', function() {
+
+    it('should call #node#connect', function() {
+      var _connect = sinon.stub();
+      var _createContact = sinon.stub();
+      Network.prototype.connect.call({
+        node: { connect: _connect  },
+        _createContact: _createContact
+      });
+      expect(_connect.called).to.equal(true);
+      expect(_createContact.called).to.equal(true);
+    });
+
+  });
+
+  describe('#publish', function() {
+
+    it('should call #_pubsub#publish', function() {
+      var _publish = sinon.stub();
+      Network.prototype.publish.call({
+        _pubsub: { publish: _publish }
+      });
+      expect(_publish.called).to.equal(true);
+    });
+
+  });
+
+  describe('#subscribe', function() {
+
+    it('should call #_pubsub#publish', function() {
+      var _subscribe = sinon.stub();
+      Network.prototype.subscribe.call({
+        _pubsub: { subscribe: _subscribe }
+      });
+      expect(_subscribe.called).to.equal(true);
+    });
+
+  });
+
   describe('#join', function() {
 
     it('should add ready listener if not transport not ready', function(done) {
@@ -77,6 +114,36 @@ describe('Network (public)', function() {
         expect(_on.called).to.equal(true);
         done();
       });
+    });
+
+    it('should callback after listening for tunnelers', function(done) {
+      var net = Network({
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
+        logger: kad.Logger(0),
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
+      });
+      net._isPublic = true;
+      CLEANUP.push(net);
+      var _listenForTunnelers = sinon.stub(net, '_listenForTunnelers');
+      var _setupTunnel = sinon.stub(net, '_setupTunnelClient').callsArgWith(
+        0,
+        null
+      );
+      var _enterOverlay = sinon.stub(net, '_enterOverlay').callsArg(0);
+      net.join(function() {
+        _setupTunnel.restore();
+        _enterOverlay.restore();
+        _listenForTunnelers.restore();
+        expect(_listenForTunnelers.called).to.equal(true);
+        expect(_enterOverlay.called).to.equal(true);
+        done();
+      });
+
     });
 
     it('should callback with error if tunnel setup fails', function(done) {
@@ -286,6 +353,24 @@ describe('Network (private)', function() {
       });
     });
 
+    it('should callback null if valid and compatible', function(done) {
+      var _isCompatibleVersion = sinon.stub(
+        utils,
+        'isCompatibleVersion'
+      ).returns(true);
+      var _isValidContact = sinon.stub(utils, 'isValidContact').returns(true);
+      Network.prototype._validateContact.call({}, {
+        address: '127.0.0.1',
+        port: 80,
+        nodeID: utils.rmd160('')
+      }, function(err) {
+        _isValidContact.restore();
+        _isCompatibleVersion.restore();
+        expect(err).to.equal(null);
+        done();
+      });
+    });
+
   });
 
   describe('#_verifyMessage', function() {
@@ -332,6 +417,30 @@ describe('Network (private)', function() {
       });
     });
 
+    it('should call #_verifySignature', function(done) {
+      var verify = Network.prototype._verifyMessage.bind({
+        _validateContact: sinon.stub().callsArg(1),
+        _verifySignature: sinon.stub().callsArg(1),
+        _createSignatureObject: sinon.stub()
+      });
+      verify({
+        method: 'PING',
+        id: 'test',
+        params: {
+          nonce: Date.now(),
+          signature: 'signature'
+        }
+      }, {
+        protocol: version.protocol,
+        address: '127.0.0.1',
+        port: 6000,
+        nodeID: utils.rmd160('')
+      }, function(err) {
+        expect(err).to.equal(undefined);
+        done();
+      });
+    });
+
   });
 
   describe('#_verifySignature', function() {
@@ -341,6 +450,35 @@ describe('Network (private)', function() {
 
       verify({}, function(err) {
         expect(err.message).to.equal('Invalid signature supplied');
+        done();
+      });
+    });
+
+    it('should pass if valid signature', function(done) {
+      var verify = Network.prototype._verifySignature.bind({ _pubkeys: {} });
+      var msg = {
+        method: 'PING',
+        id: '12345',
+        params: {}
+      };
+      var kp = KeyPair()
+      Network.prototype._signMessage.call({
+        keyPair: kp
+      }, msg, function() {});
+      verify({
+        signobj: Network.prototype._createSignatureObject(
+          msg.params.signature
+        ),
+        message: {
+          id: '12345',
+          params: { signature: msg.params.signature }
+        },
+        nonce: msg.params.nonce,
+        contact: { nodeID: 'nodeid' },
+        signature: msg.params.signature,
+        address: kp.getAddress()
+      }, function(err) {
+        expect(err).to.equal(null);
         done();
       });
     });
@@ -431,13 +569,13 @@ describe('Network (private)', function() {
         params: {}
       };
       var StubbedKeyPair = proxyquire('../../lib/crypto-tools/keypair', {
-          'bitcore-message': function() {
-            return {
-              sign: sinon.stub().throws(
-                new Error('Point does not lie on the curve')
-              )
-            };
-          }
+        'bitcore-message': function() {
+          return {
+            sign: sinon.stub().throws(
+              new Error('Point does not lie on the curve')
+            )
+          };
+        }
       });
       Network.prototype._signMessage.call({
         keyPair: StubbedKeyPair()
@@ -446,6 +584,22 @@ describe('Network (private)', function() {
         done();
       });
     });
+
+    it('should sign the response message', function(done) {
+      var msg = {
+        id: 'test',
+        result: {}
+      };
+      Network.prototype._signMessage.call({
+        keyPair: KeyPair()
+      }, msg, function(err) {
+        expect(err).to.equal(undefined);
+        expect(typeof msg.result.signature).to.equal('string');
+        expect(typeof msg.result.nonce).to.equal('number');
+        done();
+      });
+    });
+
   });
 
   describe('#_createSignatureObject', function() {
@@ -489,6 +643,34 @@ describe('Network (private)', function() {
       _isLimited.restore();
       _send.restore();
       expect(_send.called).to.equal(true);
+    });
+
+    it('should just callback if message is a response', function(done) {
+      Network.prototype._checkRateLimiter.call({}, {
+        id: 'test',
+        result: {}
+      }, { nodeID: utils.rmd160('') }, function(err) {
+        expect(err).to.equal(undefined);
+        done();
+      });
+    });
+
+    it('should just callback if contact is not limited', function(done) {
+      var _updateCounter = sinon.stub();
+      Network.prototype._checkRateLimiter.call({
+        _rateLimiter: {
+          isLimited: sinon.stub().returns(false),
+          updateCounter: _updateCounter
+        }
+      }, {
+        id: 'test',
+        method: 'PING',
+        params: {}
+      }, { nodeID: utils.rmd160('') }, function(err) {
+        expect(err).to.equal(undefined);
+        expect(_updateCounter.called).to.equal(true);
+        done();
+      });
     });
 
   });
@@ -621,6 +803,26 @@ describe('Network (private)', function() {
   });
 
   describe('#_setupTunnelClient', function() {
+
+    it('should callback null if transport is public', function(done) {
+      var net = Network({
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
+        logger: kad.Logger(0),
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        bridgeUri: null
+      });
+      CLEANUP.push(net);
+      net.transport._isPublic = true;
+      net._setupTunnelClient(function(err) {
+        expect(err).to.equal(null);
+        done();
+      });
+    });
 
     it('should callback error if no seed or bridge provided', function(done) {
       var net = Network({
@@ -775,6 +977,38 @@ describe('Network (private)', function() {
         expect(err.message).to.equal(
           'Could not find a neighbor to query for tunnels'
         );
+        done();
+      });
+    });
+
+    it('should return tunnels from neighbors', function(done) {
+      var net = Network({
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
+        logger: kad.Logger(0),
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
+      });
+      CLEANUP.push(net);
+      var contact = { address: '127.0.0.1', port: 1337 };
+      var _send = sinon.stub(net.transport, 'send').callsArgWith(
+        2,
+        null,
+        { result: { tunnels: [contact, contact] } }
+      );
+      var _establishTunnel = sinon.stub(
+        net,
+        '_establishTunnel',
+        function(tunnels, cb) {
+          expect(tunnels).to.have.lengthOf(2);
+          cb();
+        }
+      );
+      net._findTunnel([contact, contact], function(err) {
+        _send.restore();
         done();
       });
     });
@@ -1223,7 +1457,36 @@ describe('Network (private)', function() {
         expect(_connect.callCount).to.equal(3);
         done();
       });
+    });
 
+    it('should use the list list to connect', function(done) {
+      var net = Network({
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
+        logger: kad.Logger(0),
+        seedList: [
+          'storj://127.0.0.1:1337/' + utils.rmd160('nodeid1'),
+          'storj://127.0.0.1:1338/' + utils.rmd160('nodeid2'),
+          'storj://127.0.0.1:1339/' + utils.rmd160('nodeid3')
+        ],
+        bridgeUri: null,
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
+      });
+      CLEANUP.push(net);
+      var _connect = sinon.stub(net, 'connect').callsArgWith(
+        1,
+        null
+      );
+      var _setupTunnel = sinon.stub(net, '_setupTunnelClient').callsArg(0);
+      net.join(function() {
+        _connect.restore();
+        _setupTunnel.restore();
+        expect(_connect.called).to.equal(true);
+        done();
+      });
     });
 
   });
@@ -1301,6 +1564,23 @@ describe('Network (private/jobs)', function() {
       expect(dropped).to.have.lengthOf(2);
       expect(net.router._buckets[0].getSize()).to.equal(1);
       expect(net.router._buckets[2].getSize()).to.equal(0);
+    });
+
+  });
+
+  describe('#_updateActivityCounter', function() {
+
+    it('should reset the timeout and set it again', function(done) {
+      var clock = sinon.useFakeTimers();
+      var context = {
+        _reentranceCountdown: null,
+        _enterOverlay: function() {
+          clock.restore();
+          done();
+        }
+      };
+      Network.prototype._updateActivityCounter.call(context);
+      clock.tick(constants.NET_REENTRY);
     });
 
   });

@@ -294,6 +294,41 @@ describe('Network/Transport', function() {
       });
     });
 
+    it('should send if the message is a response', function(done) {
+      var _kadHttpSend = sinon.stub(
+        kad.transports.HTTP.prototype,
+        'send'
+      ).callsArg(2);
+      Transport.prototype.send({
+        address: '127.0.0.1',
+        port: 0
+      }, kad.Message({
+        id: '1234',
+        result: {}
+      }), function() {
+        _kadHttpSend.restore();
+        done();
+      });
+    });
+
+    it('should send if the message is a request and valid', function(done) {
+      var _kadHttpSend = sinon.stub(
+        kad.transports.HTTP.prototype,
+        'send'
+      ).callsArg(2);
+      Transport.prototype.send({
+        address: 'some.host',
+        port: 80
+      }, kad.Message({
+        id: '1234',
+        method: 'PING',
+        params: {}
+      }), function() {
+        _kadHttpSend.restore();
+        done();
+      });
+    });
+
   });
 
 });

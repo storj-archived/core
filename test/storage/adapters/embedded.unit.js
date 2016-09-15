@@ -12,6 +12,7 @@ var rimraf = require('rimraf');
 var path = require('path');
 var TMP_DIR = path.join(os.tmpdir(), 'STORJ_EMBEDDED_ADAPTER_TEST');
 var mkdirp = require('mkdirp');
+var EventEmitter = require('events').EventEmitter;
 
 function tmpdir() {
   return path.join(TMP_DIR, 'test-' + Date.now() + '.db');
@@ -43,6 +44,18 @@ describe('EmbeddedStorageAdapter', function() {
       expect(
         EmbeddedStorageAdapter(tmpdir())
       ).to.be.instanceOf(EmbeddedStorageAdapter);
+    });
+
+  });
+
+  describe('#_validatePath', function() {
+
+    it('should not make a directory that already exists', function() {
+      expect(function() {
+        var tmp = tmpdir();
+        mkdirp.sync(tmp);
+        EmbeddedStorageAdapter.prototype._validatePath(tmp);
+      }).to.not.throw(Error);
     });
 
   });
@@ -95,6 +108,39 @@ describe('EmbeddedStorageAdapter', function() {
       });
     });
 
+    it('should bubble error from Btable#exists', function(done) {
+      var _exists = sinon.stub(store._fs, 'exists').callsArgWith(
+        1,
+        new Error('Failed')
+      );
+      store._get(hash, function(err) {
+        _exists.restore();
+        expect(err.message).to.equal('Failed');
+        done();
+      });
+    });
+
+    it('should bubble errors from Btable#getReadStream', function(done) {
+      var _exists = sinon.stub(store._fs, 'exists').callsArgWith(
+        1,
+        null,
+        true
+      );
+      var _createReadStream = sinon.stub(
+        store._fs,
+        'createReadStream'
+      ).callsArgWith(
+        1,
+        new Error('Failed')
+      );
+      store._get(hash, function(err) {
+        _exists.restore();
+        _createReadStream.restore();
+        expect(err.message).to.equal('Failed');
+        done();
+      });
+    });
+
   });
 
   describe('#_peek', function() {
@@ -127,6 +173,21 @@ describe('EmbeddedStorageAdapter', function() {
       store._keys(function(err, keys) {
         expect(keys[0]).to.equal('5e52fee47e6b070565f74372468cdc699de89107');
         done();
+      });
+    });
+
+    it('should callback with error if emitted from stream', function(done) {
+      var emitter = new EventEmitter();
+      var _createKeyStream = sinon.stub(store._db, 'createKeyStream').returns(
+        emitter
+      );
+      store._keys(function(err) {
+        _createKeyStream.restore();
+        expect(err.message).to.equal('Failed');
+        done();
+      });
+      setImmediate(function() {
+        emitter.emit('error', new Error('Failed'));
       });
     });
 
@@ -192,6 +253,18 @@ describe('EmbeddedStorageAdapter', function() {
       store._size(function(err, size) {
         _approx.restore();
         expect(size).to.equal(7 * 1024);
+        done();
+      });
+    });
+
+    it('should bubble errors from Btable#stat', function(done) {
+      var _stat = sinon.stub(store._fs, 'stat').callsArgWith(
+        0,
+        new Error('Failed')
+      );
+      store._size(function(err) {
+        _stat.restore();
+        expect(err.message).to.equal('Failed');
         done();
       });
     });

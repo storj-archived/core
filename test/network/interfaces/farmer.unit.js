@@ -13,26 +13,54 @@ var StorageItem = require('../../../lib/storage/item');
 var StorageManager = require('../../../lib/storage/manager');
 var RAMStorageAdapter = require('../../../lib/storage/adapters/ram');
 var EventEmitter = require('events').EventEmitter;
+var CLEANUP = [];
 
 describe('FarmerInterface', function() {
 
   describe('@constructor', function() {
 
+    it('should create an instance without the new keyword', function() {
+      var farmer = FarmerInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        storageManager: new StorageManager(new RAMStorageAdapter())
+      });
+      CLEANUP.push(farmer);
+      expect(farmer).to.be.instanceOf(FarmerInterface);
+    });
+
     it('should use the keypair address if non supplied', function() {
       var keypair = KeyPair();
       var farmer = new FarmerInterface({
-        keyPair: KeyPair(),
+        keyPair: keypair,
         rpcPort: 0,
         tunnelServerPort: 0,
         doNotTraverseNat: true,
         contractNegotiator: function() {
           return false;
         },
-        paymentAddress: keypair.getAddress(),
         logger: kad.Logger(0),
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
+      CLEANUP.push(farmer);
       expect(farmer.getPaymentAddress()).to.equal(keypair.getAddress());
+    });
+
+    it('should use the renterWhitelist if provided', function() {
+      var farmer = new FarmerInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        renterWhitelist: ['somerenterid'],
+        storageManager: new StorageManager(new RAMStorageAdapter())
+      });
+      CLEANUP.push(farmer);
+      expect(farmer._renterWhitelist[0]).to.equal('somerenterid');
     });
 
   });
@@ -51,6 +79,7 @@ describe('FarmerInterface', function() {
         logger: kad.Logger(0),
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
+      CLEANUP.push(farmer);
       var _addTo = sinon.stub(farmer, '_addContractToPendingList');
       farmer._handleContractPublication(Contract({}));
       setImmediate(function() {
@@ -60,9 +89,7 @@ describe('FarmerInterface', function() {
       });
     });
 
-    it('should not send an offer if negotiator cannot get farmer free space',
-      function(done) {
-
+    it('should not send offer if cannot get farmer free space', function(done) {
       var farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
@@ -74,18 +101,16 @@ describe('FarmerInterface', function() {
         logger: kad.Logger(0),
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
-
+      CLEANUP.push(farmer);
       var _size = sinon.stub(
         farmer.storageManager._storage,
         'size'
       ).callsArgWith(0, new Error('Cannot get farmer disk space'));
-
       var _addTo = sinon.stub(farmer, '_addContractToPendingList');
       farmer._handleContractPublication(Contract({}));
       _size.restore();
       setImmediate(function() {
         expect(_addTo.called).to.equal(false);
-
         done();
       });
     });
@@ -103,12 +128,44 @@ describe('FarmerInterface', function() {
         maxOfferConcurrency: 0,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
+      CLEANUP.push(farmer);
       var _addTo = sinon.stub(farmer, '_addContractToPendingList');
       farmer._handleContractPublication(Contract({}));
       setImmediate(function() {
         expect(_addTo.called).to.equal(false);
         done();
       });
+    });
+
+    it('should add contract to pending list and negotiate', function(done) {
+      var _shouldSendOffer = sinon.stub().callsArgWith(1, true);
+      var _addContractToPendingList = sinon.stub();
+      var _negotiateContract = sinon.stub();
+      FarmerInterface.prototype._handleContractPublication.call({
+        _logger: { debug: sinon.stub() },
+        _shouldSendOffer: _shouldSendOffer,
+        _addContractToPendingList: _addContractToPendingList,
+        _negotiateContract: _negotiateContract
+      }, { data_hash: utils.rmd160('') });
+      setImmediate(function() {
+        expect(_addContractToPendingList.called).to.equal(true);
+        expect(_negotiateContract.called).to.equal(true);
+        done();
+      });
+    });
+
+  });
+
+  describe('#_removeContractFromPendingList', function() {
+
+    it('should remove the contract from the pending list', function() {
+      var _pendingList = ['testtest'];
+      FarmerInterface.prototype._removeContractFromPendingList.call({
+        _pendingOffers: _pendingList
+      }, {
+        get: sinon.stub().returns('test')
+      });
+      expect(_pendingList).to.have.lengthOf(0);
     });
 
   });
@@ -152,6 +209,7 @@ describe('FarmerInterface', function() {
         logger: kad.Logger(0),
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
+      CLEANUP.push(farmer);
       var _getContactByNodeID = sinon.stub(
         farmer.router,
         'getContactByNodeID'
@@ -184,6 +242,7 @@ describe('FarmerInterface', function() {
         logger: kad.Logger(0),
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
+      CLEANUP.push(farmer);
       var _remove = sinon.stub(farmer, '_removeContractFromPendingList');
       var _getContactByNodeID = sinon.stub(
         farmer.router,
@@ -214,6 +273,7 @@ describe('FarmerInterface', function() {
         logger: kad.Logger(0),
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
+      CLEANUP.push(farmer);
       var _save = sinon.stub(farmer.storageManager, 'save').callsArgWith(
         1,
         null
@@ -251,6 +311,7 @@ describe('FarmerInterface', function() {
         logger: kad.Logger(0),
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
+      CLEANUP.push(farmer);
       var _remove = sinon.stub(farmer, '_removeContractFromPendingList');
       var _getContactByNodeID = sinon.stub(
         farmer.router,
@@ -300,6 +361,7 @@ describe('FarmerInterface', function() {
         logger: kad.Logger(0),
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
+      CLEANUP.push(farmer);
       var _getContactByNodeID = sinon.stub(
         farmer.router,
         'getContactByNodeID'
@@ -329,6 +391,7 @@ describe('FarmerInterface', function() {
         logger: kad.Logger(0),
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
+      CLEANUP.push(farmer);
       var _join = sinon.stub(Network.prototype, 'join').callsArgWith(
         0,
         new Error('Failed to join network')
@@ -336,6 +399,29 @@ describe('FarmerInterface', function() {
       farmer.join(function(err) {
         _join.restore();
         expect(err.message).to.equal('Failed to join network');
+        done();
+      });
+    });
+
+    it('should listen for contracts before calling back', function(done) {
+      var farmer = new FarmerInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        storageManager: new StorageManager(new RAMStorageAdapter())
+      });
+      CLEANUP.push(farmer);
+      var _join = sinon.stub(Network.prototype, 'join').callsArgWith(
+        0,
+        null
+      );
+      var _listenForContracts = sinon.stub(farmer, '_listenForContracts');
+      farmer.join(function() {
+        _join.restore();
+        _listenForContracts.restore();
+        expect(_listenForContracts.called).to.equal(true);
         done();
       });
     });
@@ -353,6 +439,7 @@ describe('FarmerInterface', function() {
         logger: kad.Logger(0),
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
+      CLEANUP.push(farmer);
       var _send = sinon.stub(farmer.transport, 'send').callsArgWith(
         2,
         new Error('Failed to send offer')
@@ -379,6 +466,7 @@ describe('FarmerInterface', function() {
         logger: kad.Logger(0),
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
+      CLEANUP.push(farmer);
       var _send = sinon.stub(farmer.transport, 'send').callsArgWith(
         2,
         null,
@@ -393,6 +481,33 @@ describe('FarmerInterface', function() {
         _send.restore();
         _warn.restore();
         expect(_warn.calledWith('Renter refused to sign')).to.equal(true);
+        done();
+      });
+    });
+
+    it('should call #_handleOfferRes if all good', function(done) {
+      var farmer = new FarmerInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        storageManager: new StorageManager(new RAMStorageAdapter())
+      });
+      CLEANUP.push(farmer);
+      var _send = sinon.stub(farmer.transport, 'send').callsArgWith(
+        2,
+        null,
+        { result: { contract: {} } }
+      );
+      var _handleOfferRes = sinon.stub(farmer, '_handleOfferRes');
+      farmer._sendOfferForContract({
+        toObject: sinon.stub(),
+        get: sinon.stub()
+      });
+      setImmediate(function() {
+        _send.restore();
+        expect(_handleOfferRes.called).to.equal(true);
         done();
       });
     });
@@ -426,6 +541,7 @@ describe('FarmerInterface', function() {
         logger: kad.Logger(0),
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
+      CLEANUP.push(farmer);
       var _warn = sinon.stub(farmer._logger, 'warn');
       farmer._handleOfferRes({ result: { contract: { version: '12'} } });
       setImmediate(function() {
@@ -446,6 +562,7 @@ describe('FarmerInterface', function() {
         logger: kad.Logger(0),
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
+      CLEANUP.push(farmer);
       var _warn = sinon.stub(farmer._logger, 'warn');
       farmer._handleOfferRes({
         result: {
@@ -470,6 +587,7 @@ describe('FarmerInterface', function() {
         logger: kad.Logger(0),
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
+      CLEANUP.push(farmer);
       var _load = sinon.stub(farmer.storageManager, 'load').callsArgWith(1, {});
       var _save = sinon.stub(farmer.storageManager, 'save');
       var _verify = sinon.stub(Contract.prototype, 'verify').returns(true);
@@ -489,6 +607,18 @@ describe('FarmerInterface', function() {
 
   });
 
+  describe('#_listenForContracts', function() {
+
+    it('should call the #subscribe method with opcodes', function(done) {
+      var _subscribe = sinon.stub().callsArg(1);
+      FarmerInterface.prototype._listenForContracts.call({
+        subscribe: _subscribe,
+        _handleContractPublication: done
+      }, []);
+    });
+
+  });
+
   describe('#_listenForCapacityChanges', function() {
 
     it('should set the free space to true', function(done) {
@@ -500,6 +630,7 @@ describe('FarmerInterface', function() {
         logger: kad.Logger(0),
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
+      CLEANUP.push(farmer);
       var manager = new EventEmitter();
       farmer._listenForCapacityChanges(manager);
       manager.emit('unlocked');
@@ -518,6 +649,7 @@ describe('FarmerInterface', function() {
         logger: kad.Logger(0),
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
+      CLEANUP.push(farmer);
       var manager = new EventEmitter();
       farmer._listenForCapacityChanges(manager);
       manager.emit('locked');
@@ -538,6 +670,7 @@ describe('FarmerInterface', function() {
         logger: logger,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
+      CLEANUP.push(farmer);
       var manager = new EventEmitter();
       farmer._listenForCapacityChanges(manager);
       manager.emit('error', new Error('Failed'));
@@ -547,6 +680,102 @@ describe('FarmerInterface', function() {
       });
     });
 
+  });
+
+  after(function() {
+    CLEANUP.forEach(function(farmer) {
+      if (farmer.node) {
+        farmer.leave();
+      }
+    });
+  });
+
+});
+
+describe('FarmerInterface#Negotiator', function() {
+
+  it('should callback false is renter is not in whitelist', function(done) {
+    FarmerInterface.Negotiator.call({
+      _renterWhitelist: [utils.rmd160('someotherrenter')],
+      _logger: kad.Logger(0)
+    }, new Contract({
+      data_hash: utils.rmd160(''),
+      renter_id: utils.rmd160('renter')
+    }), function(result) {
+      expect(result).to.equal(false);
+      done();
+    });
+  });
+
+  it('should return true if farmer does not have the shard', function(done) {
+    FarmerInterface.Negotiator.call({
+      _logger: kad.Logger(0),
+      storageManager: new StorageManager(new RAMStorageAdapter())
+    }, new Contract({
+      data_hash: utils.rmd160('')
+    }), function(result) {
+      expect(result).to.equal(true);
+      done();
+    });
+  });
+
+  it('should callback true if we have shard for other renter', function(done) {
+    FarmerInterface.Negotiator.call({
+      _logger: kad.Logger(0),
+      storageManager: {
+        load: sinon.stub().callsArgWith(1, null, {
+          contracts: {
+            otherrenter: {}
+          }
+        })
+      }
+    }, new Contract({
+      data_hash: utils.rmd160(''),
+      renter_id: utils.rmd160('renter')
+    }), function(result) {
+      expect(result).to.equal(true);
+      done();
+    });
+  });
+
+  it('should return true if we have a contract but no shard', function(done) {
+    FarmerInterface.Negotiator.call({
+      _logger: kad.Logger(0),
+      storageManager: {
+        load: sinon.stub().callsArgWith(1, null, {
+          contracts: {
+            '5ebef6c9f0cabf23c3565941e76fb6e5320143d3': {}
+          },
+          shard: { write: sinon.stub() }
+        })
+      }
+    }, new Contract({
+      data_hash: utils.rmd160(''),
+      renter_id: '5ebef6c9f0cabf23c3565941e76fb6e5320143d3'
+    }), function(result) {
+      expect(result).to.equal(true);
+      done();
+    });
+  });
+
+  it('should return false if we have a contract and shard', function(done) {
+    FarmerInterface.Negotiator.call({
+      _logger: kad.Logger(0),
+      storageManager: {
+        load: sinon.stub().callsArgWith(1, null, {
+          contracts: {
+            '5ebef6c9f0cabf23c3565941e76fb6e5320143d3': {}
+          },
+          shard: { read: sinon.stub() }
+        })
+      }
+    }, new Contract({
+      data_hash: utils.rmd160(''),
+      renter_id: '5ebef6c9f0cabf23c3565941e76fb6e5320143d3'
+    }), function(result) {
+      expect(result).to.equal(false);
+      done();
+    });
   });
 
 });

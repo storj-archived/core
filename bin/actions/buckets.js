@@ -83,11 +83,10 @@ module.exports.add = function(name, storage, transfer) {
   });
 };
 
-module.exports.update = function(id, name, storage, transfer) {
+module.exports.update = function(id, storage, transfer) {
   var client = this._storj.PrivateClient();
 
   client.updateBucketById(id, {
-    name: name,
     storage: storage,
     transfer: transfer
   }, function(err, bucket) {
@@ -97,8 +96,8 @@ module.exports.update = function(id, name, storage, transfer) {
 
     log(
       'info',
-      'ID: %s, Name: %s, Storage: %s, Transfer: %s',
-      [bucket.id, bucket.name, bucket.storage, bucket.transfer]
+      'ID: %s, Storage: %s, Transfer: %s',
+      [bucket.id, bucket.storage, bucket.transfer]
     );
   });
 };

@@ -135,7 +135,7 @@ program
   .action(actions.buckets.remove.bind(program));
 
 program
-  .command('update-bucket <bucket-id> [name] [storage] [transfer]')
+  .command('update-bucket <bucket-id> [storage] [transfer]')
   .description('updates a specific storage bucket')
   .action(actions.buckets.update.bind(program));
 

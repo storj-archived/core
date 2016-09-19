@@ -9,7 +9,7 @@ var api = 'https://api.storj.io';
 var keypair = storj.KeyPair(fs.readFileSync('./private.key').toString());
 
 // console.login using the keypair generated
-var client = storj.BridgeClient(api, {keypair: keypair});
+var client = storj.BridgeClient(api, {keyPair: keypair});
 
 // Bucket containing the file to be removed
 var bucketid = 'insertbucketid';

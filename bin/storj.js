@@ -81,12 +81,15 @@ var ACTIONS = {
         program._storj.getKeyPass,
         options
       );
-      
-      uploader.start();
     } catch(err) {
       return log('error', err.message);
     }
 
+    uploader.start(function(err, filepath) {
+      if (err) {
+        return log('error', err.message);
+      }
+    });
   }
 };
 

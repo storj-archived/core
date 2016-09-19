@@ -10,14 +10,13 @@ This package exposes a module that provides all of the tools needed to
 integrate with the Storj network. You must have Node.js v4.x.x, Python v2.x.x,
 and Git installed. [Complete documentation can be found here](http://storj.github.io/core).
 
-Quick Start
------------
-
-Install with NPM:
-
 ```
 npm install storj-lib --save
 ```
+
+> If you want access to the [Storj CLI](https://github.com/storj/core-cli), 
+> you must install it separately or use the [`storj`](https://github.com/storj/npm-meta) 
+> metapackage to install both the core library *and* command line interface.
 
 Usage Examples
 --------------

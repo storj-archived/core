@@ -22,8 +22,8 @@ describe('BridgeClient', function() {
 
     it('should create an instance with the given options', function() {
       var keypair = new KeyPair();
-      var client = new BridgeClient(null, { keypair: keypair });
-      expect(client._options.keypair).to.equal(keypair);
+      var client = new BridgeClient(null, { keyPair: keypair });
+      expect(client._options.keyPair).to.equal(keypair);
     });
 
     it('should create an instance with the given url', function() {
@@ -1704,7 +1704,7 @@ describe('BridgeClient', function() {
 
       it('should sign the json payload with the keypair', function() {
         var client = new BridgeClient(null, {
-          keypair: new KeyPair()
+          keyPair: new KeyPair()
         });
         var options = {
           method: 'POST',
@@ -1718,7 +1718,7 @@ describe('BridgeClient', function() {
 
       it('should sign the querystring with the keypair', function() {
         var client = new BridgeClient(null, {
-          keypair: new KeyPair()
+          keyPair: new KeyPair()
         });
         var options = {
           method: 'GET',

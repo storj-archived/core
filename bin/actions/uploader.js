@@ -6,7 +6,6 @@ var path = require('path');
 var storj = require('../..');
 var globule = require('globule');
 var async = require('async');
-var files = require('./files');
 var storj = require('../..');
 var assert = require('assert');
 
@@ -37,7 +36,6 @@ function Uploader(client, keypass, options) {
   this.keypass = keypass();
   this.filepaths = this._getAllFiles(options.filepath);
   this.fileCount = this.filepaths.length;
-  this.env = options.env;
   this.uploadedCount = 0;
   this.fileMeta = [];
 

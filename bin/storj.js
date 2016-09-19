@@ -83,7 +83,9 @@ program
 program
   .command('login')
   .description('authorize this device to access your storj api account')
-  .action(actions.account.login.bind(null, program.url));
+  .action(function() {
+    actions.account.login(program.url);
+  });
 
 program
   .command('logout')

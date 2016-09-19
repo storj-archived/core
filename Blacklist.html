@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Storj Core Class: EncryptStream</title>
+	<title>Storj Core Class: Blacklist</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -85,13 +85,13 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: EncryptStream</h1>
+	<h1 class="page-title">Class: Blacklist</h1>
 <section>
 
 <header>
     
         <h2>
-        EncryptStream
+        Blacklist
         </h2>
         
     
@@ -104,7 +104,7 @@
         
 <hr>
 <dt>
-    <h4 class="name" id="EncryptStream"><span class="type-signature"></span>new EncryptStream(keyiv)</h4>
+    <h4 class="name" id="Blacklist"><span class="type-signature"></span>new Blacklist(path)</h4>
     
     
 </dt>
@@ -112,8 +112,8 @@
 
     
     <div class="description">
-        Represents a duplex stream capable of taking cleartext data as input and
-producing output encrypted with <a href="DataCipherKeyIv.html">DataCipherKeyIv</a>
+        Manage a blacklist file containing an object with key value pairs of
+nodeids: timestamp
     </div>
     
 
@@ -148,13 +148,13 @@ producing output encrypted with <a href="DataCipherKeyIv.html">DataCipherKeyIv</
 
         <tr>
             
-                <td class="name"><code>keyiv</code></td>
+                <td class="name"><code>path</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type"><a href="DataCipherKeyIv.html">DataCipherKeyIv</a></span>
+<span class="param-type">String</span>
 
 
 
@@ -165,7 +165,7 @@ producing output encrypted with <a href="DataCipherKeyIv.html">DataCipherKeyIv</
 
             
 
-            <td class="description last">Object to use for derivation function</td>
+            <td class="description last">blacklist folder location</td>
         </tr>
 
     
@@ -216,7 +216,7 @@ producing output encrypted with <a href="DataCipherKeyIv.html">DataCipherKeyIv</
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_crypto-tools_encrypt-stream.js.html">lib/crypto-tools/encrypt-stream.js</a>
+				<a href="lib_bridge-client_blacklist.js.html">lib/bridge-client/blacklist.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -225,6 +225,13 @@ producing output encrypted with <a href="DataCipherKeyIv.html">DataCipherKeyIv</
 	
 
 	
+	<dt class="tag-see method-doc-label method-doc-details-label">See:</dt>
+	<dd class="tag-see">
+		<ul>
+			<li><a href="https://github.com/storj/bridge">https://github.com/storj/bridge</a></li>
+			</ul>
+	</dd>
+	
 
 	
 </dl>
@@ -232,13 +239,6 @@ producing output encrypted with <a href="DataCipherKeyIv.html">DataCipherKeyIv</
 
     
 
-    
-    <h5>Fires:</h5>
-    <ul>
-        <li><a href="EncryptStream.html#event:data">EncryptStream#event:data</a></li>
-    
-        <li><a href="EncryptStream.html#event:end">EncryptStream#event:end</a></li>
-    </ul>
     
 
     
@@ -268,17 +268,13 @@ producing output encrypted with <a href="DataCipherKeyIv.html">DataCipherKeyIv</
     
 
     
-
-    
-
-    
-        <h3 class="subsection-title">Events</h3>
+        <h3 class="subsection-title">Methods</h3>
 
         <dl>
             
 <hr>
 <dt>
-    <h4 class="name" id="event:data">data</h4>
+    <h4 class="name" id="push"><span class="type-signature"></span>push(nodeid)</h4>
     
     
 </dt>
@@ -286,21 +282,65 @@ producing output encrypted with <a href="DataCipherKeyIv.html">DataCipherKeyIv</
 
     
     <div class="description">
-        Triggered when some input bytes have become encrypted output bytes
+        Push node to blacklist
     </div>
     
 
     
 
     
-        <h5>Type: 
-<span class="param-type">Buffer</span>
-
-
-</h5>
-    
 
     
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>nodeid</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Node id to be added to blacklist</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
     
 
     
@@ -338,7 +378,7 @@ producing output encrypted with <a href="DataCipherKeyIv.html">DataCipherKeyIv</
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_crypto-tools_encrypt-stream.js.html">lib/crypto-tools/encrypt-stream.js</a>
+				<a href="lib_bridge-client_blacklist.js.html">lib/bridge-client/blacklist.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -371,7 +411,7 @@ producing output encrypted with <a href="DataCipherKeyIv.html">DataCipherKeyIv</
             
 <hr>
 <dt>
-    <h4 class="name" id="event:end">end</h4>
+    <h4 class="name" id="toObject"><span class="type-signature"></span>toObject()</h4>
     
     
 </dt>
@@ -379,7 +419,7 @@ producing output encrypted with <a href="DataCipherKeyIv.html">DataCipherKeyIv</
 
     
     <div class="description">
-        Triggered when the stream has ended
+        Return list of blacklisted nodeids
     </div>
     
 
@@ -425,7 +465,7 @@ producing output encrypted with <a href="DataCipherKeyIv.html">DataCipherKeyIv</
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_crypto-tools_encrypt-stream.js.html">lib/crypto-tools/encrypt-stream.js</a>
+				<a href="lib_bridge-client_blacklist.js.html">lib/bridge-client/blacklist.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -455,6 +495,10 @@ producing output encrypted with <a href="DataCipherKeyIv.html">DataCipherKeyIv</
 </dd>
 
         </dl>
+    
+
+    
+
     
 </article>
 

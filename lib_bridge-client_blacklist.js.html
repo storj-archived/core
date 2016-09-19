@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Storj Core Class: EncryptStream</title>
+	<title>Storj Core Source: lib/bridge-client/blacklist.js</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -80,385 +80,103 @@
 <div class="row">
 
 	
-	<div class="col-md-8">
+	<div class="col-md-12">
 	
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: EncryptStream</h1>
+		<h1 class="page-title">Source: lib/bridge-client/blacklist.js</h1>
+    
 <section>
-
-<header>
-    
-        <h2>
-        EncryptStream
-        </h2>
-        
-    
-</header>
-
-
-<article>
-    <div class="container-overview">
-    
-        
-<hr>
-<dt>
-    <h4 class="name" id="EncryptStream"><span class="type-signature"></span>new EncryptStream(keyiv)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Represents a duplex stream capable of taking cleartext data as input and
-producing output encrypted with <a href="DataCipherKeyIv.html">DataCipherKeyIv</a>
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>keyiv</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="DataCipherKeyIv.html">DataCipherKeyIv</a></span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Object to use for derivation function</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-	<dt class="tag-license method-doc-label method-doc-details-label">License:</dt>
-	<dd class="tag-license">
-		<ul class="dummy">
-			<li>LGPL-3.0</li>
-		</ul>
-	</dd>
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_crypto-tools_encrypt-stream.js.html">lib/crypto-tools/encrypt-stream.js</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-    <h5>Fires:</h5>
-    <ul>
-        <li><a href="EncryptStream.html#event:data">EncryptStream#event:data</a></li>
-    
-        <li><a href="EncryptStream.html#event:end">EncryptStream#event:end</a></li>
-    </ul>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Events</h3>
-
-        <dl>
-            
-<hr>
-<dt>
-    <h4 class="name" id="event:data">data</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Triggered when some input bytes have become encrypted output bytes
-    </div>
-    
-
-    
-
-    
-        <h5>Type: 
-<span class="param-type">Buffer</span>
-
-
-</h5>
-    
-
-    
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_crypto-tools_encrypt-stream.js.html">lib/crypto-tools/encrypt-stream.js</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="event:end">end</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Triggered when the stream has ended
-    </div>
-    
-
-    
-
-    
-
-    
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_crypto-tools_encrypt-stream.js.html">lib/crypto-tools/encrypt-stream.js</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-        </dl>
-    
-</article>
-
+    <article>
+        <pre
+            class="sunlight-highlight-javascript ">'use strict';
+
+var assert = require('assert');
+var fs = require('fs');
+var utils = require('../utils');
+var path = require('path');
+
+/**
+ * Manage a blacklist file containing an object with key value pairs of
+ * nodeids: timestamp
+ * @constructor
+ * @license LGPL-3.0
+ * @see https://github.com/storj/bridge
+ * @param {String} path - blacklist folder location
+ */
+function Blacklist(folder) {
+  if (!(this instanceof Blacklist)) {
+    return new Blacklist(folder);
+  }
+
+  assert.ok(utils.existsSync(folder), 'Invalid Blacklist Folder');
+
+  this.blacklistFile = path.join(folder,'.blacklist');
+  this.blacklist = this._loadFromDisk();
+}
+
+Blacklist.TTL = 86400000;
+
+/**
+ * Push node to blacklist
+ * @param {String} nodeid - Node id to be added to blacklist
+ */
+Blacklist.prototype.push = function(nodeid) {
+  this.blacklist[nodeid] = Date.now();
+  this._saveToDisk();
+};
+
+/**
+ * Save blacklist to disk
+ * @private
+ */
+Blacklist.prototype._saveToDisk = function() {
+  fs.writeFileSync(this.blacklistFile, JSON.stringify(this.blacklist));
+};
+
+/**
+ * Read blacklist from disk and Reap old nodeids
+ * @private
+ */
+Blacklist.prototype._loadFromDisk = function() {
+  if (!utils.existsSync(this.blacklistFile)) {
+    fs.writeFileSync(this.blacklistFile, JSON.stringify([]));
+  }
+
+  return this._reap(JSON.parse(fs.readFileSync(this.blacklistFile)));
+};
+
+/**
+  * Reap old nodeids from blacklist
+  * @private
+  */
+Blacklist.prototype._reap = function(blacklist) {
+  var now = Date.now();
+
+  for (var nodeid in blacklist) {
+    if ((blacklist[nodeid] - now) > Blacklist.TTL) {
+      delete blacklist[nodeid];
+    }
+  }
+
+  this.blacklist = blacklist;
+
+  return blacklist;
+};
+
+/**
+ * Return list of blacklisted nodeids
+ */
+Blacklist.prototype.toObject = function() {
+  return Object.keys(this._reap(this.blacklist));
+};
+
+module.exports = Blacklist;
+</pre>
+    </article>
 </section>
+
 
 
 
@@ -468,10 +186,6 @@ producing output encrypted with <a href="DataCipherKeyIv.html">DataCipherKeyIv</
 
 	<div class="clearfix"></div>
 
-	
-		<div class="col-md-3">
-			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
-		</div>
 	
 
 </div>

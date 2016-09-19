@@ -32,7 +32,7 @@ function Uploader(client, keypass, options) {
                     6;
   this.fileConcurrency = options.env.fileconcurrency || 1;
   this.bucket = options.bucket;
-  this.redundancy = options.env.redundancy;
+  this.redundancy = options.env.redundancy || 0;
   this.client = client({ concurrency: this.shardConcurrency});
   this.keypass = keypass();
   this.filepaths = this._getAllFiles(options.filepath);
@@ -55,13 +55,21 @@ Uploader.prototype._validate = function() {
     log(
       'warn',
       'A file concurrency of %s may result in issues!',
-      this.fileConcurrency
+      [ this.fileConcurrency ]
+    );
+  }
+
+  if (this.redundancy === 0) {
+    log(
+      'warn',
+      'A redundancy of %s means files will not be mirrored!',
+      [ this.redundancy ]
     );
   }
 
   assert(this.fileConcurrency >= 1, 'File Concurrency cannot be less than 1');
   assert(
-    ((parseInt(this.redundancy) <= 12) || (parseInt(this.redundancy) >= 1)),
+    ((parseInt(this.redundancy) <= 12) || (parseInt(this.redundancy) >= 0)),
     this.redundancy + ' is an invalid Redundancy value.'
   );
   assert(this.fileCount >= 1, '0 files specified to be uploaded.');
@@ -282,15 +290,8 @@ Uploader.prototype._storeFileInBucket = function(filepath, token, callback) {
         [file.filename, file.mimetype, file.size, file.id]
       );
 
-      if (self.redundancy) {
-        return files.mirror.call(
-          { _storj: {PrivateClient: function() {
-            return self.client;
-          }}},
-          self.bucket,
-          file.id,
-          self.env
-        );
+      if (self.redundancy && self.redundancy > 0) {
+        return self._mirror(file.id);
       }
 
       self.uploadedCount++;
@@ -308,6 +309,40 @@ Uploader.prototype._storeFileInBucket = function(filepath, token, callback) {
 
       self.nextFileCallback();
 
+    }
+  );
+};
+
+/**
+ * Mirror files
+ * @param {String} fileid - id of file to be mirrored
+ * @private
+ */
+Uploader.prototype._mirror = function(fileid) {
+  log(
+    'info',
+    'Establishing %s mirrors per shard for redundancy',
+    [this.redundancy]
+  );
+  log('info', 'This can take a while, so grab a cocktail...');
+
+  this.client.replicateFileFromBucket(
+    this.bucket,
+    fileid,
+    parseInt(this.redundancy),
+    function(err, replicas) {
+      if (err) {
+        return log('error', err.message);
+      }
+
+      replicas.forEach(function(shard) {
+        log('info', 'Shard %s mirrored by %s nodes', [
+          shard.hash,
+          shard.mirrors.length
+        ]);
+      });
+
+      process.exit();
     }
   );
 };

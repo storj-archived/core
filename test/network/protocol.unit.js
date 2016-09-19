@@ -421,6 +421,39 @@ describe('Protocol', function() {
       });
     });
 
+    it('should return an error if the shard proving fails', function(done) {
+      var e = new stream.Writable({ write: utils.noop });
+      var StubbedProtocol = proxyquire('../../lib/network/protocol', {
+        '../audit-tools/proof-stream': function() {
+          e.getProofResult = sinon.stub().returns('PROOF RESULT');
+          return e;
+        }
+      });
+      var proto = new StubbedProtocol({
+        network: {
+          _logger: Logger(0),
+          storageManager: {
+            load: function(key, cb) {
+              cb(null, {
+                shard: new stream.Readable({ read: utils.noop }),
+                trees: {
+                  id: []
+                }
+              });
+              setImmediate(function() {
+                e.emit('error', new Error('Failed'));
+              });
+            }
+          }
+        }
+      });
+      proto._proveShardExistence(true, true, 'id', function(err) {
+        expect(err.message).to.equal('Failed');
+        done();
+      });
+
+    });
+
   });
 
   describe('#handleConsign', function() {

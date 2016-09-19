@@ -88,3 +88,10 @@ the proof and confirm that the farmer still has possession of the file:
 
 For more detailed usage information of the command line interface, run
 `storj --help`.
+
+### Temporary Files
+On Windows temporary files are stored:
+
+```
+C:\Users\<user>\AppData\Local\Temp
+```

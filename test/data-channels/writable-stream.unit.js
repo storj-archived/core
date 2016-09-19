@@ -27,6 +27,32 @@ describe('WritableDataChannelStream', function() {
 
   });
 
+  describe('#write', function() {
+
+    it('should emit error if no write ack after flush', function(done) {
+      WritableStream.MAX_TTWA = 50;
+      var channel = new EventEmitter();
+      channel.readyState = 1;
+      channel.send = function(data, opts, cb) {
+        if (typeof opts === 'function') {
+          opts();
+        } else if (typeof cb === 'function') {
+          cb();
+        }
+      };
+      var ws = new WritableStream({ _client: channel });
+      ws.on('error', function(err) {
+        WritableStream.MAX_TTWA = 5000;
+        expect(err.message).to.equal(
+          'Did not close channel by max Time-To-Write-Acknowledgement'
+        );
+        done();
+      });
+      ws.end(Buffer('test data'));
+    });
+
+  });
+
   describe('#destroy', function() {
 
     it('should call terminate and set isDestroyed', function() {

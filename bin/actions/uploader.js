@@ -8,6 +8,7 @@ var globule = require('globule');
 var async = require('async');
 var files = require('./files');
 var storj = require('../..');
+var assert = require('assert');
 
 /**
  * Interface for uploading files to Storj Network
@@ -49,19 +50,20 @@ function Uploader(client, keypass, options) {
  * @private
  */
 Uploader.prototype._validate = function() {
-  if (this.concurrency > 6) {
-    log('warn', 'A concurrency of %s may result in issues!', this.concurrency);
-  } else if (this.concurrency < 1) {
-    throw new Error('Concurrency cannot be less than 1');
+  if (this.fileConcurrency > 6) {
+    log(
+      'warn',
+      'A file concurrency of %s may result in issues!',
+      this.fileConcurrency
+    );
   }
 
-  if (parseInt(this.redundancy) > 12 || parseInt(this.redundancy) < 1) {
-    throw new Error(this.redundancy + ' is an invalid Redundancy value.');
-  }
-
-  if (this.fileCount < 1) {
-    throw new Error('0 files specified to be uploaded.');
-  }
+  assert(this.fileConcurrency >= 1, 'File Concurrency cannot be less than 1');
+  assert(
+    ((parseInt(this.redundancy) <= 12) || (parseInt(this.redundancy) >= 1)),
+    this.redundancy + ' is an invalid Redundancy value.'
+  );
+  assert(this.fileCount >= 1, '0 files specified to be uploaded.');
 };
 
 /**
@@ -158,7 +160,6 @@ Uploader.prototype._makeTempDir = function(filepath, callback) {
   var self = this;
 
   utils.makeTempDir(function(err, tmpDir, tmpCleanup) {
-
     if (err) {
       callback(err, filepath);
       log('error', 'Unable to create temp directory for file %s', filepath);
@@ -211,12 +212,10 @@ Uploader.prototype._createReadStream = function(filepath, callback) {
  */
 Uploader.prototype._createToken = function(filepath, callback) {
   var self = this;
-
   var filename = self.fileMeta[filepath].filename;
   var retry = 0;
 
   function _createToken() {
-
     log(
       'info',
       '[ %s ] Creating storage token... (retry: %s)',
@@ -251,7 +250,6 @@ Uploader.prototype._createToken = function(filepath, callback) {
  /* jshint maxstatements: 20 */
 Uploader.prototype._storeFileInBucket = function(filepath, token, callback) {
   var self = this;
-
   var filename = self.fileMeta[filepath].filename;
 
   log('info', '[ %s ] Storing file, hang tight!', filename);
@@ -277,7 +275,6 @@ Uploader.prototype._storeFileInBucket = function(filepath, token, callback) {
 
       log('info', '[ %s ] Encryption key saved to keyring.', filename);
       log('info', '[ %s ] File successfully stored in bucket.', filename);
-
       log(
         'info',
         'Name: %s, Type: %s, Size: %s bytes, ID: %s',

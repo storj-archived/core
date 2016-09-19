@@ -12,4 +12,4 @@ module.exports.frames = require('./actions/frames');
 
 module.exports.keys = require('./actions/keys');
 
-module.exports.uploader = require('./actions/uploader');
+module.exports.Uploader = require('./actions/uploader');

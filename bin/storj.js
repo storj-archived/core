@@ -76,7 +76,7 @@ var ACTIONS = {
     };
 
     try {
-      var uploader = new actions.uploader(
+      var uploader = new actions.Uploader(
         program._storj.PrivateClient,
         program._storj.getKeyPass,
         options

@@ -248,6 +248,7 @@ Uploader.prototype._createToken = function(filepath, callback) {
  * @param {String} filepath - file to be uploaded
  * @private
  */
+ /* jshint maxstatements: 20 */
 Uploader.prototype._storeFileInBucket = function(filepath, token, callback) {
   var self = this;
 

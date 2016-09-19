@@ -41,7 +41,9 @@ describe('TunnelClient+TunnelServer/Integration', function() {
   });
 
   it('should establish the tunnel', function(done) {
-    tunserver = new TunnelServer({ port: 60000, portRange: {
+    tunserver = new TunnelServer({
+      serverPort: 60000,
+      gatewayPortRange: {
         min: 0,
         max: 0
       }

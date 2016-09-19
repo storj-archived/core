@@ -214,6 +214,27 @@ describe('TunnelClient', function() {
       expect(_send.called).to.equal(true);
     });
 
+    it('should write a term signal to the muxer on close', function(done) {
+      var emitter = new EventEmitter();
+      var StubbedTunnelClient = proxyquire('../../lib/tunnel/client', {
+        ws: function() {
+          return emitter;
+        }
+      });
+      var client = new StubbedTunnelClient('', '');
+      client._muxer = {
+        write: function() {
+          done();
+        }
+      };
+      client._handleDataChannel({
+        flags: { quid: 'test' }
+      });
+      setImmediate(function() {
+        emitter.emit('close', 1000, 'Consignment completed');
+      });
+    });
+
   });
 
   describe('#_sendToExistingSocket', function() {

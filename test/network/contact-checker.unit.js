@@ -7,6 +7,7 @@ var sinon = require('sinon');
 var ContactChecker = require('../../lib/network/contact-checker');
 var Contact = require('../../lib/network/contact');
 var utils = require('../../lib/utils');
+var net = require('net');
 
 describe('ContactChecker', function() {
 
@@ -19,6 +20,13 @@ describe('ContactChecker', function() {
   });
 
   describe('#check', function() {
+
+    var testHost;
+
+    before(function(done) {
+      testHost = net.createServer(function() {});
+      testHost.listen(0, done);
+    });
 
     it('should error if timeout', function(done) {
       var ContactChecker = proxyquire('../../lib/network/contact-checker', {
@@ -63,6 +71,22 @@ describe('ContactChecker', function() {
         expect(err.message).to.equal('Connection error');
         done();
       });
+    });
+
+    it('should connect successfully and callback', function(done) {
+      var checker = new ContactChecker();
+      checker.check(Contact({
+        address: '127.0.0.1',
+        port: testHost.address().port,
+        nodeID: utils.rmd160('')
+      }), function(err) {
+        expect(err).to.equal(null);
+        done();
+      });
+    });
+
+    after(function() {
+      testHost.close();
     });
 
   });

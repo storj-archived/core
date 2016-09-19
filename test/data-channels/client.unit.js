@@ -12,6 +12,29 @@ var utils = require('../../lib/utils');
 
 describe('DataChannelClient', function() {
 
+  describe('@constructor', function() {
+
+    it('should create an instance without the new keyword', function() {
+      expect(DataChannelClient({
+        address: '',
+        port: 0
+      })).to.be.instanceOf(DataChannelClient);
+    });
+
+  });
+
+  describe('#_handleChannelOpen', function() {
+
+    it('should emit open when the underlying channel opens', function(done) {
+      var dc = new DataChannelClient({ address: '', port: 0 });
+      dc.on('open', done);
+      setImmediate(function() {
+        dc._client.emit('open');
+      });
+    });
+
+  });
+
   describe('#createReadStream', function() {
 
     it('should emit an error for channel error', function(done) {

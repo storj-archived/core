@@ -1,39 +1,25 @@
-[![Storj](https://nodei.co/npm/storj.png?downloads=true)](http://storj.github.io/core)
-==============
+[![Storj](https://nodei.co/npm/storj-lib.png?downloads=true)](http://storj.github.io/core)
+==========================================================================================
 
 [![Build Status](https://img.shields.io/travis/Storj/core.svg?style=flat-square)](https://travis-ci.org/Storj/core)
 [![Coverage Status](https://img.shields.io/coveralls/Storj/core.svg?style=flat-square)](https://coveralls.io/r/Storj/core)
-[![NPM](https://img.shields.io/npm/v/storj.svg?style=flat-square)](https://www.npmjs.com/package/storj)
+[![NPM](https://img.shields.io/npm/v/storj-lib.svg?style=flat-square)](https://www.npmjs.com/package/storj-lib)
 [![License](https://img.shields.io/badge/license-AGPL3.0-blue.svg?style=flat-square)](https://raw.githubusercontent.com/Storj/core/master/LICENSE)
 
 This package exposes a module that provides all of the tools needed to
 integrate with the Storj network. You must have Node.js v4.x.x, Python v2.x.x,
 and Git installed. [Complete documentation can be found here](http://storj.github.io/core).
 
-Quick Start (Command Line Interface)
-------------------------------------
-
-Install *globally* as user with NPM:
-
 ```
-npm install storj --global
+npm install storj-lib --save
 ```
 
-Use the linked command line interface:
+> If you want access to the [Storj CLI](https://github.com/storj/core-cli), 
+> you must install it separately or use the [`storj`](https://github.com/storj/npm-meta) 
+> metapackage to install both the core library *and* command line interface.
 
-```
-storj --help
-```
-
-Installation and Guides
------------------------
-
-- [Install Guide for Windows, Mac, and Linux](https://github.com/Storj/core/blob/master/INSTALL.md)
-- [Getting Started with a Storj Account](http://docs.storj.io/docs/getting-started)
-- [Uploading/Downloading with the CLI tools](http://docs.storj.io/docs/uploading-and-downloading-cats)
-
-Code Examples
--------------
+Usage Examples
+--------------
 
 - [Example 1 - Creating a User](https://github.com/Storj/core/blob/master/example/1-create-user.js)
 - [Example 2 - Generating a KeyPair](https://github.com/Storj/core/blob/master/example/2-generate-keypair.js)
@@ -46,8 +32,6 @@ Code Examples
 - [Example 6b - Download File](https://github.com/Storj/core/blob/master/example/6b-download-file.js)
 - [Example 6c - List Bucket Files](https://github.com/Storj/core/blob/master/example/6c-list-bucket-files.js)
 - [Example 6d - Delete File from Bucket](https://github.com/Storj/core/blob/master/example/6d-delete-file-from-bucket.js)
-
-
 
 License
 -------

@@ -52,6 +52,16 @@ describe('Manager', function() {
       });
     });
 
+    it('should callback with the loaded item', function(done) {
+      var adapter = new RAMStorageAdapter();
+      adapter._get = sinon.stub().callsArgWith(1, null, new StorageItem());
+      var man = new Manager(adapter);
+      man.load(utils.rmd160('key'), function(err, item) {
+        expect(item).to.be.instanceOf(StorageItem);
+        done();
+      });
+    });
+
   });
 
   describe('#clean', function() {

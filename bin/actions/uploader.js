@@ -283,7 +283,9 @@ Uploader.prototype._storeFileInBucket = function(filepath, token, callback) {
 
       if (self.redundancy) {
         return files.mirror.call(
-          self,
+          { _storj: {PrivateClient: function() {
+            return self.client;
+          }}},
           self.bucket,
           file.id,
           self.env

@@ -37,6 +37,7 @@ function Uploader(client, keypass, options) {
   this.keypass = keypass();
   this.filepaths = this._getAllFiles(options.filepath);
   this.fileCount = this.filepaths.length;
+  this.env = options.env;
   this.uploadedCount = 0;
   this.fileMeta = [];
 

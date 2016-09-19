@@ -67,6 +67,29 @@ var ACTIONS = {
       command
     );
     program.help();
+  },
+  upload: function(bucket, filepath, env) {
+    var options = {
+      bucket: bucket,
+      filepath: filepath,
+      env: env
+    };
+
+    try {
+      var uploader = new actions.Uploader(
+        program._storj.PrivateClient,
+        program._storj.getKeyPass,
+        options
+      );
+    } catch(err) {
+      return log('error', err.message);
+    }
+
+    uploader.start(function(err, filepath) {
+      if (err) {
+        return log('error', err.message);
+      }
+    });
   }
 };
 
@@ -192,7 +215,7 @@ program
                '  <filepath> can be a path with wildcard or a space separated' +
                ' list of files.'
              )
-  .action(actions.files.upload.bind(program));
+  .action(ACTIONS.upload);
 
 program
   .command('create-mirrors <bucket-id> <file-id>')

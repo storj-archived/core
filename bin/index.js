@@ -11,3 +11,5 @@ module.exports.files = require('./actions/files');
 module.exports.frames = require('./actions/frames');
 
 module.exports.keys = require('./actions/keys');
+
+module.exports.Uploader = require('./actions/uploader');

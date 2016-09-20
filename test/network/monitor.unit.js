@@ -213,7 +213,7 @@ describe('Monitor#getDiskUtilization', function() {
 
   it('should return the free and used space', function(done) {
     Monitor.getDiskUtilization({
-      manager: {
+      storageManager: {
         _options: { maxCapacity: 2048 },
         _storage: { size: sinon.stub().callsArgWith(0, null, 1024) }
       }
@@ -226,7 +226,7 @@ describe('Monitor#getDiskUtilization', function() {
 
   it('should return the free and used space if error', function(done) {
     Monitor.getDiskUtilization({
-      manager: {
+      storageManager: {
         _options: { maxCapacity: 2048 },
         _storage: { size: sinon.stub().callsArgWith(0, new Error('Failed')) }
       }

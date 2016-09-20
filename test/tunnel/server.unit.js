@@ -8,13 +8,18 @@ var proxyquire = require('proxyquire');
 var sinon = require('sinon');
 var TunnelErrors = require('../../lib/tunnel/error-codes');
 var kad = require('kad');
+var async = require('async');
 
 describe('TunnelServer', function() {
+
+  var CLEANUP = [];
 
   describe('@constructor', function() {
 
     it('should create an instance without the new keyword', function() {
-      expect(TunnelServer({ port: 0 })).to.be.instanceOf(TunnelServer);
+      var ts = TunnelServer({ serverPort: 0 });
+      expect(ts).to.be.instanceOf(TunnelServer);
+      CLEANUP.push(ts);
     });
 
     it('should use the http server we give it', function() {
@@ -39,6 +44,16 @@ describe('TunnelServer', function() {
         expect(err.message).to.equal('Failed to close');
         done();
       });
+    });
+
+  });
+
+  describe('#hasTunnelAvailable', function() {
+
+    it('should return a true if there are tunnels available', function() {
+      var ts = TunnelServer({ serverPort: 0 });
+      CLEANUP.push(ts);
+      expect(ts.hasTunnelAvailable()).to.equal(true);
     });
 
   });
@@ -68,10 +83,11 @@ describe('TunnelServer', function() {
 
     it('should refuse to open tunnel if max is reached', function(done) {
       var ts = new TunnelServer({
-        port: 0,
+        serverPort: 0,
         maxTunnels: 0,
-        portRange: { min: 0, max: 0 }
+        gatewayPortRange: { min: 0, max: 0 }
       });
+      CLEANUP.push(ts);
       ts.createGateway(function(err) {
         expect(err.message).to.equal('Maximum number of tunnels open');
         done();
@@ -80,10 +96,11 @@ describe('TunnelServer', function() {
 
     it('should emit the locked event when max reached', function(done) {
       var ts = new TunnelServer({
-        port: 0,
+        serverPort: 0,
         maxTunnels: 1,
-        portRange: { min: 0, max: 0 }
+        gatewayPortRange: { min: 0, max: 0 }
       });
+      CLEANUP.push(ts);
       var gw = null;
       ts.on('locked', function() {
         ts.on('unlocked', done);
@@ -98,11 +115,11 @@ describe('TunnelServer', function() {
 
     it('should only open within the specified port range', function(done) {
       var ts = new TunnelServer({
-        port: 0,
-        tunport: 0,
+        serverPort: 0,
         maxTunnels: 3,
-        portRange: { min: 55000, max: 55002 }
+        gatewayPortRange: { min: 55000, max: 55002 }
       });
+      CLEANUP.push(ts);
       var options = [55000, 55001, 55002];
       ts.createGateway(function(err, gw1) {
         expect(err).to.equal(null);
@@ -128,7 +145,8 @@ describe('TunnelServer', function() {
   describe('#_verifyClient', function() {
 
     it('should return false and 401 for unauthorized token', function(done) {
-      var ts = new TunnelServer({ port: 0 });
+      var ts = new TunnelServer({ serverPort: 0 });
+      CLEANUP.push(ts);
       ts._verifyClient({
         req: {
           url: 'ws://127.0.0.1:1337/tun?token=sometoken'
@@ -145,7 +163,8 @@ describe('TunnelServer', function() {
   describe('#_handleClient', function() {
 
     it('should close connection to unauthorized client', function(done) {
-      var ts = new TunnelServer({ port: 0 });
+      var ts = new TunnelServer({ serverPort: 0 });
+      CLEANUP.push(ts);
       ts._handleClient({
         upgradeReq: { url: 'ws://127.0.0.1:1337/tun?token=sometoken' },
         close: function(code, result) {
@@ -157,11 +176,12 @@ describe('TunnelServer', function() {
     });
 
     it('should close the gateway if client disconnects', function(done) {
-      var ts = new TunnelServer({ port: 0, portRange: {
+      var ts = new TunnelServer({ serverPort: 0, gatewayPortRange: {
           min: 0,
           max: 0
         }
       });
+      CLEANUP.push(ts);
       var client = new EventEmitter();
       ts.createGateway(function(err, gateway) {
         client.upgradeReq = {
@@ -270,12 +290,18 @@ describe('TunnelServer', function() {
     it('should not remove an incorrect available port', function() {
       var ts = new TunnelServer({
         server: http.Server(),
-        portRange: { min: 5000, max: 5000 }
+        gatewayPortRange: { min: 5000, max: 5000 }
       });
       ts._usedPorts.push(5001);
       expect(ts._getAvailablePort()).to.equal(5000);
     });
 
+  });
+
+  after(function(done) {
+    async.each(CLEANUP, function(ts, cb) {
+      ts.close(cb);
+    }, done);
   });
 
 });

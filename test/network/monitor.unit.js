@@ -16,11 +16,11 @@ describe('Network/Monitor', function() {
   describe('@constructor', function() {
 
     var net = new Network({
-      keypair: new KeyPair(),
-      manager: new Manager(new RAMStorageAdapter()),
+      keyPair: new KeyPair(),
+      storageManager: new Manager(new RAMStorageAdapter()),
       logger: new kad.Logger(),
-      port: 0,
-      tunport: 0
+      rpcPort: 0,
+      tunnelServerPort: 0
     });
 
     it('should create an instance without the new keyword', function() {
@@ -40,11 +40,11 @@ describe('Network/Monitor', function() {
   describe('#start', function() {
 
     var net = new Network({
-      keypair: new KeyPair(),
-      manager: new Manager(new RAMStorageAdapter()),
+      keyPair: new KeyPair(),
+      storageManager: new Manager(new RAMStorageAdapter()),
       logger: new kad.Logger(),
-      port: 0,
-      tunport: 0
+      rpcPort: 0,
+      tunnelServerPort: 0
     });
 
     it('should start the soft and hard intervals', function() {
@@ -71,11 +71,11 @@ describe('Network/Monitor', function() {
   describe('#stop', function() {
 
     var net = new Network({
-      keypair: new KeyPair(),
-      manager: new Manager(new RAMStorageAdapter()),
+      keyPair: new KeyPair(),
+      storageManager: new Manager(new RAMStorageAdapter()),
       logger: new kad.Logger(),
-      port: 0,
-      tunport: 0
+      rpcPort: 0,
+      tunnelServerPort: 0
     });
 
     it('should stop the soft and hard intervals', function() {
@@ -104,11 +104,11 @@ describe('Network/Monitor', function() {
   describe('#getSnapshot', function() {
 
     var net = new Network({
-      keypair: new KeyPair(),
-      manager: new Manager(new RAMStorageAdapter()),
+      keyPair: new KeyPair(),
+      storageManager: new Manager(new RAMStorageAdapter()),
       logger: new kad.Logger(),
-      port: 0,
-      tunport: 0
+      rpcPort: 0,
+      tunnelServerPort: 0
     });
 
     it('should return the current snapshot', function() {
@@ -124,11 +124,11 @@ describe('Network/Monitor', function() {
   describe('#_collectSoftStats', function() {
 
     var net = new Network({
-      keypair: new KeyPair(),
-      manager: new Manager(new RAMStorageAdapter()),
+      keyPair: new KeyPair(),
+      storageManager: new Manager(new RAMStorageAdapter()),
       logger: new kad.Logger(),
-      port: 0,
-      tunport: 0
+      rpcPort: 0,
+      tunnelServerPort: 0
     });
 
     it('should call the soft collectors', function(done) {
@@ -160,11 +160,11 @@ describe('Network/Monitor', function() {
   describe('#_collectHardStats', function() {
 
     var net = new Network({
-      keypair: new KeyPair(),
-      manager: new Manager(new RAMStorageAdapter()),
+      keyPair: new KeyPair(),
+      storageManager: new Manager(new RAMStorageAdapter()),
       logger: new kad.Logger(),
-      port: 0,
-      tunport: 0
+      rpcPort: 0,
+      tunnelServerPort: 0
     });
 
     it('should call the hard collectors', function(done) {
@@ -252,7 +252,7 @@ describe('Monitor#getPaymentAddressBalances', function() {
       }
     });
     StubbedMonitor.getPaymentAddressBalances({
-      keypair: kp,
+      keyPair: kp,
       _options: {}
     }, done);
   });
@@ -268,8 +268,8 @@ describe('Monitor#getPaymentAddressBalances', function() {
       }
     });
     StubbedMonitor.getPaymentAddressBalances({
-      keypair: kp,
-      _options: { payment: { address: '1234' } }
+      keyPair: kp,
+      _options: { paymentAddress: '1234' }
     }, done);
   });
 
@@ -281,7 +281,7 @@ describe('Monitor#getPaymentAddressBalances', function() {
       }
     });
     StubbedMonitor.getPaymentAddressBalances({
-      keypair: kp,
+      keyPair: kp,
       _options: { payment: { address: '1234' } }
     }, function(err, stats) {
       expect(stats.payments.balances.sjcx).to.equal(0);
@@ -298,7 +298,7 @@ describe('Monitor#getPaymentAddressBalances', function() {
       }
     });
     StubbedMonitor.getPaymentAddressBalances({
-      keypair: kp,
+      keyPair: kp,
       _options: { payment: { address: '1234' } }
     }, function(err, stats) {
       expect(stats.payments.balances.sjcx).to.equal(0);
@@ -328,7 +328,7 @@ describe('Monitor#getPaymentAddressBalances', function() {
       }
     });
     StubbedMonitor.getPaymentAddressBalances({
-      keypair: kp,
+      keyPair: kp,
       _options: { payment: { address: '1234' } }
     }, function(err, stats) {
       expect(stats.payments.balances.sjcx).to.equal(25000);
@@ -348,7 +348,7 @@ describe('Monitor#getPaymentAddressBalances', function() {
       }
     });
     StubbedMonitor.getPaymentAddressBalances({
-      keypair: kp,
+      keyPair: kp,
       _options: { payment: { address: '1234' } }
     }, function(err, stats) {
       expect(stats.payments.balances.sjcx).to.equal(0);
@@ -364,7 +364,7 @@ describe('Monitor#getContractsDetails', function() {
   it('should return the number of contracts', function(done) {
     var stream = new EventEmitter();
     Monitor.getContractsDetails({
-      manager: {
+      storageManager: {
         _storage: {
           createReadStream: function() {
             return stream;
@@ -386,7 +386,7 @@ describe('Monitor#getContractsDetails', function() {
   it('should return 0 contracts', function(done) {
     var stream = new EventEmitter();
     Monitor.getContractsDetails({
-      manager: {
+      storageManager: {
         _storage: {
           createReadStream: function() {
             return stream;

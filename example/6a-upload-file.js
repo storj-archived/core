@@ -13,7 +13,7 @@ var concurrency = 6;
 
 // console.login using the keypair generated
 var client = storj.BridgeClient(api, {
-  keypair: keypair,
+  keyPair: keypair,
   concurrency: concurrency // Set upload concurrency
 });
 

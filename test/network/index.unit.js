@@ -1,4 +1,5 @@
 'use strict';
+
 /* jshint maxstatements: false */
 
 var sinon = require('sinon');
@@ -20,8 +21,9 @@ var version = require('../../lib/version');
 var utils = require('../../lib/utils');
 var Contact = require('../../lib/network/contact');
 var constants = require('../../lib/constants');
-
+var async = require('async');
 var _ntp = null;
+var CLEANUP = [];
 
 describe('Network (public)', function() {
 
@@ -35,16 +37,57 @@ describe('Network (public)', function() {
   describe('@constructor', function() {
 
     it('should create an instance without the new keyword', function() {
-      expect(Network({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
+      var net = Network({
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: kad.Logger(0),
-        seeds: [],
-        address: '127.0.0.1',
-        port: 0,
-        tunport: 0,
-        noforward: true
-      })).to.be.instanceOf(Network);
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
+      });
+      CLEANUP.push(net);
+      expect(net).to.be.instanceOf(Network);
+    });
+
+  });
+
+  describe('#connect', function() {
+
+    it('should call #node#connect', function() {
+      var _connect = sinon.stub();
+      var _createContact = sinon.stub();
+      Network.prototype.connect.call({
+        node: { connect: _connect  },
+        _createContact: _createContact
+      });
+      expect(_connect.called).to.equal(true);
+      expect(_createContact.called).to.equal(true);
+    });
+
+  });
+
+  describe('#publish', function() {
+
+    it('should call #_pubsub#publish', function() {
+      var _publish = sinon.stub();
+      Network.prototype.publish.call({
+        _pubsub: { publish: _publish }
+      });
+      expect(_publish.called).to.equal(true);
+    });
+
+  });
+
+  describe('#subscribe', function() {
+
+    it('should call #_pubsub#publish', function() {
+      var _subscribe = sinon.stub();
+      Network.prototype.subscribe.call({
+        _pubsub: { subscribe: _subscribe }
+      });
+      expect(_subscribe.called).to.equal(true);
     });
 
   });
@@ -53,15 +96,16 @@ describe('Network (public)', function() {
 
     it('should add ready listener if not transport not ready', function(done) {
       var net = Network({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: kad.Logger(0),
-        seeds: [],
-        address: '127.0.0.1',
-        port: 0,
-        tunport: 0,
-        noforward: true
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
       });
+      CLEANUP.push(net);
       net._ready = false;
       var _on = sinon.stub(net, 'on');
       net.join();
@@ -72,17 +116,48 @@ describe('Network (public)', function() {
       });
     });
 
+    it('should callback after listening for tunnelers', function(done) {
+      var net = Network({
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
+        logger: kad.Logger(0),
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
+      });
+      net._isPublic = true;
+      CLEANUP.push(net);
+      var _listenForTunnelers = sinon.stub(net, '_listenForTunnelers');
+      var _setupTunnel = sinon.stub(net, '_setupTunnelClient').callsArgWith(
+        0,
+        null
+      );
+      var _enterOverlay = sinon.stub(net, '_enterOverlay').callsArg(0);
+      net.join(function() {
+        _setupTunnel.restore();
+        _enterOverlay.restore();
+        _listenForTunnelers.restore();
+        expect(_listenForTunnelers.called).to.equal(true);
+        expect(_enterOverlay.called).to.equal(true);
+        done();
+      });
+
+    });
+
     it('should callback with error if tunnel setup fails', function(done) {
       var net = Network({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: kad.Logger(0),
-        seeds: [],
-        address: '127.0.0.1',
-        port: 0,
-        tunport: 0,
-        noforward: true
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
       });
+      CLEANUP.push(net);
       var _setupTunnel = sinon.stub(net, '_setupTunnelClient').callsArgWith(
         0,
         new Error('Failed')
@@ -98,16 +173,17 @@ describe('Network (public)', function() {
 
     it('should callback with error if db open fails', function(done) {
       var net = Network({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: kad.Logger(0),
-        seeds: [],
-        address: '127.0.0.1',
-        port: 0,
-        tunport: 0,
-        noforward: true
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
       });
-      var _open = sinon.stub(net.manager, 'open').callsArgWith(
+      CLEANUP.push(net);
+      var _open = sinon.stub(net.storageManager, 'open').callsArgWith(
         0,
         new Error('Failed')
       );
@@ -124,15 +200,16 @@ describe('Network (public)', function() {
 
     it('should call Node#disconnect', function() {
       var net = Network({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: kad.Logger(0),
-        seeds: [],
-        address: '127.0.0.1',
-        port: 0,
-        tunport: 0,
-        noforward: true
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
       });
+      CLEANUP.push(net);
       net.node = { disconnect: sinon.stub() };
       net.leave();
       expect(net.node.disconnect.called).to.equal(true);
@@ -140,15 +217,16 @@ describe('Network (public)', function() {
 
     it('should callback with error if Node#disconnect fails', function(done) {
       var net = Network({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: kad.Logger(0),
-        seeds: [],
-        address: '127.0.0.1',
-        port: 0,
-        tunport: 0,
-        noforward: true
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
       });
+      CLEANUP.push(net);
       net.node = {
         disconnect: sinon.stub().callsArgWith(0, new Error('Failed'))
       };
@@ -160,15 +238,16 @@ describe('Network (public)', function() {
 
     it('should callback on successful disconnect', function(done) {
       var net = Network({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: kad.Logger(0),
-        seeds: [],
-        address: '127.0.0.1',
-        port: 0,
-        tunport: 0,
-        noforward: true
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
       });
+      CLEANUP.push(net);
       net.node = {
         disconnect: sinon.stub().callsArgWith(0, null)
       };
@@ -180,36 +259,38 @@ describe('Network (public)', function() {
 
     it('should close the tunnel client if it is open', function() {
       var net = Network({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: kad.Logger(0),
-        seeds: [],
-        address: '127.0.0.1',
-        port: 0,
-        noforward: true
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        doNotTraverseNat: true
       });
-      net._tunclient = {
+      CLEANUP.push(net);
+      net._tunnelClient = {
         readyState: 1,
         close: sinon.stub(),
         removeAllListeners: sinon.stub()
       };
       net.node = { disconnect: sinon.stub() };
       net.leave();
-      expect(net._tunclient.close.called).to.equal(true);
+      expect(net._tunnelClient.close.called).to.equal(true);
     });
 
     it('should callback with error if db close fails', function(done) {
       var net = Network({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: kad.Logger(0),
-        seeds: [],
-        address: '127.0.0.1',
-        port: 0,
-        tunport: 0,
-        noforward: true
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
       });
-      var _close = sinon.stub(net.manager, 'close').callsArgWith(
+      CLEANUP.push(net);
+      var _close = sinon.stub(net.storageManager, 'close').callsArgWith(
         0,
         new Error('Failed')
       );
@@ -272,6 +353,24 @@ describe('Network (private)', function() {
       });
     });
 
+    it('should callback null if valid and compatible', function(done) {
+      var _isCompatibleVersion = sinon.stub(
+        utils,
+        'isCompatibleVersion'
+      ).returns(true);
+      var _isValidContact = sinon.stub(utils, 'isValidContact').returns(true);
+      Network.prototype._validateContact.call({}, {
+        address: '127.0.0.1',
+        port: 80,
+        nodeID: utils.rmd160('')
+      }, function(err) {
+        _isValidContact.restore();
+        _isCompatibleVersion.restore();
+        expect(err).to.equal(null);
+        done();
+      });
+    });
+
   });
 
   describe('#_verifyMessage', function() {
@@ -318,6 +417,30 @@ describe('Network (private)', function() {
       });
     });
 
+    it('should call #_verifySignature', function(done) {
+      var verify = Network.prototype._verifyMessage.bind({
+        _validateContact: sinon.stub().callsArg(1),
+        _verifySignature: sinon.stub().callsArg(1),
+        _createSignatureObject: sinon.stub()
+      });
+      verify({
+        method: 'PING',
+        id: 'test',
+        params: {
+          nonce: Date.now(),
+          signature: 'signature'
+        }
+      }, {
+        protocol: version.protocol,
+        address: '127.0.0.1',
+        port: 6000,
+        nodeID: utils.rmd160('')
+      }, function(err) {
+        expect(err).to.equal(undefined);
+        done();
+      });
+    });
+
   });
 
   describe('#_verifySignature', function() {
@@ -331,6 +454,35 @@ describe('Network (private)', function() {
       });
     });
 
+    it('should pass if valid signature', function(done) {
+      var verify = Network.prototype._verifySignature.bind({ _pubkeys: {} });
+      var msg = {
+        method: 'PING',
+        id: '12345',
+        params: {}
+      };
+      var kp = KeyPair();
+      Network.prototype._signMessage.call({
+        keyPair: kp
+      }, msg, function() {});
+      verify({
+        signobj: Network.prototype._createSignatureObject(
+          msg.params.signature
+        ),
+        message: {
+          id: '12345',
+          params: { signature: msg.params.signature }
+        },
+        nonce: msg.params.nonce,
+        contact: { nodeID: 'nodeid' },
+        signature: msg.params.signature,
+        address: kp.getAddress()
+      }, function(err) {
+        expect(err).to.equal(null);
+        done();
+      });
+    });
+
     it('should fail if invalid signature', function(done) {
       var verify = Network.prototype._verifySignature.bind({ _pubkeys: {} });
       var msg = {
@@ -339,7 +491,7 @@ describe('Network (private)', function() {
         params: {}
       };
       Network.prototype._signMessage.call({
-        keypair: KeyPair()
+        keyPair: KeyPair()
       }, msg, function() {});
       verify({
         signobj: Network.prototype._createSignatureObject(
@@ -385,7 +537,7 @@ describe('Network (private)', function() {
         params: {}
       };
       StubbedNetwork.prototype._signMessage.call({
-        keypair: KeyPair()
+        keyPair: KeyPair()
       }, msg, function() {});
       verify({
         signobj: StubbedNetwork.prototype._createSignatureObject(
@@ -411,32 +563,43 @@ describe('Network (private)', function() {
   describe('#_signMessage', function() {
 
     it('should throw an error if there is an issue with sign', function(done) {
-
       var msg = {
         method: 'PING',
         id: '123456',
         params: {}
       };
-
       var StubbedKeyPair = proxyquire('../../lib/crypto-tools/keypair', {
-          'bitcore-message': function() {
-            return {
-              sign: sinon.stub().throws(
-                new Error('Point does not lie on the curve')
-              )
-            };
-          }
+        'bitcore-message': function() {
+          return {
+            sign: sinon.stub().throws(
+              new Error('Point does not lie on the curve')
+            )
+          };
+        }
       });
-
       Network.prototype._signMessage.call({
-        keypair: StubbedKeyPair()
+        keyPair: StubbedKeyPair()
       }, msg, function(err) {
         expect(err.message).to.equal('Point does not lie on the curve');
         done();
       });
-
-
     });
+
+    it('should sign the response message', function(done) {
+      var msg = {
+        id: 'test',
+        result: {}
+      };
+      Network.prototype._signMessage.call({
+        keyPair: KeyPair()
+      }, msg, function(err) {
+        expect(err).to.equal(undefined);
+        expect(typeof msg.result.signature).to.equal('string');
+        expect(typeof msg.result.nonce).to.equal('number');
+        done();
+      });
+    });
+
   });
 
   describe('#_createSignatureObject', function() {
@@ -461,16 +624,17 @@ describe('Network (private)', function() {
 
     it('should send an error message if rate limited', function() {
       var net = Network({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: kad.Logger(0),
-        seeds: [],
-        address: '127.0.0.1',
-        port: 0,
-        tunport: 0,
-        noforward: true
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
       });
-      var _isLimited = sinon.stub(net._limiter, 'isLimited').returns(true);
+      CLEANUP.push(net);
+      var _isLimited = sinon.stub(net._rateLimiter, 'isLimited').returns(true);
       var _send = sinon.stub(net.transport, 'send');
       net._checkRateLimiter(kad.Message({
         method: 'PING',
@@ -481,26 +645,55 @@ describe('Network (private)', function() {
       expect(_send.called).to.equal(true);
     });
 
+    it('should just callback if message is a response', function(done) {
+      Network.prototype._checkRateLimiter.call({}, {
+        id: 'test',
+        result: {}
+      }, { nodeID: utils.rmd160('') }, function(err) {
+        expect(err).to.equal(undefined);
+        done();
+      });
+    });
+
+    it('should just callback if contact is not limited', function(done) {
+      var _updateCounter = sinon.stub();
+      Network.prototype._checkRateLimiter.call({
+        _rateLimiter: {
+          isLimited: sinon.stub().returns(false),
+          updateCounter: _updateCounter
+        }
+      }, {
+        id: 'test',
+        method: 'PING',
+        params: {}
+      }, { nodeID: utils.rmd160('') }, function(err) {
+        expect(err).to.equal(undefined);
+        expect(_updateCounter.called).to.equal(true);
+        done();
+      });
+    });
+
   });
 
   describe('#_listenForTunnelers', function() {
 
     it('should announce unavailable tunnels', function(done) {
       var net = Network({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: kad.Logger(0),
-        seeds: [],
-        address: '127.0.0.1',
-        port: 0,
-        tunport: 0,
-        noforward: true,
-        tunnels: 1
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        maxTunnels: 1
       });
+      CLEANUP.push(net);
       net.on('ready', function() {
         var emitter = new EventEmitter();
         var _hasTunnel = sinon.stub(
-          net.transport._tunserver,
+          net.transport.tunnelServer,
           'hasTunnelAvailable'
         ).returns(false);
         var _pub = sinon.stub(net._pubsub, 'publish');
@@ -519,16 +712,17 @@ describe('Network (private)', function() {
 
     it('should remove the oldest tunneler to add the new one', function(done) {
       var net = Network({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: kad.Logger(0),
-        seeds: [],
-        address: '127.0.0.1',
-        port: 0,
-        tunport: 0,
-        noforward: true,
-        tunnels: 0
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        maxTunnels: 0
       });
+      CLEANUP.push(net);
       var _acCallCount = 0;
       var _getSize = sinon.stub(net._tunnelers, 'getSize').returns(20);
       var _addContact = sinon.stub(net._tunnelers, 'addContact', function() {
@@ -573,16 +767,17 @@ describe('Network (private)', function() {
 
     it('should remove contact when publish received', function(done) {
       var net = Network({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: kad.Logger(0),
-        seeds: [],
-        address: '127.0.0.1',
-        port: 0,
-        tunport: 0,
-        noforward: true,
-        tunnels: 0
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        maxTunnels: 0
       });
+      CLEANUP.push(net);
       var _removeContact = sinon.stub(net._tunnelers, 'removeContact');
       net.on('ready', function() {
         var _subscribe = sinon.stub(net._pubsub, 'subscribe', function(t, cb) {
@@ -609,18 +804,39 @@ describe('Network (private)', function() {
 
   describe('#_setupTunnelClient', function() {
 
+    it('should callback null if transport is public', function(done) {
+      var net = Network({
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
+        logger: kad.Logger(0),
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        bridgeUri: null
+      });
+      CLEANUP.push(net);
+      net.transport._isPublic = true;
+      net._setupTunnelClient(function(err) {
+        expect(err).to.equal(null);
+        done();
+      });
+    });
+
     it('should callback error if no seed or bridge provided', function(done) {
       var net = Network({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: kad.Logger(0),
-        seeds: [],
-        address: '127.0.0.1',
-        port: 0,
-        tunport: 0,
-        noforward: true,
-        bridge: false
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        bridgeUri: null
       });
+      CLEANUP.push(net);
       net.transport._isPublic = false;
       net._setupTunnelClient(function(err) {
         expect(err.message).to.equal(
@@ -632,22 +848,27 @@ describe('Network (private)', function() {
 
     it('should use the bridge seed for probe in none provided', function(done) {
       var net = Network({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: kad.Logger(0),
-        seeds: [],
-        address: '127.0.0.1',
-        port: 0,
-        tunport: 0,
-        noforward: true
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
       });
-      var bridge = sinon.stub(net.bridge, 'getInfo').callsArgWith(0, null, {
-        info: {
-          'x-network-seeds': [
-            'storj://127.0.0.1:8080/' + utils.rmd160('nodeid')
-          ]
+      CLEANUP.push(net);
+      var bridge = sinon.stub(net.bridgeClient, 'getInfo').callsArgWith(
+        0,
+        null,
+        {
+          info: {
+            'x-network-seeds': [
+              'storj://127.0.0.1:8080/' + utils.rmd160('nodeid')
+            ]
+          }
         }
-      });
+      );
       var _probe = sinon.stub(net, '_requestProbe').callsArgWith(1, null, {});
       net.transport._isPublic = false;
       net._setupTunnelClient(function() {
@@ -660,16 +881,17 @@ describe('Network (private)', function() {
 
     it('should use the bridge seed for probe in none provided', function(done) {
       var net = Network({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: kad.Logger(0),
-        seeds: [],
-        address: '127.0.0.1',
-        port: 0,
-        tunport: 0,
-        noforward: true
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
       });
-      var bridge = sinon.stub(net.bridge, 'getInfo').callsArgWith(
+      CLEANUP.push(net);
+      var bridge = sinon.stub(net.bridgeClient, 'getInfo').callsArgWith(
         0,
         new Error('Failed')
       );
@@ -683,17 +905,18 @@ describe('Network (private)', function() {
 
     it('should try to find a tunnel if probe fails', function(done) {
       var net = Network({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: kad.Logger(0),
-        seeds: [
+        seedList: [
           'storj://127.0.0.1:1337/adc83b19e793491b1c6ea0fd8b46cd9f32e592fc'
         ],
-        address: '127.0.0.1',
-        port: 0,
-        tunport: 0,
-        noforward: true
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
       });
+      CLEANUP.push(net);
       net.transport._isPublic = false;
       var _send = sinon.stub(net.transport, 'send').callsArgWith(
         2,
@@ -715,15 +938,16 @@ describe('Network (private)', function() {
 
     it('should send a probe message to the contact', function(done) {
       var net = Network({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: kad.Logger(0),
-        seeds: [],
-        address: '127.0.0.1',
-        port: 0,
-        tunport: 0,
-        noforward: true
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
       });
+      CLEANUP.push(net);
       var _send = sinon.stub(net.transport, 'send').callsArg(2);
       var contact = { address: '127.0.0.1', port: 1337 };
       net._requestProbe(contact, function() {
@@ -739,15 +963,16 @@ describe('Network (private)', function() {
 
     it('should callback error if no neighbors provided', function(done) {
       var net = Network({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: kad.Logger(0),
-        seeds: [],
-        address: '127.0.0.1',
-        port: 0,
-        tunport: 0,
-        noforward: true
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
       });
+      CLEANUP.push(net);
       net._findTunnel([], function(err) {
         expect(err.message).to.equal(
           'Could not find a neighbor to query for tunnels'
@@ -756,17 +981,51 @@ describe('Network (private)', function() {
       });
     });
 
+    it('should return tunnels from neighbors', function(done) {
+      var net = Network({
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
+        logger: kad.Logger(0),
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
+      });
+      CLEANUP.push(net);
+      var contact = { address: '127.0.0.1', port: 1337 };
+      var _send = sinon.stub(net.transport, 'send').callsArgWith(
+        2,
+        null,
+        { result: { tunnels: [contact, contact] } }
+      );
+      var _establishTunnel = sinon.stub(
+        net,
+        '_establishTunnel',
+        function(tunnels, cb) {
+          expect(tunnels).to.have.lengthOf(2);
+          cb();
+        }
+      );
+      net._findTunnel([contact, contact], function() {
+        _establishTunnel.restore();
+        _send.restore();
+        done();
+      });
+    });
+
     it('should try all neighbors for tunnel list', function(done) {
       var net = Network({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: kad.Logger(0),
-        seeds: [],
-        address: '127.0.0.1',
-        port: 0,
-        tunport: 0,
-        noforward: true
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
       });
+      CLEANUP.push(net);
       var _send = sinon.stub(net.transport, 'send').callsArgWith(
         2,
         null,
@@ -785,15 +1044,16 @@ describe('Network (private)', function() {
 
     it('should callback error if send fails', function(done) {
       var net = Network({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: kad.Logger(0),
-        seeds: [],
-        address: '127.0.0.1',
-        port: 0,
-        tunport: 0,
-        noforward: true
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
       });
+      CLEANUP.push(net);
       var _send = sinon.stub(net.transport, 'send').callsArgWith(
         2,
         new Error('Not reachable')
@@ -814,15 +1074,16 @@ describe('Network (private)', function() {
 
     it('should callback with error if no tunnels supplied', function(done) {
       var net = Network({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: kad.Logger(0),
-        seeds: [],
-        address: '127.0.0.1',
-        port: 0,
-        tunport: 0,
-        noforward: true
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
       });
+      CLEANUP.push(net);
       net._establishTunnel([], function(err) {
         expect(err.message).to.equal(
           'Failed to establish tunnel, reason: No tunnelers were returned'
@@ -833,15 +1094,16 @@ describe('Network (private)', function() {
 
     it('should callback with error if the tunnel fails', function(done) {
       var net = Network({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: kad.Logger(0),
-        seeds: [],
-        address: '127.0.0.1',
-        port: 0,
-        tunport: 0,
-        noforward: true
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
       });
+      CLEANUP.push(net);
       var _send = sinon.stub(net.transport, 'send').callsArgWith(
         2,
         new Error('Failed')
@@ -861,15 +1123,16 @@ describe('Network (private)', function() {
 
     it('should not try to tunnel if server is closed', function(done) {
       var net = new Network({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: kad.Logger(0),
-        seeds: [],
-        address: '127.0.0.1',
-        port: 0,
-        tunport: 0,
-        noforward: true
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
       });
+      CLEANUP.push(net);
       var _send = sinon.stub(net.transport, 'send').callsArgWith(
         2,
         null,
@@ -910,15 +1173,16 @@ describe('Network (private)', function() {
         }
       });
       var net = TunClientStubNetwork({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: kad.Logger(0),
-        seeds: [],
-        address: '127.0.0.1',
-        port: 0,
-        tunport: 0,
-        noforward: true
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
       });
+      CLEANUP.push(net);
       var _send = sinon.stub(net.transport, 'send').callsArgWith(
         2,
         null,
@@ -957,15 +1221,16 @@ describe('Network (private)', function() {
         }
       });
       var net = TunClientStubNetwork({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: kad.Logger(0),
-        seeds: [],
-        address: '127.0.0.1',
-        port: 0,
-        tunport: 0,
-        noforward: true
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
       });
+      CLEANUP.push(net);
       var _send = sinon.stub(net.transport, 'send').callsArgWith(
         2,
         null,
@@ -1010,15 +1275,16 @@ describe('Network (private)', function() {
         }
       });
       var net = TunClientStubNetwork({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: kad.Logger(0),
-        seeds: [],
-        address: '127.0.0.1',
-        port: 0,
-        tunport: 0,
-        noforward: true
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
       });
+      CLEANUP.push(net);
       var _send = sinon.stub(net.transport, 'send').callsArgWith(
         2,
         null,
@@ -1056,15 +1322,16 @@ describe('Network (private)', function() {
         }
       });
       var net = TunClientStubNetwork({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: kad.Logger(0),
-        seeds: [],
-        address: '127.0.0.1',
-        port: 0,
-        tunport: 0,
-        noforward: true
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
       });
+      CLEANUP.push(net);
       var _send = sinon.stub(net.transport, 'send').callsArgWith(
         2,
         null,
@@ -1092,18 +1359,19 @@ describe('Network (private)', function() {
 
     it('should use bridge to get seeds and error if fails', function(done) {
       var net = Network({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: kad.Logger(0),
-        seeds: [],
-        address: '127.0.0.1',
-        port: 0,
-        tunport: 0,
-        noforward: true
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
       });
+      CLEANUP.push(net);
       var _setupTunnel = sinon.stub(net, '_setupTunnelClient').callsArg(0);
       var _getContactList = sinon.stub(
-        net.bridge,
+        net.bridgeClient,
         'getContactList'
       ).callsArgWith(1, new Error('connection refused'));
       net.join(function(err) {
@@ -1119,18 +1387,19 @@ describe('Network (private)', function() {
     it('should use bridge to get seeds and use them', function(done) {
       this.timeout(12000);
       var net = Network({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: kad.Logger(0),
-        seeds: [],
-        address: '127.0.0.1',
-        port: 0,
-        tunport: 0,
-        noforward: true
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
       });
+      CLEANUP.push(net);
       var _setupTunnel = sinon.stub(net, '_setupTunnelClient').callsArg(0);
       var _getContactList = sinon.stub(
-        net.bridge,
+        net.bridgeClient,
         'getContactList'
       ).callsArgWith(1, null, []);
       net.join(function() {
@@ -1143,16 +1412,17 @@ describe('Network (private)', function() {
     it('should do nothing if no seeds or bridge', function(done) {
       this.timeout(4000);
       var net = Network({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: kad.Logger(0),
-        seeds: [],
-        bridge: false,
-        address: '127.0.0.1',
-        port: 0,
-        tunport: 0,
-        noforward: true
+        seedList: [],
+        bridgeUri: null,
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
       });
+      CLEANUP.push(net);
       var _setupTunnel = sinon.stub(net, '_setupTunnelClient').callsArg(0);
       net.on('connected', function() {
         _setupTunnel.restore();
@@ -1162,20 +1432,21 @@ describe('Network (private)', function() {
 
     it('should try all seeds before failing to connect', function(done) {
       var net = Network({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: kad.Logger(0),
-        seeds: [
+        seedList: [
           'storj://127.0.0.1:1337/' + utils.rmd160('nodeid1'),
           'storj://127.0.0.1:1338/' + utils.rmd160('nodeid2'),
           'storj://127.0.0.1:1339/' + utils.rmd160('nodeid3')
         ],
-        bridge: false,
-        address: '127.0.0.1',
-        port: 0,
-        tunport: 0,
-        noforward: true
+        bridgeUri: null,
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
       });
+      CLEANUP.push(net);
       var _connect = sinon.stub(net, 'connect').callsArgWith(
         1,
         new Error('Failed')
@@ -1187,7 +1458,36 @@ describe('Network (private)', function() {
         expect(_connect.callCount).to.equal(3);
         done();
       });
+    });
 
+    it('should use the list list to connect', function(done) {
+      var net = Network({
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
+        logger: kad.Logger(0),
+        seedList: [
+          'storj://127.0.0.1:1337/' + utils.rmd160('nodeid1'),
+          'storj://127.0.0.1:1338/' + utils.rmd160('nodeid2'),
+          'storj://127.0.0.1:1339/' + utils.rmd160('nodeid3')
+        ],
+        bridgeUri: null,
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
+      });
+      CLEANUP.push(net);
+      var _connect = sinon.stub(net, 'connect').callsArgWith(
+        1,
+        null
+      );
+      var _setupTunnel = sinon.stub(net, '_setupTunnelClient').callsArg(0);
+      net.join(function() {
+        _connect.restore();
+        _setupTunnel.restore();
+        expect(_connect.called).to.equal(true);
+        done();
+      });
     });
 
   });
@@ -1204,17 +1504,18 @@ describe('Network (private/jobs)', function() {
         Network.prototype,
         '_cleanRoutingTable'
       ).returns([]);
-      Network({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
+      var net = Network({
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: kad.Logger(0),
-        seeds: [],
-        bridge: false,
-        address: '127.0.0.1',
-        port: 0,
-        tunport: 0,
-        noforward: true
+        seedList: [],
+        bridgeUri: null,
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
       });
+      CLEANUP.push(net);
       setTimeout(function() {
         _cleanRoutingTable.restore();
         constants.ROUTER_CLEAN_INTERVAL = 60000;
@@ -1229,16 +1530,17 @@ describe('Network (private/jobs)', function() {
 
     it('should drop the contacts with bad address or version', function() {
       var net = Network({
-        keypair: KeyPair(),
-        manager: Manager(RAMStorageAdapter()),
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
         logger: kad.Logger(0),
-        seeds: [],
-        bridge: false,
-        address: '127.0.0.1',
-        port: 0,
-        tunport: 0,
-        noforward: true
+        seedList: [],
+        bridgeUri: null,
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
       });
+      CLEANUP.push(net);
       net.router._buckets[0] = new kad.Bucket();
       net.router._buckets[2] = new kad.Bucket();
       net.router._buckets[0].addContact(Contact({
@@ -1267,8 +1569,31 @@ describe('Network (private/jobs)', function() {
 
   });
 
-  after(function() {
+  describe('#_updateActivityCounter', function() {
+
+    it('should reset the timeout and set it again', function(done) {
+      var clock = sinon.useFakeTimers();
+      var context = {
+        _reentranceCountdown: null,
+        _enterOverlay: function() {
+          clock.restore();
+          done();
+        }
+      };
+      Network.prototype._updateActivityCounter.call(context);
+      clock.tick(constants.NET_REENTRY);
+    });
+
+  });
+
+  after(function(done) {
     _ntp.restore();
+    async.eachSeries(CLEANUP, function(net, cb) {
+      if (net.transport) {
+        net.transport.close();
+      }
+      cb();
+    }, done);
   });
 
 });

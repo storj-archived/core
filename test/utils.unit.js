@@ -262,6 +262,19 @@ describe('utils', function() {
       process.env.STORJ_TEMP = '/path/to/temp';
       expect(utils.tmpdir()).to.equal('/path/to/temp');
     });
+
+  });
+
+  describe('#isDirectory', function() {
+
+    it('should return false if not a directory', function() {
+      expect(utils.isDirectory('not a directory')).to.equal(false);
+    });
+
+    it('should return true if the path is a directory', function() {
+      expect(utils.isDirectory(__dirname)).to.equal(true);
+    });
+
   });
 
 });

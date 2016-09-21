@@ -63,7 +63,7 @@
     "json-stable-stringify": "^1.0.1",
     "kad": "^1.5.17",
     "kad-logger-json": "^0.1.2",
-    "kad-quasar": "^0.2.0",
+    "kad-quasar": "^0.2.1",
     "kfs": "^2.1.1",
     "knuth-shuffle": "^1.0.1",
     "leveldown": "^1.4.6",

@@ -22,7 +22,7 @@ describe('Blacklist', function() {
 
     it('should create an instance with the given path', function() {
       var blacklist = new Blacklist(tmpfolder);
-      expect(Array.isArray(blacklist.blacklist)).to.equal(true);
+      expect(blacklist.blacklist).to.be.an('object');
       expect(utils.existsSync(blacklist.blacklistFile)).to.equal(true);
     });
 

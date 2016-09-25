@@ -101,7 +101,7 @@ describe('Protocol', function() {
         _verify.restore();
         expect(err).to.equal(null);
         _network.on('unhandledOfferResolved', function(contact, contract) {
-          expect(contract.data_hash).to.equal(
+          expect(contract.get('data_hash')).to.equal(
             'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc'
           );
           done();

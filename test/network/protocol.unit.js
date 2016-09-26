@@ -59,7 +59,8 @@ describe('Protocol', function() {
           },
           _pendingContracts: {
             adc83b19e793491b1c6ea0fd8b46cd9f32e592fc: function() {}
-          }
+          },
+          acceptOffer: sinon.stub()
         }
       });
       var _verify = sinon.stub(proto, '_verifyContract').callsArg(2);
@@ -99,14 +100,15 @@ describe('Protocol', function() {
       }, function(err) {
         _verify.restore();
         expect(err).to.equal(null);
-        _network.on('unhandledOfferResolved', function(contract) {
-          expect(contract.data_hash).to.equal(
+        _network.on('unhandledOfferResolved', function(contact, contract) {
+          expect(contract.get('data_hash')).to.equal(
             'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc'
           );
           done();
         });
       });
     });
+
     it('should succeed and start consignment', function(done) {
       var _save = sinon.stub().callsArg(1);
       var _doConsign = sinon.stub();
@@ -118,6 +120,9 @@ describe('Protocol', function() {
           },
           _pendingContracts: {
             adc83b19e793491b1c6ea0fd8b46cd9f32e592fc: _doConsign
+          },
+          acceptOffer: function() {
+            _doConsign();
           }
         }
       });

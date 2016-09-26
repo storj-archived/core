@@ -141,7 +141,7 @@ Blacklist.prototype._saveToDisk = function() {
  */
 Blacklist.prototype._loadFromDisk = function() {
   if (!utils.existsSync(this.blacklistFile)) {
-    fs.writeFileSync(this.blacklistFile, JSON.stringify([]));
+    fs.writeFileSync(this.blacklistFile, JSON.stringify({}));
   }
 
   return this._reap(JSON.parse(fs.readFileSync(this.blacklistFile)));

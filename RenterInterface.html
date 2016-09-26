@@ -915,6 +915,191 @@
             
 <hr>
 <dt>
+    <h4 class="name" id="acceptOffer"><span class="type-signature"></span>acceptOffer(contact, contract, cb)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Triggers a callback for the contract that is pending
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>contact</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Contact.html">Contact</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The contact object for the contracted farmer</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>contract</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Contract.html">Contract</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The completed contract object</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>cb</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="RenterInterface.html#~acceptOfferCallback">RenterInterface~acceptOfferCallback</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_network_interfaces_renter.js.html">lib/network/interfaces/renter.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
     <h4 class="name" id="connect"><span class="type-signature"></span>connect(uri, callback)</h4>
     
     
@@ -1246,225 +1431,6 @@
     
 
 	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_network_interfaces_renter.js.html">lib/network/interfaces/renter.js</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="getConsignToken"><span class="type-signature"></span>getConsignToken(farmer, contract, audit, callback)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Requests a consignment token from the given farmer for opening a
-<a href="DataChannelClient.html">DataChannelClient</a> for transferring the the data shard to the farmer
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>farmer</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="Contact.html">Contact</a></span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The farmer contact object for requesting token</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>contract</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="Contract.html">Contract</a></span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The storage contract for this consignment</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>audit</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="AuditStream.html">AuditStream</a></span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The audit object for merkle leaves</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>callback</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="RenterInterface.html#~getConsignTokenCallback">RenterInterface~getConsignTokenCallback</a></span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-	<dt class="important tag-deprecated method-doc-label method-doc-details-label">Deprecated:</dt>
-	
-    <dd>
-        <ul class="dummy">
-            <li>since version 1.4.0</li>
-        </ul>
-    </dd>
-    
-    
 
 	
 
@@ -1886,201 +1852,6 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="getRetrieveToken"><span class="type-signature"></span>getRetrieveToken(farmer, contract, callback)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Requests a retrieval token from the given farmer for opening a
-<a href="DataChannelClient.html">DataChannelClient</a> for transferring the the data shard from the farmer
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>farmer</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="Contact.html">Contact</a></span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The farmer contact object for requesting token</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>contract</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="Contract.html">Contract</a></span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The storage contract for this retrieval</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>callback</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="RenterInterface.html#~getConsignTokenCallback">RenterInterface~getConsignTokenCallback</a></span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-	<dt class="important tag-deprecated method-doc-label method-doc-details-label">Deprecated:</dt>
-	
-    <dd>
-        <ul class="dummy">
-            <li>since version 1.4.0</li>
-        </ul>
-    </dd>
-    
-    
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_network_interfaces_renter.js.html">lib/network/interfaces/renter.js</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
     <h4 class="name" id="getStorageOffer"><span class="type-signature"></span>getStorageOffer(contract [, blacklist], callback)</h4>
     
     
@@ -2405,6 +2176,167 @@ supplied shard metadata.
             
 
             <td class="description last">Proof handler</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_network_interfaces_renter.js.html">lib/network/interfaces/renter.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="isAwaitingOffer"><span class="type-signature"></span>isAwaitingOffer(dataHash, callback)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Checks if we are waiting on a offer for the given data hash
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>dataHash</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The hash of the data</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="RenterInterface.html#~isAwaitingOfferCallback">RenterInterface~isAwaitingOfferCallback</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
         </tr>
 
     
@@ -3143,6 +3075,183 @@ supplied shard metadata.
                 
 <hr>
 <dt>
+    <h4 class="name" id="~acceptOfferCallback"><span class="type-signature"></span>acceptOfferCallback( [error], didEndNegotiation)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>error</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Error</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>didEndNegotiation</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_network_interfaces_renter.js.html">lib/network/interfaces/renter.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
     <h4 class="name" id="~getConsignmentPointerCallback"><span class="type-signature"></span>getConsignmentPointerCallback(err, pointer)</h4>
     
     
@@ -3232,336 +3341,6 @@ supplied shard metadata.
             
 
             <td class="description last">Pointer for a <a href="DataChannelClient.html">DataChannelClient</a></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_network_interfaces_renter.js.html">lib/network/interfaces/renter.js</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-            
-                
-<hr>
-<dt>
-    <h4 class="name" id="~getConsignTokenCallback"><span class="type-signature"></span>getConsignTokenCallback(err, token)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        This callback is called upon receipt of a consignment token from
-<a href="RenterInterface.html#getConsignToken">RenterInterface#getConsignToken</a>
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>err</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Error</span>
-|
-
-<span class="param-type">null</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">If requesting the token failed, an error object</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>token</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Consignment token for a <a href="DataChannelClient.html">DataChannelClient</a></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_network_interfaces_renter.js.html">lib/network/interfaces/renter.js</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-            
-                
-<hr>
-<dt>
-    <h4 class="name" id="~getConsignTokenCallback"><span class="type-signature"></span>getConsignTokenCallback(err, token)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        This callback is called upon receipt of a consignment token from
-<a href="RenterInterface.html#getConsignToken">RenterInterface#getConsignToken</a>
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>err</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Error</span>
-|
-
-<span class="param-type">null</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">If requesting the token failed, an error object</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>token</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Consignment token for a <a href="DataChannelClient.html">DataChannelClient</a></td>
         </tr>
 
     
@@ -3811,7 +3590,7 @@ supplied shard metadata.
     
     <div class="description">
         This callback is called upon receipt of a retrieval token from
-<a href="RenterInterface.html#getRetrieveToken">RenterInterface#getRetrieveToken</a>
+RenterInterface#getRetrieveToken
     </div>
     
 
@@ -4245,6 +4024,183 @@ supplied shard metadata.
             
 
             <td class="description last">Result from <a href="ProofStream.html#getProofResult">ProofStream#getProofResult</a></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_network_interfaces_renter.js.html">lib/network/interfaces/renter.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    <h4 class="name" id="~isAwaitingOfferCallback"><span class="type-signature"></span>isAwaitingOfferCallback( [error], isAwaitingOffer)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>error</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Error</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>isAwaitingOffer</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"></td>
         </tr>
 
     
@@ -4754,30 +4710,6 @@ supplied shard metadata.
 
         <tr>
             
-                <td class="name"><code>contract</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="Contract.html">Contract</a></span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The complete contract, signed by us and farmer</td>
-        </tr>
-
-    
-
-        <tr>
-            
                 <td class="name"><code>contact</code></td>
             
 
@@ -4796,6 +4728,30 @@ supplied shard metadata.
             
 
             <td class="description last">The farmer contact the offer is from</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>contract</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Contract.html">Contract</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The complete contract, signed by us and farmer</td>
         </tr>
 
     
@@ -4946,6 +4902,30 @@ Network~unhandledOfferResolver
     </thead>
 
     <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>contact</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Contact.html">Contact</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The farmer contact the offer is from</td>
+        </tr>
+
     
 
         <tr>

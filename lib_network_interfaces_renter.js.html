@@ -103,6 +103,7 @@ var inherits = require('util').inherits;
 var StorageItem = require('../../storage/item');
 var async = require('async');
 var DataChannelPointer = require('../../data-channels/pointer');
+var utils = require('../../utils');
 
 /**
  * Creates and a new farmer interface
@@ -144,6 +145,47 @@ function RenterInterface(options) {
 }
 
 inherits(RenterInterface, Network);
+
+/**
+ * Checks if we are waiting on a offer for the given data hash
+ * @param {String} dataHash - The hash of the data
+ * @param {RenterInterface~isAwaitingOfferCallback}
+ */
+RenterInterface.prototype.isAwaitingOffer = function(dataHash, callback) {
+  callback(null, typeof this._pendingContracts[dataHash] !== 'undefined');
+};
+/**
+ * @callback RenterInterface~isAwaitingOfferCallback
+ * @param {Error} [error]
+ * @param {Boolean} isAwaitingOffer
+ */
+
+/**
+ * Triggers a callback for the contract that is pending
+ * @param {Contact} contact - The contact object for the contracted farmer
+ * @param {Contract} contract - The completed contract object
+ * @param {RenterInterface~acceptOfferCallback}
+ */
+RenterInterface.prototype.acceptOffer = function(contact, contract, cb) {
+  var self = this;
+  var hash = contract.get('data_hash');
+  var callback = typeof cb === 'function' ? cb : utils.noop;
+
+  this.isAwaitingOffer(hash, function(err, isAwaiting) {
+    if (err || !isAwaiting) {
+      return callback(null, false);
+    }
+
+    self._pendingContracts[hash].call(self, null, contact, contract);
+    delete self._pendingContracts[hash];
+    callback(null, true);
+  });
+};
+/**
+ * @callback RenterInterface~acceptOfferCallback
+ * @param {Error} [error]
+ * @param {Boolean} didEndNegotiation
+ */
 
 /**
  * Publishes a storage {@link Contract} for solicitation of offers based on the
@@ -296,32 +338,6 @@ RenterInterface.prototype.getConsignmentPointer = function(f, c, a, callback) {
  */
 
 /**
- * Requests a consignment token from the given farmer for opening a
- * {@link DataChannelClient} for transferring the the data shard to the farmer
- * @deprecated since version 1.4.0
- * @param {Contact} farmer - The farmer contact object for requesting token
- * @param {Contract} contract - The storage contract for this consignment
- * @param {AuditStream} audit - The audit object for merkle leaves
- * @param {RenterInterface~getConsignTokenCallback} callback
- */
-RenterInterface.prototype.getConsignToken = function(f, c, a, callback) {
-  this.getConsignmentPointer(f, c, a, function(err, pointer) {
-    if (err) {
-      return callback(err);
-    }
-
-    callback(null, pointer.token);
-  });
-};
-/**
- * This callback is called upon receipt of a consignment token from
- * {@link RenterInterface#getConsignToken}
- * @callback RenterInterface~getConsignTokenCallback
- * @param {Error|null} err - If requesting the token failed, an error object
- * @param {String} token - Consignment token for a {@link DataChannelClient}
- */
-
-/**
  * Requests a retrieval token from the given farmer for opening a
  * {@link DataChannelClient} for transferring the data shard from the farmer
  * @param {Contact} farmer - The farmer contact object for requesting token
@@ -367,31 +383,6 @@ RenterInterface.prototype.getRetrievalPointer = function(f, c, callback) {
  * @param {Error|null} err - If requesting the token failed, an error object
  * @param {DataChannelPointer} pointer - Pointer for a {@link DataChannelClient}
  */
-
-/**
-* Requests a retrieval token from the given farmer for opening a
-* {@link DataChannelClient} for transferring the the data shard from the farmer
-* @deprecated since version 1.4.0
-* @param {Contact} farmer - The farmer contact object for requesting token
-* @param {Contract} contract - The storage contract for this retrieval
-* @param {RenterInterface~getConsignTokenCallback} callback
-*/
-RenterInterface.prototype.getRetrieveToken = function(f, c, callback) {
-  this.getRetrievalPointer(f, c, function(err, pointer) {
-    if (err) {
-      return callback(err);
-    }
-
-    callback(null, pointer.token);
-  });
-};
-/**
-* This callback is called upon receipt of a consignment token from
-* {@link RenterInterface#getConsignToken}
-* @callback RenterInterface~getConsignTokenCallback
-* @param {Error|null} err - If requesting the token failed, an error object
-* @param {String} token - Consignment token for a {@link DataChannelClient}
-*/
 
 /**
  * Requests that the given destination farmers mirror the data from the source

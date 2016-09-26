@@ -113,6 +113,7 @@ var UploadState = require('./upload-state');
 var Blacklist = require('./blacklist');
 var stream = require('readable-stream');
 var async = require('async');
+var os = require('os');
 
 /**
  * Represents a client interface to a given bridge server
@@ -124,6 +125,8 @@ var async = require('async');
  * @param {Object} options
  * @param {KeyPair} options.keyPair - KeyPair instance for request signing
  * @param {Object} options.logger - Logger instance
+ * @param {Object} options.requestTimeout - Timeout when making requests to the
+ * bridge
  * @param {Number} options.transferConcurrency - Upload concurrency limit
  * @param {Number} options.transferRetries - Limit number of shard transfer
  * retries before getting a new contract
@@ -152,7 +155,8 @@ BridgeClient.prototype._checkOptions = function(uri, options) {
     logger: new Logger(0),
     transferConcurrency: 6,
     transferRetries: 3,
-    blacklistFolder: utils.tmpdir()
+    blacklistFolder: utils.tmpdir(),
+    requestTimeout: 3000
   }, options);
 
   assert.ok(utils.validateLogger(options.logger), 'Invalid logger supplied');
@@ -552,7 +556,6 @@ BridgeClient.prototype._shardUploadWorker = function(task, done) {
  */
 BridgeClient.prototype._handleShardStream = function(shard, i, frame, state) {
   var tmpdir = utils.tmpdir();
-
   var meta = {
     frame: frame,
     tmpName: path.join(tmpdir, crypto.randomBytes(6).toString('hex')),
@@ -648,42 +651,60 @@ BridgeClient.prototype._handleShardTmpFileFinish = function(state, meta, done) {
  */
 BridgeClient.prototype._startTransfer = function(pointer, state, meta, done) {
   var self = this;
-  var transferStatus = self._transferShard(
-    new EventEmitter(),
-    meta.tmpName,
-    pointer,
-    state
-  );
 
-  state.on('killed', function() {
-    transferStatus.removeAllListeners();
-  });
+  function _beginTransfer() {
+    var transferStatus = self._transferShard(
+      new EventEmitter(),
+      meta.tmpName,
+      pointer,
+      state
+    );
 
-  self._logger.info('Contract negotiated with: %j', pointer.farmer);
-
-  transferStatus.on('retry', function() {
-    if (meta.transferRetries &lt; self._options.transferRetries) {
-      meta.transferRetries++;
-      self._logger.info('Retrying shard transfer, pointer: %j', pointer);
-      self._transferShard(transferStatus, meta.tmpName, pointer, state);
-    } else {
-      self._logger.info(
-        'Shard transfer failed %s times, getting another contract...',
-        meta.transferRetries
-      );
+    state.on('killed', function() {
       transferStatus.removeAllListeners();
-      self._blacklist.push(pointer.farmer.nodeID);
-      meta.transferRetries = 0;
-      self._handleShardTmpFileFinish(state, meta, done);
-    }
-  });
+    });
 
-  transferStatus.on('finish', self._shardTransferComplete.bind(
-    self,
-    state,
-    meta.frame,
-    done
-  ));
+    self._logger.info('Contract negotiated with: %j', pointer.farmer);
+
+    transferStatus.on('retry', function() {
+      if (meta.transferRetries &lt; self._options.transferRetries) {
+        meta.transferRetries++;
+        self._logger.info('Retrying shard transfer, pointer: %j', pointer);
+        self._transferShard(transferStatus, meta.tmpName, pointer, state);
+      } else {
+        self._logger.info(
+          'Shard transfer failed %s times, getting another contract...',
+          meta.transferRetries
+        );
+        transferStatus.removeAllListeners();
+        self._blacklist.push(pointer.farmer.nodeID);
+        meta.transferRetries = 0;
+        self._handleShardTmpFileFinish(state, meta, done);
+      }
+    });
+
+    transferStatus.on('finish', self._shardTransferComplete.bind(
+      self,
+      state,
+      meta.frame,
+      done
+    ));
+  }
+
+  // Make sure there is free memory before transferring the shard
+  if (os.freemem() &lt; meta.size) {
+    setTimeout(function() {
+      if (os.freemem() &lt; meta.size) {
+        state.cleanup();
+        state.callback(new Error('You are too low on memory!'));
+        return;
+      }
+
+      _beginTransfer();
+    }, 5000);
+  } else {
+    _beginTransfer();
+  }
 };
 
 /**
@@ -694,28 +715,46 @@ BridgeClient.prototype._startTransfer = function(pointer, state, meta, done) {
  * @param {Function} done - Task completion callback
  */
 BridgeClient.prototype._shardTransferComplete = function(state, frame, done) {
+  var self = this;
+  var retry = 0;
   state.completed++;
 
   this._logger.info(
     'Shard transfer completed! %s remaining...',
     state.numShards - state.completed
   );
-  done();
 
   if (state.completed !== state.numShards) {
-    return;
+    return done();
   }
 
   // NB: use the original filename if called from cli
   var origFileName = path.basename(state.file).split('.crypt')[0];
 
   state.cleanup();
-  this._logger.info('Transfer finished, creating entry...');
-  this._request('POST', '/buckets/' + state.bucketId + '/files', {
-    frame: frame.id,
-    mimetype: mime.lookup(origFileName),
-    filename: origFileName
-  }, state.callback);
+
+  function _postRequest() {
+    self._logger.info('Transfer finished, creating entry.. (retry: %s)', retry);
+
+    self._request('POST', '/buckets/' + state.bucketId + '/files', {
+      frame: frame.id,
+      mimetype: mime.lookup(origFileName),
+      filename: origFileName
+    }, function(err) {
+      if (err) {
+        if (retry &lt; 6) {
+          retry++;
+          return _postRequest();
+        }
+
+        self._logger.error('Uncaught error: %s', err.message);
+      }
+      state.callback();
+    });
+  }
+
+  _postRequest();
+  return done();
 };
 
 /**
@@ -1059,7 +1098,8 @@ BridgeClient.prototype._request = function(method, path, params, callback) {
   var opts = {
     baseUrl: this._options.baseURI,
     uri: path,
-    method: method
+    method: method,
+    timeout: this._options.requestTimeout
   };
 
   params.__nonce = uuid.v4();

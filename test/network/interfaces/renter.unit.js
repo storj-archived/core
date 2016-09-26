@@ -35,6 +35,56 @@ describe('RenterInterface', function() {
 
   });
 
+  describe('#isAwaitingOffer', function() {
+
+    it('should callback false if not awaiting offer', function(done) {
+      RenterInterface.prototype.isAwaitingOffer.call({
+        _pendingContracts: { nope: sinon.stub() }
+      }, 'test', function(err, isAwaiting) {
+        expect(isAwaiting).to.equal(false);
+        done();
+      });
+    });
+
+    it('should callback true if awaiting offer', function(done) {
+      RenterInterface.prototype.isAwaitingOffer.call({
+        _pendingContracts: { test: sinon.stub() }
+      }, 'test', function(err, isAwaiting) {
+        expect(isAwaiting).to.equal(true);
+        done();
+      });
+    });
+
+  });
+
+  describe('#acceptOffer', function() {
+
+    it('should callback false if not awaiting offer', function(done) {
+      RenterInterface.prototype.acceptOffer.call({
+        _pendingContracts: { nope: sinon.stub() },
+        isAwaitingOffer: sinon.stub().callsArgWith(1, null, false)
+      }, {}, {
+        get: sinon.stub().returns('test')
+      }, function(err, didAcceptOffer) {
+        expect(didAcceptOffer).to.equal(false);
+        done();
+      });
+    });
+
+    it('should callback true if awaiting offer', function(done) {
+      RenterInterface.prototype.acceptOffer.call({
+        _pendingContracts: { test: sinon.stub() },
+        isAwaitingOffer: sinon.stub().callsArgWith(1, null, true)
+      }, {}, {
+        get: sinon.stub().returns('test')
+      }, function(err, didAcceptOffer) {
+        expect(didAcceptOffer).to.equal(true);
+        done();
+      });
+    });
+
+  });
+
   describe('#getStorageOffer', function() {
 
     it('should timeout the contract publication and callback', function(done) {
@@ -334,7 +384,7 @@ describe('RenterInterface', function() {
 
   });
 
-  describe('#getConsignToken', function() {
+  describe('#getConsignmentPointer', function() {
 
     it('should callback error if transport send fails', function(done) {
       var renter = new RenterInterface({
@@ -353,7 +403,7 @@ describe('RenterInterface', function() {
       var audit = new AuditStream(1);
       audit.end(Buffer('data'));
       setImmediate(function() {
-        renter.getConsignToken(Contact({
+        renter.getConsignmentPointer(Contact({
           address: '0.0.0.0',
           port: 0,
           nodeID: utils.rmd160('contact')
@@ -383,7 +433,7 @@ describe('RenterInterface', function() {
       var audit = new AuditStream(1);
       audit.end(Buffer('data'));
       setImmediate(function() {
-        renter.getConsignToken(Contact({
+        renter.getConsignmentPointer(Contact({
           address: '0.0.0.0',
           port: 0,
           nodeID: utils.rmd160('contact')
@@ -395,7 +445,7 @@ describe('RenterInterface', function() {
       });
     });
 
-    it('should callback error if contact responds with one', function(done) {
+    it('should callback with pointer', function(done) {
       var renter = new RenterInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
@@ -413,15 +463,15 @@ describe('RenterInterface', function() {
       var audit = new AuditStream(1);
       audit.end(Buffer('data'));
       setImmediate(function() {
-        renter.getConsignToken(Contact({
+        renter.getConsignmentPointer(Contact({
           address: '0.0.0.0',
           port: 0,
           nodeID: utils.rmd160('contact')
         }), Contract({
           data_hash: utils.rmd160('')
-        }), audit, function(err, token) {
+        }), audit, function(err, pointer) {
           _send.restore();
-          expect(token).to.equal(utils.rmd160(''));
+          expect(pointer.token).to.equal(utils.rmd160(''));
           done();
         });
       });
@@ -429,7 +479,7 @@ describe('RenterInterface', function() {
 
   });
 
-  describe('#getRetrieveToken', function() {
+  describe('#getRetrievalPointer', function() {
 
     it('should callback error if transport send fails', function(done) {
       var renter = new RenterInterface({
@@ -445,7 +495,7 @@ describe('RenterInterface', function() {
         2,
         new Error('Send failed')
       );
-      renter.getRetrieveToken(Contact({
+      renter.getRetrievalPointer(Contact({
         address: '0.0.0.0',
         port: 0,
         nodeID: utils.rmd160('contact')
@@ -471,7 +521,7 @@ describe('RenterInterface', function() {
         null,
         { error: { message: 'FAILED' } }
       );
-      renter.getRetrieveToken(Contact({
+      renter.getRetrievalPointer(Contact({
         address: '0.0.0.0',
         port: 0,
         nodeID: utils.rmd160('contact')
@@ -482,7 +532,7 @@ describe('RenterInterface', function() {
       });
     });
 
-    it('should callback error if contact responds with one', function(done) {
+    it('should callback with pointer', function(done) {
       var renter = new RenterInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
@@ -498,15 +548,15 @@ describe('RenterInterface', function() {
         { result: { token: utils.rmd160('') } }
       );
       setImmediate(function() {
-        renter.getRetrieveToken(Contact({
+        renter.getRetrievalPointer(Contact({
           address: '0.0.0.0',
           port: 0,
           nodeID: utils.rmd160('contact')
         }), Contract({
           data_hash: utils.rmd160('')
-        }), function(err, token) {
+        }), function(err, pointer) {
           _send.restore();
-          expect(token).to.equal(utils.rmd160(''));
+          expect(pointer.token).to.equal(utils.rmd160(''));
           done();
         });
       });

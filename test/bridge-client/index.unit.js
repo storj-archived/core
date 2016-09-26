@@ -1547,6 +1547,104 @@ describe('BridgeClient', function() {
         });
       });
 
+      it('should cleanup if no free memory after wait', function(done) {
+        this.timeout(7000);
+        var StubbedClient = proxyquire('../../lib/bridge-client', {
+          os: {
+            freemem: function() {
+              return 0;
+            }
+          }
+        });
+        var _transferStatus = new EventEmitter();
+        var client = new StubbedClient();
+        var pointer = {
+          farmer: {
+            address: '127.0.0.1',
+            port: 1337,
+            nodeID: utils.rmd160('nodeid')
+          }
+        };
+        var _transferShard = sinon.stub(client, '_transferShard', function() {
+          return _transferStatus;
+        });
+        var _transferComplete = sinon.stub(
+          client,
+          '_shardTransferComplete'
+        ).callsArg(2);
+        var state = {
+          callback: sinon.stub(),
+          cleanup: sinon.stub()
+        };
+        client._startTransfer(pointer, state, {
+          frame: 'frame',
+          tmpName: 'tmpname',
+          size: 1,
+          index: 0,
+          hasher: crypto.createHash('sha256'),
+          excludeFarmers: [],
+          transferRetries: 0
+        }, function() {
+          _transferShard.restore();
+          _transferComplete.restore();
+          expect(state.callback.called).to.equal(true);
+        });
+
+        done();
+      });
+
+      it('should wait for memory to free', function(done) {
+        this.timeout(7000);
+        var callback = sinon.stub();
+        callback.onCall(0).returns(0);
+        callback.onCall(1).returns(1000000);
+        var StubbedClient = proxyquire('../../lib/bridge-client', {
+          os: {
+            freemem: callback
+          }
+        });
+        var _transferStatus = new EventEmitter();
+        var client = new StubbedClient();
+        var pointer = {
+          farmer: {
+            address: '127.0.0.1',
+            port: 1337,
+            nodeID: utils.rmd160('nodeid')
+          }
+        };
+        var _transferShard = sinon.stub(client, '_transferShard', function() {
+          return _transferStatus;
+        });
+        var _transferComplete = sinon.stub(
+          client,
+          '_shardTransferComplete'
+        ).callsArg(2);
+        var state = {
+          callback: sinon.stub(),
+          cleanup: sinon.stub(),
+          on: function() {
+            return sinon.stub();
+          }
+        };
+        client._startTransfer(pointer, state, {
+          frame: 'frame',
+          tmpName: 'tmpname',
+          size: 1,
+          index: 0,
+          hasher: crypto.createHash('sha256'),
+          excludeFarmers: [],
+          transferRetries: 0
+        }, function() {
+          _transferShard.restore();
+          _transferComplete.restore();
+          expect(client._startTransfer._beginTransfer.called).to.equal(true);
+        });
+        setImmediate(function() {
+          _transferStatus.emit('finish');
+        });
+        done();
+      });
+
     });
 
     describe('#_handleShardTmpFileFinish', function() {
@@ -1632,7 +1730,7 @@ describe('BridgeClient', function() {
 
       it('should not create an entry if remaining shards', function(done) {
         var fakeState = {
-          complete: 0,
+          completed: 0,
           numShards: 2,
           cleanup: sinon.stub()
         };
@@ -1644,6 +1742,28 @@ describe('BridgeClient', function() {
         });
       });
 
+      it('should retry if the request fails', function(done) {
+        var _request = sinon.stub(
+          BridgeClient.prototype,
+          '_request'
+        ).callsArgWith(
+          3,
+          new Error('Request failed')
+        );
+        var fakeState = {
+          completed: 1,
+          numShards: 2,
+          cleanup: sinon.stub(),
+          callback: sinon.stub()
+        };
+        var client = new BridgeClient();
+        client._shardTransferComplete(fakeState, {}, sinon.stub());
+        setImmediate(function() {
+          _request.restore();
+          expect(fakeState.callback.called).to.equal(true);
+          done();
+        });
+      });
     });
 
     describe('#_request', function() {

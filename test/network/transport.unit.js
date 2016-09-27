@@ -55,7 +55,7 @@ describe('Network/Transport', function() {
       Transport.prototype._setLimitOnConnections.call(transport);
       server.emit('connection', socket);
       setImmediate(function() {
-        expect(transport._log.warn.called).to.equal(true)
+        expect(transport._log.warn.called).to.equal(true);
         expect(socket.destroy.called).to.equal(true);
         done();
       });

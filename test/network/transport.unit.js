@@ -7,6 +7,7 @@ var Contact = require('../../lib/network/contact');
 var KeyPair = require('../../lib/crypto-tools/keypair');
 var proxyquire = require('proxyquire');
 var kad = require('kad');
+var EventEmitter = require('events').EventEmitter;
 
 describe('Network/Transport', function() {
 
@@ -21,6 +22,43 @@ describe('Network/Transport', function() {
         noforward: true,
         tunport: 0
       })).to.be.instanceOf(Transport);
+    });
+
+  });
+
+  describe('#_setLimitOnConnections', function() {
+
+    var server = new EventEmitter();
+    var transport = new EventEmitter();
+    transport._numConnections = 0;
+    transport._maxConnections = 1;
+    transport._server = server;
+    transport._log = { warn: sinon.stub() };
+
+    it('should inc the num connections and dec on close', function(done) {
+      var socket = new EventEmitter();
+      Transport.prototype._setLimitOnConnections.call(transport);
+      server.emit('connection', socket);
+      setImmediate(function() {
+        expect(transport._numConnections).to.equal(1);
+        socket.emit('close');
+        setImmediate(function() {
+          expect(transport._numConnections).to.equal(0);
+          done();
+        });
+      });
+    });
+
+    it('should destroy sockets after limit', function(done) {
+      var socket = { destroy: sinon.stub() };
+      transport._numConnections = 1;
+      Transport.prototype._setLimitOnConnections.call(transport);
+      server.emit('connection', socket);
+      setImmediate(function() {
+        expect(transport._log.warn.called).to.equal(true);
+        expect(socket.destroy.called).to.equal(true);
+        done();
+      });
     });
 
   });

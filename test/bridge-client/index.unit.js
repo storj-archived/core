@@ -1644,7 +1644,7 @@ describe('BridgeClient', function() {
         });
       });
 
-      it('should retry if the request fails', function(done) {
+      it('should log an error if the request fails', function(done) {
         var _request = sinon.stub(
           BridgeClient.prototype,
           '_request'

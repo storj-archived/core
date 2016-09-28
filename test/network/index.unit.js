@@ -613,9 +613,9 @@ describe('Network (private)', function() {
   describe('#_handleTransportError', function() {
 
     it('should send the error to the logger', function() {
-      var context = { _logger: { error: sinon.stub() } };
+      var context = { _logger: { warn: sinon.stub() } };
       Network.prototype._handleTransportError.call(context, new Error('Fail'));
-      expect(context._logger.error.called).to.equal(true);
+      expect(context._logger.warn.called).to.equal(true);
     });
 
   });

@@ -277,4 +277,13 @@ describe('utils', function() {
 
   });
 
+  describe('#calculateBucketId', function() {
+
+    it('should return the sha256 hex encoded hash', function() {
+      expect(utils.calculateBucketId('example@example.com', 'Test Bucket'))
+      .to.equal('bdbb0cb9787c9b53cf525ebd');
+    });
+
+  });
+
 });

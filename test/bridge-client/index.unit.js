@@ -342,12 +342,12 @@ describe('BridgeClient', function() {
           {}
         );
         var client = new BridgeClient();
-        client.updateBucketById('mybucket', { name: 'Updated' }, function() {
+        client.updateBucketById('mybucket', { transfer: 1 }, function() {
           _request.restore();
           expect(_request.calledWith(
             'PATCH',
             '/buckets/mybucket',
-            { name: 'Updated' }
+            { transfer: 1 }
           )).to.equal(true);
           done();
         });
@@ -1764,6 +1764,26 @@ describe('BridgeClient', function() {
         expect(options.auth.pass).to.equal(
           '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8'
         );
+      });
+
+    });
+
+    describe('#_makeIntoValidBucketId', function() {
+
+      it('should return the bucket id that was passed in', function(done) {
+        var client = new BridgeClient();
+        client._options.email = 'example@example.com';
+        var bucketId = '0123456789ab0123456789ab';
+        expect(client._makeIntoValidBucketId(bucketId)).to.equal(bucketId);
+        done();
+      });
+
+      it('should return the calculated bucket id', function(done) {
+        var client = new BridgeClient();
+        client._options.email = 'example@example.com';
+        var id = 'bdbb0cb9787c9b53cf525ebd';
+        expect(client._makeIntoValidBucketId('Test Bucket')).to.equal(id);
+        done();
       });
 
     });

@@ -1473,7 +1473,7 @@ describe('BridgeClient', function() {
 
       it('should retry transfer if count less than 3', function(done) {
         var _transferStatus = new EventEmitter();
-        var client = new BridgeClient();
+        var client = new BridgeClient({ transferRetries: 3  });
         var pointer = {
           farmer: {
             address: '127.0.0.1',

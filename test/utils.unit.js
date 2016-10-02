@@ -283,8 +283,8 @@ describe('utils', function() {
     var bucketName = 'Test Bucket';
     var fileName = 'Test File.png';
 
-    var bucketId = 'b42a9d78c69f1b0690c6586f';
-    var fileId = 'ed9f56f146cbea3bab5293a3';
+    var bucketId = '7cf2c2fbe725397dbad88b20';
+    var fileId = '5a4aea313931a721b0f50bee';
 
     describe('#calculateBucketId', function() {
 

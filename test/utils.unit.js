@@ -277,4 +277,44 @@ describe('utils', function() {
 
   });
 
+  var testIdCalculation = function(){
+
+    var user = 'user@domain.tld';
+    var bucketName = 'Test Bucket';
+    var fileName = 'Test File.png';
+
+    var bucketId = 'b42a9d78c69f1b0690c6586f';
+    var fileId = 'ed9f56f146cbea3bab5293a3';
+
+    describe('#calculateBucketId', function() {
+
+      it('should return the correct hex encoded hash', function() {
+        expect(utils.calculateBucketId(user, bucketName))
+          .to.equal(bucketId);
+      });
+
+    });
+
+    describe('#calculateFileId', function() {
+
+      it('should return the correct hex encoded hash', function() {
+        expect(utils.calculateFileId(bucketId, fileName))
+          .to.equal(fileId);
+      });
+
+    });
+
+    describe('#calculateFileIdByName', function() {
+
+      it('should return the correct hex encoded hash', function() {
+        expect(utils.calculateFileIdByName(user, bucketName, fileName))
+          .to.equal(fileId);
+      });
+
+    });
+
+  };
+
+  testIdCalculation();
+
 });

@@ -280,11 +280,11 @@ describe('utils', function() {
   var testIdCalculation = function(){
 
     var user = 'user@domain.tld';
-    var bucketName = 'Test Bucket';
-    var fileName = 'Test File.png';
+    var bucketName = 'New Bucket';
+    var fileName = 'test.txt';
 
-    var bucketId = '60fd089b9efe0596271df7f0';
-    var fileId = '04f5f9a2206b196888d77d91';
+    var bucketId = '4411d5a80291758260032093';
+    var fileId = 'da1f0e6e1d8d65556d939ed9';
 
     describe('#calculateBucketId', function() {
 

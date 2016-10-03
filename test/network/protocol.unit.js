@@ -28,7 +28,49 @@ describe('Protocol', function() {
 
   });
 
+  describe('#_offersLockedForContract', function() {
+
+    it('should return false if offer is not locked', function() {
+      var proto = new Protocol({
+        network: {
+          _logger: Logger(0)
+        }
+      });
+      proto._lockedContracts = {};
+      expect(proto._offersLockedForContract('test')).to.equal(false);
+    });
+
+  });
+
   describe('#handleOffer', function() {
+
+    it('should fail if offers are locked', function(done) {
+      var proto = new Protocol({
+        network: {
+          _logger: Logger(0),
+          _pendingContracts: {
+            adc83b19e793491b1c6ea0fd8b46cd9f32e592fc: function() {}
+          },
+          acceptOffer: sinon.stub()
+        }
+      });
+      proto._lockedContracts = {
+        adc83b19e793491b1c6ea0fd8b46cd9f32e592fc: true
+      };
+      proto.handleOffer({
+        contract: { data_hash: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
+        contact: {
+          address: '127.0.0.1',
+          port: 1337,
+          nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc'
+        }
+      }, function(err) {
+        expect(err.message).to.equal(
+          'Offers for this contract are now locked'
+        );
+        done();
+      });
+    });
 
     it('should fail with invalid contract', function(done) {
       var proto = new Protocol({
@@ -714,7 +756,7 @@ describe('Protocol', function() {
           },
           _logger: Logger(0),
           storageManager: {
-            load: sinon.stub().callsArgWith(1, null, {})
+            load: sinon.stub().callsArgWith(1, null, { shard: {} })
           }
         }
       });
@@ -726,6 +768,27 @@ describe('Protocol', function() {
         expect(_accept.called).to.equal(true);
         done();
       });
+    });
+
+    it('should fail if data is not readable', function(done) {
+      var proto = new Protocol({
+        network: {
+          _logger: Logger(0),
+          storageManager: {
+            load: sinon.stub().callsArgWith(1, null, { shard: {
+              write: sinon.stub()
+            } })
+          }
+        }
+      });
+      proto.handleRetrieve({
+        data_hash: utils.rmd160(''),
+        contact: { nodeID: 'nodeid' }
+      }, function(err) {
+        expect(err.message).to.equal('Shard data not found');
+        done();
+      });
+
     });
 
   });

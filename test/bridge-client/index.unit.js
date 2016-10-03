@@ -355,6 +355,28 @@ describe('BridgeClient', function() {
 
     });
 
+    describe('#getFileInfo', function() {
+
+      it('should send the correct args to _request', function(done) {
+        var _request = sinon.stub(BridgeClient.prototype, '_request').callsArg(
+          3,
+          null,
+          {}
+        );
+        var client = new BridgeClient();
+        client.getFileInfo('mybucket', 'myfile', function() {
+          _request.restore();
+          expect(_request.calledWith(
+            'GET',
+            '/buckets/mybucket/files/myfile/info',
+            {}
+          )).to.equal(true);
+          done();
+        });
+      });
+
+    });
+
     describe('#listFilesInBucket', function() {
 
       it('should send the correct args to _request', function(done) {

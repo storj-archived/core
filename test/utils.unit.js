@@ -283,8 +283,8 @@ describe('utils', function() {
     var bucketName = 'New Bucket';
     var fileName = 'test.txt';
 
-    var bucketId = '4411d5a80291758260032093';
-    var fileId = 'da1f0e6e1d8d65556d939ed9';
+    var bucketId = 'd0c9ac287f89dac76deadfad';
+    var fileId = 'c32ec64da2bf278caec65feb';
 
     describe('#calculateBucketId', function() {
 

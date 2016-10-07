@@ -34,7 +34,7 @@ describe('Manager', function() {
 
     it('should throw if the adapter returns invalid item', function(done) {
       var adapter = new RAMStorageAdapter();
-      adapter._get = sinon.stub().callsArgWith(1, null, {});
+      adapter.get = sinon.stub().callsArgWith(1, null, {});
       var man = new Manager(adapter);
       man.load(utils.rmd160('key'), function(err) {
         expect(err.message).to.equal('Storage adapter provided invalid result');
@@ -187,9 +187,11 @@ describe('Manager', function() {
       var man = new Manager(db);
       var _peek = sinon.stub(db, 'peek').callsArgWith(1, new Error('Failed'));
       var _put = sinon.stub(db, '_put').callsArgWith(2, new Error('Failed'));
+      var _get = sinon.stub(db, 'get').callsArgWith(1, new Error('Failed'));
       man.save(StorageItem(), function(err) {
         _put.restore();
         _peek.restore();
+        _get.restore();
         expect(err.message).to.equal('Failed');
         done();
       });

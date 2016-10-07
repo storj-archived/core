@@ -91,7 +91,7 @@ describe('EmbeddedStorageAdapter', function() {
     it('should return the stored item', function(done) {
       store._get(hash, function(err, item) {
         expect(err).to.equal(null);
-        expect(item).to.be.instanceOf(StorageItem);
+        expect(item).to.be.instanceOf(Object);
         done();
       });
     });
@@ -148,7 +148,7 @@ describe('EmbeddedStorageAdapter', function() {
     it('should return the stored item', function(done) {
       store._peek(hash, function(err, item) {
         expect(err).to.equal(null);
-        expect(item).to.be.instanceOf(StorageItem);
+        expect(item).to.be.instanceOf(Object);
         done();
       });
     });

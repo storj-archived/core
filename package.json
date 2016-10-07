@@ -53,10 +53,12 @@
     "node": "^4.4.4"
   },
   "dependencies": {
+    "apollo-client": "^0.4.20",
     "async": "^1.5.2",
     "bitcore-ecies": "^1.0.1",
     "bitcore-lib": "^0.13.12",
     "bitcore-message": "^1.0.2",
+    "es6-template-strings": "^2.0.1",
     "flushwritable": "^1.0.0",
     "ip": "^1.1.2",
     "jsen": "^0.6.0",
@@ -82,6 +84,8 @@
     "request": "^2.70.0",
     "rimraf": "^2.5.3",
     "semver": "^5.1.0",
+    "storj-service-storage-models": "^2.0.1",
+    "stripe": "^4.11.0",
     "through": "^2.3.8",
     "tmp": "0.0.28",
     "ws": "^1.1.0"

@@ -1473,7 +1473,7 @@ describe('BridgeClient', function() {
 
       it('should retry transfer if count less than 3', function(done) {
         var _transferStatus = new EventEmitter();
-        var client = new BridgeClient({ transferRetries: 3  });
+        var client = new BridgeClient(null, { transferRetries: 3  });
         var pointer = {
           farmer: {
             address: '127.0.0.1',
@@ -1513,7 +1513,7 @@ describe('BridgeClient', function() {
       it('should get a new contract if transfer fails 3 times', function(done) {
         var _transferStatus = new EventEmitter();
         var _kill = sinon.stub();
-        var client = new BridgeClient();
+        var client = new BridgeClient(null, { transferRetries: 3  });
         var state = new EventEmitter();
         state.queue = { kill: _kill };
         state.callback = sinon.stub();

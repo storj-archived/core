@@ -858,16 +858,16 @@ describe('Network (private)', function() {
         doNotTraverseNat: true
       });
       CLEANUP.push(net);
-      var bridge = sinon.stub(net.bridgeClient, 'getInfo').callsArgWith(
-        0,
+      var bridge = sinon.stub(net.bridgeClient, 'getContactList').callsArgWith(
+        1,
         null,
-        {
-          info: {
-            'x-network-seeds': [
-              'storj://127.0.0.1:8080/' + utils.rmd160('nodeid')
-            ]
+        [
+          {
+            address: '127.0.0.1',
+            port: 8080,
+            nodeID: utils.rmd160('nodeid')
           }
-        }
+        ]
       );
       var _probe = sinon.stub(net, '_requestProbe').callsArgWith(1, null, {});
       net.transport._isPublic = false;
@@ -891,8 +891,8 @@ describe('Network (private)', function() {
         doNotTraverseNat: true
       });
       CLEANUP.push(net);
-      var bridge = sinon.stub(net.bridgeClient, 'getInfo').callsArgWith(
-        0,
+      var bridge = sinon.stub(net.bridgeClient, 'getContactList').callsArgWith(
+        1,
         new Error('Failed')
       );
       net.transport._isPublic = false;

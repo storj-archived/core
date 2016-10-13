@@ -46,3 +46,27 @@ describe('DataCipherKeyIv#fromObject', function() {
   });
 
 });
+
+describe('DataCipherKeyIv#getHDBucketKey', function() {
+
+  it('should generate an HD bucket key', function() {
+    var seed = '0123456789ab0123456789ab';
+    var bucketId = '0123456789ab';
+    var id = DataCipherKeyIv.getHDBucketKey(seed, bucketId);
+    var bucketKeyStart = '5b6eddfb782719b5d41bf1c300af1789';
+    expect(id.startsWith(bucketKeyStart)).to.equal(true);
+  });
+
+});
+
+describe('DataCipherKeyIv#getHDFileKey', function() {
+
+  it('should generate an HD file key', function() {
+    var bucketKey = '0123456789ab0123456789ab';
+    var fileId = '0123456789ab';
+    var fileKey = DataCipherKeyIv.getHDFileKey(bucketKey, fileId);
+    expect(fileKey._pass.toString('hex')).to.equal(bucketKey);
+    expect(fileKey._salt.toString('hex')).to.equal(fileId);
+  });
+
+});

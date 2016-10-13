@@ -441,9 +441,6 @@ describe('Network (private)', function() {
       });
     });
 
-    it('should verify a message against hd node id and index', function() {
-    });
-
   });
 
   describe('#_verifySignature', function() {
@@ -559,6 +556,42 @@ describe('Network (private)', function() {
         expect(err.message).to.equal('Something about points and curves...');
         done();
       });
+    });
+
+    it('should verify a signature with hd contact', function(done) {
+      var verify = Network.prototype._verifySignature.bind({ _pubkeys: {} });
+
+      var msg = {
+        method: 'PING',
+        id: '12345',
+        params: {}
+      };
+
+      // TODO hdKey.toKeyPair();
+
+      var kp = KeyPair();
+
+      Network.prototype._signMessage.call({
+        keyPair: kp
+      }, msg, function() {});
+
+      verify({
+        signobj: Network.prototype._createSignatureObject(
+          msg.params.signature
+        ),
+        message: {
+          id: '12345',
+          params: { signature: msg.params.signature }
+        },
+        nonce: msg.params.nonce,
+        contact: { nodeID: 'nodeid' },
+        signature: msg.params.signature,
+        address: kp.getAddress()
+      }, function(err) {
+        expect(err).to.equal(null);
+        done();
+      });
+
     });
 
   });

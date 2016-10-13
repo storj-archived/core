@@ -732,6 +732,18 @@ describe('FarmerInterface#Negotiator', function() {
     });
   });
 
+  it('should callback false is contract has an invalid hash', function(done) {
+    FarmerInterface.Negotiator.call({
+      _renterWhitelist: null,
+      _logger: kad.Logger(0)
+    }, {
+      get: sinon.stub().returns(null)
+    }, function(result) {
+      expect(result).to.equal(false);
+      done();
+    });
+  });
+
   it('should return true if farmer does not have the shard', function(done) {
     FarmerInterface.Negotiator.call({
       _logger: kad.Logger(0),

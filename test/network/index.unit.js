@@ -441,6 +441,9 @@ describe('Network (private)', function() {
       });
     });
 
+    it('should verify a message against hd node id and index', function() {
+    });
+
   });
 
   describe('#_verifySignature', function() {

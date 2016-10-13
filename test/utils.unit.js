@@ -277,4 +277,44 @@ describe('utils', function() {
 
   });
 
+  var testIdCalculation = function(){
+
+    var user = 'user@domain.tld';
+    var bucketName = 'New Bucket';
+    var fileName = 'test.txt';
+
+    var bucketId = 'd0c9ac287f89dac76deadfad';
+    var fileId = 'c32ec64da2bf278caec65feb';
+
+    describe('#calculateBucketId', function() {
+
+      it('should return the correct hex encoded hash', function() {
+        expect(utils.calculateBucketId(user, bucketName))
+          .to.equal(bucketId);
+      });
+
+    });
+
+    describe('#calculateFileId', function() {
+
+      it('should return the correct hex encoded hash', function() {
+        expect(utils.calculateFileId(bucketId, fileName))
+          .to.equal(fileId);
+      });
+
+    });
+
+    describe('#calculateFileIdByName', function() {
+
+      it('should return the correct hex encoded hash', function() {
+        expect(utils.calculateFileIdByName(user, bucketName, fileName))
+          .to.equal(fileId);
+      });
+
+    });
+
+  };
+
+  testIdCalculation();
+
 });

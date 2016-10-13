@@ -1473,7 +1473,7 @@ describe('BridgeClient', function() {
 
       it('should retry transfer if count less than 3', function(done) {
         var _transferStatus = new EventEmitter();
-        var client = new BridgeClient();
+        var client = new BridgeClient({ transferRetries: 3  });
         var pointer = {
           farmer: {
             address: '127.0.0.1',
@@ -1632,7 +1632,7 @@ describe('BridgeClient', function() {
 
       it('should not create an entry if remaining shards', function(done) {
         var fakeState = {
-          complete: 0,
+          completed: 0,
           numShards: 2,
           cleanup: sinon.stub()
         };
@@ -1644,6 +1644,28 @@ describe('BridgeClient', function() {
         });
       });
 
+      it('should log an error if the request fails', function(done) {
+        var _request = sinon.stub(
+          BridgeClient.prototype,
+          '_request'
+        ).callsArgWith(
+          3,
+          new Error('Request failed')
+        );
+        var fakeState = {
+          completed: 1,
+          numShards: 2,
+          cleanup: sinon.stub(),
+          callback: sinon.stub()
+        };
+        var client = new BridgeClient();
+        client._shardTransferComplete(fakeState, {}, sinon.stub());
+        setImmediate(function() {
+          _request.restore();
+          expect(fakeState.callback.called).to.equal(true);
+          done();
+        });
+      });
     });
 
     describe('#_request', function() {

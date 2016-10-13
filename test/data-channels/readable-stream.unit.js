@@ -24,6 +24,7 @@ describe('ReadableDataChannelStream', function() {
       channel._client = new EventEmitter();
       channel._client.send = sinon.stub().callsArg(1);
       channel._client.terminate = sinon.stub();
+      channel._logger = { debug: sinon.stub() };
       var rs = new ReadableStream(channel);
       rs.read();
       setImmediate(function() {
@@ -54,6 +55,7 @@ describe('ReadableDataChannelStream', function() {
       channel._client.send = sinon.stub().callsArg(1);
       channel._client.terminate = sinon.stub();
       ReadableStream.MAX_TTFB = 5;
+      channel._logger = { debug: sinon.stub() };
       var rs = new ReadableStream(channel);
       rs.read();
       rs.on('error', function(err) {

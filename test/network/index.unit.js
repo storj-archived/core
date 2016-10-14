@@ -14,6 +14,7 @@ var Network = proxyquire('../../lib/network', {
   }
 });
 var Manager = require('../../lib/storage/manager');
+var HDKey = require('hdkey');
 var KeyPair = require('../../lib/crypto-tools/keypair');
 var RAMStorageAdapter = require('../../lib/storage/adapters/ram');
 var kad = require('kad');
@@ -455,7 +456,11 @@ describe('Network (private)', function() {
     });
 
     it('should pass if valid signature', function(done) {
-      var verify = Network.prototype._verifySignature.bind({ _pubkeys: {} });
+      var verify = Network.prototype._verifySignature.bind({
+        _pubkeys: {},
+        _recoverPublicKey: sinon.stub().returns([true, 'publickey']),
+        _verifyHDKeyContact: sinon.stub().returns(true)
+      });
       var msg = {
         method: 'PING',
         id: '12345',
@@ -484,7 +489,10 @@ describe('Network (private)', function() {
     });
 
     it('should fail if invalid signature', function(done) {
-      var verify = Network.prototype._verifySignature.bind({ _pubkeys: {} });
+      var verify = Network.prototype._verifySignature.bind({
+        _pubkeys: {},
+        _recoverPublicKey: sinon.stub().returns([true, 'publickey'])
+      });
       var msg = {
         method: 'PING',
         id: '123456',
@@ -515,21 +523,16 @@ describe('Network (private)', function() {
       var StubbedNetwork = proxyquire('../../lib/network', {
         'bitcore-lib': {
           crypto: {
-            ECDSA: function() {
-              return {
-                toPublicKey: sinon.stub().throws(
-                  new Error('Something about points and curves...')
-                )
-              };
-            },
             Signature: {
               fromCompact: sinon.stub().returns({})
             }
           }
         }
       });
+      var error = new Error('Something about points and curves...');
       var verify = StubbedNetwork.prototype._verifySignature.bind({
-        _pubkeys: {}
+        _pubkeys: {},
+        _recoverPublicKey: sinon.stub().returns([false, error]),
       });
       var msg = {
         method: 'PING',
@@ -559,7 +562,11 @@ describe('Network (private)', function() {
     });
 
     it('should verify a signature with hd contact', function(done) {
-      var verify = Network.prototype._verifySignature.bind({ _pubkeys: {} });
+      var verify = Network.prototype._verifySignature.bind({
+        _pubkeys: {},
+        _recoverPublicKey: sinon.stub().returns('publickey'),
+        _verifyHDKeyContact: sinon.stub().returns(true)
+      });
 
       var msg = {
         method: 'PING',
@@ -567,9 +574,27 @@ describe('Network (private)', function() {
         params: {}
       };
 
-      // TODO hdKey.toKeyPair();
+      var seed = 'a0c42a9c3ac6abf2ba6a9946ae83af18f51bf1c9fa7dacc4c92513cc4d' +
+          'd015834341c775dcd4c0fac73547c5662d81a9e9361a0aac604a73a321bd9103b' +
+          'ce8af';
 
-      var kp = KeyPair();
+      var masterKey = HDKey.fromMasterSeed(
+        new Buffer(seed, 'hex'),
+        constants.HD_KEY_VERSIONS
+      );
+
+      var hdKey = masterKey.derive('m/73\'');
+      var nodeHdKey = hdKey.deriveChild(10);
+
+      var contact = Contact({
+        address: '127.0.0.1',
+        port: 1337,
+        nodeID: '1261d3f171c23169c893a21be1f03bacafad26d7',
+        hdNodeKey: hdKey.publicExtendedKey,
+        hdNodeIndex: 10
+      });
+
+      var kp = KeyPair(nodeHdKey.privateKey.toString('hex'));
 
       Network.prototype._signMessage.call({
         keyPair: kp
@@ -584,7 +609,7 @@ describe('Network (private)', function() {
           params: { signature: msg.params.signature }
         },
         nonce: msg.params.nonce,
-        contact: { nodeID: 'nodeid' },
+        contact: contact,
         signature: msg.params.signature,
         address: kp.getAddress()
       }, function(err) {

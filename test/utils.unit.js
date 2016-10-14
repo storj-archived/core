@@ -325,40 +325,17 @@ describe('utils', function() {
   describe('#isValidHDNodeID', function() {
 
     it('will return false for a number', function() {
-      expect(utils.isValidHDNodeID(10000)).to.equal(false);
+      expect(utils.isValidHDNodeKey(10000)).to.equal(false);
     });
 
     it('will return false for object literal', function() {
-      expect(utils.isValidHDNodeID({})).to.equal(false);
+      expect(utils.isValidHDNodeKey({})).to.equal(false);
     });
 
-    it('will return false for string that is too short', function() {
-      var invalid = '051b7a1613ae86bdcd5515779c6e1f339f28053c7f40bbe7d0' +
-          '73cf4f435d91f16adcf971ed99ae8456571da214e3801a5c8ababe9b3806' +
-          'd0ec030b8696234a00';
-      expect(utils.isValidHDNodeID(invalid)).to.equal(false);
-    });
-
-    it('will return false for string that is too long', function() {
-      var invalid = '4f0a14405fa886373ae845718a549bebdc5b892ae1a61fd3f5' +
-          '3bf89ab95dc36dc08da1f1f75bbb46907949f5b939a0e897b9e387315a6b' +
-          '78fc860bf503c9dc5a1700';
-      expect(utils.isValidHDNodeID(invalid)).to.equal(false);
-    });
-
-    it('will return false for non-hexidecimal string', function() {
-      var invalid = 'e0a5f1bc56cd83a50bbd6651163699686d11633fa925998acd' +
-          '0e8ca97acb544c57c31eec7ffd561e1b7edefc2f890780768aa380312f3a' +
-          '69c1e3420d7c6774500@';
-      expect(invalid.length).to.equal(130);
-      expect(utils.isValidHDNodeID(invalid)).to.equal(false);
-    });
-
-    it('will return true for hexidecimal string with length 130', function() {
-      var valid = '962216936c47d59312373ef13dab2c42aa9dda8bba20c2590042' +
-          'c897d3be52de3cd339d448c8c0aa11055f7bcd114c881e85f5a536b0c820' +
-          '709806e758dde42c00';
-      expect(utils.isValidHDNodeID(valid)).to.equal(true);
+    it('will return true for extended public key string', function() {
+      var extendedPublicKey = 'spubXxUvVaAHwFoktwTozj4fZfK7zBdWobvXdi3T9Ujh89' +
+          'g3gsQNheGGhgi9twKBGaqgHuhUHX7aM8kPTWSkRLT9TqyQWdhwWZfUstxULsmXuDc5';
+      expect(utils.isValidHDNodeKey(extendedPublicKey)).to.equal(true);
     });
   });
 

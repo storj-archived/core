@@ -50,6 +50,10 @@
     {
       "name": "dxhome",
       "url": "https://github.com/dxhome"
+    },
+    {
+      "name": "Brandon Yuille",
+      "url": "https://github.com/yuilleb"
     }
   ],
   "license": "(AGPL-3.0 AND LGPL-3.0)",

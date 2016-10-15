@@ -439,7 +439,7 @@ describe('DataChannelServer', function() {
           }
         }
       });
-      item.shard = { write: function() {}, destroy: function() {} };
+      item.shard = { write: function() {}, destroy: function(callback) {} };
       var _load = sinon.stub(manager, 'load', function(a ,cb) {
         cb(null, item);
         setImmediate(function() {
@@ -494,7 +494,7 @@ describe('DataChannelServer', function() {
       item.shard = {
         end: function() {},
         write: function() {},
-        destroy: function() {}
+        destroy: function(callback) {}
       };
       var _load = sinon.stub(manager, 'load', function(a ,cb) {
         cb(null, item);
@@ -552,7 +552,7 @@ describe('DataChannelServer', function() {
           }
         }
       });
-      item.shard = { write: function() {}, destroy: function() {} };
+      item.shard = { write: function() {}, destroy: function(callback) {} };
       var _load = sinon.stub(manager, 'load', function(a ,cb) {
         cb(null, item);
         setImmediate(function() {

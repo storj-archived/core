@@ -18,6 +18,7 @@ describe('WritableDataChannelStream', function() {
     it('should emit finish if channel closes before flush', function(done) {
       var channel = new EventEmitter();
       channel.readyState = 3;
+      channel._logger = { debug: sinon.stub() };
       var ws = new WritableStream({ _client: channel });
       ws.on('finish', done);
       setImmediate(function() {
@@ -40,7 +41,10 @@ describe('WritableDataChannelStream', function() {
           cb();
         }
       };
-      var ws = new WritableStream({ _client: channel });
+      var ws = new WritableStream({
+        _client: channel,
+        _logger: { debug: sinon.stub() }
+      });
       ws.on('error', function(err) {
         WritableStream.MAX_TTWA = 5000;
         expect(err.message).to.equal(
@@ -59,7 +63,10 @@ describe('WritableDataChannelStream', function() {
       var channel = new EventEmitter();
       channel.readyState = 3;
       channel.terminate = sinon.stub();
-      var ws = new WritableStream({ _client: channel });
+      var ws = new WritableStream({
+        _client: channel,
+        _logger: { debug: sinon.stub() }
+      });
       ws.destroy();
       expect(ws._isDestroyed).to.equal(true);
       expect(channel.terminate.called).to.equal(true);
@@ -69,7 +76,10 @@ describe('WritableDataChannelStream', function() {
       var channel = new EventEmitter();
       channel.readyState = 3;
       channel.terminate = sinon.stub();
-      var ws = new WritableStream({ _client: channel });
+      var ws = new WritableStream({
+        _client: channel,
+        _logger: { debug: sinon.stub() }
+      });
       ws.destroy();
       expect(ws.destroy()).to.equal(false);
     });
@@ -82,7 +92,10 @@ describe('WritableDataChannelStream', function() {
       var channel = new EventEmitter();
       channel.readyState = 3;
       channel.terminate = sinon.stub();
-      var ws = new WritableStream({ _client: channel });
+      var ws = new WritableStream({
+        _client: channel,
+        _logger: { debug: sinon.stub() }
+      });
       ws._handleClosed(function(err) {
         expect(err.message).to.equal('Unspecified error occurred');
         done();

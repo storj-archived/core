@@ -233,6 +233,28 @@ describe('FarmerInterface', function() {
       farmer._negotiateContract(contract);
     });
 
+    it('should ensure renter id is present and warn if not', function(done) {
+      var farmer = new FarmerInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        storageManager: new StorageManager(new RAMStorageAdapter())
+      });
+      CLEANUP.push(farmer);
+      var _warn = sinon.stub(farmer._logger, 'warn');
+      farmer._negotiateContract(Contract({
+        data_hash: utils.rmd160(' some data'),
+        renter_id: null
+      }));
+      setImmediate(function() {
+        _warn.restore();
+        expect(_warn.called).to.equal(true);
+        done();
+      });
+    });
+
     it('should remove contract from pending if save fails', function(done) {
       var farmer = new FarmerInterface({
         keyPair: KeyPair(),
@@ -253,7 +275,8 @@ describe('FarmerInterface', function() {
         new Error('Save failed')
       );
       farmer._negotiateContract(Contract({
-        data_hash: utils.rmd160(' some data')
+        data_hash: utils.rmd160(' some data'),
+        renter_id: utils.rmd160('nodeid')
       }));
       setImmediate(function() {
         _getContactByNodeID.restore();
@@ -288,7 +311,8 @@ describe('FarmerInterface', function() {
         new Error('Lookup failed')
       );
       farmer._negotiateContract(Contract({
-        data_hash: utils.rmd160('some data')
+        data_hash: utils.rmd160('some data'),
+        renter_id: utils.rmd160('nodeid')
       }));
       setImmediate(function() {
         setImmediate(function() {
@@ -323,7 +347,8 @@ describe('FarmerInterface', function() {
         []
       );
       farmer._negotiateContract(Contract({
-        data_hash: utils.rmd160('some data')
+        data_hash: utils.rmd160('some data'),
+        renter_id: utils.rmd160('nodeid')
       }));
       setImmediate(function() {
         setImmediate(function() {
@@ -702,6 +727,18 @@ describe('FarmerInterface#Negotiator', function() {
       data_hash: utils.rmd160(''),
       renter_id: utils.rmd160('renter')
     }), function(result) {
+      expect(result).to.equal(false);
+      done();
+    });
+  });
+
+  it('should callback false is contract has an invalid hash', function(done) {
+    FarmerInterface.Negotiator.call({
+      _renterWhitelist: null,
+      _logger: kad.Logger(0)
+    }, {
+      get: sinon.stub().returns(null)
+    }, function(result) {
       expect(result).to.equal(false);
       done();
     });

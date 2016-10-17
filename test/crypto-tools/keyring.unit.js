@@ -321,6 +321,113 @@ describe('KeyRing', function() {
       rimraf.sync(fldr2);
       fs.unlinkSync(tar);
     });
+  });
+
+  describe('#generateHDKey', function() {
+
+    var tmp = tmpfolder();
+    var hdKeyPath = path.join(tmp, 'key.ring', '.hd_key')
+    var kr = new KeyRing(tmp, 'password');
+
+    it('should create a valid HD Key', function() {
+      kr.generateHDKey();
+      expect(fs.existsSync(hdKeyPath)).to.equal(true);
+      expect(typeof kr._mnemonic).to.equal('string');
+      expect(kr._mnemonic.split(' ').length).to.equal(12);
+    });
+
+    it('should not allow overwriting a key', function() {
+      expect(function(){
+        kr.generateHDKey();
+      }).to.throw(Error, 'HD Key already exists');
+    });
+
+  });
+
+  describe('#_readHDKey', function() {
+
+    var tmp = tmpfolder();
+    var hdKeyPath = path.join(tmp, 'key.ring', '.hd_key')
+    var kr = new KeyRing(tmp, 'password');
+
+    it('should decrypt and read hd key', function(done) {
+      kr.generateHDKey();
+      var oldMnemonic = kr._mnemonic;
+      kr._mnemonic = '';
+      kr._readHDKey();
+      expect(kr._mnemonic).to.equal(oldMnemonic);
+      done();
+    });
+
+  });
+
+  describe('#deleteHDKey', function() {
+
+    var tmp = tmpfolder();
+    var hdKeyPath = path.join(tmp, 'key.ring', '.hd_key')
+    var kr = new KeyRing(tmp, 'password');
+    kr.generateHDKey();
+
+    it('should delete the HD Key', function() {
+      expect(fs.existsSync(hdKeyPath)).to.equal(true);
+      kr.deleteHDKey();
+      expect(fs.existsSync(hdKeyPath)).to.equal(false);
+    });
+
+  });
+
+  describe('#exportMnemonic', function() {
+
+    var tmp = tmpfolder();
+    var hdKeyPath = path.join(tmp, 'key.ring', '.hd_key');
+    var kr = new KeyRing(tmp, 'password');
+
+    it('should return null when no key exists', function() {
+      expect(kr.exportMnemonic()).to.equal(null);
+    });
+
+    it('should export 12 word mnemonic', function() {
+      kr.generateHDKey();
+      expect(kr.exportMnemonic().split(' ').length).to.equal(12);
+    });
+
+  });
+
+  describe('#importMnemonic', function() {
+
+    var tmp = tmpfolder();
+    var hdKeyPath = path.join(tmp, 'key.ring', '.hd_key')
+    var kr = new KeyRing(tmp, 'password');
+
+    it('should reject invalid mnemonic', function(done) {
+      expect(function(){
+        kr.importMnemonic('invalid mnemonic sentence')
+      }).to.throw(Error, "Mnemonic is invalid");
+      done();
+    });
+
+    it('should import the mnemonic', function(done) {
+      var mnemonic = 'lamp endorse image either ' +
+        'benefit marriage junk empower ' +
+        'bag blind divide stereo';
+      kr.importMnemonic(mnemonic);
+      expect(kr._mnemonic).to.equal(mnemonic);
+
+      kr._mnemonic = '';
+      kr._readHDKey();
+      expect(kr._mnemonic).to.equal(mnemonic);
+      done();
+    });
+
+    it('should refuse to overwrite an exisitng mnemonic', function(done) {
+      var newMnemonic = 'lamp lamp image either ' +
+        'benefit marriage junk empower ' +
+        'bag blind divide stereo';
+      expect(function(){
+        kr.importMnemonic(newMnemonic);
+      }).to.throw(Error, 'HD Key already exists');
+      done();
+    });
 
   });
 

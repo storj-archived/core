@@ -355,6 +355,28 @@ describe('BridgeClient', function() {
 
     });
 
+    describe('#getFileInfo', function() {
+
+      it('should send the correct args to _request', function(done) {
+        var _request = sinon.stub(BridgeClient.prototype, '_request').callsArg(
+          3,
+          null,
+          {}
+        );
+        var client = new BridgeClient();
+        client.getFileInfo('mybucket', 'myfile', function() {
+          _request.restore();
+          expect(_request.calledWith(
+            'GET',
+            '/buckets/mybucket/files/myfile/info',
+            {}
+          )).to.equal(true);
+          done();
+        });
+      });
+
+    });
+
     describe('#listFilesInBucket', function() {
 
       it('should send the correct args to _request', function(done) {
@@ -1772,14 +1794,14 @@ describe('BridgeClient', function() {
 
   describe('#getFrameFromFile', function() {
 
-    it('should bubble error from #listFilesInBucket', function(done) {
+    it('should bubble error from #getFileInfo', function(done) {
       var client = new BridgeClient();
-      var _listFiles = sinon.stub(client, 'listFilesInBucket').callsArgWith(
-        1,
+      var _getFileInfo = sinon.stub(client, 'getFileInfo').callsArgWith(
+        2,
         new Error('Failed')
       );
       client.getFrameFromFile('bucketid', 'fileid', function(err) {
-        _listFiles.restore();
+        _getFileInfo.restore();
         expect(err.message).to.equal('Failed');
         done();
       });
@@ -1787,13 +1809,12 @@ describe('BridgeClient', function() {
 
     it('should error if file not found', function(done) {
       var client = new BridgeClient();
-      var _listFiles = sinon.stub(client, 'listFilesInBucket').callsArgWith(
-        1,
-        null,
-        []
+      var _getFileInfo = sinon.stub(client, 'getFileInfo').callsArgWith(
+        2,
+        new Error('Failed to find file staging frame')
       );
       client.getFrameFromFile('bucketid', 'fileid', function(err) {
-        _listFiles.restore();
+        _getFileInfo.restore();
         expect(err.message).to.equal('Failed to find file staging frame');
         done();
       });
@@ -1801,8 +1822,8 @@ describe('BridgeClient', function() {
 
     it('should bubble error from #getFileStagingFrameById', function(done) {
       var client = new BridgeClient();
-      var _listFiles = sinon.stub(client, 'listFilesInBucket').callsArgWith(
-        1,
+      var _getFileInfo = sinon.stub(client, 'getFileInfo').callsArgWith(
+        2,
         null,
         [{ id: 'fileid', frame: 'frameid' }]
       );
@@ -1811,7 +1832,7 @@ describe('BridgeClient', function() {
         'getFileStagingFrameById'
       ).callsArgWith(1, new Error('Failed'));
       client.getFrameFromFile('bucketid', 'fileid', function(err) {
-        _listFiles.restore();
+        _getFileInfo.restore();
         _getFrame.restore();
         expect(err.message).to.equal('Failed');
         done();
@@ -1821,8 +1842,8 @@ describe('BridgeClient', function() {
     it('should return the frame', function(done) {
       var client = new BridgeClient();
       var frame = {};
-      var _listFiles = sinon.stub(client, 'listFilesInBucket').callsArgWith(
-        1,
+      var _getFileInfo = sinon.stub(client, 'getFileInfo').callsArgWith(
+        2,
         null,
         [{ id: 'wrong', frame: 'frameid' }, { id: 'fileid', frame: 'frameid' }]
       );
@@ -1831,7 +1852,7 @@ describe('BridgeClient', function() {
         'getFileStagingFrameById'
       ).callsArgWith(1, null, frame);
       client.getFrameFromFile('bucketid', 'fileid', function(err, result) {
-        _listFiles.restore();
+        _getFileInfo.restore();
         _getFrame.restore();
         expect(result).to.equal(frame);
         done();

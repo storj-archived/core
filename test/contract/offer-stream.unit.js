@@ -144,7 +144,7 @@ describe('OfferStream', function() {
       offerStream.addOfferToQueue.apply(offerStream, getTestOffer());
       offerStream.addOfferToQueue.apply(offerStream, getTestOffer());
       offerStream.addOfferToQueue.apply(offerStream, getTestOffer());
-      offerStream.on('data', function(offer) {
+      offerStream.on('data', function() {
         offerStream.pause();
         setTimeout(function() {
           events++;
@@ -174,13 +174,12 @@ describe('OfferStream', function() {
         contract.sign('farmer', farmer.getPrivateKey());
         return [contact, contract];
       }
-      var events = 0;
       var offerStream = new OfferStream(sampleContract, { maxOffers: 4 });
       offerStream.addOfferToQueue.apply(offerStream, getTestOffer());
       offerStream.addOfferToQueue.apply(offerStream, getTestOffer());
       offerStream.addOfferToQueue.apply(offerStream, getTestOffer());
       offerStream.addOfferToQueue.apply(offerStream, getTestOffer());
-      offerStream.on('data', function(offer) {}).on('end', done);
+      offerStream.on('data', function() {}).on('end', done);
     });
 
   });

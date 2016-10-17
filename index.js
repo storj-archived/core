@@ -79,6 +79,9 @@ exports.Contract = require('./lib/contract');
 /** {@link OfferStream} */
 exports.OfferStream = require('./lib/contract/offer-stream');
 
+/** {@link OfferManager} */
+exports.OfferManager = require('./lib/contract/offer-manager');
+
 /** {@link AuditStream} */
 exports.AuditStream = require('./lib/audit-tools/audit-stream');
 

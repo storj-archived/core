@@ -17,6 +17,7 @@ var EventEmitter = require('events').EventEmitter;
 var rs = require('readable-stream');
 var ReadableStream = rs.Readable;
 var WritableStream = rs.Writable;
+var Contract = require('../../lib/contract');
 
 describe('Protocol', function() {
 
@@ -28,45 +29,38 @@ describe('Protocol', function() {
 
   });
 
-  describe('#_offersLockedForContract', function() {
-
-    it('should return false if offer is not locked', function() {
-      var proto = new Protocol({
-        network: {
-          _logger: Logger(0)
-        }
-      });
-      proto._lockedContracts = {};
-      expect(proto._offersLockedForContract('test')).to.equal(false);
-    });
-
-  });
-
   describe('#handleOffer', function() {
 
     it('should fail if offers are locked', function(done) {
+      var farmerKeyPair = new KeyPair();
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          _pendingContracts: {
-            adc83b19e793491b1c6ea0fd8b46cd9f32e592fc: function() {}
+          offerManager: {
+            getStream: sinon.stub().returns(null)
           },
-          acceptOffer: sinon.stub()
+          keyPair: new KeyPair(),
+          listenerCount: sinon.stub().returns(0)
         }
       });
-      proto._lockedContracts = {
-        adc83b19e793491b1c6ea0fd8b46cd9f32e592fc: true
-      };
+      var contract = new Contract({
+        data_hash: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc',
+        renter_id: proto._network.keyPair.getNodeID(),
+        farmer_id: farmerKeyPair.getNodeID(),
+        payment_destination: farmerKeyPair.getAddress()
+      });
+      contract.sign('renter', proto._network.keyPair.getPrivateKey());
+      contract.sign('farmer', farmerKeyPair.getPrivateKey());
       proto.handleOffer({
-        contract: { data_hash: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
+        contract: contract.toObject(),
         contact: {
           address: '127.0.0.1',
           port: 1337,
-          nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc'
+          nodeID: farmerKeyPair.getNodeID()
         }
       }, function(err) {
         expect(err.message).to.equal(
-          'Offers for this contract are now locked'
+          'Contract no longer open to offers'
         );
         done();
       });
@@ -91,81 +85,50 @@ describe('Protocol', function() {
       });
     });
 
-    it('should bubble manager error', function(done) {
-      var _save = sinon.stub().callsArgWith(1, new Error('Failed'));
-      var proto = new Protocol({
-        network: {
-          _logger: Logger(0),
-          storageManager: {
-            save: _save
-          },
-          _pendingContracts: {
-            adc83b19e793491b1c6ea0fd8b46cd9f32e592fc: function() {}
-          },
-          acceptOffer: sinon.stub()
-        }
-      });
-      var _verify = sinon.stub(proto, '_verifyContract').callsArg(2);
-      proto.handleOffer({
-        contract: { data_hash: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
-        contact: {
-          address: '127.0.0.1',
-          port: 1337,
-          nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc'
-        }
-      }, function(err) {
-        _verify.restore();
-        expect(err.message).to.equal('Failed');
-        done();
-      });
-    });
-
     it('should emit Network#unhandledOfferResolved', function(done) {
-      var _save = sinon.stub().callsArg(1);
       var _network = new EventEmitter();
       _network._logger = Logger(0);
-      _network.storageManager = { save: _save };
-      _network._pendingContracts = {};
+      _network.offerManager = {
+        getStream: sinon.stub().returns(null)
+      };
       var proto = new Protocol({
         network: _network
       });
       var _verify = sinon.stub(proto, '_verifyContract').callsArgWith(
         2
       );
-      proto.handleOffer({
-        contract: { data_hash: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
-        contact: {
-          address: '127.0.0.1',
-          port: 1337,
-          nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc'
-        }
-      }, function(err) {
-        _verify.restore();
-        expect(err).to.equal(null);
-        _network.on('unhandledOfferResolved', function(contact, contract) {
-          expect(contract.get('data_hash')).to.equal(
-            'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc'
-          );
-          done();
+      _network.on('unhandledOfferResolved', function(contact, contract) {
+        expect(contract.get('data_hash')).to.equal(
+          'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc'
+        );
+        done();
+      });
+      setImmediate(function() {
+        proto.handleOffer({
+          contract: { data_hash: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
+          contact: {
+            address: '127.0.0.1',
+            port: 1337,
+            nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc'
+          }
+        }, function() {
+          _verify.restore();
         });
       });
     });
 
     it('should succeed and start consignment', function(done) {
       var _save = sinon.stub().callsArg(1);
-      var _doConsign = sinon.stub();
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
           storageManager: {
             save: _save
           },
-          _pendingContracts: {
-            adc83b19e793491b1c6ea0fd8b46cd9f32e592fc: _doConsign
+          offerManager: {
+            getStream: sinon.stub().returns(null)
           },
-          acceptOffer: function() {
-            _doConsign();
-          }
+          emit: sinon.stub()
         }
       });
       var _verify = sinon.stub(proto, '_verifyContract').callsArgWith(
@@ -181,10 +144,7 @@ describe('Protocol', function() {
       }, function(err) {
         _verify.restore();
         expect(err).to.equal(null);
-        setImmediate(function() {
-          expect(_doConsign.called).to.equal(true);
-          done();
-        });
+        setImmediate(done);
       });
     });
 
@@ -192,9 +152,7 @@ describe('Protocol', function() {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
-          _pendingContracts: {
-            adc83b19e793491b1c6ea0fd8b46cd9f32e592fc: function() {}
-          }
+          offerManager: { getStream: sinon.stub().returns({}) }
         }
       });
       var _verify = sinon.stub(proto, '_verifyContract').callsArgWith(
@@ -224,14 +182,14 @@ describe('Protocol', function() {
         network: {
           _logger: Logger(0),
           keyPair: KeyPair(),
-          _pendingContracts: {
-            adc83b19e793491b1c6ea0fd8b46cd9f32e592fc: function() {}
-          }
+          offerManager: { getStream: sinon.stub().returns({}) }
         }
       });
       var contract = {
         get: sinon.stub().returns('adc83b19e793491b1c6ea0fd8b46cd9f32e592fc'),
-        verify: sinon.stub().returns(false)
+        verify: sinon.stub().returns(false),
+        sign: sinon.stub(),
+        isComplete: sinon.stub().returns(true)
       };
       var contact = {
         address: '127.0.0.1',
@@ -249,9 +207,7 @@ describe('Protocol', function() {
         network: {
           _logger: Logger(0),
           keyPair: KeyPair(),
-          _pendingContracts: {
-            adc83b19e793491b1c6ea0fd8b46cd9f32e592fc: function() {}
-          }
+          offerManager: { getStream: sinon.stub().returns({}) }
         }
       });
       var contract = {
@@ -272,15 +228,15 @@ describe('Protocol', function() {
     });
 
     it('should fail if nodeID is blacklisted', function(done) {
-      var callback = utils.noop;
-      callback.blacklist = ['adc83b19e793491b1c6ea0fd8b46cd9f32e592fc'];
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
           keyPair: KeyPair(),
-          _pendingContracts: {
-            adc83b19e793491b1c6ea0fd8b46cd9f32e592fc: callback
-          }
+          offerManager: { getStream: sinon.stub().returns({
+            options: {
+              farmerBlacklist: ['adc83b19e793491b1c6ea0fd8b46cd9f32e592fc']
+            }
+          }) }
         }
       });
       var contract = {
@@ -305,8 +261,8 @@ describe('Protocol', function() {
         network: {
           _logger: Logger(0),
           keyPair: KeyPair(),
-          _pendingContracts: {},
           emit: sinon.stub(),
+          offerManager: { getStream: sinon.stub().returns(null) },
           listenerCount: sinon.stub().returns(0)
         }
       });
@@ -331,7 +287,9 @@ describe('Protocol', function() {
       var _network = new EventEmitter();
       _network._logger = Logger(0);
       _network.keyPair = KeyPair();
-      _network._pendingContracts = {};
+      _network.offerManager = { getStream: sinon.stub().returns({
+        options: { farmerBlacklist: [] }
+      }) };
       var proto = new Protocol({
         network: _network
       });
@@ -362,9 +320,9 @@ describe('Protocol', function() {
         network: {
           _logger: Logger(0),
           keyPair: KeyPair(),
-          _pendingContracts: {
-            adc83b19e793491b1c6ea0fd8b46cd9f32e592fc: pendingCb
-          }
+          offerManager: { getStream: sinon.stub().returns({
+            options: { farmerBlacklist: [] }
+          }) }
         }
       });
       var contract = {

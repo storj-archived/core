@@ -39,7 +39,7 @@ describe('RenterInterface', function() {
 
     it('should callback false if not awaiting offer', function(done) {
       RenterInterface.prototype.isAwaitingOffer.call({
-        _pendingContracts: { nope: sinon.stub() }
+        offerManager: { getStream: sinon.stub().returns(null) }
       }, 'test', function(err, isAwaiting) {
         expect(isAwaiting).to.equal(false);
         done();
@@ -48,7 +48,7 @@ describe('RenterInterface', function() {
 
     it('should callback true if awaiting offer', function(done) {
       RenterInterface.prototype.isAwaitingOffer.call({
-        _pendingContracts: { test: sinon.stub() }
+        offerManager: { getStream: sinon.stub().returns({}) }
       }, 'test', function(err, isAwaiting) {
         expect(isAwaiting).to.equal(true);
         done();
@@ -61,7 +61,7 @@ describe('RenterInterface', function() {
 
     it('should callback false if not awaiting offer', function(done) {
       RenterInterface.prototype.acceptOffer.call({
-        _pendingContracts: { nope: sinon.stub() },
+        offerManager: { getStream: sinon.stub().returns(null) },
         isAwaitingOffer: sinon.stub().callsArgWith(1, null, false)
       }, {}, {
         get: sinon.stub().returns('test')
@@ -73,7 +73,9 @@ describe('RenterInterface', function() {
 
     it('should callback true if awaiting offer', function(done) {
       RenterInterface.prototype.acceptOffer.call({
-        _pendingContracts: { test: sinon.stub() },
+        offerManager: { getStream: sinon.stub().returns({
+          addOfferToQueue: sinon.stub()
+        }) },
         isAwaitingOffer: sinon.stub().callsArgWith(1, null, true)
       }, {}, {
         get: sinon.stub().returns('test')
@@ -121,13 +123,13 @@ describe('RenterInterface', function() {
         storageManager: StorageManager(RAMStorageAdapter())
       });
       CLEANUP.push(renter);
-      var contract = Contract({});
+      var contract = Contract({ data_hash: utils.rmd160('') });
       var publish = sinon.stub(renter, 'publish');
       var callback = sinon.stub();
       renter.getStorageOffer(contract, callback);
-      expect(renter._pendingContracts[
-        Object.keys(renter._pendingContracts)[0]
-      ].blacklist).to.have.lengthOf(0);
+      expect(
+        renter.offerManager.getStream(utils.rmd160('')).options.farmerBlacklist
+      ).to.have.lengthOf(0);
       publish.restore();
     });
 
@@ -142,11 +144,11 @@ describe('RenterInterface', function() {
       });
       CLEANUP.push(renter);
       var clock = sinon.useFakeTimers();
-      var contract = Contract({});
+      var contract = Contract({ data_hash: utils.rmd160('') });
       var publish = sinon.stub(renter, 'publish');
       var callback = sinon.stub();
       renter.getStorageOffer(contract, [], callback);
-      renter._pendingContracts = {};
+      renter.offerManager.removeStream(utils.rmd160(''));
       clock.tick(15000);
       clock.restore();
       setImmediate(function() {

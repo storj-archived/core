@@ -1,6 +1,6 @@
 {
   "name": "storj-lib",
-  "version": "5.0.0",
+  "version": "4.1.0",
   "description": "implementation of the storj protocol for node.js and the browser",
   "main": "index.js",
   "directories": {
@@ -61,6 +61,7 @@
     "bitcore-ecies": "^1.0.1",
     "bitcore-lib": "^0.13.12",
     "bitcore-message": "^1.0.2",
+    "colors": "^1.1.2",
     "flushwritable": "^1.0.0",
     "ip": "^1.1.2",
     "jsen": "^0.6.0",

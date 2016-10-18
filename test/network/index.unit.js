@@ -578,20 +578,16 @@ describe('Network (private)', function() {
           'd015834341c775dcd4c0fac73547c5662d81a9e9361a0aac604a73a321bd9103b' +
           'ce8af';
 
-      var masterKey = HDKey.fromMasterSeed(
-        new Buffer(seed, 'hex'),
-        constants.HD_KEY_VERSIONS
-      );
-
-      var hdKey = masterKey.derive('m/73\'');
+      var masterKey = HDKey.fromMasterSeed(new Buffer(seed, 'hex'));
+      var hdKey = masterKey.derive('m/3000\'/0\'');
       var nodeHdKey = hdKey.deriveChild(10);
 
       var contact = Contact({
         address: '127.0.0.1',
         port: 1337,
         nodeID: '1261d3f171c23169c893a21be1f03bacafad26d7',
-        hdNodeKey: hdKey.publicExtendedKey,
-        hdNodeIndex: 10
+        hdKey: hdKey.publicExtendedKey,
+        hdIndex: 10
       });
 
       var kp = KeyPair(nodeHdKey.privateKey.toString('hex'));

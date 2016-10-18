@@ -322,7 +322,7 @@ describe('utils', function() {
 
   testIdCalculation();
 
-  describe('#isValidHDNodeID', function() {
+  describe('#isValidHDNodeKey', function() {
 
     it('will return false for a number', function() {
       expect(utils.isValidHDNodeKey(10000)).to.equal(false);
@@ -332,33 +332,39 @@ describe('utils', function() {
       expect(utils.isValidHDNodeKey({})).to.equal(false);
     });
 
+    it('will return false for non-base58 characters', function() {
+      var hdKey = 'xpub68Gmy5EdvgibQVfPdqkBBCHxA5htiqg55crXYuXoQRKfDBFA1WEjWg' +
+          'P6LHhwBZeNK1VTsfTFUHCdrfp1bgwQ9xv5ski8PX9rL2dZXvgGDn0';
+      expect(utils.isValidHDNodeKey(hdKey)).to.equal(false);
+    });
+
     it('will return true for extended public key string', function() {
-      var extendedPublicKey = 'spubXxUvVaAHwFoktwTozj4fZfK7zBdWobvXdi3T9Ujh89' +
-          'g3gsQNheGGhgi9twKBGaqgHuhUHX7aM8kPTWSkRLT9TqyQWdhwWZfUstxULsmXuDc5';
-      expect(utils.isValidHDNodeKey(extendedPublicKey)).to.equal(true);
+      var hdKey = 'xpub68Gmy5EdvgibQVfPdqkBBCHxA5htiqg55crXYuXoQRKfDBFA1WEjWg' +
+          'P6LHhwBZeNK1VTsfTFUHCdrfp1bgwQ9xv5ski8PX9rL2dZXvgGDnw';
+      expect(utils.isValidHDNodeKey(hdKey)).to.equal(true);
     });
   });
 
-  describe('#isValidInt32', function() {
+  describe('#isValidNodeIndex', function() {
 
     it('will return false for NaN', function() {
-      expect(utils.isValidInt32(NaN)).to.equal(false);
+      expect(utils.isValidNodeIndex(NaN)).to.equal(false);
     });
 
     it('will return false for Infinity', function() {
-      expect(utils.isValidInt32(Infinity)).to.equal(false);
+      expect(utils.isValidNodeIndex(Infinity)).to.equal(false);
     });
 
-    it('will return false for number greater than 2 ^ 32 - 1', function() {
-      expect(utils.isValidInt32(Math.pow(2, 32))).to.equal(false);
+    it('will return false for number greater than 2 ^ 31 - 1', function() {
+      expect(utils.isValidNodeIndex(Math.pow(2, 31))).to.equal(false);
     });
 
     it('will return false for number less than zero', function() {
-      expect(utils.isValidInt32(Math.pow(2, 32))).to.equal(false);
+      expect(utils.isValidNodeIndex(-10000)).to.equal(false);
     });
 
-    it('will return true for > 0 and < 2 ^ 32 - 1', function() {
-      expect(utils.isValidInt32(Math.pow(2, 32) - 1)).to.equal(true);
+    it('will return true for => 0 and <= 2 ^ 31 - 1', function() {
+      expect(utils.isValidNodeIndex(Math.pow(2, 31) - 1)).to.equal(true);
     });
   });
 

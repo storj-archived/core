@@ -24,56 +24,54 @@ describe('Network/Contact', function() {
       })).to.be.instanceOf(kad.contacts.AddressPortContact);
     });
 
-    it('should set the hdNodeKey and hdNodeIndex property', function() {
-      var hdNodeKey = '035f8a8f7153256b5605c5042a58f6efcbed57035d6aa18112ea6' +
-          '6740008bf022eb9baa8887cd044fa9bf7bb6c22f3c07eec22f8386a92e43f77ce' +
-          '1b5ed391ef6d';
+    it('should set the hdKey and hdIndex property', function() {
+      var hdKey = 'xpub6FnCn6nSzZAw5Tw7cgR9bi15UV96gLZhjDstkXXxvCLsUXBGXPdSnL' +
+          'Fbdpq8p9HmGsApME5hQTZ3emM2rnY5agb9rXpVGyy3bdW6EEgAtqt';
       var contact = Contact({
         address: '127.0.0.1',
         port: 1337,
         nodeID: '1261d3f171c23169c893a21be1f03bacafad26d7',
-        hdNodeKey: hdNodeKey,
-        hdNodeIndex: 10
+        hdKey: hdKey,
+        hdIndex: 10
       });
-      expect(contact.hdNodeKey).to.equal(hdNodeKey);
-      expect(contact.hdNodeIndex).to.equal(10);
+      expect(contact.hdKey).to.equal(hdKey);
+      expect(contact.hdIndex).to.equal(10);
     });
 
-    it('should assert hdNodeIndex with hdNodeKey', function() {
-      var hdNodeKey = '035f8a8f7153256b5605c5042a58f6efcbed57035d6aa18112ea6' +
-          '6740008bf022eb9baa8887cd044fa9bf7bb6c22f3c07eec22f8386a92e43f77ce' +
-          '1b5ed391ef6d';
+    it('should assert hdIndex with hdKey', function() {
+      var hdKey = 'xpub6FnCn6nSzZAw5Tw7cgR9bi15UV96gLZhjDstkXXxvCLsUXBGXPdSnL' +
+          'Fbdpq8p9HmGsApME5hQTZ3emM2rnY5agb9rXpVGyy3bdW6EEgAtqt';
       expect(function() {
         Contact({
           address: '127.0.0.1',
           port: 1337,
           nodeID: '1261d3f171c23169c893a21be1f03bacafad26d7',
-          hdNodeKey: hdNodeKey
+          hdKey: hdKey
         });
       }).to.throw(Error);
     });
 
-    it('should assert valid hdNodeIndex', function() {
+    it('should assert valid hdIndex', function() {
       expect(function() {
         Contact({
           address: '127.0.0.1',
           port: 1337,
           nodeID: '1261d3f171c23169c893a21be1f03bacafad26d7',
-          hdNodeKey: '035f8a8f7153256b5605c5042a58f6efcbed57035d6aa18112ea66' +
+          hdKey: '035f8a8f7153256b5605c5042a58f6efcbed57035d6aa18112ea66' +
             '740008bf022eb9baa8887cd044fa9bf7bb6c22f3c07eec22f8386a92e43f77c',
-          hdNodeIndex: -10
+          hdIndex: -10
         });
       }).to.throw(Error);
     });
 
-    it('should set hdNodeID and hdNodeIndex to undefined', function() {
+    it('should set hdKey and hdIndex to undefined', function() {
       var contact = Contact({
         address: '127.0.0.1',
         port: 1337,
         nodeID: '1261d3f171c23169c893a21be1f03bacafad26d7'
       });
-      expect(contact.hdNodeKey).to.equal(undefined);
-      expect(contact.hdNodeIndex).to.equal(undefined);
+      expect(contact.hdKey).to.equal(undefined);
+      expect(contact.hdIndex).to.equal(undefined);
     });
 
   });

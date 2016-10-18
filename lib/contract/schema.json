@@ -5,6 +5,14 @@
       "type": ["integer"],
       "minimum": 0
     },
+    "renter_hd_key": {
+      "type": ["string", "boolean"],
+      "pattern": "^[1-9a-km-zA-HJ-NP-Z]{1,111}$"
+    },
+    "renter_hd_index": {
+      "type": ["integer", "boolean"],
+      "minimum": 0
+    },
     "renter_id": {
       "type": ["string", "null"],
       "pattern": "[A-Fa-f0-9]{40}$"

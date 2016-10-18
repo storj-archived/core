@@ -158,6 +158,45 @@ describe('RenterInterface', function() {
       });
     });
 
+    it('should callback with the first queued offer', function(done) {
+      var keyPair = new KeyPair();
+      var renter = new RenterInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        storageManager: StorageManager(RAMStorageAdapter())
+      });
+      CLEANUP.push(renter);
+      var farmer = new KeyPair();
+      var contact = new Contact({
+        address: 'localhost',
+        port: 80,
+        nodeID: farmer.getNodeID()
+      });
+      var contract = new Contract({
+        data_hash: utils.rmd160(''),
+        renter_id: keyPair.getNodeID()
+      });
+      contract.sign('renter', keyPair.getPrivateKey());
+      var publish = sinon.stub(renter, 'publish');
+      renter.getStorageOffer(contract, function(err, contact, contract) {
+        publish.restore();
+        expect(contact).to.be.instanceOf(Contact);
+        expect(contract).to.be.instanceOf(Contract);
+        done();
+      });
+      setImmediate(function() {
+        contract.set('farmer_id', farmer.getNodeID());
+        contract.set('payment_destination', farmer.getAddress());
+        contract.sign('farmer', farmer.getPrivateKey());
+        renter.offerManager.getStream(
+          utils.rmd160('')
+        ).addOfferToQueue(contact, contract);
+      });
+    });
+
   });
 
   describe('#getStorageProof', function() {

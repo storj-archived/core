@@ -184,4 +184,33 @@ describe('OfferStream', function() {
 
   });
 
+  describe('#destroy', function() {
+
+    it('should empty queue, remove listeners, and set flag', function(done) {
+      var farmer = new KeyPair();
+      var contact = new Contact({
+        address: 'localhost',
+        port: 80,
+        nodeID: farmer.getNodeID()
+      });
+      var contract = Contract.fromObject(sampleContract.toObject());
+      contract.set('farmer_id', farmer.getNodeID());
+      contract.set('payment_destination', farmer.getAddress());
+      contract.sign('farmer', farmer.getPrivateKey());
+      var offerStream = new OfferStream(contract, { maxOffers: 0 });
+      offerStream.on('destroy', function() {
+        expect(offerStream._queue).to.have.lengthOf(0);
+        expect(offerStream._isDestroyed).to.equal(true);
+        setImmediate(function() {
+          expect(offerStream.listenerCount('destroy')).to.equal(0);
+          done();
+        });
+      });
+      setImmediate(function() {
+        offerStream.destroy();
+      });
+    });
+
+  });
+
 });

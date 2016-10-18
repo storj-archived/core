@@ -31,6 +31,44 @@ describe('Protocol', function() {
 
   describe('#handleOffer', function() {
 
+    it('should queue the offer if we are waiting for one', function(done) {
+      var farmerKeyPair = new KeyPair();
+      var _addOfferToQueue = sinon.stub();
+      var proto = new Protocol({
+        network: {
+          _logger: Logger(0),
+          offerManager: {
+            getStream: sinon.stub().returns({
+              addOfferToQueue: _addOfferToQueue,
+              options: { farmerBlacklist: [] }
+            })
+          },
+          keyPair: new KeyPair(),
+          listenerCount: sinon.stub().returns(0)
+        }
+      });
+      var contract = new Contract({
+        data_hash: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc',
+        renter_id: proto._network.keyPair.getNodeID(),
+        farmer_id: farmerKeyPair.getNodeID(),
+        payment_destination: farmerKeyPair.getAddress()
+      });
+      contract.sign('renter', proto._network.keyPair.getPrivateKey());
+      contract.sign('farmer', farmerKeyPair.getPrivateKey());
+      proto.handleOffer({
+        contract: contract.toObject(),
+        contact: {
+          address: '127.0.0.1',
+          port: 1337,
+          nodeID: farmerKeyPair.getNodeID()
+        }
+      }, function(err) {
+        expect(_addOfferToQueue.called).to.equal(true);
+        done();
+      });
+
+    });
+
     it('should fail if offers are locked', function(done) {
       var farmerKeyPair = new KeyPair();
       var proto = new Protocol({
@@ -280,6 +318,36 @@ describe('Protocol', function() {
       proto._verifyContract(contract, contact, function(err) {
         expect(err.message).to.equal('Contract no longer open to offers');
         done();
+      });
+    });
+
+    it('should emit unhandled offer', function(done) {
+      var network = new EventEmitter();
+      network._logger = Logger(0);
+      network.keyPair = KeyPair();
+      network.offerManager = { getStream: sinon.stub().returns(null) };
+      var proto = new Protocol({
+        network: network
+      });
+      var contract = {
+        get: sinon.stub().returns('adc83b19e793491b1c6ea0fd8b46cd9f32e592fc'),
+        verify: sinon.stub().returns(true),
+        isComplete: sinon.stub().returns(true),
+        sign: sinon.stub()
+      };
+      var contact = {
+        address: '127.0.0.1',
+        port: 1337,
+        nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc'
+      };
+      network.on('unhandledOffer', function(contact, contract, didResolve) {
+        console.log('butts')
+        didResolve();
+      });
+      setImmediate(function() {
+        proto._verifyContract(contract, contact, function() {
+          done();
+        });
       });
     });
 

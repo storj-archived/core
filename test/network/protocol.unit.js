@@ -624,6 +624,19 @@ describe('Protocol', function() {
     });
 
     it('should error if the consign is early or late', function(done) {
+      var contracts = {
+        adc83b19e793491b1c6ea0fd8b46cd9f32e592fc: {
+          get: function(key) {
+            if (key === 'renter_id') {
+              return 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc';
+            } else if (key === 'store_begin') {
+              return Date.now() + 200 + constants.CONSIGN_THRESHOLD;
+            } else {
+              return Date.now() + 400 + constants.CONSIGN_THRESHOLD;
+            }
+          }
+        }
+      };
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
@@ -632,18 +645,9 @@ describe('Protocol', function() {
               trees: {
                 adc83b19e793491b1c6ea0fd8b46cd9f32e592fc: null
               },
-              contracts: {
-                adc83b19e793491b1c6ea0fd8b46cd9f32e592fc: {
-                  get: function(key) {
-                    if (key === 'renter_id') {
-                      return 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc';
-                    } else if (key === 'store_begin') {
-                      return Date.now() + 200 + constants.CONSIGN_THRESHOLD;
-                    } else {
-                      return Date.now() + 400 + constants.CONSIGN_THRESHOLD;
-                    }
-                  }
-                }
+              contracts: contracts,
+              getContract: function(contact) {
+                return contracts[contact.nodeID];
               }
             })
           }
@@ -660,6 +664,19 @@ describe('Protocol', function() {
     });
 
     it('should error if it fails to save', function(done) {
+      var contracts = {
+        adc83b19e793491b1c6ea0fd8b46cd9f32e592fc: {
+          get: function(key) {
+            if (key === 'renter_id') {
+              return 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc';
+            } else if (key === 'store_begin') {
+              return Date.now() - 100;
+            } else {
+              return Date.now() + 100;
+            }
+          }
+        }
+      };
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
@@ -668,18 +685,9 @@ describe('Protocol', function() {
               trees: {
                 adc83b19e793491b1c6ea0fd8b46cd9f32e592fc: null
               },
-              contracts: {
-                adc83b19e793491b1c6ea0fd8b46cd9f32e592fc: {
-                  get: function(key) {
-                    if (key === 'renter_id') {
-                      return 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc';
-                    } else if (key === 'store_begin') {
-                      return Date.now() - 100;
-                    } else {
-                      return Date.now() + 100;
-                    }
-                  }
-                }
+              contracts: contracts,
+              getContract: function(contact) {
+                return contracts[contact.nodeID];
               }
             }),
             save: sinon.stub().callsArgWith(1, new Error('Failed'))
@@ -695,6 +703,19 @@ describe('Protocol', function() {
     });
 
     it('should accept the consignment and issue a token', function(done) {
+      var contracts = {
+        adc83b19e793491b1c6ea0fd8b46cd9f32e592fc: {
+          get: function(key) {
+            if (key === 'renter_id') {
+              return 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc';
+            } else if (key === 'store_begin') {
+              return Date.now() - 100;
+            } else {
+              return Date.now() + 100;
+            }
+          }
+        }
+      };
       var _accept = sinon.stub();
       var proto = new Protocol({
         network: {
@@ -707,18 +728,9 @@ describe('Protocol', function() {
               trees: {
                 adc83b19e793491b1c6ea0fd8b46cd9f32e592fc: null
               },
-              contracts: {
-                adc83b19e793491b1c6ea0fd8b46cd9f32e592fc: {
-                  get: function(key) {
-                    if (key === 'renter_id') {
-                      return 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc';
-                    } else if (key === 'store_begin') {
-                      return Date.now() - 100;
-                    } else {
-                      return Date.now() + 100;
-                    }
-                  }
-                }
+              contracts: contracts,
+              getContract: function(contact) {
+                return contracts[contact.nodeID];
               }
             }),
             save: sinon.stub().callsArgWith(1, null)
@@ -773,6 +785,9 @@ describe('Protocol', function() {
     });
 
     it('should issue a datachannel token', function(done) {
+      var contracts = {
+        nodeid: {}
+      };
       var _accept = sinon.stub();
       var proto = new Protocol({
         network: {
@@ -781,14 +796,22 @@ describe('Protocol', function() {
           },
           _logger: Logger(0),
           storageManager: {
-            load: sinon.stub().callsArgWith(1, null, { shard: {} })
-          }
+            load: sinon.stub().callsArgWith(1, null, {
+              shard: {},
+              getContract: function(contact) {
+                return contracts[contact.nodeID];
+              }
+            })
+          },
         }
       });
       proto.handleRetrieve({
         data_hash: utils.rmd160(''),
         contact: { nodeID: 'nodeid' }
       }, function(err, result) {
+        if (err) {
+          return done(err);
+        }
         expect(typeof result.token).to.equal('string');
         expect(_accept.called).to.equal(true);
         done();
@@ -796,13 +819,21 @@ describe('Protocol', function() {
     });
 
     it('should fail if data is not readable', function(done) {
+      var contracts = {
+        nodeid: {}
+      };
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
           storageManager: {
-            load: sinon.stub().callsArgWith(1, null, { shard: {
-              write: sinon.stub()
-            } })
+            load: sinon.stub().callsArgWith(1, null, {
+              shard: {
+                write: sinon.stub()
+              },
+              getContract: function(contact) {
+                return contracts[contact.nodeID];
+              }
+            })
           }
         }
       });
@@ -845,16 +876,20 @@ describe('Protocol', function() {
           return dcx;
         }
       });
+      var contracts = {
+        '4e1243bd22c66e76c2ba9eddc1f91394e57f9f83': {}
+      };
       var proto = new StubbedProtocol({
         network: {
           _logger: Logger(0),
           storageManager: {
             load: function(hash, callback) {
               callback(null, {
-                contracts: {
-                  '4e1243bd22c66e76c2ba9eddc1f91394e57f9f83': {}
-                },
-                shard: new WritableStream({ write: utils.noop })
+                contracts: contracts,
+                shard: new WritableStream({ write: utils.noop }),
+                getContract: function(contact) {
+                  return contracts[contact.nodeID];
+                }
               });
               setImmediate(function() {
                 dcx.emit('error', new Error('Failed to open channel'));
@@ -873,11 +908,17 @@ describe('Protocol', function() {
     });
 
     it('should error if no contract found', function(done) {
+      var contracts = {};
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
           storageManager: {
-            load: sinon.stub().callsArgWith(1, null, { contracts: {} })
+            load: sinon.stub().callsArgWith(1, null, {
+              contracts: {},
+              getContract: function(contact) {
+                return contracts[contact.nodeID];
+              }
+            })
           }
         }
       });
@@ -890,15 +931,19 @@ describe('Protocol', function() {
     });
 
     it('should callback immediately if shard already exists', function(done) {
+      var contracts = {
+        test: {}
+      };
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
           storageManager: {
             load: sinon.stub().callsArgWith(1, null, {
-              contracts: {
-                test: {}
-              },
-              shard: { read: sinon.stub() }
+              contracts: contracts,
+              shard: { read: sinon.stub() },
+              getContract: function(contact) {
+                return contracts[contact.nodeID];
+              }
             })
           }
         }
@@ -924,16 +969,20 @@ describe('Protocol', function() {
       });
       var _shard = new WritableStream({ write: utils.noop });
       _shard.destroy = sinon.stub();
+      var contracts = {
+        '4e1243bd22c66e76c2ba9eddc1f91394e57f9f83': {}
+      };
       var proto = new StubbedProtocol({
         network: {
           _logger: Logger(0),
           storageManager: {
             load: function(hash, callback) {
               callback(null, {
-                contracts: {
-                  '4e1243bd22c66e76c2ba9eddc1f91394e57f9f83': {}
-                },
-                shard: _shard
+                contracts: contracts,
+                shard: _shard,
+                getContract: function(contact) {
+                  return contracts[contact.nodeID];
+                }
               });
               setImmediate(function() {
                 dcx.emit('open');

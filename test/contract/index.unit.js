@@ -295,6 +295,14 @@ describe('Contract (public)', function() {
       expect(Contract().get('invalid_property')).to.equal(undefined);
     });
 
+    it('should return renter_hd_key and renter_hd_index', function() {
+      var hdKey = 'xpub6FnCn6nSzZAw5Tw7cgR9bi15UV96gLZhjDstkXXxvCLsUXBGXPdSnL' +
+          'Fbdpq8p9HmGsApME5hQTZ3emM2rnY5agb9rXpVGyy3bdW6EEgAtqt';
+      var contract = Contract({renter_hd_key: hdKey, renter_hd_index: 12});
+      expect(contract.get('renter_hd_key')).to.equal(hdKey);
+      expect(contract.get('renter_hd_index')).to.equal(12);
+    });
+
   });
 
   describe('#set', function() {

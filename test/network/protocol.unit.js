@@ -784,6 +784,27 @@ describe('Protocol', function() {
       });
     });
 
+    it('should error with unauthorized contact', function() {
+      var proto = new Protocol({
+        network: {
+          storageManager: {
+            load: sinon.stub().callsArgWith(1, null, {
+              getContract: function() {
+                return false;
+              }
+            })
+          }
+        }
+      });
+      proto.handleRetrieve({
+        data_hash: utils.rmd160(''),
+        contact: {}
+      }, function(err) {
+        expect(err).to.be.instanceOf(Error);
+        expect(err.message).to.equal('Retrieval is not authorized');
+      });
+    });
+
     it('should issue a datachannel token', function(done) {
       var contracts = {
         nodeid: {}

@@ -309,6 +309,14 @@ describe('Network (public)', function() {
 
 describe('Network (private)', function() {
 
+  var seed = 'a0c42a9c3ac6abf2ba6a9946ae83af18f51bf1c9fa7dacc4c92513cc4d' +
+      'd015834341c775dcd4c0fac73547c5662d81a9e9361a0aac604a73a321bd9103b' +
+      'ce8af';
+
+  var masterKey = HDKey.fromMasterSeed(new Buffer(seed, 'hex'));
+  var hdKey = masterKey.derive('m/3000\'/0\'');
+  var nodeHdKey = hdKey.deriveChild(10);
+
   describe('#_warnIfClockNotSynced', function() {
 
     it('should warn if there is an error with ntp server', function(done) {
@@ -565,7 +573,7 @@ describe('Network (private)', function() {
     it('should verify a signature with hd contact', function(done) {
       var verify = Network.prototype._verifySignature.bind({
         _pubkeys: {},
-        _recoverPublicKey: sinon.stub().returns('publickey'),
+        _recoverPublicKey: sinon.stub().returns([true, 'publickey']),
         _verifyHDKeyContact: sinon.stub().returns(true)
       });
 
@@ -574,14 +582,6 @@ describe('Network (private)', function() {
         id: '12345',
         params: {}
       };
-
-      var seed = 'a0c42a9c3ac6abf2ba6a9946ae83af18f51bf1c9fa7dacc4c92513cc4d' +
-          'd015834341c775dcd4c0fac73547c5662d81a9e9361a0aac604a73a321bd9103b' +
-          'ce8af';
-
-      var masterKey = HDKey.fromMasterSeed(new Buffer(seed, 'hex'));
-      var hdKey = masterKey.derive('m/3000\'/0\'');
-      var nodeHdKey = hdKey.deriveChild(10);
 
       var contact = Contact({
         address: '127.0.0.1',
@@ -613,7 +613,52 @@ describe('Network (private)', function() {
         expect(err).to.equal(null);
         done();
       });
+    });
 
+    it('should NOT verify a signature with hd contact', function(done) {
+      var verify = Network.prototype._verifySignature.bind({
+        _pubkeys: {},
+        _recoverPublicKey: sinon.stub().returns([true, 'publickey']),
+        _verifyHDKeyContact: sinon.stub().returns(false)
+      });
+
+      var msg = {
+        method: 'PING',
+        id: '12345',
+        params: {}
+      };
+
+      var contact = Contact({
+        address: '127.0.0.1',
+        port: 1337,
+        nodeID: '1261d3f171c23169c893a21be1f03bacafad26d7',
+        hdKey: hdKey.publicExtendedKey,
+        hdIndex: 10
+      });
+
+      var kp = KeyPair(nodeHdKey.privateKey.toString('hex'));
+
+      Network.prototype._signMessage.call({
+        keyPair: kp
+      }, msg, function() {});
+
+      verify({
+        signobj: Network.prototype._createSignatureObject(
+          msg.params.signature
+        ),
+        message: {
+          id: '12345',
+          params: { signature: msg.params.signature }
+        },
+        nonce: msg.params.nonce,
+        contact: contact,
+        signature: msg.params.signature,
+        address: kp.getAddress()
+      }, function(err) {
+        expect(err).to.be.instanceOf(Error);
+        expect(err.message).to.equal('Invalid derived public key');
+        done();
+      });
     });
 
   });

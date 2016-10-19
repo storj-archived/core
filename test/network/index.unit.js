@@ -4,6 +4,7 @@
 
 var sinon = require('sinon');
 var expect = require('chai').expect;
+var bitcore = require('bitcore-lib');
 var proxyquire = require('proxyquire');
 var EventEmitter = require('events').EventEmitter;
 var Network = proxyquire('../../lib/network', {
@@ -655,6 +656,87 @@ describe('Network (private)', function() {
         expect(typeof msg.result.nonce).to.equal('number');
         done();
       });
+    });
+
+  });
+
+  describe('#_recoverPublicKey', function() {
+    var sandbox = sinon.sandbox.create();
+    afterEach(function() {
+      sandbox.restore();
+    });
+
+    it('it will recover a public key from a signature', function() {
+      var signedmsg = bitcore.Message('hello');
+      var privkey = bitcore.PrivateKey();
+      var pubkey = privkey.toPublicKey();
+      var signature = signedmsg.sign(privkey);
+      var sig = bitcore.crypto.Signature.fromCompact(
+        new Buffer(signature, 'base64')
+      );
+      var options = {
+        signobj: sig
+      };
+      var recoverPublicKey = Network.prototype._recoverPublicKey.bind({});
+      var pubkeyRes = recoverPublicKey(options, signedmsg);
+      expect(pubkeyRes[0]).to.equal(true);
+      expect(pubkeyRes[1].toBuffer()).to.deep.equal(pubkey.toBuffer());
+    });
+
+    it('will handle an error from bitcore.ecdsa.toPublicKey', function() {
+      var signedmsg = bitcore.Message('hello');
+      var privkey = bitcore.PrivateKey();
+      var signature = signedmsg.sign(privkey);
+      var sig = bitcore.crypto.Signature.fromCompact(
+        new Buffer(signature, 'base64')
+      );
+      var options = {
+        signobj: sig
+      };
+      var err = new Error('test');
+      sandbox.stub(bitcore.crypto, 'ECDSA').returns({
+        magicHash: sinon.stub(),
+        toPublicKey: sinon.stub().throws(err)
+      });
+      var recoverPublicKey = Network.prototype._recoverPublicKey.bind({});
+      var pubkeyRes = recoverPublicKey(options, signedmsg);
+      expect(pubkeyRes[0]).to.equal(false);
+      expect(pubkeyRes[1]).to.equal(err);
+    });
+  });
+
+  describe('#_verifyHDKeyContact', function() {
+    var seed = 'a0c42a9c3ac6abf2ba6a9946ae83af18f51bf1c9fa7dacc4c92513cc4d' +
+        'd015834341c775dcd4c0fac73547c5662d81a9e9361a0aac604a73a321bd9103b' +
+        'ce8af';
+
+    var masterKey = HDKey.fromMasterSeed(new Buffer(seed, 'hex'));
+    var hdKey = masterKey.derive('m/3000\'/0\'');
+    var key2 = hdKey.deriveChild(12);
+    var publicKey = bitcore.PublicKey.fromString(key2.publicKey);
+
+    it('will return true if derived public key matches', function() {
+      var verify = Network.prototype._verifyHDKeyContact.bind({});
+      var contact = {
+        hdKey: hdKey.publicExtendedKey,
+        hdIndex: 12
+      };
+      expect(verify(contact, publicKey)).to.equal(true);
+    });
+
+    it('will return false if derived public key does not match', function() {
+      var verify = Network.prototype._verifyHDKeyContact.bind({});
+      var contact = {
+        hdKey: hdKey.publicExtendedKey,
+        hdIndex: 10
+      };
+      expect(verify(contact, publicKey)).to.equal(false);
+    });
+
+    it('will return true if contact does nat have hd contact', function() {
+      var verify = Network.prototype._verifyHDKeyContact.bind({});
+      var contact = {};
+      expect(verify(contact, publicKey)).to.equal(true);
     });
 
   });

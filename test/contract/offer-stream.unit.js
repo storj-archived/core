@@ -188,11 +188,6 @@ describe('OfferStream', function() {
 
     it('should empty queue, remove listeners, and set flag', function(done) {
       var farmer = new KeyPair();
-      var contact = new Contact({
-        address: 'localhost',
-        port: 80,
-        nodeID: farmer.getNodeID()
-      });
       var contract = Contract.fromObject(sampleContract.toObject());
       contract.set('farmer_id', farmer.getNodeID());
       contract.set('payment_destination', farmer.getAddress());

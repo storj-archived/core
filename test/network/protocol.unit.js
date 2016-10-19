@@ -62,7 +62,7 @@ describe('Protocol', function() {
           port: 1337,
           nodeID: farmerKeyPair.getNodeID()
         }
-      }, function(err) {
+      }, function() {
         expect(_addOfferToQueue.called).to.equal(true);
         done();
       });
@@ -341,7 +341,6 @@ describe('Protocol', function() {
         nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc'
       };
       network.on('unhandledOffer', function(contact, contract, didResolve) {
-        console.log('butts')
         didResolve();
       });
       setImmediate(function() {

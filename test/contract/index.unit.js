@@ -3,6 +3,7 @@
 var crypto = require('crypto');
 var expect = require('chai').expect;
 var Contract = require('../../lib/contract');
+var HDKey = require('hdkey');
 var KeyPair = require('../../lib/crypto-tools/keypair');
 var constants = require('../../lib/constants');
 var ms = require('ms');
@@ -188,6 +189,50 @@ describe('Contract (private)', function() {
       expect(function() {
         Contract({ version: -1 });
       }).to.throw(Error);
+    });
+
+    describe('hd keys', function() {
+      var seed = 'a0c42a9c3ac6abf2ba6a9946ae83af18f51bf1c9fa7dacc4c92513cc4d' +
+          'd015834341c775dcd4c0fac73547c5662d81a9e9361a0aac604a73a321bd9103b' +
+          'ce8af';
+      var masterKey = HDKey.fromMasterSeed(new Buffer(seed, 'hex'));
+      var hdKey = masterKey.derive('m/3000\'/0\'');
+      it('will validate with correct hd key and index', function() {
+        var contract = Contract({
+          renter_hd_key: hdKey.publicExtendedKey,
+          renter_hd_index: 12
+        });
+        expect(contract);
+      });
+      it('will not validate with non-base58 hdkey', function() {
+        expect(function() {
+          Contract({renter_hd_key: '0lI'});
+        }).to.throw(Error);
+      });
+      it('will not validate with negative hd index', function() {
+        expect(function() {
+          Contract({
+            renter_hd_key: hdKey.publicExtendedKey,
+            renter_hd_index: -1
+          });
+        }).to.throw(Error);
+      });
+      it('will not validate with hardened index', function() {
+        expect(function() {
+          Contract({
+            renter_hd_key: hdKey.publicExtendedKey,
+            renter_hd_index: Math.pow(2, 31)
+          });
+        }).to.throw(Error);
+      });
+      it.skip('will not validate with floating point index', function() {
+        expect(function() {
+          Contract({
+            renter_hd_key: hdKey.publicExtendedKey,
+            renter_hd_index: 3.14159
+          });
+        }).to.throw(Error);
+      });
     });
 
   });

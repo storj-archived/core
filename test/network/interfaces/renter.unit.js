@@ -13,6 +13,7 @@ var RAMStorageAdapter = require('../../../lib/storage/adapters/ram');
 var StorageManager = require('../../../lib/storage/manager');
 var AuditStream = require('../../../lib/audit-tools/audit-stream');
 var DataChannelPointer = require('../../../lib/data-channels/pointer');
+var OfferStream = require('../../../lib/contract/offer-stream');
 
 var CLEANUP = [];
 
@@ -83,6 +84,34 @@ describe('RenterInterface', function() {
         expect(didAcceptOffer).to.equal(true);
         done();
       });
+    });
+
+  });
+
+  describe('#getOfferStream', function() {
+
+    it('should create stream and add to manager, then publish', function() {
+      var kp = KeyPair();
+      var renter = new RenterInterface({
+        keyPair: kp,
+        rpcPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        tunnelServerPort: 0,
+        storageManager: StorageManager(RAMStorageAdapter())
+      });
+      CLEANUP.push(renter);
+      var contract = Contract({
+        data_hash: utils.rmd160(''),
+        renter_id: kp.getNodeID()
+      });
+      var publish = sinon.stub(renter, 'publish');
+      var offerStream = renter.getOfferStream(contract);
+      expect(offerStream).to.be.instanceOf(OfferStream);
+      expect(
+        Object.keys(renter.offerManager._offerStreams)
+      ).to.have.lengthOf(1);
+      expect(publish.called).to.equal(true);
     });
 
   });

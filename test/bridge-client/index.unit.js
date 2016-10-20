@@ -1207,6 +1207,9 @@ describe('BridgeClient', function() {
           }
         ]);
         _getFilePointers.onThirdCall().callsArgWith(1, null, []);
+        sinon.stub(client, 'getFileInfo').callsArgWith(2, null, {
+          size: 512 * 3
+        });
         sinon.stub(
           client,
           'createToken'
@@ -1214,7 +1217,7 @@ describe('BridgeClient', function() {
         sinon.stub(
           client,
           'resolveFileFromPointers'
-        ).callsArgWith(1, null, new stream.Readable({
+        ).callsArgWith(2, null, new stream.Readable({
           read: utils.noop
         }), { push: sinon.stub().callsArg(1) });
         client.createFileStream('bucket', 'file', {}, function(err, stream) {
@@ -1223,8 +1226,20 @@ describe('BridgeClient', function() {
         });
       });
 
+      it('should error if failed to get file info', function(done) {
+        var client = new BridgeClient();
+        sinon.stub(client, 'getFileInfo').callsArgWith(2, new Error('Failed'));
+        client.createFileStream('bucket', 'file', {}, function(err) {
+          expect(err.message).to.equal('Failed');
+          done();
+        });
+      });
+
       it('should error if failed to get token', function(done) {
         var client = new BridgeClient();
+        sinon.stub(client, 'getFileInfo').callsArgWith(2, null, {
+          size: 0
+        });
         var _createToken = sinon.stub(
           client,
           'createToken'
@@ -1238,6 +1253,9 @@ describe('BridgeClient', function() {
 
       it('should error if failed to get pointers', function(done) {
         var client = new BridgeClient();
+        sinon.stub(client, 'getFileInfo').callsArgWith(2, null, {
+          size: 512 * 3
+        });
         var _getFilePointers = sinon.stub(
           client,
           'getFilePointers'
@@ -1288,6 +1306,9 @@ describe('BridgeClient', function() {
             }
           }
         ]);
+        sinon.stub(client, 'getFileInfo').callsArgWith(2, null, {
+          size: 512 * 3
+        });
         _getFilePointers.onThirdCall().callsArgWith(1, null, []);
         var _createToken = sinon.stub(
           client,
@@ -1296,7 +1317,7 @@ describe('BridgeClient', function() {
         var _resolveFileFromPointers = sinon.stub(
           client,
           'resolveFileFromPointers'
-        ).callsArgWith(1, new Error('no bytez 4 u lol'));
+        ).callsArgWith(2, new Error('no bytez 4 u lol'));
         client.createFileStream('bucket', 'file', {}, function(err) {
           _createToken.restore();
           _getFilePointers.restore();
@@ -1312,6 +1333,9 @@ describe('BridgeClient', function() {
           client,
           'getFilePointers'
         );
+        sinon.stub(client, 'getFileInfo').callsArgWith(2, null, {
+          size: 512 * 3
+        });
         _getFilePointers.onFirstCall().callsArgWith(1, null, [
           {
             size: 512,
@@ -1354,7 +1378,7 @@ describe('BridgeClient', function() {
         sinon.stub(
           client,
           'resolveFileFromPointers'
-        ).callsArgWith(1, null, new stream.Readable({
+        ).callsArgWith(2, null, new stream.Readable({
           read: utils.noop
         }), { push: sinon.stub().callsArg(1) });
         client.createFileStream('bucket', 'file', {}, function(err, stream) {
@@ -1371,6 +1395,9 @@ describe('BridgeClient', function() {
           client,
           'getFilePointers'
         );
+        sinon.stub(client, 'getFileInfo').callsArgWith(2, null, {
+          size: 512 * 3
+        });
         _getFilePointers.onFirstCall().callsArgWith(1, null, [
           {
             size: 512,
@@ -1398,7 +1425,7 @@ describe('BridgeClient', function() {
           client,
           'resolveFileFromPointers'
         );
-        _resolveFile.onFirstCall().callsArgWith(1, null, new stream.Readable({
+        _resolveFile.onFirstCall().callsArgWith(2, null, new stream.Readable({
           read: utils.noop
         }), { push: sinon.stub().callsArg(1) });
         client.createFileStream('bucket', 'file', function(err, stream) {

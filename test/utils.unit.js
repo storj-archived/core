@@ -253,14 +253,18 @@ describe('utils', function() {
 
   describe('#tmpdir', function() {
 
-    it('should use STORJ_TEMP env if set', function() {
+    it('should default to os.tmpdir', function() {
       process.env.STORJ_TEMP = '';
       expect(utils.tmpdir()).to.equal(os.tmpdir());
     });
 
-    it('should trim the stream to the specified length', function() {
+    it('should use STORJ_TEMP env if set', function() {
       process.env.STORJ_TEMP = '/path/to/temp';
+      var _existsSync = sinon.stub(utils, 'existsSync', function() {
+        return true;
+      });
       expect(utils.tmpdir()).to.equal('/path/to/temp');
+      _existsSync.restore();
     });
 
   });

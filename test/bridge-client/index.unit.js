@@ -1522,7 +1522,10 @@ describe('BridgeClient', function() {
 
       it('should retry transfer if count less than 3', function(done) {
         var _transferStatus = new EventEmitter();
-        var client = new BridgeClient({ transferRetries: 3  });
+        var client = new BridgeClient(null, {
+          transferRetries: 3,
+          retryThrottle: 0
+        });
         var pointer = {
           farmer: {
             address: '127.0.0.1',
@@ -1537,7 +1540,8 @@ describe('BridgeClient', function() {
           client,
           '_shardTransferComplete'
         ).callsArg(2);
-        client._startTransfer(pointer, new EventEmitter(), {
+        var state = new EventEmitter();
+        client._startTransfer(pointer, state, {
           frame: 'frame',
           tmpName: 'tmpname',
           size: 0,
@@ -1551,12 +1555,12 @@ describe('BridgeClient', function() {
           expect(_transferShard.callCount).to.equal(2);
           done();
         });
-        setImmediate(function() {
+        setTimeout(function() {
           _transferStatus.emit('retry');
-          setImmediate(function() {
+          setTimeout(function() {
             _transferStatus.emit('finish');
-          });
-        });
+          }, 10);
+        }, 10);
       });
 
       it('should get a new contract if transfer fails 3 times', function(done) {
@@ -1803,7 +1807,7 @@ describe('BridgeClient', function() {
 
       it('should include email and password', function() {
         var client = new BridgeClient(null, {
-          basicauth: {
+          basicAuth: {
             email: 'gordon@storj.io',
             password: 'password'
           }

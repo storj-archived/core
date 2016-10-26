@@ -1640,6 +1640,51 @@ describe('BridgeClient', function() {
         });
       });
 
+      it('should not duplicate audit generation', function(done) {
+        var StubbedClient = proxyquire('../../lib/bridge-client', {
+          fs: {
+            createReadStream: function() {
+              var wasRead = false;
+              return new stream.Readable({
+                read: function() {
+                  if (wasRead) {
+                    return this.push(null);
+                  }
+
+                  wasRead = true;
+                  this.push(Buffer('test'));
+                }
+              });
+            }
+          }
+        });
+        var client = new StubbedClient();
+        var state = new UploadState({
+          worker: utils.noop
+        });
+        var _addShardToFileStagingFrame = sinon.stub(
+          client,
+          'addShardToFileStagingFrame',
+          function(id, data, cb) {
+            state.cleanup();
+            expect(data.challenges).to.equal('CHALLENGES');
+            expect(data.tree).to.equal('TREE');
+            cb();
+
+            return { cancel: sinon.stub() };
+          }
+        );
+        client._handleShardTmpFileFinish(state, {
+          frame: {},
+          hash: utils.sha256(''),
+          challenges: 'CHALLENGES',
+          tree: 'TREE'
+        }, function() {
+          _addShardToFileStagingFrame.restore();
+          done();
+        });
+      });
+
       it('should callback early if the queue is killed', function(done) {
         var StubbedClient = proxyquire('../../lib/bridge-client', {
           fs: {

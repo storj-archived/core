@@ -4,7 +4,7 @@
 
 var sinon = require('sinon');
 var expect = require('chai').expect;
-var bitcore = require('bitcore-lib');
+var secp256k1 = require('secp256k1');
 var proxyquire = require('proxyquire');
 var EventEmitter = require('events').EventEmitter;
 var Network = proxyquire('../../lib/network', {
@@ -34,6 +34,8 @@ var seed = 'a0c42a9c3ac6abf2ba6a9946ae83af18f51bf1c9fa7dacc4c92513cc4d' +
 var masterKey = HDKey.fromMasterSeed(new Buffer(seed, 'hex'));
 var hdKey = masterKey.derive('m/3000\'/0\'');
 var nodeHdKey = hdKey.deriveChild(10);
+
+var pub = '02ad47e0d4896cd794f5296a953f897c426b3f9a58f5203b8baace8952a291cf6b';
 
 describe('Network (public)', function() {
 
@@ -510,6 +512,10 @@ describe('Network (private)', function() {
   });
 
   describe('#_verifySignature', function() {
+    var sandbox = sinon.sandbox.create();
+    afterEach(function() {
+      sandbox.restore();
+    });
 
     it('should fail if no signobj supplied', function(done) {
       var verify = Network.prototype._verifySignature;
@@ -523,15 +529,14 @@ describe('Network (private)', function() {
     it('should pass if valid signature', function(done) {
       var verify = Network.prototype._verifySignature.bind({
         _pubkeys: {},
-        _recoverPublicKey: sinon.stub().returns([true, 'publickey']),
         _verifyHDKeyContact: sinon.stub().returns(true)
       });
+      var kp = KeyPair();
       var msg = {
         method: 'PING',
         id: '12345',
         params: {}
       };
-      var kp = KeyPair();
       Network.prototype._signMessage.call({
         keyPair: kp
       }, msg, function() {});
@@ -556,8 +561,8 @@ describe('Network (private)', function() {
     it('should fail if invalid signature', function(done) {
       var verify = Network.prototype._verifySignature.bind({
         _pubkeys: {},
-        _recoverPublicKey: sinon.stub().returns([true, 'publickey'])
       });
+      sandbox.stub(secp256k1, 'recover').returns(new Buffer(pub, 'hex'));
       var msg = {
         method: 'PING',
         id: '123456',
@@ -584,33 +589,26 @@ describe('Network (private)', function() {
       });
     });
 
-    it('should callback with error if #toPublicKey throws', function(done) {
-      var StubbedNetwork = proxyquire('../../lib/network', {
-        'bitcore-lib': {
-          crypto: {
-            Signature: {
-              fromCompact: sinon.stub().returns({})
-            }
-          }
-        }
-      });
+    it('should callback with error if secp256k1 throws', function(done) {
       var error = new Error('Something about points and curves...');
-      var verify = StubbedNetwork.prototype._verifySignature.bind({
-        _pubkeys: {},
-        _recoverPublicKey: sinon.stub().returns([false, error]),
+      sandbox.stub(secp256k1, 'recover').throws(error);
+      var verify = Network.prototype._verifySignature.bind({
+        _pubkeys: {}
       });
       var msg = {
         method: 'PING',
         id: '123456',
         params: {}
       };
-      StubbedNetwork.prototype._signMessage.call({
+      Network.prototype._signMessage.call({
         keyPair: KeyPair()
       }, msg, function() {});
+
+      var sigobj = Network.prototype._createSignatureObject(
+        msg.params.signature
+      );
       verify({
-        signobj: StubbedNetwork.prototype._createSignatureObject(
-          msg.params.signature
-        ),
+        signobj: sigobj,
         message: {
           id: '123456',
           method: 'PING',
@@ -629,7 +627,6 @@ describe('Network (private)', function() {
     it('should verify a signature with hd contact', function(done) {
       var verify = Network.prototype._verifySignature.bind({
         _pubkeys: {},
-        _recoverPublicKey: sinon.stub().returns([true, 'publickey']),
         _verifyHDKeyContact: sinon.stub().returns(true)
       });
 
@@ -674,7 +671,6 @@ describe('Network (private)', function() {
     it('should NOT verify a signature with hd contact', function(done) {
       var verify = Network.prototype._verifySignature.bind({
         _pubkeys: {},
-        _recoverPublicKey: sinon.stub().returns([true, 'publickey']),
         _verifyHDKeyContact: sinon.stub().returns(false)
       });
 
@@ -761,51 +757,6 @@ describe('Network (private)', function() {
 
   });
 
-  describe('#_recoverPublicKey', function() {
-    var sandbox = sinon.sandbox.create();
-    afterEach(function() {
-      sandbox.restore();
-    });
-
-    it('it will recover a public key from a signature', function() {
-      var signedmsg = bitcore.Message('hello');
-      var privkey = bitcore.PrivateKey();
-      var pubkey = privkey.toPublicKey();
-      var signature = signedmsg.sign(privkey);
-      var sig = bitcore.crypto.Signature.fromCompact(
-        new Buffer(signature, 'base64')
-      );
-      var options = {
-        signobj: sig
-      };
-      var recoverPublicKey = Network.prototype._recoverPublicKey.bind({});
-      var pubkeyRes = recoverPublicKey(options, signedmsg);
-      expect(pubkeyRes[0]).to.equal(true);
-      expect(pubkeyRes[1].toBuffer()).to.deep.equal(pubkey.toBuffer());
-    });
-
-    it('will handle an error from bitcore.ecdsa.toPublicKey', function() {
-      var signedmsg = bitcore.Message('hello');
-      var privkey = bitcore.PrivateKey();
-      var signature = signedmsg.sign(privkey);
-      var sig = bitcore.crypto.Signature.fromCompact(
-        new Buffer(signature, 'base64')
-      );
-      var options = {
-        signobj: sig
-      };
-      var err = new Error('test');
-      sandbox.stub(bitcore.crypto, 'ECDSA').returns({
-        magicHash: sinon.stub(),
-        toPublicKey: sinon.stub().throws(err)
-      });
-      var recoverPublicKey = Network.prototype._recoverPublicKey.bind({});
-      var pubkeyRes = recoverPublicKey(options, signedmsg);
-      expect(pubkeyRes[0]).to.equal(false);
-      expect(pubkeyRes[1]).to.equal(err);
-    });
-  });
-
   describe('#_verifyHDKeyContact', function() {
     var seed = 'a0c42a9c3ac6abf2ba6a9946ae83af18f51bf1c9fa7dacc4c92513cc4d' +
         'd015834341c775dcd4c0fac73547c5662d81a9e9361a0aac604a73a321bd9103b' +
@@ -814,10 +765,12 @@ describe('Network (private)', function() {
     var masterKey = HDKey.fromMasterSeed(new Buffer(seed, 'hex'));
     var hdKey = masterKey.derive('m/3000\'/0\'');
     var key2 = hdKey.deriveChild(12);
-    var publicKey = bitcore.PublicKey.fromString(key2.publicKey);
+    var publicKey = key2.publicKey;
 
     it('will return true if derived public key matches', function() {
-      var verify = Network.prototype._verifyHDKeyContact.bind({});
+      var verify = Network.prototype._verifyHDKeyContact.bind({
+        _hdcache: {}
+      });
       var contact = {
         hdKey: hdKey.publicExtendedKey,
         hdIndex: 12
@@ -826,7 +779,9 @@ describe('Network (private)', function() {
     });
 
     it('will return false if derived public key does not match', function() {
-      var verify = Network.prototype._verifyHDKeyContact.bind({});
+      var verify = Network.prototype._verifyHDKeyContact.bind({
+        _hdcache: {}
+      });
       var contact = {
         hdKey: hdKey.publicExtendedKey,
         hdIndex: 10
@@ -835,7 +790,9 @@ describe('Network (private)', function() {
     });
 
     it('will return true if contact does nat have hd contact', function() {
-      var verify = Network.prototype._verifyHDKeyContact.bind({});
+      var verify = Network.prototype._verifyHDKeyContact.bind({
+        _hdcache: {}
+      });
       var contact = {};
       expect(verify(contact, publicKey)).to.equal(true);
     });

@@ -430,6 +430,35 @@ describe('KeyRing', function() {
 
     });
 
+    describe('#generateBucketKey', function() {
+      var tmp = tmpfolder();
+      var hdKeyPath = path.join(tmp, 'key.ring', '.hd_key');
+      var kr = new KeyRing(tmp, 'password');
+      kr._mnemonic = 'test test test';
+      it('should generate the expected bucket key', function() {
+        var bucketId = '0123456789ab0123456789ab';
+        var bucketKey = kr.generateBucketKey(bucketId);
+        var bucketKeyStart = '9686b2cb328c9640bc';
+        expect(bucketKey.startsWith(bucketKeyStart)).to.equal(true);
+      });
+
+    });
+
+    describe('#generateFileKey', function() {
+      var tmp = tmpfolder();
+      var hdKeyPath = path.join(tmp, 'key.ring', '.hd_key');
+      var kr = new KeyRing(tmp, 'password');
+      kr._mnemonic = 'test test test';
+      it('should generate the expected file key', function() {
+        var bucketId = '0123456789ab';
+        var fileId = '0123456789ab';
+        var fileKey = kr.generateFileKey(bucketId, fileId);
+        var fileKeyStart = '10247c1d89170695ae7f1';
+        var fileKeyPassString = fileKey._pass.toString('hex');
+        expect(fileKeyPassString.startsWith(fileKeyStart)).to.equal(true);
+      });
+    });
+
   };
 
   testHDKeys();

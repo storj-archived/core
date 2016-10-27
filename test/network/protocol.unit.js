@@ -1465,4 +1465,228 @@ describe('Protocol', function() {
 
   });
 
+  describe('#handleRenew', function() {
+
+    it('should fail with no renter_id', function(done) {
+      var proto = new Protocol({
+        network: {}
+      });
+      proto.handleRenew({
+        contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' }
+      }, function(err, result) {
+        expect(err.message).to.equal('No original renter_id was supplied');
+        done();
+      });
+    });
+
+    it('should fail with no renter_signature', function(done) {
+      var proto = new Protocol({
+        network: {}
+      });
+      proto.handleRenew({
+        contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
+        renter_id: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc'
+      }, function(err, result) {
+        expect(err.message).to.equal(
+          'No original renter signature supplied'
+        );
+        done();
+      });
+    });
+
+    it('should fail if bad original renter signature', function(done) {
+      var proto = new Protocol({
+        network: {}
+      });
+      proto.handleRenew({
+        contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
+        renter_id: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc',
+        renter_signature: 'iamasignature'
+      }, function(err, result) {
+        expect(err.message).to.equal(
+          'Invalid original renter signature on updated contract'
+        );
+        done();
+      });
+    });
+
+    it('should fail if bad updated signature', function(done) {
+      var proto = new Protocol({
+        network: {}
+      });
+      var renterKp = new KeyPair();
+      var badKp = new KeyPair();
+      var contract = new Contract({
+        data_hash: utils.rmd160(''),
+        renter_id: renterKp.getNodeID()
+      });
+      contract.sign('renter', badKp.getPrivateKey());
+      proto.handleRenew({
+        contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
+        renter_id: renterKp.getNodeID(),
+        renter_signature: contract.signExternal(renterKp.getPrivateKey()),
+        contract: contract.toObject()
+      }, function(err, result) {
+        expect(err.message).to.equal(
+          'Invalid new renter signature on updated contract'
+        );
+        done();
+      });
+    });
+
+    it('should fail if storage manager cannot load item', function(done) {
+      var proto = new Protocol({
+        network: {
+          storageManager: {
+            load: sinon.stub().callsArgWith(1, new Error('Not found'))
+          }
+        }
+      });
+      var renterKp = new KeyPair();
+      var contract = new Contract({
+        data_hash: utils.rmd160(''),
+        renter_id: renterKp.getNodeID()
+      });
+      contract.sign('renter', renterKp.getPrivateKey());
+      proto.handleRenew({
+        contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
+        renter_id: renterKp.getNodeID(),
+        renter_signature: contract.signExternal(renterKp.getPrivateKey()),
+        contract: contract.toObject()
+      }, function(err, result) {
+        expect(err.message).to.equal('Not found');
+        done();
+      });
+    });
+
+    it('should fail if no contract for the original renter', function(done) {
+      var renterKp = new KeyPair();
+      var oldContract = new Contract({
+        data_hash: utils.rmd160(''),
+        renter_id: renterKp.getNodeID()
+      });
+      oldContract.sign('renter', renterKp.getPrivateKey());
+      var item = new StorageItem({ hash: utils.rmd160('') });
+      item.addContract({
+        nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc'
+      }, oldContract);
+      var proto = new Protocol({
+        network: {
+          storageManager: {
+            load: sinon.stub().callsArgWith(1, null, item)
+          }
+        }
+      });
+      proto.handleRenew({
+        contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
+        renter_id: renterKp.getNodeID(),
+        renter_signature: oldContract.signExternal(renterKp.getPrivateKey()),
+        contract: oldContract.toObject()
+      }, function(err, result) {
+        expect(err.message).to.equal('No contract found for renter_id');
+        done();
+      });
+    });
+
+    it('should fail if contract is modified illegally', function(done) {
+      var renterKp = new KeyPair();
+      var oldContract = new Contract({
+        data_hash: utils.rmd160(''),
+        renter_id: renterKp.getNodeID()
+      });
+      oldContract.sign('renter', renterKp.getPrivateKey());
+      var item = new StorageItem({ hash: utils.rmd160('') });
+      item.addContract({
+        nodeID: renterKp.getNodeID()
+      }, oldContract);
+      var proto = new Protocol({
+        network: {
+          storageManager: {
+            load: sinon.stub().callsArgWith(1, null, item)
+          }
+        }
+      });
+      var newContract = new Contract(oldContract.toObject());
+      newContract.set('payment_destination', renterKp.getAddress());
+      newContract.sign('renter', renterKp.getPrivateKey());
+      proto.handleRenew({
+        contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
+        renter_id: renterKp.getNodeID(),
+        renter_signature: newContract.signExternal(renterKp.getPrivateKey()),
+        contract: newContract.toObject()
+      }, function(err, result) {
+        expect(err.message).to.equal('payment_destination cannot be changed');
+        done();
+      });
+    });
+
+    it('should fail if manager cannot save updated item', function(done) {
+      var renterKp = new KeyPair();
+      var oldContract = new Contract({
+        data_hash: utils.rmd160(''),
+        renter_id: renterKp.getNodeID()
+      });
+      oldContract.sign('renter', renterKp.getPrivateKey());
+      var item = new StorageItem({ hash: utils.rmd160('') });
+      item.addContract({
+        nodeID: renterKp.getNodeID()
+      }, oldContract);
+      var proto = new Protocol({
+        network: {
+          keyPair: new KeyPair(),
+          storageManager: {
+            load: sinon.stub().callsArgWith(1, null, item),
+            save: sinon.stub().callsArgWith(1, new Error('Cannot save'))
+          }
+        }
+      });
+      var newContract = new Contract(oldContract.toObject());
+      proto.handleRenew({
+        contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
+        renter_id: renterKp.getNodeID(),
+        renter_signature: newContract.signExternal(renterKp.getPrivateKey()),
+        contract: newContract.toObject()
+      }, function(err, result) {
+        expect(err.message).to.equal('Failed to save updated contract');
+        done();
+      });
+    });
+
+    it('should succeed with signed updated contract', function(done) {
+      var renterKp = new KeyPair();
+      var oldContract = new Contract({
+        data_hash: utils.rmd160(''),
+        renter_id: renterKp.getNodeID()
+      });
+      var farmerKp = new KeyPair();
+      oldContract.sign('renter', renterKp.getPrivateKey());
+      var item = new StorageItem({ hash: utils.rmd160('') });
+      item.addContract({
+        nodeID: renterKp.getNodeID()
+      }, oldContract);
+      var proto = new Protocol({
+        network: {
+          keyPair: farmerKp,
+          storageManager: {
+            load: sinon.stub().callsArgWith(1, null, item),
+            save: sinon.stub().callsArg(1)
+          }
+        }
+      });
+      var newContract = new Contract(oldContract.toObject());
+      proto.handleRenew({
+        contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
+        renter_id: renterKp.getNodeID(),
+        renter_signature: newContract.signExternal(renterKp.getPrivateKey()),
+        contract: newContract.toObject()
+      }, function(err, result) {
+        expect(
+          Contract.compare(Contract(result.contract), newContract)
+        ).to.equal(true);
+        done();
+      });
+    });
+
+  });
+
 });

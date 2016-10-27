@@ -7,6 +7,7 @@ var HDKey = require('hdkey');
 var KeyPair = require('../../lib/crypto-tools/keypair');
 var constants = require('../../lib/constants');
 var ms = require('ms');
+var utils = require('../../lib/utils');
 
 var kp1 = new KeyPair();
 var kp2 = new KeyPair();
@@ -41,6 +42,19 @@ describe('Contract#compare', function() {
     var c1 = Contract.fromBuffer(new Buffer('{}'));
     var c2 = Contract.fromBuffer(new Buffer('{}'));
     expect(Contract.compare(c1, c2)).to.be.equal(true);
+  });
+
+});
+
+describe('Contract#diff', function() {
+
+  it('should return an array of differing properties', function() {
+    var diff = Contract.diff(
+      Contract({ data_hash: utils.rmd160('beep') }),
+      Contract({ data_hash: utils.rmd160('boop') })
+    );
+    expect(diff).to.have.lengthOf(1);
+    expect(diff[0]).to.equal('data_hash');
   });
 
 });

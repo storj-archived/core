@@ -72,7 +72,66 @@ describe('StorageItem', function() {
 
   });
 
+  describe('#removeContract', function() {
+
+    it('should delete the hd contract for the hd contact', function() {
+      var contact = new Contact({
+        address: '127.0.0.1',
+        port: 1336,
+        nodeID: keyPair.getNodeID(),
+        hdKey: hdKey.publicExtendedKey,
+        hdIndex: 10
+      });
+      var item = new StorageItem();
+      var contract = new Contract({
+        renter_hd_key: hdKey.publicExtendedKey,
+        renter_hd_index: 12,
+        renter_id: contact.nodeID,
+        data_size: 1234,
+        data_hash: utils.rmd160sha256(''),
+        store_begin: Date.now(),
+        store_end: Date.now() + 10000,
+        audit_count: 12
+      });
+      item.addContract(contact, contract);
+      item.removeContract(contact);
+      expect(item.getContract(contact)).to.equal(false);
+    });
+
+    it('should delete non-hd contract for the non-hd contact', function() {
+      var contact = new Contact({
+        address: '127.0.0.1',
+        port: 1336,
+        nodeID: keyPair.getNodeID()
+      });
+      var item = new StorageItem();
+      var contract = new Contract({
+        renter_id: contact.nodeID,
+        data_size: 1234,
+        data_hash: utils.rmd160sha256(''),
+        store_begin: Date.now(),
+        store_end: Date.now() + 10000,
+        audit_count: 12
+      });
+      item.addContract(contact, contract);
+      item.removeContract(contact);
+      expect(item.getContract(contact)).to.equal(false);
+    });
+
+    it('should not delete a contract not found', function() {
+      var contact = new Contact({
+        address: '127.0.0.1',
+        port: 1336,
+        nodeID: keyPair.getNodeID()
+      });
+      var item = new StorageItem();
+      expect(item.removeContract(contact)).to.equal(false);
+    });
+
+  });
+
   describe('#getContract', function() {
+
     it('should get the hd contract for the hd contact', function() {
       var contact = new Contact({
         address: '127.0.0.1',
@@ -95,6 +154,7 @@ describe('StorageItem', function() {
       item.addContract(contact, contract);
       expect(item.getContract(contact)).to.equal(contract);
     });
+
     it('should return non-hd contract for the non-hd contact', function() {
       var contact = new Contact({
         address: '127.0.0.1',
@@ -113,6 +173,7 @@ describe('StorageItem', function() {
       item.addContract(contact, contract);
       expect(item.getContract(contact)).to.equal(contract);
     });
+
     it('should not return a contract non-hd', function() {
       var contact = new Contact({
         address: '127.0.0.1',
@@ -131,6 +192,7 @@ describe('StorageItem', function() {
       item.addContract(contact, contract);
       expect(item.getContract({nodeID: KeyPair().getNodeID()})).to.equal(false);
     });
+
     it('should not return an hd contract', function() {
       var contact = new Contact({
         address: '127.0.0.1',
@@ -163,6 +225,7 @@ describe('StorageItem', function() {
       item.addContract(contact, contract);
       expect(item.getContract(otherContact)).to.equal(false);
     });
+
     it('should return an hd contract with sibling contact', function() {
       var contact = new Contact({
         address: '127.0.0.1',
@@ -195,6 +258,7 @@ describe('StorageItem', function() {
       item.addContract(contact, contract);
       expect(item.getContract(siblingContact)).to.equal(contract);
     });
+
   });
 
   describe('#addAuditRecords', function() {

@@ -1473,7 +1473,7 @@ describe('Protocol', function() {
       });
       proto.handleRenew({
         contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' }
-      }, function(err, result) {
+      }, function(err) {
         expect(err.message).to.equal('No original renter_id was supplied');
         done();
       });
@@ -1486,7 +1486,7 @@ describe('Protocol', function() {
       proto.handleRenew({
         contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
         renter_id: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc'
-      }, function(err, result) {
+      }, function(err) {
         expect(err.message).to.equal(
           'No original renter signature supplied'
         );
@@ -1502,7 +1502,7 @@ describe('Protocol', function() {
         contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
         renter_id: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc',
         renter_signature: 'iamasignature'
-      }, function(err, result) {
+      }, function(err) {
         expect(err.message).to.equal(
           'Invalid original renter signature on updated contract'
         );
@@ -1526,7 +1526,7 @@ describe('Protocol', function() {
         renter_id: renterKp.getNodeID(),
         renter_signature: contract.signExternal(renterKp.getPrivateKey()),
         contract: contract.toObject()
-      }, function(err, result) {
+      }, function(err) {
         expect(err.message).to.equal(
           'Invalid new renter signature on updated contract'
         );
@@ -1553,7 +1553,7 @@ describe('Protocol', function() {
         renter_id: renterKp.getNodeID(),
         renter_signature: contract.signExternal(renterKp.getPrivateKey()),
         contract: contract.toObject()
-      }, function(err, result) {
+      }, function(err) {
         expect(err.message).to.equal('Not found');
         done();
       });
@@ -1582,7 +1582,7 @@ describe('Protocol', function() {
         renter_id: renterKp.getNodeID(),
         renter_signature: oldContract.signExternal(renterKp.getPrivateKey()),
         contract: oldContract.toObject()
-      }, function(err, result) {
+      }, function(err) {
         expect(err.message).to.equal('No contract found for renter_id');
         done();
       });
@@ -1614,7 +1614,7 @@ describe('Protocol', function() {
         renter_id: renterKp.getNodeID(),
         renter_signature: newContract.signExternal(renterKp.getPrivateKey()),
         contract: newContract.toObject()
-      }, function(err, result) {
+      }, function(err) {
         expect(err.message).to.equal('payment_destination cannot be changed');
         done();
       });
@@ -1646,7 +1646,7 @@ describe('Protocol', function() {
         renter_id: renterKp.getNodeID(),
         renter_signature: newContract.signExternal(renterKp.getPrivateKey()),
         contract: newContract.toObject()
-      }, function(err, result) {
+      }, function(err) {
         expect(err.message).to.equal('Failed to save updated contract');
         done();
       });

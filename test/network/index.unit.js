@@ -27,6 +27,14 @@ var async = require('async');
 var _ntp = null;
 var CLEANUP = [];
 
+var seed = 'a0c42a9c3ac6abf2ba6a9946ae83af18f51bf1c9fa7dacc4c92513cc4d' +
+    'd015834341c775dcd4c0fac73547c5662d81a9e9361a0aac604a73a321bd9103b' +
+    'ce8af';
+
+var masterKey = HDKey.fromMasterSeed(new Buffer(seed, 'hex'));
+var hdKey = masterKey.derive('m/3000\'/0\'');
+var nodeHdKey = hdKey.deriveChild(10);
+
 describe('Network (public)', function() {
 
   before(function() {
@@ -51,6 +59,24 @@ describe('Network (public)', function() {
       });
       CLEANUP.push(net);
       expect(net).to.be.instanceOf(Network);
+    });
+
+    it('should create network with SIP32 contact', function() {
+      var net = Network({
+        hdKey: hdKey.privateExtendedKey,
+        hdIndex: 10,
+        storageManager: Manager(RAMStorageAdapter()),
+        logger: kad.Logger(0),
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
+      });
+      CLEANUP.push(net);
+      expect(net).to.be.instanceOf(Network);
+      expect(net.contact.hdKey).to.equal(hdKey.publicExtendedKey);
+      expect(net.contact.hdIndex).to.equal(10);
     });
 
   });
@@ -309,14 +335,6 @@ describe('Network (public)', function() {
 
 describe('Network (private)', function() {
 
-  var seed = 'a0c42a9c3ac6abf2ba6a9946ae83af18f51bf1c9fa7dacc4c92513cc4d' +
-      'd015834341c775dcd4c0fac73547c5662d81a9e9361a0aac604a73a321bd9103b' +
-      'ce8af';
-
-  var masterKey = HDKey.fromMasterSeed(new Buffer(seed, 'hex'));
-  var hdKey = masterKey.derive('m/3000\'/0\'');
-  var nodeHdKey = hdKey.deriveChild(10);
-
   describe('#_warnIfClockNotSynced', function() {
 
     it('should warn if there is an error with ntp server', function(done) {
@@ -338,6 +356,44 @@ describe('Network (private)', function() {
         expect(_warn.called).to.equal(true);
         done();
       });
+    });
+
+  });
+
+  describe('#_initKeyPair', function() {
+
+    it('it will derive keyPair and set hdKey and hdIndex', function() {
+      var obj = {};
+      var initKeyPair = Network.prototype._initKeyPair.bind(obj);
+      initKeyPair({
+        hdKey: hdKey.privateExtendedKey,
+        hdIndex: 3
+      });
+      expect(obj.hdKey).to.be.instanceOf(HDKey);
+      expect(obj.hdIndex).to.equal(3);
+      expect(obj.keyPair).to.be.instanceOf(KeyPair);
+    });
+
+    it('it will fail if given public extended key', function() {
+      var obj = {};
+      var initKeyPair = Network.prototype._initKeyPair.bind(obj);
+      expect(function() {
+        initKeyPair({
+          hdKey: hdKey.publicExtendedKey,
+          hdIndex: 3
+        });
+      }).to.throw(Error);
+    });
+
+    it('it will set keyPair', function() {
+      var keyPair = new KeyPair();
+      var obj = {};
+      var initKeyPair = Network.prototype._initKeyPair.bind(obj);
+      initKeyPair({
+        keyPair: keyPair
+      });
+      expect(obj.keyPair).to.be.instanceOf(KeyPair);
+      expect(obj.keyPair).to.equal(keyPair);
     });
 
   });

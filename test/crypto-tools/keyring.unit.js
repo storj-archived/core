@@ -438,7 +438,6 @@ describe('KeyRing', function() {
 
     describe('#generateBucketKey', function() {
       var tmp = tmpfolder();
-      var hdKeyPath = path.join(tmp, 'key.ring', '.hd_key');
       var kr = new KeyRing(tmp, 'password');
       kr._mnemonic = 'test test test';
       it('should generate the expected bucket key', function() {
@@ -459,7 +458,6 @@ describe('KeyRing', function() {
 
     describe('#generateFileKey', function() {
       var tmp = tmpfolder();
-      var hdKeyPath = path.join(tmp, 'key.ring', '.hd_key');
       var kr = new KeyRing(tmp, 'password');
       kr._mnemonic = 'test test test';
       it('should generate the expected file key', function() {
@@ -472,7 +470,7 @@ describe('KeyRing', function() {
       });
 
       it('should generate a random file key', function() {
-        kr._mnemonic = null
+        kr._mnemonic = null;
         var bucketId = '0123456789ab';
         var fileId = '0123456789ab';
         var fileKey = kr.generateFileKey(bucketId, fileId);

@@ -13,6 +13,7 @@ var RAMStorageAdapter = require('../../../lib/storage/adapters/ram');
 var StorageManager = require('../../../lib/storage/manager');
 var AuditStream = require('../../../lib/audit-tools/audit-stream');
 var DataChannelPointer = require('../../../lib/data-channels/pointer');
+var OfferStream = require('../../../lib/contract/offer-stream');
 
 var CLEANUP = [];
 
@@ -39,7 +40,7 @@ describe('RenterInterface', function() {
 
     it('should callback false if not awaiting offer', function(done) {
       RenterInterface.prototype.isAwaitingOffer.call({
-        _pendingContracts: { nope: sinon.stub() }
+        offerManager: { getStream: sinon.stub().returns(null) }
       }, 'test', function(err, isAwaiting) {
         expect(isAwaiting).to.equal(false);
         done();
@@ -48,7 +49,7 @@ describe('RenterInterface', function() {
 
     it('should callback true if awaiting offer', function(done) {
       RenterInterface.prototype.isAwaitingOffer.call({
-        _pendingContracts: { test: sinon.stub() }
+        offerManager: { getStream: sinon.stub().returns({}) }
       }, 'test', function(err, isAwaiting) {
         expect(isAwaiting).to.equal(true);
         done();
@@ -61,7 +62,7 @@ describe('RenterInterface', function() {
 
     it('should callback false if not awaiting offer', function(done) {
       RenterInterface.prototype.acceptOffer.call({
-        _pendingContracts: { nope: sinon.stub() },
+        offerManager: { getStream: sinon.stub().returns(null) },
         isAwaitingOffer: sinon.stub().callsArgWith(1, null, false)
       }, {}, {
         get: sinon.stub().returns('test')
@@ -73,7 +74,9 @@ describe('RenterInterface', function() {
 
     it('should callback true if awaiting offer', function(done) {
       RenterInterface.prototype.acceptOffer.call({
-        _pendingContracts: { test: sinon.stub() },
+        offerManager: { getStream: sinon.stub().returns({
+          addOfferToQueue: sinon.stub()
+        }) },
         isAwaitingOffer: sinon.stub().callsArgWith(1, null, true)
       }, {}, {
         get: sinon.stub().returns('test')
@@ -81,6 +84,34 @@ describe('RenterInterface', function() {
         expect(didAcceptOffer).to.equal(true);
         done();
       });
+    });
+
+  });
+
+  describe('#getOfferStream', function() {
+
+    it('should create stream and add to manager, then publish', function() {
+      var kp = KeyPair();
+      var renter = new RenterInterface({
+        keyPair: kp,
+        rpcPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        tunnelServerPort: 0,
+        storageManager: StorageManager(RAMStorageAdapter())
+      });
+      CLEANUP.push(renter);
+      var contract = Contract({
+        data_hash: utils.rmd160(''),
+        renter_id: kp.getNodeID()
+      });
+      var publish = sinon.stub(renter, 'publish');
+      var offerStream = renter.getOfferStream(contract);
+      expect(offerStream).to.be.instanceOf(OfferStream);
+      expect(
+        Object.keys(renter.offerManager._offerStreams)
+      ).to.have.lengthOf(1);
+      expect(publish.called).to.equal(true);
     });
 
   });
@@ -121,13 +152,13 @@ describe('RenterInterface', function() {
         storageManager: StorageManager(RAMStorageAdapter())
       });
       CLEANUP.push(renter);
-      var contract = Contract({});
+      var contract = Contract({ data_hash: utils.rmd160('') });
       var publish = sinon.stub(renter, 'publish');
       var callback = sinon.stub();
       renter.getStorageOffer(contract, callback);
-      expect(renter._pendingContracts[
-        Object.keys(renter._pendingContracts)[0]
-      ].blacklist).to.have.lengthOf(0);
+      expect(
+        renter.offerManager.getStream(utils.rmd160('')).options.farmerBlacklist
+      ).to.have.lengthOf(0);
       publish.restore();
     });
 
@@ -142,17 +173,56 @@ describe('RenterInterface', function() {
       });
       CLEANUP.push(renter);
       var clock = sinon.useFakeTimers();
-      var contract = Contract({});
+      var contract = Contract({ data_hash: utils.rmd160('') });
       var publish = sinon.stub(renter, 'publish');
       var callback = sinon.stub();
       renter.getStorageOffer(contract, [], callback);
-      renter._pendingContracts = {};
+      renter.offerManager.removeStream(utils.rmd160(''));
       clock.tick(15000);
       clock.restore();
       setImmediate(function() {
         publish.restore();
         expect(callback.called).to.equal(false);
         done();
+      });
+    });
+
+    it('should callback with the first queued offer', function(done) {
+      var keyPair = new KeyPair();
+      var renter = new RenterInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        storageManager: StorageManager(RAMStorageAdapter())
+      });
+      CLEANUP.push(renter);
+      var farmer = new KeyPair();
+      var contact = new Contact({
+        address: 'localhost',
+        port: 80,
+        nodeID: farmer.getNodeID()
+      });
+      var contract = new Contract({
+        data_hash: utils.rmd160(''),
+        renter_id: keyPair.getNodeID()
+      });
+      contract.sign('renter', keyPair.getPrivateKey());
+      var publish = sinon.stub(renter, 'publish');
+      renter.getStorageOffer(contract, function(err, contact, contract) {
+        publish.restore();
+        expect(contact).to.be.instanceOf(Contact);
+        expect(contract).to.be.instanceOf(Contract);
+        done();
+      });
+      setImmediate(function() {
+        contract.set('farmer_id', farmer.getNodeID());
+        contract.set('payment_destination', farmer.getAddress());
+        contract.sign('farmer', farmer.getPrivateKey());
+        renter.offerManager.getStream(
+          utils.rmd160('')
+        ).addOfferToQueue(contact, contract);
       });
     });
 

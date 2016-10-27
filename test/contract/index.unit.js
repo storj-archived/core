@@ -166,11 +166,11 @@ describe('Contract (private)', function() {
 
   });
 
-  describe('#_getSigningData', function() {
+  describe('#getSigningData', function() {
 
     it('should remove the signature fields', function() {
       var contract = new Contract();
-      var signingObject = JSON.parse(contract._getSigningData());
+      var signingObject = JSON.parse(contract.getSigningData());
       expect(signingObject.farmer_signature).to.equal(undefined);
       expect(signingObject.renter_signature).to.equal(undefined);
     });

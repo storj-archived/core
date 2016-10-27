@@ -62,7 +62,6 @@
     "bitcore-ecies": "^1.0.1",
     "bitcore-lib": "^0.13.12",
     "bitcore-message": "^1.0.2",
-    "colors": "^1.1.2",
     "flushwritable": "^1.0.0",
     "hdkey": "^0.7.1",
     "ip": "^1.1.2",

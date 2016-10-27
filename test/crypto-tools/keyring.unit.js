@@ -159,6 +159,12 @@ describe('KeyRing', function() {
       expect(kr.get('wrong')).to.equal(null);
     });
 
+    it('should return a generated key if mnemonic exists', function() {
+      var kr = new KeyRing(tmpfolder());
+      kr._mnemonic = 'test test test';
+      expect(kr.get('wrong')).to.not.equal(null);
+    });
+
   });
 
   describe('#export', function() {
@@ -442,6 +448,13 @@ describe('KeyRing', function() {
         expect(bucketKey.startsWith(bucketKeyStart)).to.equal(true);
       });
 
+      it('should return null without mnemonic', function() {
+        kr._mnemonic = null;
+        var bucketId = '0123456789ab0123456789ab';
+        var bucketKey = kr.generateBucketKey(bucketId);
+        expect(bucketKey).to.equal(null);
+      });
+
     });
 
     describe('#generateFileKey', function() {
@@ -457,6 +470,17 @@ describe('KeyRing', function() {
         var fileKeyPassString = fileKey._pass.toString('hex');
         expect(fileKeyPassString.startsWith(fileKeyStart)).to.equal(true);
       });
+
+      it('should generate a random file key', function() {
+        kr._mnemonic = null
+        var bucketId = '0123456789ab';
+        var fileId = '0123456789ab';
+        var fileKey = kr.generateFileKey(bucketId, fileId);
+        var fileKeyStart = '10247c1d89170695ae7f1';
+        var fileKeyPassString = fileKey._pass.toString('hex');
+        expect(fileKeyPassString).to.not.equal(fileKeyStart);
+      });
+
     });
 
   };

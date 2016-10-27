@@ -65,7 +65,7 @@
     "flushwritable": "^1.0.0",
     "hdkey": "^0.7.1",
     "ip": "^1.1.2",
-    "jsen": "^0.6.4",
+    "jsen": "bugventure/jsen#9e57a9d653ff4ea47d364fc37da0f1659bfb8e89",
     "json-stable-stringify": "^1.0.1",
     "kad": "^1.5.20",
     "kad-logger-json": "^0.1.2",

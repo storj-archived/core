@@ -225,7 +225,7 @@ describe('Contract (private)', function() {
           });
         }).to.throw(Error);
       });
-      it.skip('will not validate with floating point index', function() {
+      it('will not validate with floating point index', function() {
         expect(function() {
           Contract({
             renter_hd_key: hdKey.publicExtendedKey,

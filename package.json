@@ -58,7 +58,6 @@
   },
   "dependencies": {
     "async": "^1.5.2",
-    "benchmark": "^2.1.1",
     "bitcore-ecies": "^1.0.1",
     "bitcore-lib": "^0.13.12",
     "bitcore-message": "^1.0.2",
@@ -95,6 +94,7 @@
     "ws": "^1.1.0"
   },
   "devDependencies": {
+    "benchmark": "^2.1.1",
     "browserify": "^11.1.0",
     "chai": "^2.2.0",
     "coveralls": "^2.11.2",

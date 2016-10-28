@@ -620,7 +620,7 @@ describe('FarmerInterface', function() {
         result: {
           contract: Contract({}).toObject()
         }
-      }, new Contract(), {});
+      }, new Contract(), {nodeID: 'nodeid'});
       setImmediate(function() {
         _load.restore();
         _save.restore();

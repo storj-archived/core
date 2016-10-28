@@ -1522,7 +1522,10 @@ describe('BridgeClient', function() {
 
       it('should retry transfer if count less than 3', function(done) {
         var _transferStatus = new EventEmitter();
-        var client = new BridgeClient({ transferRetries: 3  });
+        var client = new BridgeClient(null, {
+          transferRetries: 3,
+          retryThrottle: 0
+        });
         var pointer = {
           farmer: {
             address: '127.0.0.1',
@@ -1537,7 +1540,8 @@ describe('BridgeClient', function() {
           client,
           '_shardTransferComplete'
         ).callsArg(2);
-        client._startTransfer(pointer, new EventEmitter(), {
+        var state = new EventEmitter();
+        client._startTransfer(pointer, state, {
           frame: 'frame',
           tmpName: 'tmpname',
           size: 0,
@@ -1551,12 +1555,12 @@ describe('BridgeClient', function() {
           expect(_transferShard.callCount).to.equal(2);
           done();
         });
-        setImmediate(function() {
+        setTimeout(function() {
           _transferStatus.emit('retry');
-          setImmediate(function() {
+          setTimeout(function() {
             _transferStatus.emit('finish');
-          });
-        });
+          }, 10);
+        }, 10);
       });
 
       it('should get a new contract if transfer fails 3 times', function(done) {
@@ -1630,6 +1634,51 @@ describe('BridgeClient', function() {
         client._handleShardTmpFileFinish(state, {
           frame: {},
           hash: utils.sha256('')
+        }, function() {
+          _addShardToFileStagingFrame.restore();
+          done();
+        });
+      });
+
+      it('should not duplicate audit generation', function(done) {
+        var StubbedClient = proxyquire('../../lib/bridge-client', {
+          fs: {
+            createReadStream: function() {
+              var wasRead = false;
+              return new stream.Readable({
+                read: function() {
+                  if (wasRead) {
+                    return this.push(null);
+                  }
+
+                  wasRead = true;
+                  this.push(Buffer('test'));
+                }
+              });
+            }
+          }
+        });
+        var client = new StubbedClient();
+        var state = new UploadState({
+          worker: utils.noop
+        });
+        var _addShardToFileStagingFrame = sinon.stub(
+          client,
+          'addShardToFileStagingFrame',
+          function(id, data, cb) {
+            state.cleanup();
+            expect(data.challenges).to.equal('CHALLENGES');
+            expect(data.tree).to.equal('TREE');
+            cb();
+
+            return { cancel: sinon.stub() };
+          }
+        );
+        client._handleShardTmpFileFinish(state, {
+          frame: {},
+          hash: utils.sha256(''),
+          challenges: 'CHALLENGES',
+          tree: 'TREE'
         }, function() {
           _addShardToFileStagingFrame.restore();
           done();
@@ -1803,7 +1852,7 @@ describe('BridgeClient', function() {
 
       it('should include email and password', function() {
         var client = new BridgeClient(null, {
-          basicauth: {
+          basicAuth: {
             email: 'gordon@storj.io',
             password: 'password'
           }

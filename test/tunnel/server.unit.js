@@ -31,6 +31,26 @@ describe('TunnelServer', function() {
 
   });
 
+  describe('#open', function() {
+
+    it('should callback on the ready event if callback given', function(done) {
+      var wsServer = new EventEmitter();
+      var httpServer = new EventEmitter();
+      wsServer._server = httpServer;
+      var StubbedTunnelServer = proxyquire('../../lib/tunnel/server', {
+        ws: {
+          Server: sinon.stub().returns(wsServer)
+        }
+      });
+      var tunnelServer = new StubbedTunnelServer({ autoBindServer: false });
+      tunnelServer.open(done);
+      setImmediate(function() {
+        httpServer.emit('listening');
+      });
+    });
+
+  });
+
   describe('#close', function() {
 
     it('should bubble error if failed to close', function(done) {

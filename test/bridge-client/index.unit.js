@@ -1753,6 +1753,7 @@ describe('BridgeClient', function() {
         var fakeState = {
           completed: 1,
           numShards: 2,
+          file: 'file',
           cleanup: sinon.stub(),
           callback: sinon.stub()
         };

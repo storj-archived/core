@@ -9,7 +9,6 @@ var proxyquire = require('proxyquire');
 var sinon = require('sinon');
 var constants = require('../lib/constants');
 var os = require('os');
-var HDKey = require('hdkey');
 
 describe('utils', function() {
   /* jshint maxstatements: false */

@@ -329,56 +329,60 @@ describe('KeyRing', function() {
     });
   });
 
-  var testHDKeys = function(){
+  var testDeterministicKeys = function(){
 
-    describe('#generateHDKey', function() {
+    describe('#generateDeterministicKey', function() {
 
       var tmp = tmpfolder();
-      var hdKeyPath = path.join(tmp, 'key.ring', '.hd_key');
+      var deterministicKeyPath = path.join(
+        tmp,'key.ring', '.deterministic_key');
+
       var kr = new KeyRing(tmp, 'password');
 
-      it('should create a valid HD Key', function() {
-        kr.generateHDKey();
-        expect(fs.existsSync(hdKeyPath)).to.equal(true);
+      it('should create a valid deterministic key', function() {
+        kr.generateDeterministicKey();
+        expect(fs.existsSync(deterministicKeyPath)).to.equal(true);
         expect(typeof kr._mnemonic).to.equal('string');
         expect(kr._mnemonic.split(' ').length).to.equal(12);
       });
 
       it('should not allow overwriting a key', function() {
         expect(function(){
-          kr.generateHDKey();
-        }).to.throw(Error, 'HD Key already exists');
+          kr.generateDeterministicKey();
+        }).to.throw(Error, 'Deterministic key already exists');
       });
 
     });
 
-    describe('#_readHDKey', function() {
+    describe('#_readDeterministicKey', function() {
 
       var tmp = tmpfolder();
       var kr = new KeyRing(tmp, 'password');
 
-      it('should decrypt and read hd key', function(done) {
-        kr.generateHDKey();
+      it('should decrypt and read deterministic key', function(done) {
+        kr.generateDeterministicKey();
         var oldMnemonic = kr._mnemonic;
         kr._mnemonic = '';
-        kr._readHDKey();
+        kr._readDeterministicKey();
         expect(kr._mnemonic).to.equal(oldMnemonic);
         done();
       });
 
     });
 
-    describe('#deleteHDKey', function() {
+    describe('#deleteDeterministicKey', function() {
 
       var tmp = tmpfolder();
-      var hdKeyPath = path.join(tmp, 'key.ring', '.hd_key');
-      var kr = new KeyRing(tmp, 'password');
-      kr.generateHDKey();
+      var deterministicKeyPath = path.join(
+        tmp, 'key.ring', '.deterministic_key');
 
-      it('should delete the HD Key', function() {
-        expect(fs.existsSync(hdKeyPath)).to.equal(true);
-        kr.deleteHDKey();
-        expect(fs.existsSync(hdKeyPath)).to.equal(false);
+      var kr = new KeyRing(tmp, 'password');
+      kr.generateDeterministicKey();
+
+      it('should delete the deterministic Key', function() {
+        expect(fs.existsSync(deterministicKeyPath)).to.equal(true);
+        kr.deleteDeterministicKey();
+        expect(fs.existsSync(deterministicKeyPath)).to.equal(false);
       });
 
     });
@@ -393,7 +397,7 @@ describe('KeyRing', function() {
       });
 
       it('should export 12 word mnemonic', function() {
-        kr.generateHDKey();
+        kr.generateDeterministicKey();
         expect(kr.exportMnemonic().split(' ').length).to.equal(12);
       });
 
@@ -419,7 +423,7 @@ describe('KeyRing', function() {
         expect(kr._mnemonic).to.equal(mnemonic);
 
         kr._mnemonic = '';
-        kr._readHDKey();
+        kr._readDeterministicKey();
         expect(kr._mnemonic).to.equal(mnemonic);
         done();
       });
@@ -430,7 +434,7 @@ describe('KeyRing', function() {
           'bag blind divide stereo';
         expect(function(){
           kr.importMnemonic(newMnemonic);
-        }).to.throw(Error, 'HD Key already exists');
+        }).to.throw(Error, 'Deterministic key already exists');
         done();
       });
 
@@ -482,6 +486,6 @@ describe('KeyRing', function() {
 
   };
 
-  testHDKeys();
+  testDeterministicKeys();
 
 });

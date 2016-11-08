@@ -44,7 +44,7 @@ describe('DeterministicKeyIv#fromObject', function() {
 
 describe('DeterministicKeyIv#getDeterministicKey', function() {
 
-  it('should generate an HD key', function() {
+  it('should generate an deterministic key', function() {
     var seed = '0123456789ab0123456789ab';
     var bucketId = '0123456789ab';
     var bucketKey = DeterministicKeyIv.getDeterministicKey(seed, bucketId);
@@ -56,7 +56,7 @@ describe('DeterministicKeyIv#getDeterministicKey', function() {
 
 describe('DeterministicKeyIv#getCipherKeyIv', function() {
 
-  it('should generate an HD key', function() {
+  it('should generate an deterministic key', function() {
     var keyiv1 = new DeterministicKeyIv('0123', '0123');
     var cipherIv = keyiv1.getCipherKeyIv();
     expect(cipherIv[0].toString('hex').startsWith('1be2e')).to.equal(true);

@@ -112,6 +112,9 @@ exports.StorageItem = require('./lib/storage/item');
 /** {@link DataCipherKeyIv} */
 exports.DataCipherKeyIv = require('./lib/crypto-tools/cipher-key-iv');
 
+/** {@link DataCipherKeyIv} */
+exports.DeterministicKeyIv = require('./lib/crypto-tools/deterministic-key-iv');
+
 /** {@link KeyPair} */
 exports.KeyPair = require('./lib/crypto-tools/keypair');
 

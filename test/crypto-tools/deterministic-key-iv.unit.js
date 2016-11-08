@@ -48,7 +48,7 @@ describe('DeterministicKeyIv#getDeterministicKey', function() {
     var seed = '0123456789ab0123456789ab';
     var bucketId = '0123456789ab';
     var bucketKey = DeterministicKeyIv.getDeterministicKey(seed, bucketId);
-    var bucketKeyStart = '468678a2a';
+    var bucketKeyStart = 'ba24525';
     expect(bucketKey.startsWith(bucketKeyStart)).to.equal(true);
   });
 

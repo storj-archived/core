@@ -443,7 +443,7 @@ describe('KeyRing', function() {
       it('should generate the expected bucket key', function() {
         var bucketId = '0123456789ab0123456789ab';
         var bucketKey = kr.generateBucketKey(bucketId);
-        expect(bucketKey.startsWith('c3f23811')).to.equal(true);
+        expect(bucketKey.startsWith('c79dbe80')).to.equal(true);
       });
 
       it('should return null without mnemonic', function() {
@@ -463,7 +463,7 @@ describe('KeyRing', function() {
         var bucketId = '0123456789ab';
         var fileId = '0123456789ab';
         var fileKey = kr.generateFileKey(bucketId, fileId);
-        var fileKeyStart = 'd8776f06f';
+        var fileKeyStart = 'fea62b60';
         var fileKeyPassString = fileKey._pass.toString('hex');
         expect(fileKeyPassString.startsWith(fileKeyStart)).to.equal(true);
       });

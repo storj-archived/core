@@ -366,6 +366,21 @@ describe('utils', function() {
     it('will return true for => 0 and <= 2 ^ 31 - 1', function() {
       expect(utils.isValidNodeIndex(Math.pow(2, 31) - 1)).to.equal(true);
     });
+
+  });
+
+  describe('#createComplexKeyFromSeed', function() {
+
+    it('should return the expected extended key', function() {
+      var seed = 'a0c42a9c3ac6abf2ba6a9946ae83af18f51bf1c9fa7dacc4c92513cc4d' +
+        'd015834341c775dcd4c0fac73547c5662d81a9e9361a0aac604a73a321bd9103b' +
+        'ce8af';
+      var seedBuffer = new Buffer(seed, 'hex');
+      var expectedKey = 'xprv9xJ62Jwpr14Bbz63pamJV4Z3qT67JfqddRW55LR2bUQ38jt' +
+        'y7G2TSVkE5Ro8yYZjrJGVhN8Z3qvmM9XWgGvyceNMUj7xozR4LZS1eEFP5W3';
+      expect(utils.createComplexKeyFromSeed(seedBuffer)).to.equal(expectedKey);
+    });
+
   });
 
 });

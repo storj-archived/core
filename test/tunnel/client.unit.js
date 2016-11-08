@@ -175,6 +175,15 @@ describe('TunnelClient', function() {
       client._forwardResponse(new Error('Some error'));
     });
 
+    it('should emit error if cannot deserialize message', function(done) {
+      var client = new TunnelClient('', '');
+      client.on('error', function(err) {
+        expect(err.message).to.equal('Failed to deserialize response');
+        done();
+      });
+      client._forwardResponse(null, {}, 'not valid rpc message');
+    });
+
   });
 
   describe('#_handleDataChannel', function() {

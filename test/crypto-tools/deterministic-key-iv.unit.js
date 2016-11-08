@@ -42,12 +42,12 @@ describe('DeterministicKeyIv#fromObject', function() {
 
 });
 
-describe('DeterministicKeyIv#getHDKey', function() {
+describe('DeterministicKeyIv#getDeterministicKey', function() {
 
   it('should generate an HD key', function() {
     var seed = '0123456789ab0123456789ab';
     var bucketId = '0123456789ab';
-    var bucketKey = DeterministicKeyIv.getHDKey(seed, bucketId);
+    var bucketKey = DeterministicKeyIv.getDeterministicKey(seed, bucketId);
     var bucketKeyStart = '468678a2a';
     expect(bucketKey.startsWith(bucketKeyStart)).to.equal(true);
   });

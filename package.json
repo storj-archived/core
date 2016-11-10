@@ -1,6 +1,6 @@
 {
   "name": "storj-lib",
-  "version": "5.0.1",
+  "version": "5.1.0",
   "description": "implementation of the storj protocol for node.js and the browser",
   "main": "index.js",
   "directories": {

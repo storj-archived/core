@@ -2,6 +2,7 @@
 
 var KeyRing = require('../../lib/crypto-tools/keyring');
 var DataCipherKeyIv = require('../../lib/crypto-tools/cipher-key-iv');
+var DeterministicKeyIv = require('../../lib/crypto-tools/deterministic-key-iv');
 var expect = require('chai').expect;
 var path = require('path');
 var fs = require('fs');
@@ -157,6 +158,26 @@ describe('KeyRing', function() {
     it('should return null if no key for the given ID', function() {
       var kr = new KeyRing(tmpfolder());
       expect(kr.get('wrong')).to.equal(null);
+    });
+
+    it('should return a generated key if mnemonic exists', function() {
+      var kr = new KeyRing(tmpfolder());
+      kr._mnemonic = 'test test test';
+      expect(kr.get('wrong')).to.not.equal(null);
+    });
+
+    it('should return deterministic key read from file', function() {
+      var kr = new KeyRing(tmpfolder());
+      kr.set('0123', DeterministicKeyIv('0123', '0123'));
+      var retrieved = kr.get('0123').toObject();
+      expect(retrieved.type).to.equal('DeterministicKeyIv');
+    });
+
+    it('should return DataCipherIv read from file', function() {
+      var kr = new KeyRing(tmpfolder());
+      kr.set('0123', DataCipherKeyIv('0123', '0123'));
+      var retrieved = kr.get('0123').toObject();
+      expect(retrieved.type).to.not.equal('DeterministicKeyIv');
     });
 
   });
@@ -321,7 +342,165 @@ describe('KeyRing', function() {
       rimraf.sync(fldr2);
       fs.unlinkSync(tar);
     });
-
   });
+
+  var testDeterministicKeys = function(){
+
+    describe('#generateDeterministicKey', function() {
+
+      var tmp = tmpfolder();
+      var deterministicKeyPath = path.join(
+        tmp,'key.ring', '.deterministic_key');
+
+      var kr = new KeyRing(tmp, 'password');
+
+      it('should create a valid deterministic key', function() {
+        kr.generateDeterministicKey();
+        expect(fs.existsSync(deterministicKeyPath)).to.equal(true);
+        expect(typeof kr._mnemonic).to.equal('string');
+        expect(kr._mnemonic.split(' ').length).to.equal(12);
+      });
+
+      it('should not allow overwriting a key', function() {
+        expect(function(){
+          kr.generateDeterministicKey();
+        }).to.throw(Error, 'Deterministic key already exists');
+      });
+
+    });
+
+    describe('#_readDeterministicKey', function() {
+
+      var tmp = tmpfolder();
+      var kr = new KeyRing(tmp, 'password');
+
+      it('should decrypt and read deterministic key', function(done) {
+        kr.generateDeterministicKey();
+        var oldMnemonic = kr._mnemonic;
+        kr._mnemonic = '';
+        kr._readDeterministicKey();
+        expect(kr._mnemonic).to.equal(oldMnemonic);
+        done();
+      });
+
+    });
+
+    describe('#deleteDeterministicKey', function() {
+
+      var tmp = tmpfolder();
+      var deterministicKeyPath = path.join(
+        tmp, 'key.ring', '.deterministic_key');
+
+      var kr = new KeyRing(tmp, 'password');
+      kr.generateDeterministicKey();
+
+      it('should delete the deterministic Key', function() {
+        expect(fs.existsSync(deterministicKeyPath)).to.equal(true);
+        kr.deleteDeterministicKey();
+        expect(fs.existsSync(deterministicKeyPath)).to.equal(false);
+      });
+
+    });
+
+    describe('#exportMnemonic', function() {
+
+      var tmp = tmpfolder();
+      var kr = new KeyRing(tmp, 'password');
+
+      it('should return null when no key exists', function() {
+        expect(kr.exportMnemonic()).to.equal(null);
+      });
+
+      it('should export 12 word mnemonic', function() {
+        kr.generateDeterministicKey();
+        expect(kr.exportMnemonic().split(' ').length).to.equal(12);
+      });
+
+    });
+
+    describe('#importMnemonic', function() {
+
+      var tmp = tmpfolder();
+      var kr = new KeyRing(tmp, 'password');
+
+      it('should reject invalid mnemonic', function(done) {
+        expect(function(){
+          kr.importMnemonic('invalid mnemonic sentence');
+        }).to.throw(Error, 'Mnemonic is invalid');
+        done();
+      });
+
+      it('should import the mnemonic', function(done) {
+        var mnemonic = 'lamp endorse image either ' +
+          'benefit marriage junk empower ' +
+          'bag blind divide stereo';
+        kr.importMnemonic(mnemonic);
+        expect(kr._mnemonic).to.equal(mnemonic);
+
+        kr._mnemonic = '';
+        kr._readDeterministicKey();
+        expect(kr._mnemonic).to.equal(mnemonic);
+        done();
+      });
+
+      it('should refuse to overwrite an exisitng mnemonic', function(done) {
+        var newMnemonic = 'lamp lamp image either ' +
+          'benefit marriage junk empower ' +
+          'bag blind divide stereo';
+        expect(function(){
+          kr.importMnemonic(newMnemonic);
+        }).to.throw(Error, 'Deterministic key already exists');
+        done();
+      });
+
+    });
+
+    describe('#generateBucketKey', function() {
+      var tmp = tmpfolder();
+      var kr = new KeyRing(tmp, 'password');
+      kr._mnemonic = 'test test test';
+      it('should generate the expected bucket key', function() {
+        var bucketId = '0123456789ab0123456789ab';
+        var bucketKey = kr.generateBucketKey(bucketId);
+        expect(bucketKey.startsWith('c79dbe80')).to.equal(true);
+      });
+
+      it('should return null without mnemonic', function() {
+        kr._mnemonic = null;
+        var bucketId = '0123456789ab0123456789ab';
+        var bucketKey = kr.generateBucketKey(bucketId);
+        expect(bucketKey).to.equal(null);
+      });
+
+    });
+
+    describe('#generateFileKey', function() {
+      var tmp = tmpfolder();
+      var kr = new KeyRing(tmp, 'password');
+      kr._mnemonic = 'test test test';
+      it('should generate the expected file key', function() {
+        var bucketId = '0123456789ab';
+        var fileId = '0123456789ab';
+        var fileKey = kr.generateFileKey(bucketId, fileId);
+        var fileKeyStart = 'fea62b60';
+        var fileKeyPassString = fileKey._pass.toString('hex');
+        expect(fileKeyPassString.startsWith(fileKeyStart)).to.equal(true);
+      });
+
+      it('should generate a random file key', function() {
+        kr._mnemonic = null;
+        var bucketId = '0123456789ab';
+        var fileId = '0123456789ab';
+        var fileKey = kr.generateFileKey(bucketId, fileId);
+        var fileKeyStart = '10247c1d89170695ae7f1';
+        var fileKeyPassString = fileKey._pass.toString('hex');
+        expect(fileKeyPassString).to.not.equal(fileKeyStart);
+      });
+
+    });
+
+  };
+
+  testDeterministicKeys();
 
 });

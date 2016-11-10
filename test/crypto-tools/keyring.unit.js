@@ -2,6 +2,7 @@
 
 var KeyRing = require('../../lib/crypto-tools/keyring');
 var DataCipherKeyIv = require('../../lib/crypto-tools/cipher-key-iv');
+var DeterministicKeyIv = require('../../lib/crypto-tools/deterministic-key-iv');
 var expect = require('chai').expect;
 var path = require('path');
 var fs = require('fs');
@@ -163,6 +164,20 @@ describe('KeyRing', function() {
       var kr = new KeyRing(tmpfolder());
       kr._mnemonic = 'test test test';
       expect(kr.get('wrong')).to.not.equal(null);
+    });
+
+    it('should return deterministic key read from file', function() {
+      var kr = new KeyRing(tmpfolder());
+      kr.set('0123', DeterministicKeyIv('0123', '0123'));
+      var retrieved = kr.get('0123').toObject();
+      expect(retrieved.type).to.equal('DeterministicKeyIv');
+    });
+
+    it('should return DataCipherIv read from file', function() {
+      var kr = new KeyRing(tmpfolder());
+      kr.set('0123', DataCipherKeyIv('0123', '0123'));
+      var retrieved = kr.get('0123').toObject();
+      expect(retrieved.type).to.not.equal('DeterministicKeyIv');
     });
 
   });

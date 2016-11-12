@@ -8,7 +8,7 @@ var api = 'https://api.storj.io';
 
 // API credentials
 var user = {email: 'example@storj.io', password: 'examplePass'};
-var client = storj.BridgeClient(api, {basicauth: user});
+var client = storj.BridgeClient(api, {basicAuth: user});
 
 // Generate KeyPair
 var keypair = storj.KeyPair();

@@ -379,7 +379,6 @@ describe('DataChannelServer', function() {
         null,
         { shard: shard }
       );
-      var _closeSock = sinon.stub(dcs, '_closeSocketSuccess');
       dcs._allowed.token = {
         hash: 'hash',
         report: { end: sinon.stub() }

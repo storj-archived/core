@@ -3,12 +3,16 @@
 var PassThrough = require('readable-stream').PassThrough;
 var proxyquire = require('proxyquire');
 var expect = require('chai').expect;
+var sinon = require('sinon');
 var RAMStorageAdapter = require('../../lib/storage/adapters/ram');
 var Manager = require('../../lib/storage/manager');
 var Logger = require('kad').Logger;
-var DataChannelServer = require('../../lib/data-channels/server');
+var DataChannelServer = proxyquire('../../lib/data-channels/server', {
+  '../bridge-client': sinon.stub().returns({
+    createExchangeReport: sinon.stub()
+  })
+});
 var DataChannelErrors = require('../../lib/data-channels/error-codes');
-var sinon = require('sinon');
 var EventEmitter = require('events').EventEmitter;
 var http = require('http');
 var StorageItem = require('../../lib/storage/item');
@@ -22,7 +26,8 @@ describe('DataChannelServer', function() {
       expect(DataChannelServer({
         server: http.createServer(function noop() {}),
         storageManager: Manager(RAMStorageAdapter()),
-        logger: Logger(0)
+        logger: Logger(0),
+        nodeID: utils.rmd160('')
       })).to.be.instanceOf(DataChannelServer);
     });
 
@@ -34,7 +39,8 @@ describe('DataChannelServer', function() {
       var dcs = new DataChannelServer({
         server: http.createServer(function noop() {}),
         storageManager: Manager(RAMStorageAdapter()),
-        logger: Logger(0)
+        logger: Logger(0),
+        nodeID: utils.rmd160('')
       });
       dcs.accept('token', 'filehash');
       expect(dcs._allowed.token.hash).to.equal('filehash');
@@ -48,7 +54,8 @@ describe('DataChannelServer', function() {
       var dcs = DataChannelServer({
         server: http.createServer(function noop() {}),
         storageManager: Manager(RAMStorageAdapter()),
-        logger: Logger(0)
+        logger: Logger(0),
+        nodeID: utils.rmd160('')
       });
       dcs._allowed.token = { client: null };
       dcs.reject('token');
@@ -59,7 +66,8 @@ describe('DataChannelServer', function() {
       var dcs = DataChannelServer({
         server: http.createServer(function noop() {}),
         storageManager: Manager(RAMStorageAdapter()),
-        logger: Logger(0)
+        logger: Logger(0),
+        nodeID: utils.rmd160('')
       });
       var _close = sinon.stub();
       dcs._allowed.token = { client: { readyState: 1, close: _close } };
@@ -76,7 +84,8 @@ describe('DataChannelServer', function() {
       var dcs = DataChannelServer({
         server: http.createServer(function noop() {}),
         storageManager: Manager(RAMStorageAdapter()),
-        logger: Logger(0)
+        logger: Logger(0),
+        nodeID: utils.rmd160('')
       });
       dcs._server = { close: sinon.stub() };
       dcs.close();
@@ -91,7 +100,8 @@ describe('DataChannelServer', function() {
       var dcs = DataChannelServer({
         server: http.createServer(function noop() {}),
         storageManager: Manager(RAMStorageAdapter()),
-        logger: Logger(0)
+        logger: Logger(0),
+        nodeID: utils.rmd160('')
       });
       var socket = new EventEmitter();
       socket.close = function(code, message) {
@@ -109,7 +119,8 @@ describe('DataChannelServer', function() {
       var dcs = DataChannelServer({
         server: http.createServer(function noop() {}),
         storageManager: Manager(RAMStorageAdapter()),
-        logger: Logger(0)
+        logger: Logger(0),
+        nodeID: utils.rmd160('')
       });
       var socket = new EventEmitter();
       socket.close = function(code, message) {
@@ -127,7 +138,8 @@ describe('DataChannelServer', function() {
       var dcs = DataChannelServer({
         server: http.createServer(function noop() {}),
         storageManager: Manager(RAMStorageAdapter()),
-        logger: Logger(0)
+        logger: Logger(0),
+        nodeID: utils.rmd160('')
       });
       var socket = new EventEmitter();
       socket.close = function(code, message) {
@@ -148,7 +160,8 @@ describe('DataChannelServer', function() {
       var dcs = DataChannelServer({
         server: http.createServer(function noop() {}),
         storageManager: Manager(RAMStorageAdapter()),
-        logger: Logger(0)
+        logger: Logger(0),
+        nodeID: utils.rmd160('')
       });
       dcs._allowed.token = {
         client: null,
@@ -180,7 +193,8 @@ describe('DataChannelServer', function() {
       var dcs = DataChannelServer({
         server: http.createServer(function noop() {}),
         storageManager: Manager(RAMStorageAdapter()),
-        logger: Logger(0)
+        logger: Logger(0),
+        nodeID: utils.rmd160('')
       });
       dcs._allowed.token = {
         client: null,
@@ -208,12 +222,14 @@ describe('DataChannelServer', function() {
       var dcs = DataChannelServer({
         server: http.createServer(function noop() {}),
         storageManager: Manager(RAMStorageAdapter()),
-        logger: Logger(0)
+        logger: Logger(0),
+        nodeID: utils.rmd160('')
       });
       dcs._allowed.token = {
         client: null,
         hash: 'hash',
-        expires: Date.now() + 12000
+        expires: Date.now() + 12000,
+        report: { end: sinon.stub() }
       };
       var socket = new EventEmitter();
       var _handleRetrieveStream = sinon.stub(dcs, '_handleRetrieveStream');
@@ -235,7 +251,8 @@ describe('DataChannelServer', function() {
       var dcs = DataChannelServer({
         server: http.createServer(function noop() {}),
         storageManager: Manager(RAMStorageAdapter()),
-        logger: Logger(0)
+        logger: Logger(0),
+        nodeID: utils.rmd160('')
       }).on('error', function(err) {
         expect(err.message).to.equal('BOOM');
         done();
@@ -252,7 +269,8 @@ describe('DataChannelServer', function() {
       var dcs = DataChannelServer({
         server: http.createServer(function noop() {}),
         storageManager: manager,
-        logger: Logger(0)
+        logger: Logger(0),
+        nodeID: utils.rmd160('')
       });
       var _load = sinon.stub(manager, 'load').callsArgWith(
         1,
@@ -280,7 +298,8 @@ describe('DataChannelServer', function() {
       var dcs = DataChannelServer({
         server: http.createServer(function noop() {}),
         storageManager: manager,
-        logger: Logger(0)
+        logger: Logger(0),
+        nodeID: utils.rmd160('')
       });
       var _load = sinon.stub(manager, 'load').callsArgWith(
         1,
@@ -312,7 +331,8 @@ describe('DataChannelServer', function() {
       var dcs = DataChannelServer({
         server: http.createServer(function noop() {}),
         storageManager: manager,
-        logger: Logger(0)
+        logger: Logger(0),
+        nodeID: utils.rmd160('')
       });
       var _load = sinon.stub(manager, 'load').callsArgWith(
         1,
@@ -320,7 +340,10 @@ describe('DataChannelServer', function() {
         { shard: shard }
       );
       var _closeSock = sinon.stub(dcs, '_closeSocketSuccess');
-      dcs._allowed.token = { hash: 'hash' };
+      dcs._allowed.token = {
+        hash: 'hash',
+        report: { end: sinon.stub() }
+      };
       dcs._handleRetrieveStream(socket, 'token');
       setImmediate(function() {
         _load.restore();
@@ -336,6 +359,45 @@ describe('DataChannelServer', function() {
       });
     });
 
+    it('should report read failures', function(done) {
+      var shard = new EventEmitter();
+      var socket = new EventEmitter();
+      socket.readyState = 1;
+      socket.send = sinon.stub().callsArg(2);
+      shard.pause = sinon.stub();
+      shard.resume = sinon.stub();
+      shard.removeAllListeners = sinon.stub();
+      var manager = Manager(RAMStorageAdapter());
+      var dcs = DataChannelServer({
+        server: http.createServer(function noop() {}),
+        storageManager: manager,
+        logger: Logger(0),
+        nodeID: utils.rmd160('')
+      });
+      var _load = sinon.stub(manager, 'load').callsArgWith(
+        1,
+        null,
+        { shard: shard }
+      );
+      var _closeSock = sinon.stub(dcs, '_closeSocketSuccess');
+      dcs._allowed.token = {
+        hash: 'hash',
+        report: { end: sinon.stub() }
+      };
+      dcs._handleRetrieveStream(socket, 'token');
+      setImmediate(function() {
+        _load.restore();
+        shard.emit('data', new Buffer('ohai'));
+        setImmediate(function() {
+          expect(socket.send.called).to.equal(true);
+          shard.emit('error');
+          setImmediate(function() {
+            expect(dcs._allowed.token.report.end.called).to.equal(true);
+            done();
+          });
+        });
+      });
+    });
   });
 
   describe('#_handleConsignStream', function() {
@@ -345,7 +407,8 @@ describe('DataChannelServer', function() {
       var dcs = DataChannelServer({
         server: http.createServer(function noop() {}),
         storageManager: manager,
-        logger: Logger(0)
+        logger: Logger(0),
+        nodeID: utils.rmd160('')
       });
       var _load = sinon.stub(manager, 'load').callsArgWith(
         1,
@@ -353,7 +416,10 @@ describe('DataChannelServer', function() {
       );
       var socket = new EventEmitter();
       socket.close = sinon.stub();
-      dcs._allowed.token = { hash: 'hash' };
+      dcs._allowed.token = {
+        hash: 'hash',
+        report: { begin: sinon.stub(), end: sinon.stub() }
+      };
       dcs._handleConsignStream(socket, 'token');
       setImmediate(function() {
         expect(socket.close.called).to.equal(true);
@@ -368,7 +434,8 @@ describe('DataChannelServer', function() {
       var dcs = DataChannelServer({
         server: http.createServer(function noop() {}),
         storageManager: manager,
-        logger: Logger(0)
+        logger: Logger(0),
+        nodeID: utils.rmd160('')
       });
       var _load = sinon.stub(manager, 'load').callsArgWith(
         1,
@@ -396,7 +463,10 @@ describe('DataChannelServer', function() {
       var socket = new EventEmitter();
       socket.close = sinon.stub();
       socket.readyState = 0;
-      dcs._allowed.token = { hash: 'somehash' };
+      dcs._allowed.token = {
+        hash: 'somehash',
+        report: { begin: sinon.stub(), end: sinon.stub() }
+      };
       dcs._handleConsignStream(socket, 'token');
       setImmediate(function() {
         _load.restore();
@@ -413,12 +483,16 @@ describe('DataChannelServer', function() {
           PassThrough: function() {
             return emitter;
           }
-        }
+        },
+        '../bridge-client': sinon.stub().returns({
+          createExchangeReport: sinon.stub()
+        })
       });
       var dcs = BadHashDataChannelS({
         server: http.createServer(function noop() {}),
         storageManager: manager,
-        logger: Logger(0)
+        logger: Logger(0),
+        nodeID: utils.rmd160('')
       });
       var item = StorageItem({
         hash: 'somehash',
@@ -459,7 +533,10 @@ describe('DataChannelServer', function() {
         };
         socket.resume = sinon.stub();
       })();
-      dcs._allowed.token = { hash: 'somehash' };
+      dcs._allowed.token = {
+        hash: 'somehash',
+        report: { begin: sinon.stub(), end: sinon.stub() }
+      };
       dcs._handleConsignStream(socket, 'token');
     });
 
@@ -468,7 +545,8 @@ describe('DataChannelServer', function() {
       var dcs = DataChannelServer({
         server: http.createServer(function noop() {}),
         storageManager: manager,
-        logger: Logger(0)
+        logger: Logger(0),
+        nodeID: utils.rmd160('')
       });
       var data = new Buffer('hello');
       var hash = utils.rmd160sha256(data);
@@ -510,7 +588,10 @@ describe('DataChannelServer', function() {
         };
         socket.resume = sinon.stub();
       })();
-      dcs._allowed.token = { hash: hash };
+      dcs._allowed.token = {
+        hash: hash,
+        report: { begin: sinon.stub(), end: sinon.stub() }
+      };
       dcs._handleConsignStream(socket, 'token');
       setImmediate(function() {
         socket.emit('message', data);
@@ -526,12 +607,16 @@ describe('DataChannelServer', function() {
           PassThrough: function() {
             return emitter;
           }
-        }
+        },
+        '../bridge-client': sinon.stub().returns({
+          createExchangeReport: sinon.stub()
+        })
       });
       var dcs = PTDataChannelS({
         server: http.createServer(function noop() {}),
         storageManager: manager,
-        logger: Logger(0)
+        logger: Logger(0),
+        nodeID: utils.rmd160('')
       });
       var item = StorageItem({
         hash: 'somehash',
@@ -564,7 +649,10 @@ describe('DataChannelServer', function() {
         socket.readyState = 1;
         socket.resume = sinon.stub();
         socket.close = sinon.stub();
-        dcs._allowed.token = { hash: 'somehash' };
+        dcs._allowed.token = {
+          hash: 'somehash',
+          report: { begin: sinon.stub(), end: sinon.stub() }
+        };
         dcs._handleConsignStream(socket, 'token');
         socket.emit('message', Buffer([1,2,3,4]));
         socket.emit('message', Buffer([1,2,3,4,5]));
@@ -581,7 +669,8 @@ describe('DataChannelServer', function() {
       var dcs = DataChannelServer({
         server: http.createServer(function noop() {}),
         storageManager: manager,
-        logger: Logger(0)
+        logger: Logger(0),
+        nodeID: utils.rmd160('')
       });
       var item = StorageItem({
         hash: 'somehash',
@@ -607,7 +696,10 @@ describe('DataChannelServer', function() {
       var socket = new EventEmitter();
       socket.resume = sinon.stub();
       socket.readyState = 1;
-      dcs._allowed.token = { hash: 'somehash' };
+      dcs._allowed.token = {
+        hash: 'somehash',
+        report: { begin: sinon.stub(), end: sinon.stub() }
+      };
       var _closeSocketSuccess = sinon.stub(dcs, '_closeSocketSuccess');
       dcs._handleConsignStream(socket, 'token');
       setImmediate(function() {

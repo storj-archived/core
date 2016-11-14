@@ -2140,7 +2140,7 @@ describe('BridgeClient', function() {
       var client = new BridgeClient();
       client._request = function(method, path, data) {
         expect(method).to.equal('POST');
-        expect(path).to.equal('/reports');
+        expect(path).to.equal('/reports/exchanges');
         expect(data.reporterId).to.equal('anonymous');
         done();
       };

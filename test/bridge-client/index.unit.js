@@ -2138,7 +2138,7 @@ describe('BridgeClient', function() {
 
     it('should call POST /reports with report', function(done) {
       var client = new BridgeClient();
-      client._request = function(method, path, data, callback) {
+      client._request = function(method, path, data) {
         expect(method).to.equal('POST');
         expect(path).to.equal('/reports');
         expect(data.reporterId).to.equal('anonymous');

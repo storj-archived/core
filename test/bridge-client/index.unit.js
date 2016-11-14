@@ -15,6 +15,7 @@ var FileMuxer = require('../../lib/file-handling/file-muxer');
 var crypto = require('crypto');
 var utils = require('../../lib/utils');
 var UploadState = require('../../lib/bridge-client/upload-state');
+var ExchangeReport = require('../../lib/bridge-client/exchange-report');
 
 describe('BridgeClient', function() {
 
@@ -530,7 +531,8 @@ describe('BridgeClient', function() {
             address: '127.0.0.1',
             port: 8080,
             nodeID: utils.rmd160('nodeid')
-          }
+          },
+          hash: utils.rmd160('')
         }).returns({ cancel: sinon.stub() });
         var _request = sinon.stub(
           StubbedClient.prototype,
@@ -1460,7 +1462,8 @@ describe('BridgeClient', function() {
             address: '127.0.0.1',
             port: 1337,
             nodeID: utils.rmd160('nodeid')
-          }
+          },
+          hash: utils.rmd160('')
         };
         client._transferShard(emitter, 'name', pointer, state);
         emitter.once('retry', function(name, pointer2) {
@@ -1526,12 +1529,14 @@ describe('BridgeClient', function() {
           transferRetries: 3,
           retryThrottle: 0
         });
+        sinon.stub(client, 'createExchangeReport');
         var pointer = {
           farmer: {
             address: '127.0.0.1',
             port: 1337,
             nodeID: utils.rmd160('nodeid')
-          }
+          },
+          hash: utils.rmd160('')
         };
         var _transferShard = sinon.stub(client, '_transferShard', function() {
           return _transferStatus;
@@ -1567,6 +1572,7 @@ describe('BridgeClient', function() {
         var _transferStatus = new EventEmitter();
         var _kill = sinon.stub();
         var client = new BridgeClient();
+        sinon.stub(client, 'createExchangeReport');
         var state = new EventEmitter();
         state.queue = { kill: _kill };
         state.callback = sinon.stub();
@@ -1575,7 +1581,8 @@ describe('BridgeClient', function() {
             address: '127.0.0.1',
             port: 1337,
             nodeID: utils.rmd160('nodeid')
-          }
+          },
+          hash: utils.rmd160('')
         };
         var _transferShard = sinon.stub(client, '_transferShard', function() {
           return _transferStatus;
@@ -2103,6 +2110,43 @@ describe('BridgeClient', function() {
       expect(params.limit).to.equal(3);
       expect(params.trimFront).to.equal(50);
       expect(params.trimBack).to.equal(25);
+    });
+
+  });
+
+  describe('#_getReporterId', function() {
+
+    it('should return anonymous for no auth', function() {
+      var client = new BridgeClient();
+      expect(client._getReporterId()).to.equal('anonymous');
+    });
+
+    it('should return anonymous for no auth', function() {
+      var keyPair = new KeyPair();
+      var client = new BridgeClient(null, { keyPair: keyPair });
+      expect(client._getReporterId()).to.equal(keyPair.getPublicKey());
+    });
+
+    it('should return email for basic auth', function() {
+      var client = new BridgeClient(null, { basicAuth: { email: 'test' } });
+      expect(client._getReporterId()).to.equal('test');
+    });
+
+  });
+
+  describe('#createExchangeReport', function() {
+
+    it('should call POST /reports with report', function(done) {
+      var client = new BridgeClient();
+      client._request = function(method, path, data, callback) {
+        expect(method).to.equal('POST');
+        expect(path).to.equal('/reports');
+        expect(data.reporterId).to.equal('anonymous');
+        done();
+      };
+      client.createExchangeReport(ExchangeReport({
+        reporterId: client._getReporterId()
+      }));
     });
 
   });

@@ -1,5 +1,7 @@
 'use strict';
 
+/* jshint maxstatements: 100 */
+
 var PassThrough = require('readable-stream').PassThrough;
 var proxyquire = require('proxyquire');
 var expect = require('chai').expect;
@@ -278,7 +280,10 @@ describe('DataChannelServer', function() {
       );
       var socket = new EventEmitter();
       socket.close = sinon.stub();
-      dcs._allowed.token = { hash: 'hash' };
+      dcs._allowed.token = {
+        hash: 'hash',
+        begin: sinon.stub()
+      };
       dcs._handleRetrieveStream(socket, 'token');
       setImmediate(function() {
         expect(socket.close.called).to.equal(true);
@@ -306,12 +311,19 @@ describe('DataChannelServer', function() {
         null,
         { shard: shard }
       );
-      dcs._allowed.token = { hash: 'hash' };
+      var begin = sinon.stub();
+      dcs._allowed.token = {
+        hash: 'hash',
+        report: {
+          begin: begin
+        }
+      };
       dcs._handleRetrieveStream(socket, 'token');
       setImmediate(function() {
         _load.restore();
         shard.emit('data', new Buffer('ohai'));
         setImmediate(function() {
+          expect(begin.callCount).to.equal(1);
           expect(shard.removeAllListeners.called).to.equal(true);
           expect(dcs._allowed.token).to.equal(undefined);
           done();
@@ -340,9 +352,13 @@ describe('DataChannelServer', function() {
         { shard: shard }
       );
       var _closeSock = sinon.stub(dcs, '_closeSocketSuccess');
+      var report = {
+        begin: sinon.stub(),
+        end: sinon.stub()
+      };
       dcs._allowed.token = {
         hash: 'hash',
-        report: { end: sinon.stub() }
+        report: report
       };
       dcs._handleRetrieveStream(socket, 'token');
       setImmediate(function() {
@@ -352,6 +368,8 @@ describe('DataChannelServer', function() {
           expect(socket.send.called).to.equal(true);
           shard.emit('end');
           setImmediate(function() {
+            expect(report.begin.callCount).to.equal(1);
+            expect(report.end.callCount).to.equal(1);
             expect(_closeSock.called).to.equal(true);
             done();
           });
@@ -379,9 +397,13 @@ describe('DataChannelServer', function() {
         null,
         { shard: shard }
       );
+      var report = {
+        begin: sinon.stub(),
+        end: sinon.stub()
+      };
       dcs._allowed.token = {
         hash: 'hash',
-        report: { end: sinon.stub() }
+        report: report
       };
       dcs._handleRetrieveStream(socket, 'token');
       setImmediate(function() {
@@ -391,6 +413,7 @@ describe('DataChannelServer', function() {
           expect(socket.send.called).to.equal(true);
           shard.emit('error');
           setImmediate(function() {
+            expect(report.begin.callCount).to.equal(1);
             expect(dcs._allowed.token.report.end.called).to.equal(true);
             done();
           });

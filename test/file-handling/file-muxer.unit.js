@@ -7,6 +7,10 @@ var ReadableStream = require('readable-stream');
 var utils = require('../../lib/utils');
 
 describe('FileMuxer', function() {
+  var sandbox = sinon.sandbox.create();
+  afterEach(function() {
+    sandbox.restore();
+  });
 
   describe('@constructor', function() {
 
@@ -37,23 +41,43 @@ describe('FileMuxer', function() {
   describe('#input', function() {
 
     it('should not allow more than defined shards', function() {
+      var hash = '20e0f5160ca11fb3646e6f6ede0c3ae9a340f8df';
+      var exchangeReport = {};
+      var bridgeClient = {};
+      var fmxr = new FileMuxer({ shards: 2, length: 4096 });
+      var rs1 = new ReadableStream();
+      var rs2 = new ReadableStream();
+      fmxr.addInputSource(rs1, hash, exchangeReport, bridgeClient);
+      fmxr.addInputSource(rs2, hash, exchangeReport, bridgeClient);
       expect(function() {
-        var fmxr = new FileMuxer({ shards: 2, length: 4096 });
-        var rs1 = new ReadableStream();
-        var rs2 = new ReadableStream();
         var rs3 = new ReadableStream();
-        fmxr.addInputSource(rs1).addInputSource(rs2).addInputSource(rs3);
+        fmxr.addInputSource(rs3, hash, exchangeReport, bridgeClient);
       }).to.throw(Error, 'Inputs exceed defined number of shards');
+    });
+
+    it('should handle error from readable error', function(done) {
+      var hash = '20e0f5160ca11fb3646e6f6ede0c3ae9a340f8df';
+      var exchangeReport = {
+        end: sinon.stub()
+      };
+      var bridgeClient = {
+        createExchangeReport: sinon.stub()
+      };
+      var fmxr = new FileMuxer({ shards: 1, length: 4096 });
+      fmxr.on('error', function(err) {
+        expect(err).to.be.instanceOf(Error);
+        done();
+      });
+      sandbox.stub(ReadableStream.prototype, '_read');
+      var rs1 = new ReadableStream();
+      fmxr.addInputSource(rs1, hash, exchangeReport, bridgeClient);
+      rs1.emit('error', new Error('test'));
+
     });
 
   });
 
   describe('#read', function() {
-    var sandbox = sinon.sandbox.create();
-    afterEach(function() {
-      sandbox.restore();
-    });
-
     it('should multiplex the inputs in the proper order', function(done) {
       var chunks = '';
       var fmxr = new FileMuxer({ shards: 4, length: 71 });
@@ -108,8 +132,8 @@ describe('FileMuxer', function() {
       sandbox.stub(utils, 'rmd160').returns(hash);
 
       var exchangeReport = {
-        begin: sinon.stub(),
-        end: sinon.stub()
+        begin: sinon.stub().returns(),
+        end: sinon.stub().returns()
       };
       var bridgeClient = {
         createExchangeReport: sinon.stub()
@@ -190,8 +214,8 @@ describe('FileMuxer', function() {
       var chunks = [0x01, 0x02];
       var hash = '48323293838c914e4f336d18dd4e427d5371e4d2';
       var exchangeReport = {
-        begin: sinon.stub(),
-        end: sinon.stub()
+        begin: sinon.stub().returns(),
+        end: sinon.stub().returns()
       };
       var bridgeClient = {
         createExchangeReport: sinon.stub()

@@ -1,6 +1,6 @@
 {
   "name": "storj-lib",
-  "version": "5.1.2",
+  "version": "6.0.0",
   "description": "implementation of the storj protocol for node.js and the browser",
   "main": "index.js",
   "directories": {
@@ -67,6 +67,7 @@
     "bitcore-message": "^1.0.2",
     "bitcore-mnemonic": "^1.1.1",
     "colors": "^1.1.2",
+    "diglet": "^1.0.2",
     "flushwritable": "^1.0.0",
     "hdkey": "^0.7.1",
     "ip": "^1.1.2",
@@ -91,6 +92,7 @@
     "portfinder": "^1.0.3",
     "readable-stream": "^2.0.6",
     "request": "^2.70.0",
+    "restify": "^4.3.0",
     "rimraf": "^2.5.3",
     "secp256k1": "^3.2.2",
     "semver": "^5.1.0",

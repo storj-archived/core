@@ -114,27 +114,14 @@ describe('Network/Transport', function() {
   describe('#_checkIfReachable', function() {
 
     it('it should check the contact if address public', function(done) {
-      var _check = sinon.stub().callsArg(1);
+      var emitter = new EventEmitter();
+      emitter.close = sinon.stub();
+      var _check = sinon.stub().returns(emitter);
       var StubbedTransport = proxyquire('../../lib/network/transport', {
         ip: { isPrivate: sinon.stub().returns(false) },
-        './contact-checker': sinon.stub().returns({
-          check: _check
-        })
-      });
-      StubbedTransport.prototype._checkIfReachable.call({
-        _contact: { address: 'public.ip.address' }
-      }, function() {
-        done();
-      });
-    });
-
-    it('it should callback true if reachable', function(done) {
-      var _check = sinon.stub().callsArgWith(1, null);
-      var StubbedTransport = proxyquire('../../lib/network/transport', {
-        ip: { isPrivate: sinon.stub().returns(false) },
-        './contact-checker': sinon.stub().returns({
-          check: _check
-        })
+        net: {
+          connect: _check
+        }
       });
       StubbedTransport.prototype._checkIfReachable.call({
         _contact: { address: 'public.ip.address' }
@@ -142,15 +129,16 @@ describe('Network/Transport', function() {
         expect(result).to.equal(true);
         done();
       });
+      emitter.emit('connect');
     });
 
-    it('it should callback false if reachable', function(done) {
-      var _check = sinon.stub().callsArgWith(1, new Error('Failed'));
+    it('it should callback false if not reachable', function(done) {
+      var emitter = new EventEmitter();
+      emitter.destroy = sinon.stub();
+      var _check = sinon.stub().returns(emitter);
       var StubbedTransport = proxyquire('../../lib/network/transport', {
         ip: { isPrivate: sinon.stub().returns(false) },
-        './contact-checker': sinon.stub().returns({
-          check: _check
-        })
+        net: { connect: _check }
       });
       StubbedTransport.prototype._checkIfReachable.call({
         _contact: { address: 'public.ip.address' }
@@ -158,6 +146,7 @@ describe('Network/Transport', function() {
         expect(result).to.equal(false);
         done();
       });
+      emitter.emit('error', new Error());
     });
 
   });
@@ -334,7 +323,7 @@ describe('Network/Transport', function() {
 
     it('should send if the message is a response', function(done) {
       var _kadHttpSend = sinon.stub(
-        kad.transports.HTTP.prototype,
+        kad.RPC.prototype,
         'send'
       ).callsArg(2);
       Transport.prototype.send({
@@ -351,7 +340,7 @@ describe('Network/Transport', function() {
 
     it('should send if the message is a request and valid', function(done) {
       var _kadHttpSend = sinon.stub(
-        kad.transports.HTTP.prototype,
+        kad.RPC.prototype,
         'send'
       ).callsArg(2);
       Transport.prototype.send({

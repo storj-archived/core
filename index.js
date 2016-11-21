@@ -10,6 +10,15 @@ require('./lib/patches')(); // NB: Apply any monkey patches
 /** {@link Network} */
 exports.Network = require('./lib/network');
 
+/** {@link Protocol} */
+exports.Protocol = require('./lib/network/protocol');
+
+/** {@link Renter} */
+exports.Renter = require('./lib/network/renter');
+
+/** {@link Farmer} */
+exports.Farmer = require('./lib/network/farmer');
+
 /** {@link Monitor} */
 exports.Monitor = require('./lib/network/monitor');
 
@@ -18,12 +27,6 @@ exports.Transport = require('./lib/network/transport');
 
 /** {@link Contact} */
 exports.Contact = require('./lib/network/contact');
-
-/** {@link ContactChecker} */
-exports.ContactChecker = require('./lib/network/contact-checker');
-
-/** {@link RateLimiter} */
-exports.RateLimiter = require('./lib/network/rate-limiter');
 
 /** {@link DataChannelClient} */
 exports.DataChannelClient = require('./lib/data-channels/client');
@@ -36,24 +39,6 @@ exports.DataChannelPointer = require('./lib/data-channels/pointer');
 
 /** {@link module:storj/datachannel/errors} */
 exports.DataChannelErrors = require('./lib/data-channels/error-codes');
-
-/** {@link Protocol} */
-exports.Protocol = require('./lib/network/protocol');
-
-/** {@link TunnelServer} */
-exports.TunnelServer = require('./lib/tunnel/server');
-
-/** {@link TunnelMuxer} */
-exports.TunnelMuxer = require('./lib/tunnel/multiplexer');
-
-/** {@link TunnelDemuxer} */
-exports.TunnelDemuxer = require('./lib/tunnel/demultiplexer');
-
-/** {@link module:storj/tunnel/errors} */
-exports.TunnelErrors = require('./lib/tunnel/error-codes');
-
-/** {@link TunnelClient} */
-exports.TunnelClient = require('./lib/tunnel/client');
 
 /** {@link EncryptStream} */
 exports.EncryptStream = require('./lib/crypto-tools/encrypt-stream');
@@ -120,15 +105,6 @@ exports.KeyPair = require('./lib/crypto-tools/keypair');
 
 /** {@link KeyRing} */
 exports.KeyRing = require('./lib/crypto-tools/keyring');
-
-/** {@link RenterInterface} */
-exports.RenterInterface = require('./lib/network/interfaces/renter');
-
-/** {@link FarmerInterface} */
-exports.FarmerInterface = require('./lib/network/interfaces/farmer');
-
-/** {@link TunnelerInterface} */
-exports.TunnelerInterface = require('./lib/network/interfaces/tunneler');
 
 /** {@link BridgeClient} */
 exports.BridgeClient = require('./lib/bridge-client');

@@ -1316,13 +1316,13 @@ describe('Protocol', function() {
   describe('#handleOpenTunnel', function() {
 
     it('should error if it fails to open gateway', function(done) {
-      var _createGateway = sinon.stub().callsArgWith(0, new Error('Failed'));
+      var _addProxy = sinon.stub().callsArgWith(1, new Error('Failed'));
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
           transport: {
             tunnelServer: {
-              createGateway: _createGateway
+              addProxy: _addProxy
             }
           }
         }
@@ -1337,13 +1337,8 @@ describe('Protocol', function() {
 
     it('should not try to create a port mapping if public', function(done) {
       var _createPortMapping = sinon.stub().callsArg(1);
-      var _createGateway = sinon.stub().callsArgWith(0, null, {
-        getEntranceToken: function() {
-          return 'sometoken';
-        },
-        getEntranceAddress: function() {
-          return { address: '0.0.0.0', port: 0 };
-        }
+      var _addProxy = sinon.stub().callsArgWith(1, null, {
+        getProxyPort: sinon.stub().returns(8080)
       });
       var proto = new Protocol({
         network: {
@@ -1353,8 +1348,7 @@ describe('Protocol', function() {
             _requiresTraversal: false,
             _isPublic: true,
             tunnelServer: {
-              createGateway: _createGateway,
-              getListeningPort: sinon.stub().returns(0)
+              addProxy: _addProxy
             },
             createPortMapping: _createPortMapping
           }
@@ -1370,13 +1364,8 @@ describe('Protocol', function() {
 
     it('should try to create a port mapping if private', function(done) {
       var _createPortMapping = sinon.stub().callsArg(1);
-      var _createGateway = sinon.stub().callsArgWith(0, null, {
-        getEntranceToken: function() {
-          return 'sometoken';
-        },
-        getEntranceAddress: function() {
-          return { address: '0.0.0.0', port: 0 };
-        }
+      var _addProxy = sinon.stub().callsArgWith(1, null, {
+        getProxyPort: sinon.stub().returns(8080)
       });
       var proto = new Protocol({
         network: {
@@ -1386,8 +1375,7 @@ describe('Protocol', function() {
             _requiresTraversal: true,
             _isPublic: true,
             tunnelServer: {
-              createGateway: _createGateway,
-              getListeningPort: sinon.stub().returns(0)
+              addProxy: _addProxy
             },
             createPortMapping: _createPortMapping
           }
@@ -1406,13 +1394,8 @@ describe('Protocol', function() {
         1,
         new Error('Failed')
       );
-      var _createGateway = sinon.stub().callsArgWith(0, null, {
-        getEntranceToken: function() {
-          return 'sometoken';
-        },
-        getEntranceAddress: function() {
-          return { address: '0.0.0.0', port: 0 };
-        }
+      var _addProxy = sinon.stub().callsArgWith(1, null, {
+        getProxyPort: sinon.stub().returns(8080)
       });
       var proto = new Protocol({
         network: {
@@ -1422,8 +1405,7 @@ describe('Protocol', function() {
             _requiresTraversal: true,
             _isPublic: true,
             tunnelServer: {
-              createGateway: _createGateway,
-              getListeningPort: sinon.stub().returns(0)
+              addProxy: _addProxy
             },
             createPortMapping: _createPortMapping
           }

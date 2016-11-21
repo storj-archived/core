@@ -2,16 +2,16 @@
 
 var sinon = require('sinon');
 var expect = require('chai').expect;
-var Contract = require('../../../lib/contract');
-var KeyPair = require('../../../lib/crypto-tools/keypair');
-var FarmerInterface = require('../../../lib/network/interfaces/farmer');
-var Network = require('../../../lib/network');
+var Contract = require('../../lib/contract');
+var KeyPair = require('../../lib/crypto-tools/keypair');
+var FarmerInterface = require('../../lib/network/farmer');
+var Network = require('../../lib/network');
 var kad = require('kad');
-var Contact = require('../../../lib/network/contact');
-var utils = require('../../../lib/utils');
-var StorageItem = require('../../../lib/storage/item');
-var StorageManager = require('../../../lib/storage/manager');
-var RAMStorageAdapter = require('../../../lib/storage/adapters/ram');
+var Contact = require('../../lib/network/contact');
+var utils = require('../../lib/utils');
+var StorageItem = require('../../lib/storage/item');
+var StorageManager = require('../../lib/storage/manager');
+var RAMStorageAdapter = require('../../lib/storage/adapters/ram');
 var EventEmitter = require('events').EventEmitter;
 var CLEANUP = [];
 

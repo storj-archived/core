@@ -7,13 +7,7 @@ var expect = require('chai').expect;
 var secp256k1 = require('secp256k1');
 var proxyquire = require('proxyquire');
 var EventEmitter = require('events').EventEmitter;
-var Network = proxyquire('../../lib/network', {
-  './contact-checker': function() {
-    var emitter = new EventEmitter();
-    emitter.check = sinon.stub().callsArgWith(1, null);
-    return emitter;
-  }
-});
+var Network = require('../../lib/network');
 var Manager = require('../../lib/storage/manager');
 var HDKey = require('hdkey');
 var KeyPair = require('../../lib/crypto-tools/keypair');
@@ -285,27 +279,6 @@ describe('Network (public)', function() {
         expect(err).to.equal(null);
         done();
       });
-    });
-
-    it('should close the tunnel client if it is open', function() {
-      var net = Network({
-        keyPair: KeyPair(),
-        storageManager: Manager(RAMStorageAdapter()),
-        logger: kad.Logger(0),
-        seedList: [],
-        rpcAddress: '127.0.0.1',
-        rpcPort: 0,
-        doNotTraverseNat: true
-      });
-      CLEANUP.push(net);
-      net._tunnelClient = {
-        readyState: 1,
-        close: sinon.stub(),
-        removeAllListeners: sinon.stub()
-      };
-      net.node = { disconnect: sinon.stub() };
-      net.leave();
-      expect(net._tunnelClient.close.called).to.equal(true);
     });
 
     it('should callback with error if db close fails', function(done) {
@@ -817,61 +790,6 @@ describe('Network (private)', function() {
 
   });
 
-  describe('#_checkRateLimiter', function() {
-
-    it('should send an error message if rate limited', function() {
-      var net = Network({
-        keyPair: KeyPair(),
-        storageManager: Manager(RAMStorageAdapter()),
-        logger: kad.Logger(0),
-        seedList: [],
-        rpcAddress: '127.0.0.1',
-        rpcPort: 0,
-        tunnelServerPort: 0,
-        doNotTraverseNat: true
-      });
-      CLEANUP.push(net);
-      var _isLimited = sinon.stub(net._rateLimiter, 'isLimited').returns(true);
-      var _send = sinon.stub(net.transport, 'send');
-      net._checkRateLimiter(kad.Message({
-        method: 'PING',
-        params: {}
-      }), { nodeID: 'nodeid' });
-      _isLimited.restore();
-      _send.restore();
-      expect(_send.called).to.equal(true);
-    });
-
-    it('should just callback if message is a response', function(done) {
-      Network.prototype._checkRateLimiter.call({}, {
-        id: 'test',
-        result: {}
-      }, { nodeID: utils.rmd160('') }, function(err) {
-        expect(err).to.equal(undefined);
-        done();
-      });
-    });
-
-    it('should just callback if contact is not limited', function(done) {
-      var _updateCounter = sinon.stub();
-      Network.prototype._checkRateLimiter.call({
-        _rateLimiter: {
-          isLimited: sinon.stub().returns(false),
-          updateCounter: _updateCounter
-        }
-      }, {
-        id: 'test',
-        method: 'PING',
-        params: {}
-      }, { nodeID: utils.rmd160('') }, function(err) {
-        expect(err).to.equal(undefined);
-        expect(_updateCounter.called).to.equal(true);
-        done();
-      });
-    });
-
-  });
-
   describe('#_listenForTunnelers', function() {
 
     it('should announce unavailable tunnels', function(done) {
@@ -886,19 +804,15 @@ describe('Network (private)', function() {
         doNotTraverseNat: true,
         maxTunnels: 1
       });
+      net.transport.tunnelServer._proxies = { foo: 'bar' };
       CLEANUP.push(net);
       net.on('ready', function() {
         var emitter = new EventEmitter();
-        var _hasTunnel = sinon.stub(
-          net.transport.tunnelServer,
-          'hasTunnelAvailable'
-        ).returns(false);
         var _pub = sinon.stub(net._pubsub, 'publish');
         var _sub = sinon.stub(net._pubsub, 'subscribe');
         net._listenForTunnelers();
         emitter.emit('unlocked');
         setImmediate(function() {
-          _hasTunnel.restore();
           _pub.restore();
           _sub.restore();
           expect(_pub.args[0][0]).to.equal('0e00');
@@ -1333,7 +1247,10 @@ describe('Network (private)', function() {
       var _send = sinon.stub(net.transport, 'send').callsArgWith(
         2,
         null,
-        { result: { tunnel: true, alias: true } }
+        { result: {
+          proxyPort: 8080,
+          contact: { address: '0.0.0.0', port: 1234 }
+        } }
       );
       var _addr = sinon.stub(net.transport._server, 'address').returns(null);
       net._establishTunnel([{
@@ -1360,13 +1277,8 @@ describe('Network (private)', function() {
         emitter.emit('error', new Error('Failed'));
       };
       var TunClientStubNetwork = proxyquire('../../lib/network', {
-        '../tunnel/client': function() {
-          return emitter;
-        },
-        './contact-checker': function() {
-          var emitter = new EventEmitter();
-          emitter.check = sinon.stub().callsArgWith(1, null);
-          return emitter;
+        diglet: function() {
+          return { Tunnel: () => emitter };
         }
       });
       var net = TunClientStubNetwork({
@@ -1383,7 +1295,10 @@ describe('Network (private)', function() {
       var _send = sinon.stub(net.transport, 'send').callsArgWith(
         2,
         null,
-        { result: { tunnel: true, alias: true } }
+        { result: {
+          proxyPort: 8080,
+          contact: { address: '0.0.0.0', port: 1234 }
+        } }
       );
       var _establishTunnel = sinon.spy(net, '_establishTunnel');
       net._establishTunnel([{
@@ -1399,123 +1314,14 @@ describe('Network (private)', function() {
       });
     });
 
-    it('should try to re-establish tunnel on check fail', function(done) {
-      var emitter = new EventEmitter();
-      emitter.open = function() {
-        emitter.emit('open');
-      };
-      emitter.close = function() {
-        emitter.emit('close');
-      };
-      var TunClientStubNetwork = proxyquire('../../lib/network', {
-        '../tunnel/client': function() {
-          return emitter;
-        },
-        './contact-checker': function() {
-          var emitter = new EventEmitter();
-          emitter.check = sinon.stub().callsArgWith(1, new Error('Failed'));
-          return emitter;
-        }
-      });
-      var net = TunClientStubNetwork({
-        keyPair: KeyPair(),
-        storageManager: Manager(RAMStorageAdapter()),
-        logger: kad.Logger(0),
-        seedList: [],
-        rpcAddress: '127.0.0.1',
-        rpcPort: 0,
-        tunnelServerPort: 0,
-        doNotTraverseNat: true
-      });
-      CLEANUP.push(net);
-      var _send = sinon.stub(net.transport, 'send').callsArgWith(
-        2,
-        null,
-        { result: { tunnel: true, alias: true } }
-      );
-      var _requestProbe = sinon.stub(net, '_requestProbe').callsArgWith(
-        1,
-        new Error('Failed probe')
-      );
-      net._establishTunnel([{
-        address: '127.0.0.1',
-        port: 1337,
-        nodeID: utils.rmd160('nodeid')
-      }], function() {
-        _send.restore();
-        _requestProbe.restore();
-        var _establishTunnel = sinon.stub(net, '_establishTunnel');
-        emitter.emit('open');
-        setImmediate(function() {
-          setImmediate(function() {
-            _establishTunnel.restore();
-            expect(_establishTunnel.called).to.equal(true);
-            done();
-          });
-        });
-      });
-    });
-
-    it('should try to re-establish tunnel on close', function(done) {
-      var emitter = new EventEmitter();
-      emitter.open = function() {
-        emitter.emit('open');
-      };
-      var TunClientStubNetwork = proxyquire('../../lib/network', {
-        '../tunnel/client': function() {
-          return emitter;
-        },
-        './contact-checker': function() {
-          var emitter = new EventEmitter();
-          emitter.check = sinon.stub().callsArgWith(1, null);
-          return emitter;
-        }
-      });
-      var net = TunClientStubNetwork({
-        keyPair: KeyPair(),
-        storageManager: Manager(RAMStorageAdapter()),
-        logger: kad.Logger(0),
-        seedList: [],
-        rpcAddress: '127.0.0.1',
-        rpcPort: 0,
-        tunnelServerPort: 0,
-        doNotTraverseNat: true
-      });
-      CLEANUP.push(net);
-      var _send = sinon.stub(net.transport, 'send').callsArgWith(
-        2,
-        null,
-        { result: { tunnel: true, alias: true } }
-      );
-      net._establishTunnel([{
-        address: '127.0.0.1',
-        port: 1337,
-        nodeID: utils.rmd160('nodeid')
-      }], function() {
-        _send.restore();
-        var _establishTunnel = sinon.stub(net, '_establishTunnel');
-        emitter.emit('close');
-        setImmediate(function() {
-          _establishTunnel.restore();
-          expect(_establishTunnel.called).to.equal(true);
-          done();
-        });
-      });
-    });
-
     it('should try to re-establish tunnel on error', function(done) {
       var emitter = new EventEmitter();
       emitter.open = function() {
         emitter.emit('open');
       };
       var TunClientStubNetwork = proxyquire('../../lib/network', {
-        '../tunnel/client': function() {
-          return emitter;
-        },
-        './contact-checker': function() {
-          var emitter = new EventEmitter();
-          emitter.check = sinon.stub().callsArgWith(1, null);
-          return emitter;
+        diglet: {
+          Tunnel: function() { return emitter; }
         }
       });
       var net = TunClientStubNetwork({
@@ -1532,7 +1338,10 @@ describe('Network (private)', function() {
       var _send = sinon.stub(net.transport, 'send').callsArgWith(
         2,
         null,
-        { result: { tunnel: true, alias: true } }
+        { result: {
+          proxyPort: 8080,
+          contact: { address: '0.0.0.0', port: 1234 }
+        } }
       );
       net._establishTunnel([{
         address: '127.0.0.1',
@@ -1548,6 +1357,7 @@ describe('Network (private)', function() {
           done();
         });
       });
+      setImmediate(() => emitter.emit('established'));
     });
 
   });

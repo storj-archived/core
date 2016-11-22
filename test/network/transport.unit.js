@@ -8,6 +8,7 @@ var KeyPair = require('../../lib/crypto-tools/keypair');
 var proxyquire = require('proxyquire');
 var kad = require('kad');
 var EventEmitter = require('events').EventEmitter;
+var utils = require('../../lib/utils');
 
 describe('Network/Transport', function() {
 
@@ -354,6 +355,235 @@ describe('Network/Transport', function() {
         _kadHttpSend.restore();
         done();
       });
+    });
+
+  });
+
+  describe('#_handleRPC', function() {
+
+    it('should respond 400 if cannot parse message', function(done) {
+      var response = {
+        status: function(code) {
+          expect(code).to.equal(400);
+          return { end: done };
+        }
+      };
+      Transport.prototype._handleRPC.call({
+        receive: sinon.stub()
+      }, {
+        body: 'invalid body'
+      }, response);
+    });
+
+    it('should queue the response if the message is request', function(done) {
+      var response = {
+        status: function(code) {
+          expect(code).to.equal(400);
+          return { end: done };
+        }
+      };
+      var queued = {};
+      Transport.prototype._handleRPC.call({
+        receive: sinon.stub(),
+        _queuedResponses: queued
+      }, {
+        body: {
+          id: 'test',
+          method: 'PING',
+          params: {}
+        }
+      }, response);
+      expect(queued.test).to.equal(response);
+      done();
+    });
+
+    it('should receive the serialized message', function(done) {
+      var response = {
+        status: function(code) {
+          expect(code).to.equal(400);
+          return { end: done };
+        }
+      };
+      var queued = {};
+      Transport.prototype._handleRPC.call({
+        receive: sinon.stub(),
+        _queuedResponses: queued
+      }, {
+        body: {
+          id: 'test',
+          result: {}
+        }
+      }, response);
+      expect(queued.test).to.equal(undefined);
+      done();
+    });
+
+  });
+
+  describe('#_routeTunnelProxies', function() {
+
+    it('should not route to proxy if node id is not present', function(done) {
+      Transport.prototype._routeTunnelProxies.call({
+        tunnelServer: {},
+        _contact: { nodeID: 'test' }
+      }, {
+        header: sinon.stub().returns('test')
+      }, {}, done);
+    });
+
+    it('should route as websocket if upgrade', function(done) {
+      let routews = sinon.stub().callsArg(3);
+      Transport.prototype._routeTunnelProxies.call({
+        tunnelServer: {
+          routeWebSocketConnection: routews
+        },
+        _contact: { nodeID: 'test' }
+      }, {
+        header: sinon.stub().returns('someoneelse')
+      }, {
+        claimUpgrade: sinon.stub().returns({})
+      });
+      expect(routews.called).to.equal(true);
+      done();
+    });
+
+    it('should route as http if not upgrade', function(done) {
+      let routehttp = sinon.stub().callsArg(3);
+      Transport.prototype._routeTunnelProxies.call({
+        tunnelServer: {
+          routeHttpRequest: routehttp
+        },
+        _contact: { nodeID: 'test' }
+      }, {
+        header: sinon.stub().returns('someoneelse')
+      }, {});
+      expect(routehttp.called).to.equal(true);
+      done();
+    });
+
+  });
+
+  describe('#_send', function() {
+
+    it('should send to queued response if exists', function(done) {
+      var send = sinon.stub();
+      var message = '{"id":"test"}';
+      Transport.prototype._send.call({
+        _queuedResponses: {
+          test: { send: send }
+        }
+      }, message, Contact({
+        address: '0.0.0.0',
+        port: 1234,
+        nodeID: utils.rmd160('')
+      }));
+      expect(send.called).to.equal(true);
+      done();
+    });
+
+    it('should receive null if invalid contact', function(done) {
+      var message = '{"id":"test","method":"PING","params":{}}';
+      var contact = Contact({
+        address: '0.0.0.0',
+        port: 1234,
+        nodeID: utils.rmd160('')
+      });
+      contact.valid = sinon.stub().returns(false);
+      var receive = sinon.stub();
+      Transport.prototype._send.call({
+        _queuedResponses: {},
+        receive: receive
+      }, message, contact);
+      expect(receive.called).to.equal(true);
+      done();
+    });
+
+    it('should receive null if request error', function(done) {
+      var message = '{"id":"test","method":"PING","params":{}}';
+      var receive = sinon.stub();
+      var Transport = proxyquire('../../lib/network/transport', {
+        restify: {
+          createJsonClient: function() {
+            return {
+              post: sinon.stub().callsArgWith(1, new Error('Failed'))
+            };
+          }
+        }
+      });
+      Transport.prototype._send.call({
+        _queuedResponses: {},
+        receive: receive
+      }, message, Contact({
+        address: '0.0.0.0',
+        port: 1234,
+        nodeID: utils.rmd160('nodeid')
+      }));
+      expect(receive.calledWithMatch(null)).to.equal(true);
+      done();
+    });
+
+    it('should receive null if response if invalid', function(done) {
+      var message = '{"id":"test","method":"PING","params":{}}';
+      var receive = sinon.stub();
+      var Transport = proxyquire('../../lib/network/transport', {
+        restify: {
+          createJsonClient: function() {
+            return {
+              post: sinon.stub().callsArgWith(
+                1,
+               null,
+               {},
+               {},
+               'bad data'
+              )
+            };
+          }
+        }
+      });
+      Transport.prototype._send.call({
+        _queuedResponses: {},
+        receive: receive
+      }, message, Contact({
+        address: '0.0.0.0',
+        port: 1234,
+        nodeID: utils.rmd160('nodeid')
+      }));
+      expect(receive.calledWithMatch(null)).to.equal(true);
+      done();
+    });
+
+    it('should receive the serialized message', function(done) {
+      var message = '{"id":"test","method":"PING","params":{}}';
+      var receive = function(data) {
+        expect(Buffer.isBuffer(data)).to.equal(true);
+        done();
+      };
+      var Transport = proxyquire('../../lib/network/transport', {
+        restify: {
+          createJsonClient: function() {
+            return {
+              post: sinon.stub().callsArgWith(
+                1,
+                null,
+                {},
+                {},
+                {
+                  id: 'test',
+                  result: {}
+                }
+              )
+            };
+          }
+        }
+      });
+      Transport.prototype._send.call({
+        _queuedResponses: {},
+        receive: receive
+      }, message, Contact({
+        address: '0.0.0.0',
+        port: 1234,
+        nodeID: utils.rmd160('nodeid')
+      }));
     });
 
   });

@@ -108,7 +108,7 @@
     "coveralls": "^2.11.2",
     "gh-pages": "^0.9.0",
     "ink-docstrap": "bookchin/docstrap",
-    "istanbul": "^0.3.13",
+    "istanbul": "^0.4.5",
     "jsdoc": "^3.4.0",
     "jshint": "2.8.0",
     "mocha": "^2.2.4",

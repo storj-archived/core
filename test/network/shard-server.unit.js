@@ -9,12 +9,11 @@ var sinon = require('sinon');
 var RAMStorageAdapter = require('../../lib/storage/adapters/ram');
 var Manager = require('../../lib/storage/manager');
 var Logger = require('kad').Logger;
-var DataChannelServer = proxyquire('../../lib/data-channels/server', {
+var DataChannelServer = proxyquire('../../lib/network/shard-server', {
   '../bridge-client': sinon.stub().returns({
     createExchangeReport: sinon.stub()
   })
 });
-var DataChannelErrors = require('../../lib/data-channels/error-codes');
 var EventEmitter = require('events').EventEmitter;
 var http = require('http');
 var StorageItem = require('../../lib/storage/item');

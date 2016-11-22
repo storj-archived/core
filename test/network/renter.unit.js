@@ -12,7 +12,6 @@ var StorageItem = require('../../lib/storage/item');
 var RAMStorageAdapter = require('../../lib/storage/adapters/ram');
 var StorageManager = require('../../lib/storage/manager');
 var AuditStream = require('../../lib/audit-tools/audit-stream');
-var DataChannelPointer = require('../../lib/data-channels/pointer');
 var OfferStream = require('../../lib/contract/offer-stream');
 
 var CLEANUP = [];
@@ -485,15 +484,16 @@ describe('RenterInterface', function() {
         2,
         new Error('Send failed')
       );
-      renter.getMirrorNodes([DataChannelPointer(
-        Contact({
+      renter.getMirrorNodes([{
+        farmer: Contact({
           address: '0.0.0.0',
           port: 0,
           nodeID: utils.rmd160('contact')
         }),
-        utils.rmd160('hash'),
-        utils.generateToken()
-      )], [Contact({
+        hash: utils.rmd160('hash'),
+        token: utils.generateToken(),
+        operation: 'PULL'
+      }], [Contact({
         address: '0.0.0.0',
         port: 0,
         nodeID: utils.rmd160('contact')
@@ -519,15 +519,16 @@ describe('RenterInterface', function() {
         null,
         { result: {} }
       );
-      renter.getMirrorNodes([DataChannelPointer(
-        Contact({
+      renter.getMirrorNodes([{
+        farmer: Contact({
           address: '0.0.0.0',
           port: 0,
           nodeID: utils.rmd160('contact')
         }),
-        utils.rmd160('hash'),
-        utils.generateToken()
-      )], [Contact({
+        hash: utils.rmd160('hash'),
+        token: utils.generateToken(),
+        operation: 'PULL'
+      }], [Contact({
         address: '0.0.0.0',
         port: 0,
         nodeID: utils.rmd160('contact')

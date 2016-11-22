@@ -719,9 +719,6 @@ describe('Protocol', function() {
       var _accept = sinon.stub();
       var proto = new Protocol({
         network: {
-          dataChannelServer: {
-            accept: _accept
-          },
           _logger: Logger(0),
           storageManager: {
             load: sinon.stub().callsArgWith(1, null, {
@@ -734,6 +731,9 @@ describe('Protocol', function() {
               }
             }),
             save: sinon.stub().callsArgWith(1, null)
+          },
+          transport: {
+            shardServer: { accept: _accept }
           }
         }
       });
@@ -812,8 +812,8 @@ describe('Protocol', function() {
       var _accept = sinon.stub();
       var proto = new Protocol({
         network: {
-          dataChannelServer: {
-            accept: _accept
+          transport: {
+            shardServer: { accept: _accept }
           },
           _logger: Logger(0),
           storageManager: {
@@ -887,47 +887,6 @@ describe('Protocol', function() {
       });
     });
 
-    it('should callback with error if channel cannot open', function(done) {
-      var dcx = new EventEmitter();
-      dcx.createReadStream = function() {
-        return new ReadableStream({ read: utils.noop });
-      };
-      var StubbedProtocol = proxyquire('../../lib/network/protocol', {
-        '../data-channels/client': function() {
-          return dcx;
-        }
-      });
-      var contracts = {
-        '4e1243bd22c66e76c2ba9eddc1f91394e57f9f83': {}
-      };
-      var proto = new StubbedProtocol({
-        network: {
-          _logger: Logger(0),
-          storageManager: {
-            load: function(hash, callback) {
-              callback(null, {
-                contracts: contracts,
-                shard: new WritableStream({ write: utils.noop }),
-                getContract: function(contact) {
-                  return contracts[contact.nodeID];
-                }
-              });
-              setImmediate(function() {
-                dcx.emit('error', new Error('Failed to open channel'));
-              });
-            }
-          }
-        }
-      });
-      proto.handleMirror({
-        contact: { nodeID: '4e1243bd22c66e76c2ba9eddc1f91394e57f9f83' },
-        data_hash: '4e1243bd22c66e76c2ba9eddc1f91394e57f9f83'
-      }, function(err) {
-        expect(err.message).to.equal('Failed to open channel');
-        done();
-      });
-    });
-
     it('should error if no contract found', function(done) {
       var contracts = {};
       var proto = new Protocol({
@@ -975,57 +934,6 @@ describe('Protocol', function() {
         expect(err).to.equal(null);
         done();
       });
-    });
-
-    it('should open the channel and destroy a failed shard', function(done) {
-      var dcx = new EventEmitter();
-      var _rs = new ReadableStream({ read: utils.noop });
-      dcx.createReadStream = function() {
-        return _rs;
-      };
-      var StubbedProtocol = proxyquire('../../lib/network/protocol', {
-        '../data-channels/client': function() {
-          return dcx;
-        }
-      });
-      var _shard = new WritableStream({ write: utils.noop });
-      _shard.destroy = sinon.stub();
-      var contracts = {
-        '4e1243bd22c66e76c2ba9eddc1f91394e57f9f83': {}
-      };
-      var proto = new StubbedProtocol({
-        network: {
-          _logger: Logger(0),
-          storageManager: {
-            load: function(hash, callback) {
-              callback(null, {
-                contracts: contracts,
-                shard: _shard,
-                getContract: function(contact) {
-                  return contracts[contact.nodeID];
-                }
-              });
-              setImmediate(function() {
-                dcx.emit('open');
-                setImmediate(function() {
-                  _rs.emit('error', new Error('Failed'));
-                });
-              });
-            }
-          }
-        }
-      });
-      proto.handleMirror({
-        contact: { nodeID: '4e1243bd22c66e76c2ba9eddc1f91394e57f9f83' },
-        data_hash: '4e1243bd22c66e76c2ba9eddc1f91394e57f9f83'
-      }, function(err) {
-        expect(err).to.equal(null);
-        setTimeout(function() {
-          expect(_shard.destroy.called).to.equal(true);
-          done();
-        }, 10);
-      });
-
     });
 
   });

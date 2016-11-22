@@ -9,6 +9,8 @@ var proxyquire = require('proxyquire');
 var kad = require('kad');
 var EventEmitter = require('events').EventEmitter;
 var utils = require('../../lib/utils');
+var StorageManager = require('../../lib/storage/manager');
+var RamAdapter = require('../../lib/storage/adapters/ram');
 
 describe('Network/Transport', function() {
 
@@ -20,8 +22,8 @@ describe('Network/Transport', function() {
         port: 0,
         nodeID: KeyPair().getNodeID()
       }), {
-        noforward: true,
-        tunport: 0
+        doNotTraverseNat: true,
+        storageManager: StorageManager(RamAdapter())
       })).to.be.instanceOf(Transport);
     });
 
@@ -79,7 +81,9 @@ describe('Network/Transport', function() {
         address: '127.0.0.1',
         port: 0,
         nodeID: KeyPair().getNodeID()
-      }), { tunport: 0 });
+      }), {
+        storageManager: StorageManager(RamAdapter())
+      });
       transport.on('ready', function() {
         _forwardPort.restore();
         _checkIfReachable.restore();
@@ -101,7 +105,9 @@ describe('Network/Transport', function() {
         address: '127.0.0.1',
         port: 0,
         nodeID: KeyPair().getNodeID()
-      }));
+      }), {
+        storageManager: StorageManager(RamAdapter())
+      });
       transport.on('ready', function() {
         _close.restore();
         _checkIfReachable.restore();
@@ -168,7 +174,9 @@ describe('Network/Transport', function() {
         address: '127.0.0.1',
         port: 0,
         nodeID: KeyPair().getNodeID()
-      }), { tunport: 0 });
+      }), {
+        storageManager: StorageManager(RamAdapter())
+      });
       transport.on('ready', function() {
         expect(transport._isPublic).to.equal(false);
         transport._forwardPort(function(err) {
@@ -193,7 +201,9 @@ describe('Network/Transport', function() {
         address: '127.0.0.1',
         port: 0,
         nodeID: KeyPair().getNodeID()
-      }), { tunport: 0 });
+      }), {
+        storageManager: StorageManager(RamAdapter())
+      });
       transport.on('ready', function() {
         expect(transport._isPublic).to.equal(false);
         transport._forwardPort(function(err) {
@@ -218,7 +228,9 @@ describe('Network/Transport', function() {
         address: '127.0.0.1',
         port: 0,
         nodeID: KeyPair().getNodeID()
-      }), { tunport: 0 });
+      }), {
+        storageManager: StorageManager(RamAdapter())
+      });
       transport.on('ready', function() {
         expect(transport._isPublic).to.equal(false);
         transport._forwardPort(function(err) {
@@ -240,7 +252,9 @@ describe('Network/Transport', function() {
         address: '127.0.0.1',
         port: 0,
         nodeID: KeyPair().getNodeID()
-      }), { tunport: 0 });
+      }), {
+        storageManager: StorageManager(RamAdapter())
+      });
       transport.on('ready', function() {
         expect(transport._isPublic).to.equal(false);
         transport._forwardPort(function(err) {
@@ -265,7 +279,9 @@ describe('Network/Transport', function() {
         address: '127.0.0.1',
         port: 4000,
         nodeID: KeyPair().getNodeID()
-      }), { tunport: 0 });
+      }), {
+        storageManager: StorageManager(RamAdapter())
+      });
       transport.on('ready', function() {
         expect(transport._isPublic).to.equal(true);
         transport._forwardPort(function(err, ip, port) {
@@ -292,7 +308,9 @@ describe('Network/Transport', function() {
         address: '127.0.0.1',
         port: 0,
         nodeID: KeyPair().getNodeID()
-      }), { tunport: 0 });
+      }), {
+        storageManager: StorageManager(RamAdapter())
+      });
       transport.on('ready', function() {
         expect(transport._isPublic).to.equal(true);
         transport._forwardPort(function(err, ip, port) {

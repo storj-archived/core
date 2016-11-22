@@ -476,25 +476,14 @@ describe('BridgeClient', function() {
               });
             }
           },
-          '../data-channels/client': function() {
-            var emitter = new EventEmitter();
-            emitter.createWriteStream = function() {
-              var ws = new stream.Transform({
-                transform: function(c, e, cb) {
-                  this.push(c);
-                  cb(null);
+          '../utils': {
+            createShardUploader: function() {
+              return new stream.Writable({
+                write: function() {
+                  this.emit('finish');
                 }
               });
-              ws.destroy = sinon.stub();
-              setTimeout(function() {
-                ws.emit('end');
-              }, 200);
-              return ws;
-            };
-            setTimeout(function() {
-              emitter.emit('open');
-            }, 20);
-            return emitter;
+            }
           },
           '../file-handling/file-demuxer': function() {
             _demuxer.DEFAULTS = { shardSize: 32 };
@@ -808,31 +797,6 @@ describe('BridgeClient', function() {
 
     });
 
-    describe('#_createInputFromPointer', function() {
-
-      it('should callback with the error', function(done) {
-        var emitter = new EventEmitter();
-        var StubbedClient = proxyquire('../../lib/bridge-client', {
-          '../data-channels/client': sinon.stub().returns(emitter)
-        });
-        var client = new StubbedClient();
-        client._createInputFromPointer({
-          farmer: {
-            address: '127.0.0.1',
-            port: 1337,
-            nodeID: utils.rmd160('')
-          }
-        }, function(err) {
-          expect(err.message).to.equal('Failed');
-          done();
-        });
-        setImmediate(function() {
-          emitter.emit('error', new Error('Failed'));
-        });
-      });
-
-    });
-
   });
 
   describe('BridgeClient/Frames', function() {
@@ -1049,124 +1013,6 @@ describe('BridgeClient', function() {
           setImmediate(function() {
             emitters[1].emit('open');
           });
-        });
-      });
-
-      it('should callback error if fails before stream', function(done) {
-        var emitters = [new EventEmitter(), new EventEmitter()];
-        var count = 0;
-        var StubbedClient = proxyquire('../../lib/bridge-client', {
-          '../data-channels/client': function() {
-            emitters[count++].createReadStream = function() {
-              return new stream.Readable({ read: function() {} });
-            };
-            return emitters[count - 1];
-          }
-        });
-        var client = new StubbedClient();
-        var _createInputFromPointer = sinon.stub(
-          client,
-          '_createInputFromPointer'
-        ).callsArgWith(1, new Error('Failed'));
-        client.resolveFileFromPointers([
-          {
-            size: 512,
-            farmer: {
-              address: '127.0.0.1',
-              port: 8080,
-              nodeID: utils.rmd160('nodeid')
-            }
-          }
-        ], function(err) {
-          _createInputFromPointer.restore();
-          expect(err.message).to.equal('Failed');
-          done();
-        });
-      });
-
-      it('should emit an error event if the pointer fails', function(done) {
-        var emitters = [new EventEmitter(), new EventEmitter()];
-        var count = 0;
-        var StubbedClient = proxyquire('../../lib/bridge-client', {
-          '../data-channels/client': function() {
-            emitters[count++].createReadStream = function() {
-              return new stream.Readable({ read: function() {} });
-            };
-            return emitters[count - 1];
-          }
-        });
-        var client = new StubbedClient();
-        client.resolveFileFromPointers([
-          {
-            size: 512,
-            farmer: {
-              address: '127.0.0.1',
-              port: 8080,
-              nodeID: utils.rmd160('nodeid')
-            }
-          }
-        ], function(err, stream, queue) {
-          stream.on('error', function(err) {
-            expect(err.message).to.equal('Failed');
-            done();
-          });
-          queue.push({
-            size: 512,
-            farmer: {
-              address: '127.0.0.1',
-              port: 8080,
-              nodeID: utils.rmd160('nodeid')
-            }
-          });
-          setImmediate(function() {
-            emitters[1].emit('error', new Error('Failed'));
-          });
-        });
-        setImmediate(function() {
-          emitters[0].emit('open');
-        });
-      });
-
-      it('should add the pointers to the queue afterwards', function(done) {
-        var emitters = [new EventEmitter(), new EventEmitter()];
-        var count = 0;
-        var StubbedClient = proxyquire('../../lib/bridge-client', {
-          '../data-channels/client': function() {
-            emitters[count++].createReadStream = function() {
-              return new stream.Readable({ read: function() {} });
-            };
-            return emitters[count - 1];
-          }
-        });
-        var client = new StubbedClient();
-        client.resolveFileFromPointers([
-          {
-            size: 512,
-            farmer: {
-              address: '127.0.0.1',
-              port: 8080,
-              nodeID: utils.rmd160('nodeid')
-            }
-          }
-        ], function(err, stream, queue) {
-          queue.push({
-            size: 512,
-            farmer: {
-              address: '127.0.0.1',
-              port: 8080,
-              nodeID: utils.rmd160('nodeid')
-            }
-          });
-          setImmediate(function() {
-            emitters[1].emit('open');
-            setImmediate(function() {
-              expect(stream._inputs).to.have.lengthOf(2);
-              done();
-            });
-          });
-        });
-        setImmediate(function() {
-          emitters[0].emit('open');
         });
       });
 
@@ -1447,16 +1293,21 @@ describe('BridgeClient', function() {
     describe('#_transferShard', function() {
 
       it('should emit a retry on client error', function(done) {
-        var clientEmitter = new EventEmitter();
+        var clientEmitter = new stream.Writable({ write: utils.noop });
         var StubbedClient = proxyquire('../../lib/bridge-client', {
           fs: {
-            createReadStream: sinon.stub().returns({})
+            createReadStream: sinon.stub().returns(
+              new stream.Readable({ read: utils.noop })
+            )
           },
-          '../data-channels/client': sinon.stub().returns(clientEmitter)
+          '../utils': {
+            createShardUploader: sinon.stub().returns(clientEmitter)
+          }
         });
         var client = new StubbedClient();
         var emitter = new EventEmitter();
         var state = new EventEmitter();
+        state.uploaders = [];
         var pointer = {
           farmer: {
             address: '127.0.0.1',
@@ -1477,25 +1328,22 @@ describe('BridgeClient', function() {
       });
 
       it('should cleanup when state killed', function(done) {
-        var clientEmitter = new EventEmitter();
-        var ws = new ReadableStream.Writable({});
-        ws.destroy = sinon.stub();
-        ws.end = sinon.stub();
-        clientEmitter.createWriteStream = function() {
-          return ws;
-        };
+        var clientEmitter = new stream.Writable({ write: utils.noop });
+        var _end = sinon.stub(clientEmitter, 'end');
         var StubbedClient = proxyquire('../../lib/bridge-client', {
           fs: {
             createReadStream: sinon.stub().returns(new ReadableStream({
               read: utils.noop
             }))
           },
-          '../data-channels/client': sinon.stub().returns(clientEmitter)
+          '../utils': {
+            createShardUploader: sinon.stub().returns(clientEmitter)
+          }
         });
         var client = new StubbedClient();
         var emitter = new EventEmitter();
         var state = new EventEmitter();
-        state.dataChannels = [];
+        state.uploaders = [];
         var pointer = {
           farmer: {
             address: '127.0.0.1',
@@ -1505,16 +1353,12 @@ describe('BridgeClient', function() {
         };
         client._transferShard(emitter, 'name', pointer, state);
         emitter.on('finish', function() {
-          expect(ws.destroy.called).to.equal(true);
-          expect(ws.end.called).to.equal(true);
+          expect(_end.called).to.equal(true);
           done();
         });
         setImmediate(function() {
           setImmediate(function() {
-            clientEmitter.emit('open');
-            setImmediate(function() {
-              state.emit('killed');
-            });
+            state.emit('killed');
           });
         });
       });

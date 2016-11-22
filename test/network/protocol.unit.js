@@ -933,6 +933,49 @@ describe('Protocol', function() {
       });
     });
 
+    it('should start downloading shard and destroy on failure', function(done) {
+      var download = new stream.Readable({ read: () => null });
+      var Protocol = proxyquire('../../lib/network/protocol', {
+        '../utils': {
+          createShardDownloader: sinon.stub().returns(download)
+        }
+      });
+      var contracts = {
+        test: {}
+      };
+      var shard = new stream.Writable({ write: () => null });
+      shard.destroy = sinon.stub();
+      var proto = new Protocol({
+        network: {
+          _logger: Logger(0),
+          storageManager: {
+            load: sinon.stub().callsArgWith(1, null, {
+              contracts: contracts,
+              shard: shard,
+              getContract: function(contact) {
+                return contracts[contact.nodeID];
+              }
+            })
+          }
+        }
+      });
+      proto.handleMirror({
+        contact: { nodeID: 'test' },
+        farmer: {
+          address: '0.0.0.0',
+          port: 1234,
+          nodeID: utils.rmd160('')
+        }
+      }, function(err) {
+        expect(err).to.equal(null);
+        download.emit('error', new Error());
+        setImmediate(() => {
+          expect(shard.destroy.called).to.equal(true);
+          done();
+        })
+      });
+    });
+
   });
 
   describe('#handleProbe', function() {

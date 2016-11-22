@@ -383,4 +383,28 @@ describe('utils', function() {
 
   });
 
+  describe('#createShardDownloader', function() {
+
+    it('should return the request object', function() {
+      var requestObj = {};
+      var utils = proxyquire('../lib/utils', {
+        request: sinon.stub().returns(requestObj)
+      });
+      expect(utils.createShardDownloader({})).to.equal(requestObj);
+    });
+
+  });
+
+  describe('#createShardUploader', function() {
+
+    it('should return the request object', function() {
+      var requestObj = {};
+      var utils = proxyquire('../lib/utils', {
+        request: sinon.stub().returns(requestObj)
+      });
+      expect(utils.createShardUploader({})).to.equal(requestObj);
+    });
+
+  });
+
 });

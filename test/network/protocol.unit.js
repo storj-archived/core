@@ -14,9 +14,6 @@ var StorageItem = require('../../lib/storage/item');
 var utils = require('../../lib/utils');
 var TriggerManager = require('../../lib/sips/0003').TriggerManager;
 var EventEmitter = require('events').EventEmitter;
-var rs = require('readable-stream');
-var ReadableStream = rs.Readable;
-var WritableStream = rs.Writable;
 var Contract = require('../../lib/contract');
 
 describe('Protocol', function() {

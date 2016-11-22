@@ -13,9 +13,6 @@ var ShardServer = proxyquire('../../lib/network/shard-server', {
     createExchangeReport: sinon.stub()
   })
 });
-var EventEmitter = require('events').EventEmitter;
-var http = require('http');
-var StorageItem = require('../../lib/storage/item');
 var utils = require('../../lib/utils');
 
 describe('ShardServer', function() {

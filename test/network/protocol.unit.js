@@ -972,7 +972,7 @@ describe('Protocol', function() {
         setImmediate(() => {
           expect(shard.destroy.called).to.equal(true);
           done();
-        })
+        });
       });
     });
 

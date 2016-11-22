@@ -25,20 +25,11 @@ exports.Monitor = require('./lib/network/monitor');
 /** {@link Transport} */
 exports.Transport = require('./lib/network/transport');
 
+/** {@link ShardServer} */
+exports.ShardServer = require('./lib/network/shard-server');
+
 /** {@link Contact} */
 exports.Contact = require('./lib/network/contact');
-
-/** {@link DataChannelClient} */
-exports.DataChannelClient = require('./lib/data-channels/client');
-
-/** {@link DataChannelServer} */
-exports.DataChannelServer = require('./lib/data-channels/server');
-
-/** {@link DataChannelPointer} */
-exports.DataChannelPointer = require('./lib/data-channels/pointer');
-
-/** {@link module:storj/datachannel/errors} */
-exports.DataChannelErrors = require('./lib/data-channels/error-codes');
 
 /** {@link EncryptStream} */
 exports.EncryptStream = require('./lib/crypto-tools/encrypt-stream');

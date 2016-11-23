@@ -1,6 +1,6 @@
 'use strict';
 
-var storj = require('storj');
+var storj = require('storj-lib');
 // Set the bridge api URL
 var api = 'https://api.storj.io';
 // Create client for interacting with API

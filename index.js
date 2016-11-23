@@ -43,12 +43,6 @@ exports.FileMuxer = require('./lib/file-handling/file-muxer');
 /** {@link FileDemuxer} */
 exports.FileDemuxer = require('./lib/file-handling/file-demuxer');
 
-/** {@link Padder} */
-exports.Padder = require('./lib/file-handling/padder');
-
-/** {@link Unpadder} */
-exports.Unpadder = require('./lib/file-handling/unpadder');
-
 /** {@link Contract} */
 exports.Contract = require('./lib/contract');
 

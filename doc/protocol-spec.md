@@ -597,8 +597,8 @@ Upon receipt of a `PUBLISH` message, a node must first check to make sure it
 has not already received the publication. This is done by caching the `uuid` of
 received publications. If the node has already seen the publication, it should
 respond with an error message indicating such. The node should also make sure
-that the publication has not expired by checking the `ttl` against the current
-UNIX time.
+that the publication has not expired by checking that the `ttl` is a positive
+integer.
 
 If the node has not previously seen the publication and the message has not
 expired, then it must check to see if the publication topic is of interest to
@@ -627,12 +627,12 @@ should acknowledge receipt of the publication to the forwarder:
 ```
 
 Then, it must append *negative information* to the publication message by
-adding it's own `nodeID` to the `publishers` property. Once the message has
-been updated with the negative information, the node must check it's attenuated
-bloom filter to see if any of it's neighbors are also interested and, if so,
-forward the message along to them. If no neighbors are interested, the node
-must select a random contact from the routing table and forward the message to
-that contact.
+adding it's own `nodeID` to the `publishers` property as well as decrementing 
+the `ttl`. Once the message has been updated with the negative information, 
+the node must check it's attenuated bloom filter to see if any of it's 
+neighbors are also interested and, if so, forward the message along to them. 
+If no neighbors are interested, the node must select a random contact from the 
+routing table and forward the message to that contact.
 
 ### Negotiating Storage Contracts
 
@@ -1083,4 +1083,6 @@ the test fails, then this effectively a failed audit and the contract is null.
 
 ### Implemented SIPs
 
-* [SIP0003 Application Specific Triggers](https://github.com/bookchin/storj-sips/blob/master/sip-0003.md)
+* [SIP0003 Remote Notifications and Triggers](https://github.com/Storj/sips/blob/master/sip-0003.md)
+* [SIP0004 Contract Transfers and Renewals](https://github.com/Storj/sips/blob/master/sip-0004.md)
+* [SIP0032 Hierarchically Deterministic Node IDs](https://github.com/Storj/sips/blob/master/sip-0032.md)

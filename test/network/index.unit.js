@@ -4,6 +4,7 @@
 
 var sinon = require('sinon');
 var expect = require('chai').expect;
+var secp256k1 = require('secp256k1');
 var proxyquire = require('proxyquire');
 var EventEmitter = require('events').EventEmitter;
 var Network = proxyquire('../../lib/network', {
@@ -14,6 +15,7 @@ var Network = proxyquire('../../lib/network', {
   }
 });
 var Manager = require('../../lib/storage/manager');
+var HDKey = require('hdkey');
 var KeyPair = require('../../lib/crypto-tools/keypair');
 var RAMStorageAdapter = require('../../lib/storage/adapters/ram');
 var kad = require('kad');
@@ -24,6 +26,16 @@ var constants = require('../../lib/constants');
 var async = require('async');
 var _ntp = null;
 var CLEANUP = [];
+
+var seed = 'a0c42a9c3ac6abf2ba6a9946ae83af18f51bf1c9fa7dacc4c92513cc4d' +
+    'd015834341c775dcd4c0fac73547c5662d81a9e9361a0aac604a73a321bd9103b' +
+    'ce8af';
+
+var masterKey = HDKey.fromMasterSeed(new Buffer(seed, 'hex'));
+var hdKey = masterKey.derive('m/3000\'/0\'');
+var nodeHdKey = hdKey.deriveChild(10);
+
+var pub = '02ad47e0d4896cd794f5296a953f897c426b3f9a58f5203b8baace8952a291cf6b';
 
 describe('Network (public)', function() {
 
@@ -49,6 +61,24 @@ describe('Network (public)', function() {
       });
       CLEANUP.push(net);
       expect(net).to.be.instanceOf(Network);
+    });
+
+    it('should create network with SIP32 contact', function() {
+      var net = Network({
+        hdKey: hdKey.privateExtendedKey,
+        hdIndex: 10,
+        storageManager: Manager(RAMStorageAdapter()),
+        logger: kad.Logger(0),
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
+      });
+      CLEANUP.push(net);
+      expect(net).to.be.instanceOf(Network);
+      expect(net.contact.hdKey).to.equal(hdKey.publicExtendedKey);
+      expect(net.contact.hdIndex).to.equal(10);
     });
 
   });
@@ -332,6 +362,44 @@ describe('Network (private)', function() {
 
   });
 
+  describe('#_initKeyPair', function() {
+
+    it('it will derive keyPair and set hdKey and hdIndex', function() {
+      var obj = {};
+      var initKeyPair = Network.prototype._initKeyPair.bind(obj);
+      initKeyPair({
+        hdKey: hdKey.privateExtendedKey,
+        hdIndex: 3
+      });
+      expect(obj.hdKey).to.be.instanceOf(HDKey);
+      expect(obj.hdIndex).to.equal(3);
+      expect(obj.keyPair).to.be.instanceOf(KeyPair);
+    });
+
+    it('it will fail if given public extended key', function() {
+      var obj = {};
+      var initKeyPair = Network.prototype._initKeyPair.bind(obj);
+      expect(function() {
+        initKeyPair({
+          hdKey: hdKey.publicExtendedKey,
+          hdIndex: 3
+        });
+      }).to.throw(Error);
+    });
+
+    it('it will set keyPair', function() {
+      var keyPair = new KeyPair();
+      var obj = {};
+      var initKeyPair = Network.prototype._initKeyPair.bind(obj);
+      initKeyPair({
+        keyPair: keyPair
+      });
+      expect(obj.keyPair).to.be.instanceOf(KeyPair);
+      expect(obj.keyPair).to.equal(keyPair);
+    });
+
+  });
+
   describe('#_validateContact', function() {
 
     it('should return an error if the contact is invalid', function(done) {
@@ -444,6 +512,10 @@ describe('Network (private)', function() {
   });
 
   describe('#_verifySignature', function() {
+    var sandbox = sinon.sandbox.create();
+    afterEach(function() {
+      sandbox.restore();
+    });
 
     it('should fail if no signobj supplied', function(done) {
       var verify = Network.prototype._verifySignature;
@@ -455,13 +527,16 @@ describe('Network (private)', function() {
     });
 
     it('should pass if valid signature', function(done) {
-      var verify = Network.prototype._verifySignature.bind({ _pubkeys: {} });
+      var verify = Network.prototype._verifySignature.bind({
+        _pubkeys: {},
+        _verifyHDKeyContact: sinon.stub().returns(true)
+      });
+      var kp = KeyPair();
       var msg = {
         method: 'PING',
         id: '12345',
         params: {}
       };
-      var kp = KeyPair();
       Network.prototype._signMessage.call({
         keyPair: kp
       }, msg, function() {});
@@ -484,7 +559,10 @@ describe('Network (private)', function() {
     });
 
     it('should fail if invalid signature', function(done) {
-      var verify = Network.prototype._verifySignature.bind({ _pubkeys: {} });
+      var verify = Network.prototype._verifySignature.bind({
+        _pubkeys: {},
+      });
+      sandbox.stub(secp256k1, 'recover').returns(new Buffer(pub, 'hex'));
       var msg = {
         method: 'PING',
         id: '123456',
@@ -511,24 +589,10 @@ describe('Network (private)', function() {
       });
     });
 
-    it('should callback with error if #toPublicKey throws', function(done) {
-      var StubbedNetwork = proxyquire('../../lib/network', {
-        'bitcore-lib': {
-          crypto: {
-            ECDSA: function() {
-              return {
-                toPublicKey: sinon.stub().throws(
-                  new Error('Something about points and curves...')
-                )
-              };
-            },
-            Signature: {
-              fromCompact: sinon.stub().returns({})
-            }
-          }
-        }
-      });
-      var verify = StubbedNetwork.prototype._verifySignature.bind({
+    it('should callback with error if secp256k1 throws', function(done) {
+      var error = new Error('Something about points and curves...');
+      sandbox.stub(secp256k1, 'recover').throws(error);
+      var verify = Network.prototype._verifySignature.bind({
         _pubkeys: {}
       });
       var msg = {
@@ -536,13 +600,15 @@ describe('Network (private)', function() {
         id: '123456',
         params: {}
       };
-      StubbedNetwork.prototype._signMessage.call({
+      Network.prototype._signMessage.call({
         keyPair: KeyPair()
       }, msg, function() {});
+
+      var sigobj = Network.prototype._createSignatureObject(
+        msg.params.signature
+      );
       verify({
-        signobj: StubbedNetwork.prototype._createSignatureObject(
-          msg.params.signature
-        ),
+        signobj: sigobj,
         message: {
           id: '123456',
           method: 'PING',
@@ -554,6 +620,95 @@ describe('Network (private)', function() {
         address: KeyPair().getAddress()
       }, function(err) {
         expect(err.message).to.equal('Something about points and curves...');
+        done();
+      });
+    });
+
+    it('should verify a signature with hd contact', function(done) {
+      var verify = Network.prototype._verifySignature.bind({
+        _pubkeys: {},
+        _verifyHDKeyContact: sinon.stub().returns(true)
+      });
+
+      var msg = {
+        method: 'PING',
+        id: '12345',
+        params: {}
+      };
+
+      var contact = Contact({
+        address: '127.0.0.1',
+        port: 1337,
+        nodeID: '1261d3f171c23169c893a21be1f03bacafad26d7',
+        hdKey: hdKey.publicExtendedKey,
+        hdIndex: 10
+      });
+
+      var kp = KeyPair(nodeHdKey.privateKey.toString('hex'));
+
+      Network.prototype._signMessage.call({
+        keyPair: kp
+      }, msg, function() {});
+
+      verify({
+        signobj: Network.prototype._createSignatureObject(
+          msg.params.signature
+        ),
+        message: {
+          id: '12345',
+          params: { signature: msg.params.signature }
+        },
+        nonce: msg.params.nonce,
+        contact: contact,
+        signature: msg.params.signature,
+        address: kp.getAddress()
+      }, function(err) {
+        expect(err).to.equal(null);
+        done();
+      });
+    });
+
+    it('should NOT verify a signature with hd contact', function(done) {
+      var verify = Network.prototype._verifySignature.bind({
+        _pubkeys: {},
+        _verifyHDKeyContact: sinon.stub().returns(false)
+      });
+
+      var msg = {
+        method: 'PING',
+        id: '12345',
+        params: {}
+      };
+
+      var contact = Contact({
+        address: '127.0.0.1',
+        port: 1337,
+        nodeID: '1261d3f171c23169c893a21be1f03bacafad26d7',
+        hdKey: hdKey.publicExtendedKey,
+        hdIndex: 10
+      });
+
+      var kp = KeyPair(nodeHdKey.privateKey.toString('hex'));
+
+      Network.prototype._signMessage.call({
+        keyPair: kp
+      }, msg, function() {});
+
+      verify({
+        signobj: Network.prototype._createSignatureObject(
+          msg.params.signature
+        ),
+        message: {
+          id: '12345',
+          params: { signature: msg.params.signature }
+        },
+        nonce: msg.params.nonce,
+        contact: contact,
+        signature: msg.params.signature,
+        address: kp.getAddress()
+      }, function(err) {
+        expect(err).to.be.instanceOf(Error);
+        expect(err.message).to.equal('Invalid derived public key');
         done();
       });
     });
@@ -598,6 +753,48 @@ describe('Network (private)', function() {
         expect(typeof msg.result.nonce).to.equal('number');
         done();
       });
+    });
+
+  });
+
+  describe('#_verifyHDKeyContact', function() {
+    var seed = 'a0c42a9c3ac6abf2ba6a9946ae83af18f51bf1c9fa7dacc4c92513cc4d' +
+        'd015834341c775dcd4c0fac73547c5662d81a9e9361a0aac604a73a321bd9103b' +
+        'ce8af';
+
+    var masterKey = HDKey.fromMasterSeed(new Buffer(seed, 'hex'));
+    var hdKey = masterKey.derive('m/3000\'/0\'');
+    var key2 = hdKey.deriveChild(12);
+    var publicKey = key2.publicKey;
+
+    it('will return true if derived public key matches', function() {
+      var verify = Network.prototype._verifyHDKeyContact.bind({
+        _hdcache: {}
+      });
+      var contact = {
+        hdKey: hdKey.publicExtendedKey,
+        hdIndex: 12
+      };
+      expect(verify(contact, publicKey)).to.equal(true);
+    });
+
+    it('will return false if derived public key does not match', function() {
+      var verify = Network.prototype._verifyHDKeyContact.bind({
+        _hdcache: {}
+      });
+      var contact = {
+        hdKey: hdKey.publicExtendedKey,
+        hdIndex: 10
+      };
+      expect(verify(contact, publicKey)).to.equal(false);
+    });
+
+    it('will return true if contact does nat have hd contact', function() {
+      var verify = Network.prototype._verifyHDKeyContact.bind({
+        _hdcache: {}
+      });
+      var contact = {};
+      expect(verify(contact, publicKey)).to.equal(true);
     });
 
   });

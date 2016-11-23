@@ -620,7 +620,7 @@ describe('FarmerInterface', function() {
         result: {
           contract: Contract({}).toObject()
         }
-      }, new Contract(), {});
+      }, new Contract(), {nodeID: 'nodeid'});
       setImmediate(function() {
         _load.restore();
         _save.restore();
@@ -789,6 +789,32 @@ describe('FarmerInterface#Negotiator', function() {
     }, new Contract({
       data_hash: utils.rmd160(''),
       renter_id: '5ebef6c9f0cabf23c3565941e76fb6e5320143d3'
+    }), function(result) {
+      expect(result).to.equal(true);
+      done();
+    });
+  });
+
+  it('should return true if check pass and hd key used', function(done) {
+    FarmerInterface.Negotiator.call({
+      _logger: kad.Logger(0),
+      _renterWhitelist: [
+        'xpub6AHweYHAxk1EhJSBctQD1nLWPog6Sy2eTpKQLExR1hfzTyyZQWvU4EYNXv1NJN7' +
+          'GpLYXnDLt4PzN874g6zSjAQdFCHZN7U7nbYKYVDUzD42'
+      ],
+      storageManager: {
+        load: sinon.stub().callsArgWith(1, null, {
+          contracts: {
+            '5ebef6c9f0cabf23c3565941e76fb6e5320143d3': {}
+          },
+          shard: { write: sinon.stub() }
+        })
+      }
+    }, new Contract({
+      data_hash: utils.rmd160(''),
+      renter_id: '5ebef6c9f0cabf23c3565941e76fb6e5320143d3',
+      renter_hd_key: 'xpub6AHweYHAxk1EhJSBctQD1nLWPog6Sy2eTpKQLExR1hfzTyyZQ' +
+        'WvU4EYNXv1NJN7GpLYXnDLt4PzN874g6zSjAQdFCHZN7U7nbYKYVDUzD42'
     }), function(result) {
       expect(result).to.equal(true);
       done();

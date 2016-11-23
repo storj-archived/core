@@ -15,6 +15,7 @@ var FileMuxer = require('../../lib/file-handling/file-muxer');
 var crypto = require('crypto');
 var utils = require('../../lib/utils');
 var UploadState = require('../../lib/bridge-client/upload-state');
+var ExchangeReport = require('../../lib/bridge-client/exchange-report');
 
 describe('BridgeClient', function() {
 
@@ -530,7 +531,8 @@ describe('BridgeClient', function() {
             address: '127.0.0.1',
             port: 8080,
             nodeID: utils.rmd160('nodeid')
-          }
+          },
+          hash: utils.rmd160('')
         }).returns({ cancel: sinon.stub() });
         var _request = sinon.stub(
           StubbedClient.prototype,
@@ -1460,7 +1462,8 @@ describe('BridgeClient', function() {
             address: '127.0.0.1',
             port: 1337,
             nodeID: utils.rmd160('nodeid')
-          }
+          },
+          hash: utils.rmd160('')
         };
         client._transferShard(emitter, 'name', pointer, state);
         emitter.once('retry', function(name, pointer2) {
@@ -1522,13 +1525,18 @@ describe('BridgeClient', function() {
 
       it('should retry transfer if count less than 3', function(done) {
         var _transferStatus = new EventEmitter();
-        var client = new BridgeClient({ transferRetries: 3  });
+        var client = new BridgeClient(null, {
+          transferRetries: 3,
+          retryThrottle: 0
+        });
+        sinon.stub(client, 'createExchangeReport');
         var pointer = {
           farmer: {
             address: '127.0.0.1',
             port: 1337,
             nodeID: utils.rmd160('nodeid')
-          }
+          },
+          hash: utils.rmd160('')
         };
         var _transferShard = sinon.stub(client, '_transferShard', function() {
           return _transferStatus;
@@ -1537,7 +1545,8 @@ describe('BridgeClient', function() {
           client,
           '_shardTransferComplete'
         ).callsArg(2);
-        client._startTransfer(pointer, new EventEmitter(), {
+        var state = new EventEmitter();
+        client._startTransfer(pointer, state, {
           frame: 'frame',
           tmpName: 'tmpname',
           size: 0,
@@ -1551,18 +1560,19 @@ describe('BridgeClient', function() {
           expect(_transferShard.callCount).to.equal(2);
           done();
         });
-        setImmediate(function() {
+        setTimeout(function() {
           _transferStatus.emit('retry');
-          setImmediate(function() {
+          setTimeout(function() {
             _transferStatus.emit('finish');
-          });
-        });
+          }, 10);
+        }, 10);
       });
 
       it('should get a new contract if transfer fails 3 times', function(done) {
         var _transferStatus = new EventEmitter();
         var _kill = sinon.stub();
         var client = new BridgeClient();
+        sinon.stub(client, 'createExchangeReport');
         var state = new EventEmitter();
         state.queue = { kill: _kill };
         state.callback = sinon.stub();
@@ -1571,7 +1581,8 @@ describe('BridgeClient', function() {
             address: '127.0.0.1',
             port: 1337,
             nodeID: utils.rmd160('nodeid')
-          }
+          },
+          hash: utils.rmd160('')
         };
         var _transferShard = sinon.stub(client, '_transferShard', function() {
           return _transferStatus;
@@ -1630,6 +1641,51 @@ describe('BridgeClient', function() {
         client._handleShardTmpFileFinish(state, {
           frame: {},
           hash: utils.sha256('')
+        }, function() {
+          _addShardToFileStagingFrame.restore();
+          done();
+        });
+      });
+
+      it('should not duplicate audit generation', function(done) {
+        var StubbedClient = proxyquire('../../lib/bridge-client', {
+          fs: {
+            createReadStream: function() {
+              var wasRead = false;
+              return new stream.Readable({
+                read: function() {
+                  if (wasRead) {
+                    return this.push(null);
+                  }
+
+                  wasRead = true;
+                  this.push(Buffer('test'));
+                }
+              });
+            }
+          }
+        });
+        var client = new StubbedClient();
+        var state = new UploadState({
+          worker: utils.noop
+        });
+        var _addShardToFileStagingFrame = sinon.stub(
+          client,
+          'addShardToFileStagingFrame',
+          function(id, data, cb) {
+            state.cleanup();
+            expect(data.challenges).to.equal('CHALLENGES');
+            expect(data.tree).to.equal('TREE');
+            cb();
+
+            return { cancel: sinon.stub() };
+          }
+        );
+        client._handleShardTmpFileFinish(state, {
+          frame: {},
+          hash: utils.sha256(''),
+          challenges: 'CHALLENGES',
+          tree: 'TREE'
         }, function() {
           _addShardToFileStagingFrame.restore();
           done();
@@ -1704,6 +1760,7 @@ describe('BridgeClient', function() {
         var fakeState = {
           completed: 1,
           numShards: 2,
+          file: 'file',
           cleanup: sinon.stub(),
           callback: sinon.stub()
         };
@@ -1803,7 +1860,7 @@ describe('BridgeClient', function() {
 
       it('should include email and password', function() {
         var client = new BridgeClient(null, {
-          basicauth: {
+          basicAuth: {
             email: 'gordon@storj.io',
             password: 'password'
           }
@@ -2053,6 +2110,43 @@ describe('BridgeClient', function() {
       expect(params.limit).to.equal(3);
       expect(params.trimFront).to.equal(50);
       expect(params.trimBack).to.equal(25);
+    });
+
+  });
+
+  describe('#_getReporterId', function() {
+
+    it('should return anonymous for no auth', function() {
+      var client = new BridgeClient();
+      expect(client._getReporterId()).to.equal('anonymous');
+    });
+
+    it('should return anonymous for no auth', function() {
+      var keyPair = new KeyPair();
+      var client = new BridgeClient(null, { keyPair: keyPair });
+      expect(client._getReporterId()).to.equal(keyPair.getPublicKey());
+    });
+
+    it('should return email for basic auth', function() {
+      var client = new BridgeClient(null, { basicAuth: { email: 'test' } });
+      expect(client._getReporterId()).to.equal('test');
+    });
+
+  });
+
+  describe('#createExchangeReport', function() {
+
+    it('should call POST /reports with report', function(done) {
+      var client = new BridgeClient();
+      client._request = function(method, path, data) {
+        expect(method).to.equal('POST');
+        expect(path).to.equal('/reports/exchanges');
+        expect(data.reporterId).to.equal('anonymous');
+        done();
+      };
+      client.createExchangeReport(ExchangeReport({
+        reporterId: client._getReporterId()
+      }));
     });
 
   });

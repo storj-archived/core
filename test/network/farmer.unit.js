@@ -217,7 +217,7 @@ describe('FarmerInterface', function() {
       var _findNode = sinon.stub(
         farmer.router,
         'findNode'
-      ).callsArgWith(1, null, [Contact({
+      ).callsArgWith(2, null, [Contact({
         address: '127.0.0.1',
         port: 1234,
         nodeID: kp1.getNodeID()
@@ -307,7 +307,7 @@ describe('FarmerInterface', function() {
         'getContactByNodeID'
       ).returns(null);
       var _findNode = sinon.stub(farmer.router, 'findNode').callsArgWith(
-        1,
+        2,
         new Error('Lookup failed')
       );
       farmer._negotiateContract(Contract({
@@ -342,7 +342,7 @@ describe('FarmerInterface', function() {
         'getContactByNodeID'
       ).returns(null);
       var _findNode = sinon.stub(farmer.router, 'findNode').callsArgWith(
-        1,
+        2,
         null,
         []
       );

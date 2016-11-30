@@ -388,9 +388,19 @@ describe('utils', function() {
     it('should return the request object', function() {
       var requestObj = {};
       var utils = proxyquire('../lib/utils', {
-        request: sinon.stub().returns(requestObj)
+        request: function(opts) {
+          expect(opts.method).to.equal('GET');
+          expect(opts.uri).to.equal(
+            'http://farmer.host:6666/shards/hash?token=token'
+          );
+          return requestObj;
+        }
       });
-      expect(utils.createShardDownloader({})).to.equal(requestObj);
+      expect(utils.createShardDownloader(
+        { address: 'farmer.host', port: 6666 },
+        'hash',
+        'token'
+      )).to.equal(requestObj);
     });
 
   });
@@ -400,9 +410,19 @@ describe('utils', function() {
     it('should return the request object', function() {
       var requestObj = {};
       var utils = proxyquire('../lib/utils', {
-        request: sinon.stub().returns(requestObj)
+        request: function(opts) {
+          expect(opts.method).to.equal('POST');
+          expect(opts.uri).to.equal(
+            'http://farmer.host:6666/shards/hash?token=token'
+          );
+          return requestObj;
+        }
       });
-      expect(utils.createShardUploader({})).to.equal(requestObj);
+      expect(utils.createShardUploader(
+        { address: 'farmer.host', port: 6666 },
+        'hash',
+        'token'
+      )).to.equal(requestObj);
     });
 
   });

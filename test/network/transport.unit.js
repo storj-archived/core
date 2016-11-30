@@ -575,6 +575,8 @@ describe('Network/Transport', function() {
       var message = '{"id":"test","method":"PING","params":{}}';
       var receive = function(data) {
         expect(Buffer.isBuffer(data)).to.equal(true);
+        expect(JSON.parse(data.toString()).id).to.equal('test');
+        expect(typeof JSON.parse(data.toString()).result).to.equal('object');
         done();
       };
       var Transport = proxyquire('../../lib/network/transport', {

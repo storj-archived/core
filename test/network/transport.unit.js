@@ -122,7 +122,7 @@ describe('Network/Transport', function() {
 
     it('it should check the contact if address public', function(done) {
       var emitter = new EventEmitter();
-      emitter.close = sinon.stub();
+      emitter.end = sinon.stub();
       var _check = sinon.stub().returns(emitter);
       var StubbedTransport = proxyquire('../../lib/network/transport', {
         ip: { isPrivate: sinon.stub().returns(false) },

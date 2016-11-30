@@ -1411,7 +1411,9 @@ describe('Network (private)', function() {
       var _getContactList = sinon.stub(
         net.bridgeClient,
         'getContactList'
-      ).callsArgWith(1, null, []);
+      ).callsArgWith(1, null, [
+        { address: '0.0.0.0', port: 1234, nodeID: utils.rmd160('nodeid') }
+      ]);
       net.join(function() {
         _setupTunnel.restore();
         _getContactList.restore();

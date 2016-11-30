@@ -1030,7 +1030,8 @@ describe('Protocol', function() {
           contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
           transport: {
             tunnelServer: {
-              hasTunnelAvailable: sinon.stub().returns(false)
+              _proxies: {},
+              _opts: { maxProxiesAllowed: 0 }
             }
           },
           _tunnelers: {
@@ -1059,7 +1060,8 @@ describe('Protocol', function() {
           contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
           transport: {
             tunnelServer: {
-              hasTunnelAvailable: sinon.stub().returns(true)
+              _proxies: {},
+              _opts: { maxProxiesAllowed: 3 }
             }
           },
           _tunnelers: {
@@ -1087,7 +1089,8 @@ describe('Protocol', function() {
           contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
           transport: {
             tunnelServer: {
-              hasTunnelAvailable: sinon.stub().returns(false)
+              _proxies: {},
+              _opts: { maxProxiesAllowed: 0 }
             }
           },
           _tunnelers: {

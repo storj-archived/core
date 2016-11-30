@@ -2,6 +2,7 @@
 
 /* jshint maxstatements: false */
 
+var util = require('util');
 var sinon = require('sinon');
 var expect = require('chai').expect;
 var secp256k1 = require('secp256k1');
@@ -1268,17 +1269,19 @@ describe('Network (private)', function() {
     });
 
     it('should recurse with callback if not already called', function(done) {
-      var emitter = new EventEmitter();
       var calledOnce = false;
-      emitter.open = function() {
+      function Emitter() {}
+      Emitter.prototype.open = function() {
         if (calledOnce) {
-          return emitter.emit('open');
+          return this.emit('open');
         }
-        emitter.emit('error', new Error('Failed'));
+        this.emit('error', new Error('Failed'));
       };
+      util.inherits(Emitter, EventEmitter);
+
       var TunClientStubNetwork = proxyquire('../../lib/network', {
-        diglet: function() {
-          return { Tunnel: () => emitter };
+        diglet: {
+          Tunnel: Emitter
         }
       });
       var net = TunClientStubNetwork({

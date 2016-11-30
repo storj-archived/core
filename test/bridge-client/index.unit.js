@@ -1292,6 +1292,90 @@ describe('BridgeClient', function() {
 
     describe('#_transferShard', function() {
 
+      it('should emit a retry on non 200 status', function(done) {
+        var clientEmitter = new stream.Writable({ write: utils.noop });
+        var StubbedClient = proxyquire('../../lib/bridge-client', {
+          fs: {
+            createReadStream: sinon.stub().returns(
+              new stream.Readable({ read: utils.noop })
+            )
+          },
+          '../utils': {
+            createShardUploader: sinon.stub().returns(clientEmitter)
+          }
+        });
+        var client = new StubbedClient();
+        var emitter = new EventEmitter();
+        var state = new EventEmitter();
+        state.uploaders = [];
+        var pointer = {
+          farmer: {
+            address: '127.0.0.1',
+            port: 1337,
+            nodeID: utils.rmd160('nodeid')
+          },
+          hash: utils.rmd160('')
+        };
+        client._transferShard(emitter, 'name', pointer, state);
+        emitter.once('retry', function(name, pointer2) {
+          expect(name).to.equal('name');
+          expect(pointer).to.equal(pointer2);
+          done();
+        });
+        setImmediate(function() {
+          var resp = new EventEmitter();
+          resp.statusCode = 401;
+          clientEmitter.emit('response', resp);
+          setImmediate(() => {
+            resp.emit('data', 'FAIL');
+            resp.emit('end');
+          });
+        });
+      });
+
+      it('should emit a retry on non 200 status', function(done) {
+        var clientEmitter = new stream.Writable({ write: utils.noop });
+        var StubbedClient = proxyquire('../../lib/bridge-client', {
+          fs: {
+            createReadStream: sinon.stub().returns(
+              new stream.Readable({ read: utils.noop })
+            )
+          },
+          '../utils': {
+            createShardUploader: sinon.stub().returns(clientEmitter)
+          }
+        });
+        var client = new StubbedClient();
+        var emitter = new EventEmitter();
+        var state = new EventEmitter();
+        state.uploaders = [];
+        var pointer = {
+          farmer: {
+            address: '127.0.0.1',
+            port: 1337,
+            nodeID: utils.rmd160('nodeid')
+          },
+          hash: utils.rmd160('')
+        };
+        client._transferShard(emitter, 'name', pointer, state);
+        emitter.once('retry', function(name, pointer2) {
+          expect(name).to.equal('name');
+          expect(pointer).to.equal(pointer2);
+          done();
+        });
+        setImmediate(function() {
+          var resp = new EventEmitter();
+          resp.statusCode = 401;
+          clientEmitter.emit('response', resp);
+          setImmediate(() => {
+            resp.emit('data', JSON.stringify({
+              result: 'Not authorized'
+            }));
+            resp.emit('end');
+          });
+        });
+      });
+
       it('should emit a retry on client error', function(done) {
         var clientEmitter = new stream.Writable({ write: utils.noop });
         var StubbedClient = proxyquire('../../lib/bridge-client', {

@@ -523,7 +523,7 @@ describe('Network/Transport', function() {
         restify: {
           createJsonClient: function() {
             return {
-              post: sinon.stub().callsArgWith(1, new Error('Failed'))
+              post: sinon.stub().callsArgWith(2, new Error('Failed'))
             };
           }
         }
@@ -548,11 +548,11 @@ describe('Network/Transport', function() {
           createJsonClient: function() {
             return {
               post: sinon.stub().callsArgWith(
-                1,
-               null,
-               {},
-               {},
-               'bad data'
+                2,
+                null,
+                {},
+                {},
+                'bad data'
               )
             };
           }
@@ -581,7 +581,7 @@ describe('Network/Transport', function() {
           createJsonClient: function() {
             return {
               post: sinon.stub().callsArgWith(
-                1,
+                2,
                 null,
                 {},
                 {},

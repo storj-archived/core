@@ -56,8 +56,8 @@ describe('Blacklist', function() {
 
     it('should reap old nodeids', function() {
       var blacklist = new Blacklist(tmpfolder);
-      blacklist.push('hi');
       var clock = sinon.useFakeTimers();
+      blacklist.push('hi');
       clock.tick(86400001);
       blacklist.push('hi2');
       blacklist.push('hi3');

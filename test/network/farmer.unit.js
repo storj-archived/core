@@ -2,16 +2,16 @@
 
 var sinon = require('sinon');
 var expect = require('chai').expect;
-var Contract = require('../../../lib/contract');
-var KeyPair = require('../../../lib/crypto-tools/keypair');
-var FarmerInterface = require('../../../lib/network/interfaces/farmer');
-var Network = require('../../../lib/network');
+var Contract = require('../../lib/contract');
+var KeyPair = require('../../lib/crypto-tools/keypair');
+var FarmerInterface = require('../../lib/network/farmer');
+var Network = require('../../lib/network');
 var kad = require('kad');
-var Contact = require('../../../lib/network/contact');
-var utils = require('../../../lib/utils');
-var StorageItem = require('../../../lib/storage/item');
-var StorageManager = require('../../../lib/storage/manager');
-var RAMStorageAdapter = require('../../../lib/storage/adapters/ram');
+var Contact = require('../../lib/network/contact');
+var utils = require('../../lib/utils');
+var StorageItem = require('../../lib/storage/item');
+var StorageManager = require('../../lib/storage/manager');
+var RAMStorageAdapter = require('../../lib/storage/adapters/ram');
 var EventEmitter = require('events').EventEmitter;
 var CLEANUP = [];
 
@@ -217,7 +217,7 @@ describe('FarmerInterface', function() {
       var _findNode = sinon.stub(
         farmer.router,
         'findNode'
-      ).callsArgWith(1, null, [Contact({
+      ).callsArgWith(2, null, [Contact({
         address: '127.0.0.1',
         port: 1234,
         nodeID: kp1.getNodeID()
@@ -307,7 +307,7 @@ describe('FarmerInterface', function() {
         'getContactByNodeID'
       ).returns(null);
       var _findNode = sinon.stub(farmer.router, 'findNode').callsArgWith(
-        1,
+        2,
         new Error('Lookup failed')
       );
       farmer._negotiateContract(Contract({
@@ -342,7 +342,7 @@ describe('FarmerInterface', function() {
         'getContactByNodeID'
       ).returns(null);
       var _findNode = sinon.stub(farmer.router, 'findNode').callsArgWith(
-        1,
+        2,
         null,
         []
       );

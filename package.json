@@ -1,6 +1,6 @@
 {
   "name": "storj-lib",
-  "version": "5.1.2",
+  "version": "6.0.0",
   "description": "implementation of the storj protocol for node.js and the browser",
   "main": "index.js",
   "directories": {
@@ -66,13 +66,12 @@
     "bitcore-lib": "^0.13.12",
     "bitcore-message": "^1.0.2",
     "bitcore-mnemonic": "^1.1.1",
-    "colors": "^1.1.2",
-    "flushwritable": "^1.0.0",
+    "diglet": "^1.0.6",
     "hdkey": "^0.7.1",
     "ip": "^1.1.2",
     "jsen": "bugventure/jsen#9e57a9d653ff4ea47d364fc37da0f1659bfb8e89",
     "json-stable-stringify": "^1.0.1",
-    "kad": "^1.6.1",
+    "kad": "^1.6.2",
     "kad-logger-json": "^0.1.2",
     "kad-quasar": "^1.0.1",
     "kfs": "^2.2.4",
@@ -91,13 +90,12 @@
     "portfinder": "^1.0.3",
     "readable-stream": "^2.0.6",
     "request": "^2.70.0",
+    "restify": "^4.3.0",
     "rimraf": "^2.5.3",
     "secp256k1": "^3.2.2",
     "semver": "^5.1.0",
     "through": "^2.3.8",
-    "tmp": "0.0.28",
-    "unorm": "^1.4.1",
-    "ws": "^1.1.0"
+    "unorm": "^1.4.1"
   },
   "devDependencies": {
     "benchmark": "^2.1.1",
@@ -106,12 +104,12 @@
     "coveralls": "^2.11.2",
     "gh-pages": "^0.9.0",
     "ink-docstrap": "bookchin/docstrap",
-    "istanbul": "^0.3.13",
+    "istanbul": "^0.4.5",
     "jsdoc": "^3.4.0",
     "jshint": "2.8.0",
     "mocha": "^2.2.4",
+    "node-mocks-http": "^1.5.4",
     "noisegen": "^1.0.0",
-    "pem": "^1.8.1",
     "proxyquire": "^1.7.3",
     "sinon": "^1.14.1"
   }

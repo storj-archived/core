@@ -119,6 +119,14 @@ reconstruct the complete public key and is used in the Storj network to sign
 and verify messages. This ensures that nodes are unable to assume the identity
 of another node by claiming it has the same `nodeID`.
 
+#### Special Headers
+
+##### `x-storj-node-id`
+
+Every request sent should include this header. It's value should equal the 
+expected Node ID of the destination. This allows nodes who are tunneling 
+other nodes to determine who the message is intended for.
+
 #### PROBE
 
 Before a node can join the network, it must determine whether or not it is
@@ -288,7 +296,7 @@ parameters need to be sent.
       "address": "10.0.0.3",
       "port": 1337,
       "nodeID": "48dc026fa01ae26822bfb23f98e725444d6775b0",
-      "protocol": "0.6.0"
+      "protocol": "1.0.0"
     },
     "nonce": 1455216323786,
     "signature": "304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c..."
@@ -305,23 +313,18 @@ she must do so, assigning a dedicated address or port to receive messages and
 data channel requests (see {@tutorial data-channels}).
 
 Once the tunnel's dedicated entry point has been established, she responds to
-the sender of the `OPEN_TUNNEL` request with a unique WebSocket URI that
-includes a token, as well as an `alias` property which contains the contact
-information for the new entry point through which data will enter the tunnel.
+the sender of the `OPEN_TUNNEL` request with a `proxyPort` to which the client 
+may connect to receive messages.
 
 ```
 {
   "result": {
-    "tunnel": "ws://10.0.0.3:1337/tun?token=2bfb23f98e72",
-    "alias": {
-      "address": "10.0.0.3",
-      "port": 1338
-    },
+    "proxyPort": 12000,
     "contact": {
       "address": "10.0.0.3",
       "port": 1337,
       "nodeID": "48dc026fa01ae26822bfb23f98e725444d6775b0",
-      "protocol": "0.6.0"
+      "protocol": "1.0.0"
     },
     "nonce": 1455216323786,
     "signature": "304502207e8a439f2cb33055e0b2e2d90e775f29d90b3ad85aec0c..."
@@ -330,11 +333,11 @@ information for the new entry point through which data will enter the tunnel.
 }
 ```
 
-This response indicates that a tunnel has been established and the original
-sender can receive messages from the overlay by opening a WebSocket connection
-to the `tunnel` address in the reply. In addition, the sender must update it's
-{@link Contact} information to the included `alias` so that it can be reached
-by other peers in the overlay.
+This response indicates that a proxy has been established and the original
+sender can receive messages from the overlay by opening a TCP connection
+to the `proxyPort` and contact address in the reply. In addition, the sender 
+must update it's {@link Contact} information to mirror the remote tunneler's 
+address and port.
 
 If the recipient of the `OPEN_TUNNEL` message is not able to establish a tunnel
 for the sender, then she may respond with an error so that the sender can

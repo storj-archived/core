@@ -530,7 +530,8 @@ describe('Network/Transport', function() {
       });
       Transport.prototype._send.call({
         _queuedResponses: {},
-        receive: receive
+        receive: receive,
+        _log: { warn: () => null }
       }, message, Contact({
         address: '0.0.0.0',
         port: 1234,

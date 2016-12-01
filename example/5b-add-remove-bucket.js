@@ -12,9 +12,7 @@ var keypair = storj.KeyPair(fs.readFileSync('./private.key').toString());
 var client = storj.BridgeClient(api, {keyPair: keypair});
 
 var bucketInfo = {
-  name: 'Cool bucket',
-  storage: 30,
-  transfer: 10
+  name: 'Cool bucket'
 };
 
 // Add bucket

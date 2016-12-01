@@ -88,9 +88,8 @@ check:
 
 If the tunneling node has enough tunnels, is not already tunneling the node,
 and (in a future spec) if a payment channel has been opened for bandwidth, then
-the tunneling node opens a new dedicated HTTP/WS server on an available port
-that will be used by the requester as it's "contact" information included in
-RPC messages.
+the tunneling node opens a new dedicated TCP socket on an available port
+that will be used by the requester to send/receive HTTP messages.
 
 ```
 {

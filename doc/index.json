@@ -2,7 +2,7 @@
   "protocol-spec": {
     "title": "Protocol Specification"
   },
-  "data-channels": {
+  "data-transfer": {
     "title": "Transferring File Shards"
   },
   "contract-topics": {

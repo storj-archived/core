@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Storj Core Module: storj/patches</title>
+	<title>Storj Core Source: lib/bridge-client/exchange-report.js</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -80,104 +80,87 @@
 <div class="row">
 
 	
-	<div class="col-md-8">
+	<div class="col-md-12">
 	
 		<div id="main">
 			
 
-	<h1 class="page-title">Module: storj/patches</h1>
+		<h1 class="page-title">Source: lib/bridge-client/exchange-report.js</h1>
+    
 <section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript ">'use strict';
 
-<header>
-    
-</header>
+var assert = require('assert');
 
+/**
+ * Represents a report to a bridge regarding the result of a shard exchange
+ * @constructor
+ * @param {Object} options
+ * @param {String} options.reporterId
+ * @param {String} [options.farmerId]
+ * @param {String} [options.clientId]
+ */
+function ExchangeReport(options = {}) {
+  /* jshint maxcomplexity: 7 */
+  if (!(this instanceof ExchangeReport)) {
+    return new ExchangeReport(options);
+  }
 
-<article>
-    <div class="container-overview">
-    
-        
+  assert(options.reporterId, 'Invalid reporterId');
 
-        
-<dl class="details">
-    
+  this._r = {
+    dataHash: options.dataHash || null,
+    reporterId: options.reporterId,
+    farmerId: options.farmerId,
+    clientId: options.clientId,
+    exchangeStart: options.exchangeStart || null,
+    exchangeEnd: options.exchangeEnd || null,
+    exchangeResultCode: options.exchangeResultCode || null,
+    exchangeResultMessage: options.exchangeResultMessage || null
+  };
+}
 
-	
+ExchangeReport.SUCCESS = 1000;
+ExchangeReport.FAILURE = 1100;
 
-	
+/**
+ * Starts recording duration of exchange
+ * @param {String} dataHash - The shard hash as reference
+ */
+ExchangeReport.prototype.begin = function(dataHash) {
+  assert(dataHash, 'You must supply a dataHash to begin an exchange report');
+  this._r.dataHash = dataHash;
+  this._r.exchangeStart = Date.now();
+};
 
-	
+/**
+ * Ends the recording time a set result code and message
+ * @param {Number} resultCode - Exchange result code
+ * @param {String} resultMessage - Exchange result message
+ */
+ExchangeReport.prototype.end = function(resultCode, resultMessage) {
+  assert(resultCode, 'You must supply a result code');
+  assert(resultMessage, 'You must supply a result message');
+  this._r.exchangeEnd = Date.now();
+  this._r.exchangeResultCode = resultCode;
+  this._r.exchangeResultMessage = resultMessage;
+};
 
-    
+/**
+ * Returns a plain report object
+ * @returns {Object}
+ */
+ExchangeReport.prototype.toObject = function() {
+  return JSON.parse(JSON.stringify(this._r));
+};
 
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-	<dt class="tag-license method-doc-label method-doc-details-label">License:</dt>
-	<dd class="tag-license">
-		<ul class="dummy">
-			<li>AGPL-3.0</li>
-		</ul>
-	</dd>
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_patches.js.html">lib/patches.js</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</article>
-
+module.exports = ExchangeReport;
+</pre>
+    </article>
 </section>
+
 
 
 
@@ -187,10 +170,6 @@
 
 	<div class="clearfix"></div>
 
-	
-		<div class="col-md-3">
-			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
-		</div>
 	
 
 </div>

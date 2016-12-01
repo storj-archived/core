@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Storj Core Module: storj/patches</title>
+	<title>Storj Core Class: OfferManager</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -85,10 +85,15 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Module: storj/patches</h1>
+	<h1 class="page-title">Class: OfferManager</h1>
 <section>
 
 <header>
+    
+        <h2>
+        OfferManager
+        </h2>
+        
     
 </header>
 
@@ -97,8 +102,29 @@
     <div class="container-overview">
     
         
+<hr>
+<dt>
+    <h4 class="name" id="OfferManager"><span class="type-signature"></span>new OfferManager()</h4>
+    
+    
+</dt>
+<dd>
 
-        
+    
+    <div class="description">
+        Simple management of a collection of <a href="OfferStream.html">OfferStream</a>s that are keyable
+by their associated <a href="Contract.html">Contract</a>'s data hash
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
 <dl class="details">
     
 
@@ -123,13 +149,6 @@
 	
 
 	
-	<dt class="tag-license method-doc-label method-doc-details-label">License:</dt>
-	<dd class="tag-license">
-		<ul class="dummy">
-			<li>AGPL-3.0</li>
-		</ul>
-	</dd>
-	
 
 	
 
@@ -140,7 +159,7 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="lib_patches.js.html">lib/patches.js</a>
+				<a href="lib_contract_offer-manager.js.html">lib/contract/offer-manager.js</a>
 			</li>
 		</ul>
 	</dd>
@@ -154,7 +173,21 @@
 </dl>
 
 
-        
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
     
     </div>
 
@@ -170,6 +203,444 @@
 
     
 
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        <dl>
+            
+<hr>
+<dt>
+    <h4 class="name" id="addStream"><span class="type-signature"></span>addStream(offerStream)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Adds the offer stream to the manager
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>offerStream</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="OfferStream.html">OfferStream</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The <a href="OfferStream.html">OfferStream</a> to manage</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_contract_offer-manager.js.html">lib/contract/offer-manager.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getStream"><span class="type-signature"></span>getStream(dataHash)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Returns the stream at the given key
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>dataHash</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The hash of the contract's data</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_contract_offer-manager.js.html">lib/contract/offer-manager.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="OfferStream.html">OfferStream</a></span>
+|
+
+<span class="param-type">null</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="removeStream"><span class="type-signature"></span>removeStream(dataHash)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Removes the stream at the given key
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>dataHash</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The hash of the contract's data</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_contract_offer-manager.js.html">lib/contract/offer-manager.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        </dl>
     
 
     

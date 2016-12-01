@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Storj Core Module: storj/patches</title>
+	<title>Storj Core Source: lib/contract/offer-manager.js</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -80,104 +80,71 @@
 <div class="row">
 
 	
-	<div class="col-md-8">
+	<div class="col-md-12">
 	
 		<div id="main">
 			
 
-	<h1 class="page-title">Module: storj/patches</h1>
+		<h1 class="page-title">Source: lib/contract/offer-manager.js</h1>
+    
 <section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript ">'use strict';
 
-<header>
-    
-</header>
+var OfferStream = require('./offer-stream');
+var assert = require('assert');
 
+/**
+ * Simple management of a collection of {@link OfferStream}s that are keyable
+ * by their associated {@link Contract}'s data hash
+ * @constructor
+ */
+function OfferManager() {
+  if (!(this instanceof OfferManager)) {
+    return new OfferManager();
+  }
 
-<article>
-    <div class="container-overview">
-    
-        
+  this._offerStreams = {};
+}
 
-        
-<dl class="details">
-    
+/**
+ * Returns the stream at the given key
+ * @param {String} dataHash - The hash of the contract's data
+ * @returns {OfferStream|null}
+ */
+OfferManager.prototype.getStream = function(dataHash) {
+  return this._offerStreams[dataHash] || null;
+};
 
-	
+/**
+ * Removes the stream at the given key
+ * @param {String} dataHash - The hash of the contract's data
+ */
+OfferManager.prototype.removeStream = function(dataHash) {
+  delete this._offerStreams[dataHash];
+};
 
-	
+/**
+ * Adds the offer stream to the manager
+ * @param {OfferStream} offerStream - The {@link OfferStream} to manage
+ */
+OfferManager.prototype.addStream = function(offerStream) {
+  assert(offerStream instanceof OfferStream, 'Invalid offer stream supplied');
 
-	
+  var key = offerStream._contract.get('data_hash');
+  this._offerStreams[key] = offerStream;
 
-    
+  offerStream.on('end', this.removeStream.bind(this, key));
+  offerStream.on('error', this.removeStream.bind(this, key));
+  offerStream.on('destroy', this.removeStream.bind(this, key));
+};
 
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-	<dt class="tag-license method-doc-label method-doc-details-label">License:</dt>
-	<dd class="tag-license">
-		<ul class="dummy">
-			<li>AGPL-3.0</li>
-		</ul>
-	</dd>
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_patches.js.html">lib/patches.js</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</article>
-
+module.exports = OfferManager;
+</pre>
+    </article>
 </section>
+
 
 
 
@@ -187,10 +154,6 @@
 
 	<div class="clearfix"></div>
 
-	
-		<div class="col-md-3">
-			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
-		</div>
 	
 
 </div>

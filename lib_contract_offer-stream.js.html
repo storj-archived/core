@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Storj Core Module: storj/patches</title>
+	<title>Storj Core Source: lib/contract/offer-stream.js</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -80,104 +80,145 @@
 <div class="row">
 
 	
-	<div class="col-md-8">
+	<div class="col-md-12">
 	
 		<div id="main">
 			
 
-	<h1 class="page-title">Module: storj/patches</h1>
+		<h1 class="page-title">Source: lib/contract/offer-stream.js</h1>
+    
 <section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript ">'use strict';
 
-<header>
-    
-</header>
+var Contact = require('../network/contact');
+var Contract = require('./index');
+var ReadableStream = require('readable-stream');
+var inherits = require('util').inherits;
+var assert = require('assert');
+var merge = require('merge');
 
+/**
+ * Manages a stream of offers for a given storage contract publication
+ * @constructor
+ * @param {Contract} contract - Storage contract published to network
+ * @param {Object} [options]
+ * @param {Number} [options.maxOffers] - Maximum number of offers to process
+ * @param {Array.&lt;String>} [options.farmerBlacklist] - Reject offers from nodeID
+ */
+function OfferStream(contract, options) {
+  if (!(this instanceof OfferStream)) {
+    return new OfferStream(contract, options);
+  }
 
-<article>
-    <div class="container-overview">
-    
-        
+  ReadableStream.call(this, { objectMode: true });
+  assert(contract instanceof Contract, 'Invalid contract supplied');
 
-        
-<dl class="details">
-    
+  this.options = merge(Object.create(OfferStream.DEFAULTS), options);
 
-	
+  this._contract = contract;
+  this._queue = [];
+  this._offersQueued = 0;
+  this._offersProccessed = 0;
+  this._farmersDidOffer = [];
+  this._isDestroyed = false;
+}
 
-	
+inherits(OfferStream, ReadableStream);
 
-	
+OfferStream.DEFAULTS = {
+  maxOffers: 12,
+  farmerBlacklist: [],
+};
 
-    
+/**
+ * Triggered when an offer is received
+ * @event OfferStream#data
+ * @param {Object} data
+ * @param {Contact} data.contact - The sending farmer for the offer
+ * @param {Contract} data.contract - The received offer contract
+ */
 
-    
+/**
+ * Triggered when the maximum number of offers are received and processed
+ * @event OfferStream#end
+ */
 
-    
+/**
+ * Triggered if an error occurs
+ * @event OfferStream#error
+ * @param {Error} error - The error object with message
+ */
 
-    
+/**
+ * Implements the underlying stream
+ * @private
+ */
+OfferStream.prototype._read = function() {
+  var self = this;
 
-	
+  if (this._offersProccessed === this.options.maxOffers) {
+    return this.push(null);
+  }
 
-	
+  function _push() {
+    self._offersProccessed++;
+    self.push(self._queue.shift());
+  }
 
-	
+  if (this._queue.length > 0) {
+    return setImmediate(_push);
+  }
 
-	
-	<dt class="tag-license method-doc-label method-doc-details-label">License:</dt>
-	<dd class="tag-license">
-		<ul class="dummy">
-			<li>AGPL-3.0</li>
-		</ul>
-	</dd>
-	
+  this.once('_offerAddedToQueue', _push);
+};
 
-	
+/**
+ * Adds the offer to the internal queue if there is room
+ * @param {Contact} contact - The sending farmer for the offer
+ * @param {Contract} contract - The received offer contract
+ * @returns {Boolean} didAddOfferToQueue
+ */
+OfferStream.prototype.addOfferToQueue = function(contact, contract) {
+  assert(contact instanceof Contact, 'Invalid contact supplied');
+  assert(contract instanceof Contract, 'Invalid contract supplied');
 
+  var isDestroyed = this._isDestroyed;
+  var farmerSentOffer = this._farmersDidOffer.indexOf(
+    contact.nodeID
+  ) !== -1;
+  var contractIncomplete = !contract.isComplete();
+  var maxReached = this._offersQueued === this.options.maxOffers;
 
+  if (isDestroyed || farmerSentOffer || contractIncomplete || maxReached) {
+    return false;
+  }
 
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="lib_patches.js.html">lib/patches.js</a>
-			</li>
-		</ul>
-	</dd>
-	
+  this._farmersDidOffer.push(contact.nodeID);
+  this._queue.push({ contact: contact, contract: contract });
+  this._offersQueued++;
+  this.emit('_offerAddedToQueue');
 
-	
+  return true;
+};
 
-	
+/**
+ * Tears down listeners and ends the stream
+ */
+OfferStream.prototype.destroy = function() {
+  this._queue = [];
+  this._isDestroyed = true;
 
-	
-</dl>
+  setImmediate(this.removeAllListeners.bind(this));
+  this.emit('destroy');
+};
 
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</article>
-
+module.exports = OfferStream;
+</pre>
+    </article>
 </section>
+
 
 
 
@@ -187,10 +228,6 @@
 
 	<div class="clearfix"></div>
 
-	
-		<div class="col-md-3">
-			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
-		</div>
 	
 
 </div>

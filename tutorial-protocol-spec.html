@@ -55,7 +55,7 @@
 			<li class="dropdown">
 				<a href="tutorials.list.html" class="dropdown-toggle" data-toggle="dropdown">Tutorials<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="tutorial-command-line-interface.html">Using the Command Line Tools</a></li><li><a href="tutorial-contract-topics.html">Publishing Storage Contracts</a></li><li><a href="tutorial-data-channels.html">Transferring File Shards</a></li><li><a href="tutorial-environment-variables.html">Environment Variables</a></li><li><a href="tutorial-file-encryption.html">File Encryption Standards</a></li><li><a href="tutorial-private-testnet.html">Running a Test Network</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li><li><a href="tutorial-renting-data.html">Renting Data to the Network</a></li><li><a href="tutorial-tunnel-connections.html">Tunnelling Connections</a></li>
+					<li><a href="tutorial-command-line-interface.html">Using the Command Line Tools</a></li><li><a href="tutorial-contract-topics.html">Publishing Storage Contracts</a></li><li><a href="tutorial-data-transfer.html">Transferring File Shards</a></li><li><a href="tutorial-environment-variables.html">Environment Variables</a></li><li><a href="tutorial-file-encryption.html">File Encryption Standards</a></li><li><a href="tutorial-private-testnet.html">Running a Test Network</a></li><li><a href="tutorial-protocol-spec.html">Protocol Specification</a></li><li><a href="tutorial-renting-data.html">Renting Data to the Network</a></li><li><a href="tutorial-tunnel-connections.html">Tunnelling Connections</a></li>
 				</ul>
 			</li>
 			
@@ -331,7 +331,7 @@ can satisfy the request. This decision may be based upon an arbitrary limit
 set by the node regarding how many concurrent tunnels she wishes to open,
 available bandwidth, etc. If the node is capable of establishing the tunnel,
 she must do so, assigning a dedicated address or port to receive messages and
-data channel requests (see <a href="tutorial-data-channels.html">Transferring File Shards</a>).</p>
+data channel requests (see data-channels).</p>
 <p>Once the tunnel's dedicated entry point has been established, she responds to
 the sender of the <code>OPEN_TUNNEL</code> request with a <code>proxyPort</code> to which the client 
 may connect to receive messages.</p>
@@ -721,7 +721,7 @@ or another authorized party can use to open a data channel with the farmer
 (via websocket) to deliver the data as a binary stream.</p>
 <blockquote>
 <p>For more information on the Data Channel specification see the tutorial for
-<a href="tutorial-data-channels.html">Transferring File Shards</a>.</p>
+data-channels.</p>
 </blockquote>
 <p>In addition, the farmer should verify that the current UNIX time is greater
 than or equal to the agreed upon <code>store_begin</code> and less than the agreed upon
@@ -747,7 +747,7 @@ farmers leaves the network, loses the data, or otherwise breaches the terms of
 the storage contract. This can be accomplished by simply performing an
 iterative <code>PUBLISH - OFFER - CONSIGN</code> loop for the desired level of redundancy,
 followed by the establishment of a data channel as described in
-<a href="tutorial-data-channels.html">Transferring File Shards</a>.</p>
+data-channels.</p>
 <p>However, this method can introduce a significant amount of latency for
 completing a full upload that increases linearly with the number of redundant
 shards. Additionally, the amount of bandwidth consumed by the renter increases
@@ -925,7 +925,7 @@ it's record of the <code>downloads_since_last_audit</code> (which must be reset 
 next audit).</p>
 <blockquote>
 <p>For more information on the Data Channel specification see the tutorial for
-<a href="tutorial-data-channels.html">Transferring File Shards</a>.</p>
+data-channels.</p>
 </blockquote>
 <pre class="prettyprint source"><code>{
   &quot;result&quot;: {

@@ -869,16 +869,29 @@ describe('Protocol', function() {
 
   describe('#handleMirror', function() {
 
+    var Protocol = proxyquire('../../lib/network/protocol', {
+      '../bridge-client': sinon.stub().returns({
+        createExchangeReport: sinon.stub()
+      })
+    });
+
     it('should error if it fails to load', function(done) {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
           storageManager: {
             load: sinon.stub().callsArgWith(1, new Error('Failed'))
+          },
+          contact: {
+            address: '0.0.0.0',
+            port: 1234,
+            nodeID: 'nodeid'
           }
         }
       });
-      proto.handleMirror({}, function(err) {
+      proto.handleMirror({
+        contact: { address: '0.0.0.0', port: 4321, nodeID: 'nodeid' }
+      }, function(err) {
         expect(err.message).to.equal('Failed');
         done();
       });
@@ -896,6 +909,11 @@ describe('Protocol', function() {
                 return contracts[contact.nodeID];
               }
             })
+          },
+          contact: {
+            address: '0.0.0.0',
+            port: 1234,
+            nodeID: 'nodeid'
           }
         }
       });
@@ -922,6 +940,11 @@ describe('Protocol', function() {
                 return contracts[contact.nodeID];
               }
             })
+          },
+          contact: {
+            address: '0.0.0.0',
+            port: 1234,
+            nodeID: 'nodeid'
           }
         }
       });
@@ -957,6 +980,11 @@ describe('Protocol', function() {
                 return contracts[contact.nodeID];
               }
             })
+          },
+          contact: {
+            address: '0.0.0.0',
+            port: 1234,
+            nodeID: 'nodeid'
           }
         }
       });
@@ -966,13 +994,67 @@ describe('Protocol', function() {
           address: '0.0.0.0',
           port: 1234,
           nodeID: utils.rmd160('')
-        }
+        },
+        data_hash: 'hash'
       }, function(err) {
         expect(err).to.equal(null);
         download.emit('error', new Error());
         setImmediate(() => {
           expect(shard.destroy.called).to.equal(true);
           expect(download.destroy.called).to.equal(true);
+          done();
+        });
+      });
+    });
+
+    it('should start downloading shard and report on success', function(done) {
+      var download = new stream.Readable({ read: () => null });
+      var createExchangeReport = sinon.stub();
+      var Protocol = proxyquire('../../lib/network/protocol', {
+        '../utils': {
+          createShardDownloader: sinon.stub().returns(download)
+        },
+        '../bridge-client': sinon.stub().returns({
+          createExchangeReport: createExchangeReport
+        })
+      });
+      var contracts = {
+        test: {}
+      };
+      var shard = new stream.Writable({ write: () => null });
+      shard.destroy = sinon.stub();
+      var proto = new Protocol({
+        network: {
+          _logger: Logger(0),
+          storageManager: {
+            load: sinon.stub().callsArgWith(1, null, {
+              contracts: contracts,
+              shard: shard,
+              getContract: function(contact) {
+                return contracts[contact.nodeID];
+              }
+            })
+          },
+          contact: {
+            address: '0.0.0.0',
+            port: 1234,
+            nodeID: 'nodeid'
+          }
+        }
+      });
+      proto.handleMirror({
+        contact: { nodeID: 'test' },
+        farmer: {
+          address: '0.0.0.0',
+          port: 1234,
+          nodeID: utils.rmd160('')
+        },
+        data_hash: 'hash'
+      }, function(err) {
+        expect(err).to.equal(null);
+        shard.emit('finish');
+        setImmediate(() => {
+          expect(createExchangeReport.called).to.equal(true);
           done();
         });
       });

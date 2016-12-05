@@ -9,6 +9,7 @@ var proxyquire = require('proxyquire');
 var sinon = require('sinon');
 var constants = require('../lib/constants');
 var os = require('os');
+var stream = require('readable-stream');
 
 describe('utils', function() {
   /* jshint maxstatements: false */
@@ -397,7 +398,7 @@ describe('utils', function() {
 
   describe('#createShardDownloader', function() {
 
-    it('should return the request object', function() {
+    it('should return a readable stream object', function() {
       var requestObj = {};
       var utils = proxyquire('../lib/utils', {
         request: function(opts) {
@@ -412,7 +413,7 @@ describe('utils', function() {
         { address: 'farmer.host', port: 6666 },
         'hash',
         'token'
-      )).to.equal(requestObj);
+      )).to.be.instanceOf(stream.Readable);
     });
 
   });

@@ -404,7 +404,7 @@ describe('BridgeClient', function() {
 
       it('should send the correct args to _request', function(done) {
         var _request = sinon.stub(BridgeClient.prototype, '_request').callsArg(
-          2,
+          3,
           null,
           {}
         );

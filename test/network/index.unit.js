@@ -20,6 +20,7 @@ var Contact = require('../../lib/network/contact');
 var constants = require('../../lib/constants');
 var async = require('async');
 var _ntp = null;
+var VERSION = require('../../lib/version');
 var CLEANUP = [];
 
 var seed = 'a0c42a9c3ac6abf2ba6a9946ae83af18f51bf1c9fa7dacc4c92513cc4d' +
@@ -1412,7 +1413,12 @@ describe('Network (private)', function() {
         net.bridgeClient,
         'getContactList'
       ).callsArgWith(1, null, [
-        { address: '0.0.0.0', port: 1234, nodeID: utils.rmd160('nodeid') }
+        {
+          address: '0.0.0.0',
+          port: 1234,
+          nodeID: utils.rmd160('nodeid'),
+          protocol: VERSION.protocol
+        }
       ]);
       net.join(function() {
         _setupTunnel.restore();

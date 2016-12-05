@@ -381,9 +381,10 @@ describe('Network/Transport', function() {
 
     it('should respond 400 if cannot parse message', function(done) {
       var response = {
-        status: function(code) {
+        send: function(code, body) {
           expect(code).to.equal(400);
-          return { end: done };
+          expect(body).to.be.instanceOf(Error);
+          done();
         }
       };
       Transport.prototype._handleRPC.call({

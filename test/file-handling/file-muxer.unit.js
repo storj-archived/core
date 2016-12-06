@@ -139,6 +139,13 @@ describe('FileMuxer', function() {
         createExchangeReport: sinon.stub()
       };
 
+
+      var hasError = false;
+
+      fmxr.on('error', function(err) {
+        hasError = err;
+      });
+
       fmxr
         .addInputSource(rs1, hash, exchangeReport, bridgeClient)
         .addInputSource(rs2, hash, exchangeReport, bridgeClient)
@@ -162,6 +169,7 @@ describe('FileMuxer', function() {
             [ 1100, 'FAILED_INTEGRITY' ]
           ]);
           expect(bridgeClient.createExchangeReport.callCount).to.equal(4);
+          expect(hasError);
           done();
         });
     });
@@ -220,6 +228,7 @@ describe('FileMuxer', function() {
       var bridgeClient = {
         createExchangeReport: sinon.stub()
       };
+      sandbox.stub(utils, 'rmd160').returns(hash);
       var fmx = FileMuxer({ shards: 1, length: 2 });
       fmx.on('data', function() {}).on('end', done);
       setImmediate(function() {

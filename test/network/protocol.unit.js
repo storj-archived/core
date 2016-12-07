@@ -985,6 +985,9 @@ describe('Protocol', function() {
             address: '0.0.0.0',
             port: 1234,
             nodeID: 'nodeid'
+          },
+          bridgeClient: {
+            createExchangeReport: sinon.stub()
           }
         }
       });
@@ -1013,10 +1016,7 @@ describe('Protocol', function() {
       var Protocol = proxyquire('../../lib/network/protocol', {
         '../utils': {
           createShardDownloader: sinon.stub().returns(download)
-        },
-        '../bridge-client': sinon.stub().returns({
-          createExchangeReport: createExchangeReport
-        })
+        }
       });
       var contracts = {
         test: {}
@@ -1034,6 +1034,9 @@ describe('Protocol', function() {
                 return contracts[contact.nodeID];
               }
             })
+          },
+          bridgeClient: {
+            createExchangeReport: createExchangeReport
           },
           contact: {
             address: '0.0.0.0',

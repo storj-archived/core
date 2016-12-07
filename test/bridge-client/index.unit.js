@@ -19,6 +19,8 @@ var ExchangeReport = require('../../lib/bridge-client/exchange-report');
 
 describe('BridgeClient', function() {
 
+  BridgeClient.DEFAULTS.retryThrottle = 0;
+
   describe('@constructor', function() {
 
     it('should create an instance with the given options', function() {
@@ -1773,6 +1775,23 @@ describe('BridgeClient', function() {
           expect(result.hello).to.equal('world');
           done();
         });
+      });
+
+      it('should abort the current request', function(done) {
+        var _abort = sinon.stub();
+        var StubbedClient = proxyquire('../../lib/bridge-client', {
+          request: function(opts, callback) {
+            setTimeout(() => {
+              callback(null, { statusCode: 200 }, { hello: 'world' });
+            }, 1000);
+            return { abort: _abort }
+          }
+        });
+        var client = new StubbedClient();
+        var req = client._request('POST', '/', {}, () => null);
+        req.abort();
+        expect(_abort.called).to.equal(true);
+        done();
       });
 
     });

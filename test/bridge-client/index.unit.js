@@ -400,6 +400,27 @@ describe('BridgeClient', function() {
 
     });
 
+    describe('#listMirrorsForFile', function() {
+
+      it('should send the correct args to _request', function(done) {
+        var _request = sinon.stub(BridgeClient.prototype, '_request').callsArg(
+          3,
+          null,
+          {}
+        );
+        var client = new BridgeClient();
+        client.listMirrorsForFile('mybucket', 'myfile', function() {
+          _request.restore();
+          expect(_request.calledWith(
+            'GET',
+            '/buckets/mybucket/files/myfile/mirrors'
+          )).to.equal(true);
+          done();
+        });
+      });
+
+    });
+
     describe('#createToken', function() {
 
       it('should send the correct args to _request', function(done) {

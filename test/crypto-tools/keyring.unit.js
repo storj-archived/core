@@ -374,16 +374,26 @@ describe('KeyRing', function() {
 
     describe('#_readDeterministicKey', function() {
 
-      var tmp = tmpfolder();
-      var kr = new KeyRing(tmp, 'password');
-
       it('should decrypt and read deterministic key', function(done) {
+        var tmp = tmpfolder();
+        var kr = new KeyRing(tmp, 'password');
         kr.generateDeterministicKey();
         var oldMnemonic = kr._mnemonic;
-        kr._mnemonic = '';
+        kr._mnemonic = null;
         kr._readDeterministicKey();
         expect(kr._mnemonic).to.eql(oldMnemonic);
         done();
+      });
+
+      it('should fail to decrypt', function() {
+        var tmp = tmpfolder();
+        var kr = new KeyRing(tmp, 'password');
+        kr.generateDeterministicKey();
+
+        expect(function() {
+          var kr2 = new KeyRing(tmp, 'badpassword');
+          kr2._readDeterministicKey();
+        }).to.throw('Invalid passphrase was supplied to KeyRing');
       });
 
     });

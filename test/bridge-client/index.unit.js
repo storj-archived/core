@@ -1784,7 +1784,7 @@ describe('BridgeClient', function() {
             setTimeout(() => {
               callback(null, { statusCode: 200 }, { hello: 'world' });
             }, 1000);
-            return { abort: _abort }
+            return { abort: _abort };
           }
         });
         var client = new StubbedClient();

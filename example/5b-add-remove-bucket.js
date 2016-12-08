@@ -1,6 +1,6 @@
 'use strict';
 
-var storj = require('storj');
+var storj = require('storj-lib');
 var fs = require('fs');
 // Set the bridge api URL
 var api = 'https://api.storj.io';
@@ -12,9 +12,7 @@ var keypair = storj.KeyPair(fs.readFileSync('./private.key').toString());
 var client = storj.BridgeClient(api, {keyPair: keypair});
 
 var bucketInfo = {
-  name: 'Cool bucket',
-  storage: 30,
-  transfer: 10
+  name: 'Cool bucket'
 };
 
 // Add bucket

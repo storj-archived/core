@@ -9,6 +9,7 @@ var proxyquire = require('proxyquire');
 var sinon = require('sinon');
 var constants = require('../lib/constants');
 var os = require('os');
+var stream = require('readable-stream');
 
 describe('utils', function() {
   /* jshint maxstatements: false */
@@ -133,22 +134,34 @@ describe('utils', function() {
 
   describe('#toNumberBytes', function() {
 
+    it('should convert from mebibytes', function() {
+      expect(utils.toNumberBytes('250', 'MiB')).to.equal(262144000);
+    });
+
+    it('should convert from gibibytes', function() {
+      expect(utils.toNumberBytes('500', 'GiB')).to.equal(536870912000);
+    });
+
+    it('should convert from tebibytes', function() {
+      expect(utils.toNumberBytes('2', 'TiB')).to.equal(2199023255552);
+    });
+
     it('should convert from megabytes', function() {
-      expect(utils.toNumberBytes('250', 'MB')).to.equal(262144000);
+      expect(utils.toNumberBytes('250', 'MB')).to.equal(250000000);
     });
 
     it('should convert from gigabytes', function() {
-      expect(utils.toNumberBytes('500', 'GB')).to.equal(536870912000);
+      expect(utils.toNumberBytes('500', 'GB')).to.equal(500000000000);
     });
 
     it('should convert from terabytes', function() {
-      expect(utils.toNumberBytes('2', 'TB')).to.equal(2199023255552);
+      expect(utils.toNumberBytes('2', 'TB')).to.equal(2000000000000);
     });
 
     it('should throw if bad unit', function() {
       expect(function() {
-        utils.toNumberBytes('1024', 'KB');
-      }).to.throw(Error, 'Unit must be one of TB, GB, or MB');
+        utils.toNumberBytes('1000', 'KB');
+      }).to.throw(Error, 'Unit must be one of TB, TiB, GB, GiB, MB or MiB');
     });
 
   });
@@ -379,6 +392,50 @@ describe('utils', function() {
       var expectedKey = 'xprv9xJ62Jwpr14Bbz63pamJV4Z3qT67JfqddRW55LR2bUQ38jt' +
         'y7G2TSVkE5Ro8yYZjrJGVhN8Z3qvmM9XWgGvyceNMUj7xozR4LZS1eEFP5W3';
       expect(utils.createComplexKeyFromSeed(seedBuffer)).to.equal(expectedKey);
+    });
+
+  });
+
+  describe('#createShardDownloader', function() {
+
+    it('should return a readable stream object', function() {
+      var requestObj = {};
+      var utils = proxyquire('../lib/utils', {
+        request: function(opts) {
+          expect(opts.method).to.equal('GET');
+          expect(opts.uri).to.equal(
+            'http://farmer.host:6666/shards/hash?token=token'
+          );
+          return requestObj;
+        }
+      });
+      expect(utils.createShardDownloader(
+        { address: 'farmer.host', port: 6666 },
+        'hash',
+        'token'
+      )).to.be.instanceOf(stream.Readable);
+    });
+
+  });
+
+  describe('#createShardUploader', function() {
+
+    it('should return the request object', function() {
+      var requestObj = {};
+      var utils = proxyquire('../lib/utils', {
+        request: function(opts) {
+          expect(opts.method).to.equal('POST');
+          expect(opts.uri).to.equal(
+            'http://farmer.host:6666/shards/hash?token=token'
+          );
+          return requestObj;
+        }
+      });
+      expect(utils.createShardUploader(
+        { address: 'farmer.host', port: 6666 },
+        'hash',
+        'token'
+      )).to.equal(requestObj);
     });
 
   });

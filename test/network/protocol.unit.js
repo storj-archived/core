@@ -14,9 +14,6 @@ var StorageItem = require('../../lib/storage/item');
 var utils = require('../../lib/utils');
 var TriggerManager = require('../../lib/sips/0003').TriggerManager;
 var EventEmitter = require('events').EventEmitter;
-var rs = require('readable-stream');
-var ReadableStream = rs.Readable;
-var WritableStream = rs.Writable;
 var Contract = require('../../lib/contract');
 
 describe('Protocol', function() {
@@ -719,9 +716,6 @@ describe('Protocol', function() {
       var _accept = sinon.stub();
       var proto = new Protocol({
         network: {
-          dataChannelServer: {
-            accept: _accept
-          },
           _logger: Logger(0),
           storageManager: {
             load: sinon.stub().callsArgWith(1, null, {
@@ -734,6 +728,9 @@ describe('Protocol', function() {
               }
             }),
             save: sinon.stub().callsArgWith(1, null)
+          },
+          transport: {
+            shardServer: { accept: _accept }
           }
         }
       });
@@ -812,8 +809,8 @@ describe('Protocol', function() {
       var _accept = sinon.stub();
       var proto = new Protocol({
         network: {
-          dataChannelServer: {
-            accept: _accept
+          transport: {
+            shardServer: { accept: _accept }
           },
           _logger: Logger(0),
           storageManager: {
@@ -872,58 +869,30 @@ describe('Protocol', function() {
 
   describe('#handleMirror', function() {
 
+    var Protocol = proxyquire('../../lib/network/protocol', {
+      '../bridge-client': sinon.stub().returns({
+        createExchangeReport: sinon.stub()
+      })
+    });
+
     it('should error if it fails to load', function(done) {
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
           storageManager: {
             load: sinon.stub().callsArgWith(1, new Error('Failed'))
-          }
-        }
-      });
-      proto.handleMirror({}, function(err) {
-        expect(err.message).to.equal('Failed');
-        done();
-      });
-    });
-
-    it('should callback with error if channel cannot open', function(done) {
-      var dcx = new EventEmitter();
-      dcx.createReadStream = function() {
-        return new ReadableStream({ read: utils.noop });
-      };
-      var StubbedProtocol = proxyquire('../../lib/network/protocol', {
-        '../data-channels/client': function() {
-          return dcx;
-        }
-      });
-      var contracts = {
-        '4e1243bd22c66e76c2ba9eddc1f91394e57f9f83': {}
-      };
-      var proto = new StubbedProtocol({
-        network: {
-          _logger: Logger(0),
-          storageManager: {
-            load: function(hash, callback) {
-              callback(null, {
-                contracts: contracts,
-                shard: new WritableStream({ write: utils.noop }),
-                getContract: function(contact) {
-                  return contracts[contact.nodeID];
-                }
-              });
-              setImmediate(function() {
-                dcx.emit('error', new Error('Failed to open channel'));
-              });
-            }
+          },
+          contact: {
+            address: '0.0.0.0',
+            port: 1234,
+            nodeID: 'nodeid'
           }
         }
       });
       proto.handleMirror({
-        contact: { nodeID: '4e1243bd22c66e76c2ba9eddc1f91394e57f9f83' },
-        data_hash: '4e1243bd22c66e76c2ba9eddc1f91394e57f9f83'
+        contact: { address: '0.0.0.0', port: 4321, nodeID: 'nodeid' }
       }, function(err) {
-        expect(err.message).to.equal('Failed to open channel');
+        expect(err.message).to.equal('Failed');
         done();
       });
     });
@@ -940,6 +909,11 @@ describe('Protocol', function() {
                 return contracts[contact.nodeID];
               }
             })
+          },
+          contact: {
+            address: '0.0.0.0',
+            port: 1234,
+            nodeID: 'nodeid'
           }
         }
       });
@@ -966,6 +940,11 @@ describe('Protocol', function() {
                 return contracts[contact.nodeID];
               }
             })
+          },
+          contact: {
+            address: '0.0.0.0',
+            port: 1234,
+            nodeID: 'nodeid'
           }
         }
       });
@@ -977,55 +956,111 @@ describe('Protocol', function() {
       });
     });
 
-    it('should open the channel and destroy a failed shard', function(done) {
-      var dcx = new EventEmitter();
-      var _rs = new ReadableStream({ read: utils.noop });
-      dcx.createReadStream = function() {
-        return _rs;
-      };
-      var StubbedProtocol = proxyquire('../../lib/network/protocol', {
-        '../data-channels/client': function() {
-          return dcx;
+    it('should start downloading shard and destroy on failure', function(done) {
+      var download = new stream.Readable({ read: () => null });
+      download.destroy = sinon.stub();
+      var Protocol = proxyquire('../../lib/network/protocol', {
+        '../utils': {
+          createShardDownloader: sinon.stub().returns(download)
         }
       });
-      var _shard = new WritableStream({ write: utils.noop });
-      _shard.destroy = sinon.stub();
       var contracts = {
-        '4e1243bd22c66e76c2ba9eddc1f91394e57f9f83': {}
+        test: {}
       };
-      var proto = new StubbedProtocol({
+      var shard = new stream.Writable({ write: () => null });
+      shard.destroy = sinon.stub();
+      var proto = new Protocol({
         network: {
           _logger: Logger(0),
           storageManager: {
-            load: function(hash, callback) {
-              callback(null, {
-                contracts: contracts,
-                shard: _shard,
-                getContract: function(contact) {
-                  return contracts[contact.nodeID];
-                }
-              });
-              setImmediate(function() {
-                dcx.emit('open');
-                setImmediate(function() {
-                  _rs.emit('error', new Error('Failed'));
-                });
-              });
-            }
+            load: sinon.stub().callsArgWith(1, null, {
+              contracts: contracts,
+              shard: shard,
+              getContract: function(contact) {
+                return contracts[contact.nodeID];
+              }
+            })
+          },
+          contact: {
+            address: '0.0.0.0',
+            port: 1234,
+            nodeID: 'nodeid'
+          },
+          bridgeClient: {
+            createExchangeReport: sinon.stub()
           }
         }
       });
       proto.handleMirror({
-        contact: { nodeID: '4e1243bd22c66e76c2ba9eddc1f91394e57f9f83' },
-        data_hash: '4e1243bd22c66e76c2ba9eddc1f91394e57f9f83'
+        contact: { nodeID: 'test' },
+        farmer: {
+          address: '0.0.0.0',
+          port: 1234,
+          nodeID: utils.rmd160('')
+        },
+        data_hash: 'hash'
       }, function(err) {
         expect(err).to.equal(null);
-        setTimeout(function() {
-          expect(_shard.destroy.called).to.equal(true);
+        download.emit('error', new Error());
+        setImmediate(() => {
+          expect(shard.destroy.called).to.equal(true);
+          expect(download.destroy.called).to.equal(true);
           done();
-        }, 10);
+        });
       });
+    });
 
+    it('should start downloading shard and report on success', function(done) {
+      var download = new stream.Readable({ read: () => null });
+      var createExchangeReport = sinon.stub();
+      var Protocol = proxyquire('../../lib/network/protocol', {
+        '../utils': {
+          createShardDownloader: sinon.stub().returns(download)
+        }
+      });
+      var contracts = {
+        test: {}
+      };
+      var shard = new stream.Writable({ write: () => null });
+      shard.destroy = sinon.stub();
+      var proto = new Protocol({
+        network: {
+          _logger: Logger(0),
+          storageManager: {
+            load: sinon.stub().callsArgWith(1, null, {
+              contracts: contracts,
+              shard: shard,
+              getContract: function(contact) {
+                return contracts[contact.nodeID];
+              }
+            })
+          },
+          bridgeClient: {
+            createExchangeReport: createExchangeReport
+          },
+          contact: {
+            address: '0.0.0.0',
+            port: 1234,
+            nodeID: 'nodeid'
+          }
+        }
+      });
+      proto.handleMirror({
+        contact: { nodeID: 'test' },
+        farmer: {
+          address: '0.0.0.0',
+          port: 1234,
+          nodeID: utils.rmd160('')
+        },
+        data_hash: 'hash'
+      }, function(err) {
+        expect(err).to.equal(null);
+        shard.emit('finish');
+        setImmediate(() => {
+          expect(createExchangeReport.called).to.equal(true);
+          done();
+        });
+      });
     });
 
   });
@@ -1082,7 +1117,8 @@ describe('Protocol', function() {
           contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
           transport: {
             tunnelServer: {
-              hasTunnelAvailable: sinon.stub().returns(false)
+              _proxies: {},
+              _opts: { maxProxiesAllowed: 0 }
             }
           },
           _tunnelers: {
@@ -1111,7 +1147,8 @@ describe('Protocol', function() {
           contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
           transport: {
             tunnelServer: {
-              hasTunnelAvailable: sinon.stub().returns(true)
+              _proxies: {},
+              _opts: { maxProxiesAllowed: 3 }
             }
           },
           _tunnelers: {
@@ -1139,7 +1176,8 @@ describe('Protocol', function() {
           contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
           transport: {
             tunnelServer: {
-              hasTunnelAvailable: sinon.stub().returns(false)
+              _proxies: {},
+              _opts: { maxProxiesAllowed: 0 }
             }
           },
           _tunnelers: {
@@ -1316,13 +1354,13 @@ describe('Protocol', function() {
   describe('#handleOpenTunnel', function() {
 
     it('should error if it fails to open gateway', function(done) {
-      var _createGateway = sinon.stub().callsArgWith(0, new Error('Failed'));
+      var _addProxy = sinon.stub().callsArgWith(1, new Error('Failed'));
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
           transport: {
             tunnelServer: {
-              createGateway: _createGateway
+              addProxy: _addProxy
             }
           }
         }
@@ -1337,13 +1375,8 @@ describe('Protocol', function() {
 
     it('should not try to create a port mapping if public', function(done) {
       var _createPortMapping = sinon.stub().callsArg(1);
-      var _createGateway = sinon.stub().callsArgWith(0, null, {
-        getEntranceToken: function() {
-          return 'sometoken';
-        },
-        getEntranceAddress: function() {
-          return { address: '0.0.0.0', port: 0 };
-        }
+      var _addProxy = sinon.stub().callsArgWith(1, null, {
+        getProxyPort: sinon.stub().returns(8080)
       });
       var proto = new Protocol({
         network: {
@@ -1353,8 +1386,7 @@ describe('Protocol', function() {
             _requiresTraversal: false,
             _isPublic: true,
             tunnelServer: {
-              createGateway: _createGateway,
-              getListeningPort: sinon.stub().returns(0)
+              addProxy: _addProxy
             },
             createPortMapping: _createPortMapping
           }
@@ -1370,13 +1402,8 @@ describe('Protocol', function() {
 
     it('should try to create a port mapping if private', function(done) {
       var _createPortMapping = sinon.stub().callsArg(1);
-      var _createGateway = sinon.stub().callsArgWith(0, null, {
-        getEntranceToken: function() {
-          return 'sometoken';
-        },
-        getEntranceAddress: function() {
-          return { address: '0.0.0.0', port: 0 };
-        }
+      var _addProxy = sinon.stub().callsArgWith(1, null, {
+        getProxyPort: sinon.stub().returns(8080)
       });
       var proto = new Protocol({
         network: {
@@ -1386,8 +1413,7 @@ describe('Protocol', function() {
             _requiresTraversal: true,
             _isPublic: true,
             tunnelServer: {
-              createGateway: _createGateway,
-              getListeningPort: sinon.stub().returns(0)
+              addProxy: _addProxy
             },
             createPortMapping: _createPortMapping
           }
@@ -1406,13 +1432,8 @@ describe('Protocol', function() {
         1,
         new Error('Failed')
       );
-      var _createGateway = sinon.stub().callsArgWith(0, null, {
-        getEntranceToken: function() {
-          return 'sometoken';
-        },
-        getEntranceAddress: function() {
-          return { address: '0.0.0.0', port: 0 };
-        }
+      var _addProxy = sinon.stub().callsArgWith(1, null, {
+        getProxyPort: sinon.stub().returns(8080)
       });
       var proto = new Protocol({
         network: {
@@ -1422,8 +1443,7 @@ describe('Protocol', function() {
             _requiresTraversal: true,
             _isPublic: true,
             tunnelServer: {
-              createGateway: _createGateway,
-              getListeningPort: sinon.stub().returns(0)
+              addProxy: _addProxy
             },
             createPortMapping: _createPortMapping
           }

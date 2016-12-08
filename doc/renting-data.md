@@ -162,9 +162,7 @@ encryptedShard.pipe(auditGenerator);
 
 Now that we have stored a copy of our contract and challenges, it's time to
 authorize a "data channel" (as described in {@tutorial data-channels}) and
-transfer the shard to the farmer. We will be using:
-
-* {@link DataChannelClient} - for opening the channel and transferring the data
+transfer the shard to the farmer.
 
 ```
 renter.getConsignToken(farmer, contract, auditGenerator, function(err, token) {
@@ -172,17 +170,11 @@ renter.getConsignToken(farmer, contract, auditGenerator, function(err, token) {
     return console.error(err);
   }
 
-  var client = new storj.DataChannelClient(farmer);
+  var upload = storj.utils.createShardUploader(farmer, hash, token);
   var encryptedShard = fs.createReadStream(tmpName);
 
-  client.on('open', function() {
-    var datachannel = client.createWriteStream(token, hash);
-
-    datachannel.on('finish', function() {
-      // CONTINUED IN NEXT EXAMPLE
-    });
-
-    encryptedShard.pipe(datachannel);
+  encryptedShard.pipe(upload).on('end', () => {
+    // CONTINUED IN THE NEXT EXAMPLE
   });
 });
 ```
@@ -203,9 +195,6 @@ use mirrors to accomplish this. Mirroring is a method for *passively*
 replicating our data, meaning that instead of uploading it again, we instruct a
 new farmer to retrieve it from the location we already stored it.
 
-To do this we are going to need:
-
-* {@link DataChannelPointer} - for representing the location of the shard
 
 > We are also going to use the [async](https://github.com/caolan/async) module
 > for managing flow control.
@@ -226,7 +215,7 @@ function _getMirroringContract(n, next) {
       }
 
       mirrors.push(mirror);
-      next(null, new storj.DataChannelPointer(farmer, hash, token));
+      next(null, { farmer: farmer, hash: hash, token: token });
     });
   });
 }
@@ -296,15 +285,11 @@ renter.getRetrieveToken(farmer, contract, function(err, token) {
     return console.error(err);
   }
 
-  var client = new storj.DataChannelClient(farmer);
+  var download = utils.createShardDownloader(farmer, hash, token);
   var decrypter = new storj.DecryptStream(keypair);
   var fileDestination = fs.createWriteStream('/path/to/download/shard');
 
-  client.on('open', function() {
-    var download = client.createReadStream(token, hash);
-
-    download.pipe(decrypter).pipe(fileDestination);
-  });
+  download.pipe(decrypter).pipe(fileDestination);
 
   fileDestination.on('finish', function() {
     console.info('Successfully downloaded shard!');

@@ -1,6 +1,6 @@
 'use strict';
 
-var storj = require('storj');
+var storj = require('storj-lib');
 var through = require('through');
 var fs = require('fs');
 // Set the bridge api URL

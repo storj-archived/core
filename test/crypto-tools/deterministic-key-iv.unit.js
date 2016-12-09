@@ -45,11 +45,13 @@ describe('DeterministicKeyIv#fromObject', function() {
 describe('DeterministicKeyIv#getDeterministicKey', function() {
 
   it('should generate an deterministic key', function() {
-    var seed = '0123456789ab0123456789ab';
-    var bucketId = '0123456789ab';
+    var seed = new Buffer('5eb00bbddcf069084889a8ab9155568165f5c453ccb85e708' +
+                          '11aaed6f6da5fc19a5ac40b389cd370d086206dec8aa6c43d' +
+                          'aea6690f20ad3d8d48b2d2ce9e38e4', 'hex');
+    var bucketId = new Buffer('0123456789ab0123456789ab', 'hex');
     var bucketKey = DeterministicKeyIv.getDeterministicKey(seed, bucketId);
-    var bucketKeyStart = 'ba24525';
-    expect(bucketKey.startsWith(bucketKeyStart)).to.equal(true);
+    expect(bucketKey).to.equal('b2464469e364834ad21e24c64f637c39083af5067693'+
+                               '605c84e259447644f6f6');
   });
 
 });

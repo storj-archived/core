@@ -94,8 +94,7 @@
     "rimraf": "^2.5.3",
     "secp256k1": "^3.2.2",
     "semver": "^5.1.0",
-    "through": "^2.3.8",
-    "unorm": "^1.4.1"
+    "through": "^2.3.8"
   },
   "devDependencies": {
     "benchmark": "^2.1.1",

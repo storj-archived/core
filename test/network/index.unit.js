@@ -1367,6 +1367,8 @@ describe('Network (private)', function() {
   });
 
   describe('#_enterOverlay', function() {
+    const sandbox = sinon.sandbox.create();
+    afterEach(() => sandbox.restore());
 
     it('should use bridge to get seeds and error if fails', function(done) {
       var net = Network({
@@ -1380,14 +1382,12 @@ describe('Network (private)', function() {
         doNotTraverseNat: true
       });
       CLEANUP.push(net);
-      var _setupTunnel = sinon.stub(net, '_setupTunnelClient').callsArg(0);
-      var _getContactList = sinon.stub(
+      sandbox.stub(net, '_setupTunnelClient').callsArg(0);
+      sandbox.stub(
         net.bridgeClient,
         'getContactList'
       ).callsArgWith(1, new Error('connection refused'));
       net.join(function(err) {
-        _setupTunnel.restore();
-        _getContactList.restore();
         expect(err.message).to.equal(
           'Failed to discover seeds from bridge: connection refused'
         );
@@ -1408,8 +1408,8 @@ describe('Network (private)', function() {
         doNotTraverseNat: true
       });
       CLEANUP.push(net);
-      var _setupTunnel = sinon.stub(net, '_setupTunnelClient').callsArg(0);
-      var _getContactList = sinon.stub(
+      sandbox.stub(net, '_setupTunnelClient').callsArg(0);
+      sandbox.stub(
         net.bridgeClient,
         'getContactList'
       ).callsArgWith(1, null, [
@@ -1420,11 +1420,7 @@ describe('Network (private)', function() {
           protocol: VERSION.protocol
         }
       ]);
-      net.join(function() {
-        _setupTunnel.restore();
-        _getContactList.restore();
-        done();
-      });
+      net.join(done);
     });
 
     it('should do nothing if no seeds or bridge', function(done) {
@@ -1441,11 +1437,14 @@ describe('Network (private)', function() {
         doNotTraverseNat: true
       });
       CLEANUP.push(net);
-      var _setupTunnel = sinon.stub(net, '_setupTunnelClient').callsArg(0);
+      sandbox.stub(net, '_setupTunnelClient').callsArg(0);
       net.on('connected', function() {
-        _setupTunnel.restore();
         done();
-      }).join();
+      }).join(function(err) {
+        if (err) {
+          return done(err);
+        }
+      });
     });
 
     it('should try all seeds before failing to connect', function(done) {
@@ -1465,15 +1464,16 @@ describe('Network (private)', function() {
         doNotTraverseNat: true
       });
       CLEANUP.push(net);
-      var _connect = sinon.stub(net, 'connect').callsArgWith(
+      sandbox.stub(net, 'connect').callsArgWith(
         1,
         new Error('Failed')
       );
-      var _setupTunnel = sinon.stub(net, '_setupTunnelClient').callsArg(0);
-      net.join(function() {
-        _connect.restore();
-        _setupTunnel.restore();
-        expect(_connect.callCount).to.equal(3);
+      sandbox.stub(net, '_setupTunnelClient').callsArg(0);
+      net.join(function(err) {
+        if (err) {
+          return done(err);
+        }
+        expect(net.connect.callCount).to.equal(3);
         done();
       });
     });
@@ -1500,7 +1500,10 @@ describe('Network (private)', function() {
         null
       );
       var _setupTunnel = sinon.stub(net, '_setupTunnelClient').callsArg(0);
-      net.join(function() {
+      net.join(function(err) {
+        if (err) {
+          return done(err);
+        }
         _connect.restore();
         _setupTunnel.restore();
         expect(_connect.called).to.equal(true);

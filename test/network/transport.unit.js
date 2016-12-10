@@ -27,39 +27,19 @@ describe('Network/Transport', function() {
       })).to.be.instanceOf(Transport);
     });
 
-  });
-
-  describe('#_setLimitOnConnections', function() {
-
-    var server = new EventEmitter();
-    var transport = new EventEmitter();
-    transport._numConnections = 0;
-    transport._maxConnections = 1;
-    transport._server = server;
-    transport._log = { warn: sinon.stub() };
-
-    it('should inc the num connections and dec on close', function(done) {
-      var socket = new EventEmitter();
-      Transport.prototype._setLimitOnConnections.call(transport);
-      server.emit('connection', socket);
-      setImmediate(function() {
-        expect(transport._numConnections).to.equal(1);
-        socket.emit('close');
-        setImmediate(function() {
-          expect(transport._numConnections).to.equal(0);
-          done();
-        });
+    it('should disable the nagle algorithm on connection', function(done) {
+      var transport = new Transport(Contact({
+        address: '127.0.0.1',
+        port: 0,
+        nodeID: KeyPair().getNodeID()
+      }), {
+        doNotTraverseNat: true,
+        storageManager: StorageManager(RamAdapter())
       });
-    });
-
-    it('should destroy sockets after limit', function(done) {
-      var socket = { destroy: sinon.stub() };
-      transport._numConnections = 1;
-      Transport.prototype._setLimitOnConnections.call(transport);
-      server.emit('connection', socket);
-      setImmediate(function() {
-        expect(transport._log.warn.called).to.equal(true);
-        expect(socket.destroy.called).to.equal(true);
+      var sock = { setNoDelay: sinon.stub() };
+      transport._server.emit('connection', sock);
+      setImmediate(() => {
+        expect(sock.setNoDelay.calledWithMatch(true)).to.equal(true);
         done();
       });
     });

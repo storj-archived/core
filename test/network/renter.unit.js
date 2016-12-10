@@ -501,7 +501,7 @@ describe('RenterInterface', function() {
         nodeID: utils.rmd160('contact')
       })], function(err) {
         expect(err).instanceOf(Error);
-        expect(err.message).to.equal('Send failed');
+        expect(err.message).to.equal('All mirror requests failed');
         done();
       });
     });

@@ -1409,6 +1409,7 @@ describe('Network (private)', function() {
       });
       CLEANUP.push(net);
       sandbox.stub(net, '_setupTunnelClient').callsArg(0);
+      sandbox.stub(net, 'connect').callsArgWith(1, null);
       sandbox.stub(
         net.bridgeClient,
         'getContactList'
@@ -1470,9 +1471,8 @@ describe('Network (private)', function() {
       );
       sandbox.stub(net, '_setupTunnelClient').callsArg(0);
       net.join(function(err) {
-        if (err) {
-          return done(err);
-        }
+        expect(err).to.be.instanceOf(Error);
+        expect(err.message).to.equal('Failed to join the network');
         expect(net.connect.callCount).to.equal(3);
         done();
       });

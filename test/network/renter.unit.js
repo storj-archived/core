@@ -472,7 +472,7 @@ describe('RenterInterface', function() {
     const sandbox = sinon.sandbox.create();
     afterEach(() => sandbox.restore());
 
-    it('should callback error if all nodes fail', function(done) {
+    it('should callback error if all nodes fail (send error)', function(done) {
       var renter = new RenterInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
@@ -500,12 +500,13 @@ describe('RenterInterface', function() {
         port: 0,
         nodeID: utils.rmd160('contact')
       })], function(err) {
+        expect(err).instanceOf(Error);
         expect(err.message).to.equal('Send failed');
         done();
       });
     });
 
-    it('should callback error if all nodes fail', function(done) {
+    it('should callback error if length of result is zero', function(done) {
       var renter = new RenterInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
@@ -515,7 +516,42 @@ describe('RenterInterface', function() {
         storageManager: StorageManager(RAMStorageAdapter())
       });
       CLEANUP.push(renter);
-      var _send = sinon.stub(renter.transport, 'send').callsArgWith(
+      sandbox.stub(renter.transport, 'send').callsArgWith(
+        2,
+        null,
+        null
+      );
+      renter.getMirrorNodes([{
+        farmer: Contact({
+          address: '0.0.0.0',
+          port: 0,
+          nodeID: utils.rmd160('contact')
+        }),
+        hash: utils.rmd160('hash'),
+        token: utils.generateToken(),
+        operation: 'PULL'
+      }], [Contact({
+        address: '0.0.0.0',
+        port: 0,
+        nodeID: utils.rmd160('contact')
+      })], function(err) {
+        expect(err).instanceOf(Error);
+        expect(err.message).to.equal('All mirror requests failed');
+        done();
+      });
+    });
+
+    it('should NOT callback error if all nodes fail', function(done) {
+      var renter = new RenterInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        storageManager: StorageManager(RAMStorageAdapter())
+      });
+      CLEANUP.push(renter);
+      sandbox.stub(renter.transport, 'send').callsArgWith(
         2,
         null,
         { result: {} }
@@ -534,7 +570,6 @@ describe('RenterInterface', function() {
         port: 0,
         nodeID: utils.rmd160('contact')
       })], function(err, results) {
-        _send.restore();
         expect(results).to.lengthOf(1);
         done();
       });

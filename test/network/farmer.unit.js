@@ -722,7 +722,13 @@ describe('FarmerInterface#Negotiator', function() {
   it('should callback false is renter is not in whitelist', function(done) {
     FarmerInterface.Negotiator.call({
       _renterWhitelist: [utils.rmd160('someotherrenter')],
-      _logger: kad.Logger(0)
+      _logger: kad.Logger(0),
+      _offerBackoffLimit: 4,
+      transport: {
+        shardServer: {
+          activeTransfers: 0
+        }
+      }
     }, new Contract({
       data_hash: utils.rmd160(''),
       renter_id: utils.rmd160('renter')
@@ -735,7 +741,13 @@ describe('FarmerInterface#Negotiator', function() {
   it('should callback false is contract has an invalid hash', function(done) {
     FarmerInterface.Negotiator.call({
       _renterWhitelist: null,
-      _logger: kad.Logger(0)
+      _logger: kad.Logger(0),
+      _offerBackoffLimit: 4,
+      transport: {
+        shardServer: {
+          activeTransfers: 0
+        }
+      }
     }, {
       get: sinon.stub().returns(null)
     }, function(result) {
@@ -744,9 +756,33 @@ describe('FarmerInterface#Negotiator', function() {
     });
   });
 
+  it('should return false if farmer has active transfers', function(done) {
+    FarmerInterface.Negotiator.call({
+      _logger: kad.Logger(0),
+      storageManager: new StorageManager(new RAMStorageAdapter()),
+      _offerBackoffLimit: 4,
+      transport: {
+        shardServer: {
+          activeTransfers: 4
+        }
+      }
+    }, new Contract({
+      data_hash: utils.rmd160('')
+    }), function(result) {
+      expect(result).to.equal(false);
+      done();
+    });
+  });
+
   it('should return true if farmer does not have the shard', function(done) {
     FarmerInterface.Negotiator.call({
       _logger: kad.Logger(0),
+      _offerBackoffLimit: 4,
+      transport: {
+        shardServer: {
+          activeTransfers: 0
+        }
+      },
       storageManager: new StorageManager(new RAMStorageAdapter())
     }, new Contract({
       data_hash: utils.rmd160('')
@@ -759,6 +795,12 @@ describe('FarmerInterface#Negotiator', function() {
   it('should callback true if we have shard for other renter', function(done) {
     FarmerInterface.Negotiator.call({
       _logger: kad.Logger(0),
+      _offerBackoffLimit: 4,
+      transport: {
+        shardServer: {
+          activeTransfers: 0
+        }
+      },
       storageManager: {
         load: sinon.stub().callsArgWith(1, null, {
           contracts: {
@@ -785,6 +827,12 @@ describe('FarmerInterface#Negotiator', function() {
           },
           shard: { write: sinon.stub() }
         })
+      },
+      _offerBackoffLimit: 4,
+      transport: {
+        shardServer: {
+          activeTransfers: 0
+        }
       }
     }, new Contract({
       data_hash: utils.rmd160(''),
@@ -809,6 +857,12 @@ describe('FarmerInterface#Negotiator', function() {
           },
           shard: { write: sinon.stub() }
         })
+      },
+      _offerBackoffLimit: 4,
+      transport: {
+        shardServer: {
+          activeTransfers: 0
+        }
       }
     }, new Contract({
       data_hash: utils.rmd160(''),
@@ -824,6 +878,12 @@ describe('FarmerInterface#Negotiator', function() {
   it('should return false if we have a contract and shard', function(done) {
     FarmerInterface.Negotiator.call({
       _logger: kad.Logger(0),
+      _offerBackoffLimit: 4,
+      transport: {
+        shardServer: {
+          activeTransfers: 0
+        }
+      },
       storageManager: {
         load: sinon.stub().callsArgWith(1, null, {
           contracts: {

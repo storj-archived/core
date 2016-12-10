@@ -469,6 +469,8 @@ describe('RenterInterface', function() {
   });
 
   describe('#getMirrorNodes', function() {
+    const sandbox = sinon.sandbox.create();
+    afterEach(() => sandbox.restore());
 
     it('should callback error if all nodes fail', function(done) {
       var renter = new RenterInterface({
@@ -480,7 +482,7 @@ describe('RenterInterface', function() {
         storageManager: StorageManager(RAMStorageAdapter())
       });
       CLEANUP.push(renter);
-      var _send = sinon.stub(renter.transport, 'send').callsArgWith(
+      sandbox.stub(renter.transport, 'send').callsArgWith(
         2,
         new Error('Send failed')
       );
@@ -498,8 +500,7 @@ describe('RenterInterface', function() {
         port: 0,
         nodeID: utils.rmd160('contact')
       })], function(err) {
-        _send.restore();
-        expect(err.message).to.equal('All mirror requests failed');
+        expect(err.message).to.equal('Send failed');
         done();
       });
     });

@@ -61,7 +61,7 @@
     "node": "^6.9.1"
   },
   "dependencies": {
-    "async": "^1.5.2",
+    "async": "^2.1.4",
     "bitcore-ecies": "^1.0.1",
     "bitcore-lib": "^0.13.12",
     "bitcore-message": "^1.0.2",

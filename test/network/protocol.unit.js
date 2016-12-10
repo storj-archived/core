@@ -1200,6 +1200,8 @@ describe('Protocol', function() {
   });
 
   describe('#_askNeighborsForTunnels', function() {
+    const sandbox = sinon.sandbox.create();
+    afterEach(() => sandbox.restore());
 
     it('should skip adding tunnels if error response', function(done) {
       var _forEach = sinon.stub();
@@ -1282,6 +1284,41 @@ describe('Protocol', function() {
       });
       proto._askNeighborsForTunnels([], function() {
         expect(_addContact.called).to.equal(false);
+        done();
+      });
+    });
+
+    it('should stop requesting if response was given', function(done) {
+      var _addContact = sinon.stub();
+      var send = sinon.stub().callsArgWith(2, null, {
+        result: {
+          tunnels: [
+            { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' }
+          ]
+        }
+      });
+      send.onFirstCall().callsArgWith(2, new Error('Failed'));
+      var proto = new Protocol({
+        network: {
+          _logger: Logger(0),
+          router: {
+            getNearestContacts: sinon.stub().returns([{}, {}, {}])
+          },
+          contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
+          transport: {
+            _createContact: sinon.stub(),
+            send: send
+          },
+          _tunnelers: {
+            addContact: _addContact,
+            getContactList: sinon.stub().returns([]),
+            getSize: sinon.stub().returns(19)
+          }
+        }
+      });
+      proto._askNeighborsForTunnels([], function() {
+        expect(send.callCount).to.equal(2);
+        expect(_addContact.called).to.equal(true);
         done();
       });
     });

@@ -1073,6 +1073,8 @@ describe('Network (private)', function() {
   });
 
   describe('#_findTunnel', function() {
+    const sandbox = sinon.sandbox.create();
+    afterEach(() => sandbox.restore());
 
     it('should callback error if no neighbors provided', function(done) {
       var net = Network({
@@ -1107,12 +1109,12 @@ describe('Network (private)', function() {
       });
       CLEANUP.push(net);
       var contact = { address: '127.0.0.1', port: 1337 };
-      var _send = sinon.stub(net.transport, 'send').callsArgWith(
+      sandbox.stub(net.transport, 'send').callsArgWith(
         2,
         null,
         { result: { tunnels: [contact, contact] } }
       );
-      var _establishTunnel = sinon.stub(
+      sandbox.stub(
         net,
         '_establishTunnel',
         function(tunnels, cb) {
@@ -1121,10 +1123,48 @@ describe('Network (private)', function() {
         }
       );
       net._findTunnel([contact, contact], function() {
-        _establishTunnel.restore();
-        _send.restore();
         done();
       });
+    });
+
+    it('should stop trying after success', function(done) {
+      var net = Network({
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
+        logger: kad.Logger(0),
+        seedList: [],
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
+      });
+      CLEANUP.push(net);
+      sandbox.stub(
+        net,
+        '_establishTunnel',
+        function(tunnels, cb) {
+          expect(tunnels).to.have.lengthOf(1);
+          cb();
+        }
+      );
+      sandbox.stub(net.transport, 'send').callsArgWith(
+        2,
+        null,
+        { result: { tunnels: [{nodeID: ''}] } }
+      );
+      net.transport.send.onFirstCall().callsArgWith(
+        2,
+        new Error('Failed')
+      );
+      var contact = { address: '127.0.0.1', port: 1337 };
+      net._findTunnel([contact, contact, contact], function(err) {
+        if (err) {
+          return done(err);
+        }
+        expect(net.transport.send.callCount).to.equal(2);
+        done();
+      });
+
     });
 
     it('should try all neighbors for tunnel list', function(done) {
@@ -1139,15 +1179,14 @@ describe('Network (private)', function() {
         doNotTraverseNat: true
       });
       CLEANUP.push(net);
-      var _send = sinon.stub(net.transport, 'send').callsArgWith(
+      sandbox.stub(net.transport, 'send').callsArgWith(
         2,
         null,
         { result: { tunnels: [] } }
       );
       var contact = { address: '127.0.0.1', port: 1337 };
       net._findTunnel([contact, contact], function(err) {
-        _send.restore();
-        expect(_send.callCount).to.equal(2);
+        expect(net.transport.send.callCount).to.equal(2);
         expect(err.message).to.equal(
           'Failed to find tunnels from neighbors'
         );
@@ -1167,13 +1206,12 @@ describe('Network (private)', function() {
         doNotTraverseNat: true
       });
       CLEANUP.push(net);
-      var _send = sinon.stub(net.transport, 'send').callsArgWith(
+      sandbox.stub(net.transport, 'send').callsArgWith(
         2,
         new Error('Not reachable')
       );
       var contact = { address: '127.0.0.1', port: 1337 };
       net._findTunnel([contact], function(err) {
-        _send.restore();
         expect(err.message).to.equal(
           'Failed to find tunnels from neighbors'
         );
@@ -1367,6 +1405,8 @@ describe('Network (private)', function() {
   });
 
   describe('#_enterOverlay', function() {
+    const sandbox = sinon.sandbox.create();
+    afterEach(() => sandbox.restore());
 
     it('should use bridge to get seeds and error if fails', function(done) {
       var net = Network({
@@ -1380,14 +1420,12 @@ describe('Network (private)', function() {
         doNotTraverseNat: true
       });
       CLEANUP.push(net);
-      var _setupTunnel = sinon.stub(net, '_setupTunnelClient').callsArg(0);
-      var _getContactList = sinon.stub(
+      sandbox.stub(net, '_setupTunnelClient').callsArg(0);
+      sandbox.stub(
         net.bridgeClient,
         'getContactList'
       ).callsArgWith(1, new Error('connection refused'));
       net.join(function(err) {
-        _setupTunnel.restore();
-        _getContactList.restore();
         expect(err.message).to.equal(
           'Failed to discover seeds from bridge: connection refused'
         );
@@ -1408,8 +1446,9 @@ describe('Network (private)', function() {
         doNotTraverseNat: true
       });
       CLEANUP.push(net);
-      var _setupTunnel = sinon.stub(net, '_setupTunnelClient').callsArg(0);
-      var _getContactList = sinon.stub(
+      sandbox.stub(net, '_setupTunnelClient').callsArg(0);
+      sandbox.stub(net, 'connect').callsArgWith(1, null);
+      sandbox.stub(
         net.bridgeClient,
         'getContactList'
       ).callsArgWith(1, null, [
@@ -1420,11 +1459,7 @@ describe('Network (private)', function() {
           protocol: VERSION.protocol
         }
       ]);
-      net.join(function() {
-        _setupTunnel.restore();
-        _getContactList.restore();
-        done();
-      });
+      net.join(done);
     });
 
     it('should do nothing if no seeds or bridge', function(done) {
@@ -1441,11 +1476,46 @@ describe('Network (private)', function() {
         doNotTraverseNat: true
       });
       CLEANUP.push(net);
-      var _setupTunnel = sinon.stub(net, '_setupTunnelClient').callsArg(0);
+      sandbox.stub(net, '_setupTunnelClient').callsArg(0);
       net.on('connected', function() {
-        _setupTunnel.restore();
         done();
-      }).join();
+      }).join(function(err) {
+        if (err) {
+          return done(err);
+        }
+      });
+    });
+
+    it('should stop detecting after success', function(done) {
+      var net = Network({
+        keyPair: KeyPair(),
+        storageManager: Manager(RAMStorageAdapter()),
+        logger: kad.Logger(0),
+        seedList: [
+          'storj://127.0.0.1:1337/' + utils.rmd160('nodeid1'),
+          'storj://127.0.0.1:1338/' + utils.rmd160('nodeid2'),
+          'storj://127.0.0.1:1339/' + utils.rmd160('nodeid3')
+        ],
+        bridgeUri: null,
+        rpcAddress: '127.0.0.1',
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true
+      });
+      CLEANUP.push(net);
+      sandbox.stub(net, 'connect').callsArgWith(1, null);
+      net.connect.onFirstCall().callsArgWith(
+        1,
+        new Error('Failed')
+      );
+      sandbox.stub(net, '_setupTunnelClient').callsArg(0);
+      net.join(function(err) {
+        if (err) {
+          return done(err);
+        }
+        expect(net.connect.callCount).to.equal(2);
+        done();
+      });
     });
 
     it('should try all seeds before failing to connect', function(done) {
@@ -1465,15 +1535,15 @@ describe('Network (private)', function() {
         doNotTraverseNat: true
       });
       CLEANUP.push(net);
-      var _connect = sinon.stub(net, 'connect').callsArgWith(
+      sandbox.stub(net, 'connect').callsArgWith(
         1,
         new Error('Failed')
       );
-      var _setupTunnel = sinon.stub(net, '_setupTunnelClient').callsArg(0);
-      net.join(function() {
-        _connect.restore();
-        _setupTunnel.restore();
-        expect(_connect.callCount).to.equal(3);
+      sandbox.stub(net, '_setupTunnelClient').callsArg(0);
+      net.join(function(err) {
+        expect(err).to.be.instanceOf(Error);
+        expect(err.message).to.equal('Failed to join the network');
+        expect(net.connect.callCount).to.equal(3);
         done();
       });
     });
@@ -1500,7 +1570,10 @@ describe('Network (private)', function() {
         null
       );
       var _setupTunnel = sinon.stub(net, '_setupTunnelClient').callsArg(0);
-      net.join(function() {
+      net.join(function(err) {
+        if (err) {
+          return done(err);
+        }
         _connect.restore();
         _setupTunnel.restore();
         expect(_connect.called).to.equal(true);

@@ -541,7 +541,7 @@ describe('RenterInterface', function() {
       });
     });
 
-    it('should NOT callback error if all nodes fail', function(done) {
+    it('should NOT callback error if all nodes give result', function(done) {
       var renter = new RenterInterface({
         keyPair: KeyPair(),
         rpcPort: 0,

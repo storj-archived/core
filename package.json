@@ -1,6 +1,6 @@
 {
   "name": "storj-lib",
-  "version": "6.0.6",
+  "version": "6.0.7",
   "description": "implementation of the storj protocol for node.js and the browser",
   "main": "index.js",
   "directories": {
@@ -71,7 +71,7 @@
     "ip": "^1.1.2",
     "jsen": "bugventure/jsen#9e57a9d653ff4ea47d364fc37da0f1659bfb8e89",
     "json-stable-stringify": "^1.0.1",
-    "kad": "^1.6.3",
+    "kad": "^1.6.4",
     "kad-logger-json": "^0.1.2",
     "kad-quasar": "^1.0.1",
     "kfs": "^2.2.4",

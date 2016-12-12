@@ -63,6 +63,26 @@ describe('ShardServer', function() {
 
   });
 
+  describe('#_handleEarlySocketClose', function() {
+
+    it('should decrement the active transfers count', function() {
+      var ctx = { activeTransfers: 1, _log: new Logger(0) };
+      ShardServer.prototype._handleEarlySocketClose.call(ctx);
+      expect(ctx.activeTransfers).to.equal(0);
+    });
+
+  });
+
+  describe('#_handleRequestError', function() {
+
+    it('should decrement the active transfers count', function() {
+      var ctx = { activeTransfers: 1, _log: new Logger(0) };
+      ShardServer.prototype._handleRequestError.call(ctx, new Error('Failed'));
+      expect(ctx.activeTransfers).to.equal(0);
+    });
+
+  });
+
   describe('#isAuthorized', function() {
 
     it('should return [false, error] if not authorized', function() {

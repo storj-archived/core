@@ -102,6 +102,47 @@ describe('utils', function() {
 
   });
 
+  describe('#isHexaString', function() {
+    it('returns false for object', function() {
+      expect(utils.isHexaString({})).to.equal(false);
+    });
+
+    it('returns false for number', function() {
+      expect(utils.isHexaString(123456789)).to.equal(false);
+    });
+
+    it('returns false for function', function() {
+      expect(utils.isHexaString(function(){})).to.equal(false);
+    });
+
+    it('returns false for json string', function() {
+      expect(utils.isHexaString('{"hello": "world"}')).to.equal(false);
+    });
+
+    it('returns false for base64 string', function() {
+      expect(utils.isHexaString('+rx4I0qmXs+I8TYn')).to.equal(false);
+    });
+
+    it('returns false for any string with non-base16 characters', function() {
+      ['g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q',
+       'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '!', '@',
+       '#', '$', '%', '^', '&', '*', '(', ')', 'G', 'H', 'I',
+       'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
+       'U', 'V', 'W', 'X', 'Y', 'Z', '\'', '"'].forEach((a) => {
+         expect(utils.isHexaString(a)).to.equal(false);
+       });
+    });
+
+    it('returns true for hexadecimal string (lowercase)', function() {
+      expect(utils.isHexaString('0123456789abcdef')).to.equal(true);
+    });
+
+    it('returns true for hexadecimal string (uppercase)', function() {
+      expect(utils.isHexaString('0123456789ABCDEF')).to.equal(true);
+    });
+
+  });
+
   describe('#sha1whirlpool', function() {
 
     it('should return the hex encoded hash', function() {

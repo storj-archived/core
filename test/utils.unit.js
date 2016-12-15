@@ -10,6 +10,7 @@ var sinon = require('sinon');
 var constants = require('../lib/constants');
 var os = require('os');
 var stream = require('readable-stream');
+var EventEmitter = require('events').EventEmitter;
 
 describe('utils', function() {
   /* jshint maxstatements: false */
@@ -439,44 +440,92 @@ describe('utils', function() {
 
   describe('#createShardDownloader', function() {
 
-    it('should return a readable stream object', function() {
-      var requestObj = {};
+    it('should return a readable stream object', function(done) {
+      var requestObj = new EventEmitter();
       var utils = proxyquire('../lib/utils', {
-        request: function(opts) {
-          expect(opts.method).to.equal('GET');
-          expect(opts.uri).to.equal(
-            'http://farmer.host:6666/shards/hash?token=token'
-          );
-          return requestObj;
+        http: {
+          get: function(opts) {
+            expect(opts.path).to.equal('/shards/hash?token=token');
+            return requestObj;
+          }
         }
       });
-      expect(utils.createShardDownloader(
+      let download = utils.createShardDownloader(
         { address: 'farmer.host', port: 6666 },
         'hash',
         'token'
-      )).to.be.instanceOf(stream.Readable);
+      );
+      expect(download).to.be.instanceOf(stream.Readable);
+      download.once('data', () => done());
+      setImmediate(() => {
+        let res = new EventEmitter();
+        requestObj.emit('response', res);
+        setTimeout(() => {
+          res.emit('data', Buffer.from('somedata'));
+        }, 30);
+      });
     });
 
   });
 
   describe('#createShardUploader', function() {
 
-    it('should return the request object', function() {
-      var requestObj = {};
+    it('should return a bubble error', function(done) {
+      var requestObj = new EventEmitter();
+      requestObj.write = sinon.stub();
       var utils = proxyquire('../lib/utils', {
-        request: function(opts) {
-          expect(opts.method).to.equal('POST');
-          expect(opts.uri).to.equal(
-            'http://farmer.host:6666/shards/hash?token=token'
-          );
-          return requestObj;
+        http: {
+          request: function(opts) {
+            expect(opts.method).to.equal('POST');
+            expect(opts.path).to.equal(
+              '/shards/hash?token=token'
+            );
+            return requestObj;
+          }
         }
       });
-      expect(utils.createShardUploader(
+      let upload = utils.createShardUploader(
         { address: 'farmer.host', port: 6666 },
         'hash',
         'token'
-      )).to.equal(requestObj);
+      );
+      expect(upload).to.be.instanceOf(stream.Transform);
+      upload.on('error', (err) => {
+        expect(err.message).to.equal('Failed');
+        done();
+      });
+      upload.write(Buffer.from([]));
+      setImmediate(() => {
+        requestObj.emit('error', new Error('Failed'));
+      });
+    });
+
+    it('should return a transform stream', function(done) {
+      var requestObj = new EventEmitter();
+      requestObj.write = sinon.stub().callsArg(2);
+      requestObj.end = sinon.stub();
+      var utils = proxyquire('../lib/utils', {
+        http: {
+          request: function(opts) {
+            expect(opts.method).to.equal('POST');
+            expect(opts.path).to.equal(
+              '/shards/hash?token=token'
+            );
+            return requestObj;
+          }
+        }
+      });
+      let upload = utils.createShardUploader(
+        { address: 'farmer.host', port: 6666 },
+        'hash',
+        'token'
+      );
+      expect(upload).to.be.instanceOf(stream.Transform);
+      upload.on('finish', done);
+      setTimeout(() => {
+        upload.write(Buffer.from('somedata'));
+        upload.end();
+      }, 30);
     });
 
   });

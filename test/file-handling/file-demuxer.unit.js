@@ -183,7 +183,7 @@ describe('FileDemuxer#getOptimalShardSize', function() {
     ).to.equal(8 * (1024 * 1024));
   });
 
-  it('should return 8 for 256', function() {
+  it('should return 16 for 256', function() {
     expect(
       FileDemuxerStub.getOptimalShardSize(
         {
@@ -191,10 +191,10 @@ describe('FileDemuxer#getOptimalShardSize', function() {
           shardConcurrency: 3
         }
       )
-    ).to.equal(8 * (1024 * 1024));
+    ).to.equal(16 * (1024 * 1024));
   });
 
-  it('should return 16 for 512', function() {
+  it('should return 32 for 512', function() {
     expect(
       FileDemuxerStub.getOptimalShardSize(
         {
@@ -202,10 +202,10 @@ describe('FileDemuxer#getOptimalShardSize', function() {
           shardConcurrency: 3
         }
       )
-    ).to.equal(16 * (1024 * 1024));
+    ).to.equal(32 * (1024 * 1024));
   });
 
-  it('should return 32 for 1024', function() {
+  it('should return 64 for 1024', function() {
     expect(
       FileDemuxerStub.getOptimalShardSize(
         {
@@ -213,10 +213,10 @@ describe('FileDemuxer#getOptimalShardSize', function() {
           shardConcurrency: 3
         }
       )
-    ).to.equal(32 * (1024 * 1024));
+    ).to.equal(64 * (1024 * 1024));
   });
 
-  it('should return 64 for 2048', function() {
+  it('should return 128 for 2048', function() {
     expect(
       FileDemuxerStub.getOptimalShardSize(
         {
@@ -224,10 +224,10 @@ describe('FileDemuxer#getOptimalShardSize', function() {
           shardConcurrency: 3
         }
       )
-    ).to.equal(64 * (1024 * 1024));
+    ).to.equal(128 * (1024 * 1024));
   });
 
-  it('should return 128 for 4096', function() {
+  it('should return 256 for 4096', function() {
     expect(
       FileDemuxerStub.getOptimalShardSize(
         {
@@ -235,7 +235,7 @@ describe('FileDemuxer#getOptimalShardSize', function() {
           shardConcurrency: 3
         }
       )
-    ).to.equal(128 * (1024 * 1024));
+    ).to.equal(256 * (1024 * 1024));
   });
 
   it('should return 8 for 4096 if only 16MB of memory', function() {

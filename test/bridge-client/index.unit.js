@@ -503,7 +503,7 @@ describe('BridgeClient', function() {
             createShardUploader: function() {
               return new stream.Writable({
                 write: function() {
-                  this.emit('end');
+                  this.emit('finish');
                 }
               });
             }

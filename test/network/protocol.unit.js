@@ -958,7 +958,6 @@ describe('Protocol', function() {
 
     it('should start downloading shard and destroy on failure', function(done) {
       var download = new stream.Readable({ read: () => null });
-      download.destroy = sinon.stub();
       var Protocol = proxyquire('../../lib/network/protocol', {
         '../utils': {
           createShardDownloader: sinon.stub().returns(download)
@@ -1004,15 +1003,22 @@ describe('Protocol', function() {
         download.emit('error', new Error());
         setImmediate(() => {
           expect(shard.destroy.called).to.equal(true);
-          expect(download.destroy.called).to.equal(true);
           done();
         });
       });
     });
 
-    it('should start downloading shard and report on success', function(done) {
-      var download = new stream.Readable({ read: () => null });
-      var createExchangeReport = sinon.stub();
+    it('should start downloading and destroy on bad hash', function(done) {
+      var download = new stream.Readable({
+        read: function() {
+          if (!this.called) {
+            this.called = true;
+            this.push('hello world');
+          } else {
+            this.push(null);
+          }
+        }
+      });
       var Protocol = proxyquire('../../lib/network/protocol', {
         '../utils': {
           createShardDownloader: sinon.stub().returns(download)
@@ -1021,7 +1027,7 @@ describe('Protocol', function() {
       var contracts = {
         test: {}
       };
-      var shard = new stream.Writable({ write: () => null });
+      var shard = new stream.Writable({ write: (a, b, c) => c() });
       shard.destroy = sinon.stub();
       var proto = new Protocol({
         network: {
@@ -1033,6 +1039,68 @@ describe('Protocol', function() {
               getContract: function(contact) {
                 return contracts[contact.nodeID];
               }
+            })
+          },
+          contact: {
+            address: '0.0.0.0',
+            port: 1234,
+            nodeID: 'nodeid'
+          },
+          bridgeClient: {
+            createExchangeReport: sinon.stub()
+          }
+        }
+      });
+      proto.handleMirror({
+        contact: { nodeID: 'test' },
+        farmer: {
+          address: '0.0.0.0',
+          port: 1234,
+          nodeID: utils.rmd160('')
+        },
+        data_hash: 'hash'
+      }, function(err) {
+        expect(err).to.equal(null);
+        setImmediate(() => {
+          expect(shard.destroy.called).to.equal(true);
+          done();
+        });
+      });
+    });
+
+    it('should start downloading shard and report on success', function(done) {
+      var download = new stream.Readable({
+        read: function() {
+          if (!this.called) {
+            this.called = true;
+            this.push('hello world');
+          } else {
+            this.push(null);
+          }
+        }
+      });
+      var createExchangeReport = sinon.stub();
+      var Protocol = proxyquire('../../lib/network/protocol', {
+        '../utils': {
+          createShardDownloader: sinon.stub().returns(download)
+        }
+      });
+      var contracts = {
+        test: {}
+      };
+      var shard = new stream.Writable({ write: (a, b, c) => c() });
+      shard.destroy = sinon.stub();
+      var proto = new Protocol({
+        network: {
+          _logger: Logger(0),
+          storageManager: {
+            load: sinon.stub().callsArgWith(1, null, {
+              contracts: contracts,
+              shard: shard,
+              getContract: function(contact) {
+                return contracts[contact.nodeID];
+              },
+              hash: 'd7d5ee7824ff93f94c3055af9382c86c68b5ca92'
             })
           },
           bridgeClient: {
@@ -1052,10 +1120,9 @@ describe('Protocol', function() {
           port: 1234,
           nodeID: utils.rmd160('')
         },
-        data_hash: 'hash'
+        data_hash: 'd7d5ee7824ff93f94c3055af9382c86c68b5ca92'
       }, function(err) {
         expect(err).to.equal(null);
-        shard.emit('finish');
         setImmediate(() => {
           expect(createExchangeReport.called).to.equal(true);
           done();

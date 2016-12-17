@@ -1360,7 +1360,11 @@ describe('Protocol', function() {
       var send = sinon.stub().callsArgWith(2, null, {
         result: {
           tunnels: [
-            { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' }
+            {
+              address: '0.0.0.0',
+              port: 1234,
+              nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc'
+            }
           ]
         }
       });
@@ -1373,7 +1377,6 @@ describe('Protocol', function() {
           },
           contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
           transport: {
-            _createContact: sinon.stub(),
             send: send
           },
           _tunnelers: {
@@ -1400,11 +1403,14 @@ describe('Protocol', function() {
           },
           contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
           transport: {
-            _createContact: sinon.stub(),
             send: sinon.stub().callsArgWith(2, null, {
               result: {
                 tunnels: [
-                  { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' }
+                  {
+                    address: '0.0.0.0',
+                    port: 1234,
+                    nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc'
+                  }
                 ]
               }
             })
@@ -1432,7 +1438,6 @@ describe('Protocol', function() {
           },
           contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
           transport: {
-            _createContact: sinon.stub(),
             send: sinon.stub().callsArgWith(2, null, {
               result: {
                 tunnels: []

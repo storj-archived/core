@@ -77,3 +77,52 @@ describe('Network/Contact', function() {
   });
 
 });
+
+describe('Contact#isValidUrl', function() {
+
+  it('should return false for invalid address', function() {
+    expect(Contact.isValidUrl(
+      'storj://[object Object]:4000/1261d3f171c23169c893a21be1f03bacafad26d7'
+    )).to.equal(false);
+  });
+
+  it('should return false for invalid port', function() {
+    expect(Contact.isValidUrl(
+      'storj://farmer.host:0/1261d3f171c23169c893a21be1f03bacafad26d7'
+    )).to.equal(false);
+  });
+
+  it('should return false for invalid node id', function() {
+    expect(Contact.isValidUrl(
+      'storj://farmer.host:4000/badnodeid'
+    )).to.equal(false);
+  });
+
+  it('should return false for invalid protocol', function() {
+    expect(Contact.isValidUrl(
+      'http://farmer.host:4000/1261d3f171c23169c893a21be1f03bacafad26d7'
+    )).to.equal(false);
+  });
+
+  it('should return true for valid url', function() {
+    expect(Contact.isValidUrl(
+      'storj://farmer.host:4000/1261d3f171c23169c893a21be1f03bacafad26d7'
+    )).to.equal(true);
+  });
+
+});
+
+describe('Contact#fromUrl', function() {
+
+  it('should return a contact object', function() {
+    var contact = Contact.fromUrl(
+      'storj://farmer.host:4000/1261d3f171c23169c893a21be1f03bacafad26d7'
+    );
+    expect(contact.address).to.equal('farmer.host');
+    expect(contact.port).to.equal(4000);
+    expect(contact.nodeID).to.equal(
+      '1261d3f171c23169c893a21be1f03bacafad26d7'
+    );
+  });
+
+});

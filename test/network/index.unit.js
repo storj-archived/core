@@ -83,18 +83,29 @@ describe('Network (public)', function() {
 
     it('should not call #node#connect', function() {
       var _connect = sinon.stub();
+      var _warn = sinon.stub();
       Network.prototype.connect.call({
-        node: { connect: _connect }
+        node: { connect: _connect },
+        _logger: {
+          warn: _warn
+        }
       }, 'http://127.0.0.1:1337');
       expect(_connect.called).to.equal(false);
+      expect(_warn.called).to.equal(true);
     });
 
-    it('should call #node#connect', function() {
-      var _connect = sinon.stub();
+    it('should call #node#connect', function(done) {
+      var _connect = sinon.stub().callsArg(1);
+      var _info = sinon.stub();
       Network.prototype.connect.call({
-        node: { connect: _connect }
+        node: { connect: _connect },
+        _logger: { info: _info }
       }, 'storj://127.0.0.1:1337/f39bc0ae7b79e89dca5100d7577fde0559bcda8c');
       expect(_connect.called).to.equal(true);
+      setImmediate(() => {
+        expect(_info.called).to.equal(true);
+        done();
+      });
     });
 
   });

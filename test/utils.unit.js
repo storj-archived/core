@@ -530,4 +530,28 @@ describe('utils', function() {
 
   });
 
+  describe('#warnOnError', function() {
+
+    it('should return a callback function that logs error', function(done) {
+      var _warn = sinon.stub();
+      var callback= utils.warnOnError({ warn: _warn });
+      callback(new Error('Something failed'));
+      setImmediate(() => {
+        expect(_warn.called).to.equal(true);
+        done();
+      });
+    });
+
+    it('should return a callback function that does nothing', function(done) {
+      var _warn = sinon.stub();
+      var callback= utils.warnOnError({ warn: _warn });
+      callback(null);
+      setImmediate(() => {
+        expect(_warn.called).to.equal(false);
+        done();
+      });
+    });
+
+  });
+
 });

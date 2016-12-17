@@ -77,3 +77,15 @@ describe('Network/Contact', function() {
   });
 
 });
+
+describe('Contact#isValidUrl', function() {
+
+
+
+});
+
+describe('Contact#fromUrl', function() {
+
+
+
+});

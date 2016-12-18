@@ -1564,7 +1564,7 @@ describe('Network (private)', function() {
       });
     });
 
-    it('should use the list list to connect', function(done) {
+    it('should use the list to connect every 10min', function(done) {
       var net = Network({
         keyPair: KeyPair(),
         storageManager: Manager(RAMStorageAdapter()),
@@ -1585,14 +1585,18 @@ describe('Network (private)', function() {
         1,
         null
       );
+      var clock = sinon.useFakeTimers();
       var _setupTunnel = sinon.stub(net, '_setupTunnelClient').callsArg(0);
       net.join(function(err) {
         if (err) {
           return done(err);
         }
+        expect(_connect.callCount).to.equal(1);
+        clock.tick(600001);
+        clock.restore();
         _connect.restore();
         _setupTunnel.restore();
-        expect(_connect.called).to.equal(true);
+        expect(_connect.callCount).to.equal(2);
         done();
       });
     });

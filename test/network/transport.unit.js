@@ -220,6 +220,33 @@ describe('Network/Transport', function() {
       });
     });
 
+    it('should bubble invalid ip error', function(done) {
+      var BadIPTransport = proxyquire('../../lib/network/transport', {
+        'nat-upnp': {
+          createClient: function() {
+            return {
+              portMapping: sinon.stub().callsArg(1),
+              externalIp: sinon.stub().callsArgWith(0, null, 'bad upnp device')
+            };
+          }
+        }
+      });
+      var transport = new BadIPTransport(Contact({
+        address: '127.0.0.1',
+        port: 0,
+        nodeID: KeyPair().getNodeID()
+      }), {
+        storageManager: StorageManager(RamAdapter())
+      });
+      transport.on('ready', function() {
+        expect(transport._isPublic).to.equal(false);
+        transport._forwardPort(function(err) {
+          expect(err.message).to.equal('UPnP device has no valid IP address');
+          done();
+        });
+      });
+    });
+
     it('should bubble portfinder error', function(done) {
       var BadPortFinder = proxyquire('../../lib/network/transport', {
         portfinder: {
@@ -250,7 +277,7 @@ describe('Network/Transport', function() {
           createClient: function() {
             return {
               portMapping: sinon.stub().callsArg(1),
-              externalIp: sinon.stub().callsArgWith(0, null, 'my.ip.address')
+              externalIp: sinon.stub().callsArgWith(0, null, '8.8.8.8')
             };
           }
         }
@@ -266,7 +293,7 @@ describe('Network/Transport', function() {
         expect(transport._isPublic).to.equal(true);
         transport._forwardPort(function(err, ip, port) {
           expect(err).to.equal(null);
-          expect(ip).to.equal('my.ip.address');
+          expect(ip).to.equal('8.8.8.8');
           expect(port).to.equal(4000);
           done();
         });
@@ -279,7 +306,7 @@ describe('Network/Transport', function() {
           createClient: function() {
             return {
               portMapping: sinon.stub().callsArg(1),
-              externalIp: sinon.stub().callsArgWith(0, null, 'my.ip.address')
+              externalIp: sinon.stub().callsArgWith(0, null, '8.8.8.8')
             };
           }
         }
@@ -295,7 +322,7 @@ describe('Network/Transport', function() {
         expect(transport._isPublic).to.equal(true);
         transport._forwardPort(function(err, ip, port) {
           expect(err).to.equal(null);
-          expect(ip).to.equal('my.ip.address');
+          expect(ip).to.equal('8.8.8.8');
           expect(port).to.be.at.least(1024);
           expect(port).to.be.at.most(65535);
           done();

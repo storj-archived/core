@@ -255,9 +255,25 @@ describe('utils', function() {
       });
     });
 
-    it('should error is delta is greater than NONCE_EXPIRE', function(done) {
+    it('should error if delta is greater than NONCE_EXPIRE', function(done) {
       var time = new Date();
       time.setTime(time.getTime() + constants.NONCE_EXPIRE + 2000);
+      var stubbedUtils = proxyquire('../lib/utils', {
+        'ntp-client': {
+          getNetworkTime: sinon.stub().callsArgWith(2, null, time)
+        }
+      });
+      stubbedUtils.ensureNtpClockIsSynchronized(function(err) {
+        expect(err.message).to.equal(
+          'System clock is not syncronized with NTP'
+        );
+        done();
+      });
+    });
+
+    it('should error if delta is negativ than NONCE_EXPIRE', function(done) {
+      var time = new Date();
+      time.setTime(time.getTime() - (constants.NONCE_EXPIRE + 2000));
       var stubbedUtils = proxyquire('../lib/utils', {
         'ntp-client': {
           getNetworkTime: sinon.stub().callsArgWith(2, null, time)

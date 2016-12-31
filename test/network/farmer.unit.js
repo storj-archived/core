@@ -115,6 +115,37 @@ describe('FarmerInterface', function() {
       });
     });
 
+    it('should not send offer if there is ' +
+      'not enough free disk space', function(done) {
+      //arrange
+      var farmer = new FarmerInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        contractNegotiator: function(contract, callback) {
+          callback(false);
+        },
+        logger: kad.Logger(0),
+        storageManager: new StorageManager(new RAMStorageAdapter())
+      });
+      CLEANUP.push(farmer);
+      var _size = sinon.stub(
+        farmer.storageManager._storage,
+        'size'
+      ).callsArgWith(0, null, 1000);
+      farmer.storageManager._options.maxCapacity = 2000;
+      var _addTo = sinon.stub(farmer, '_addContractToPendingList');
+      //execute
+      farmer._handleContractPublication(Contract({}));
+      //assert
+      _size.restore();
+      setImmediate(function() {
+        expect(_addTo.called).to.equal(false);
+        done();
+      });
+    });
+
     it('should not send an offer if concurrency is exceeded', function(done) {
       var farmer = new FarmerInterface({
         keyPair: KeyPair(),

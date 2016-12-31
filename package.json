@@ -54,6 +54,10 @@
     {
       "name": "dxhome",
       "url": "https://github.com/dxhome"
+    },
+    {
+      "name": "Colm Seale",
+      "url": "https://github.com/cseale"
     }
   ],
   "license": "(AGPL-3.0 AND LGPL-3.0)",

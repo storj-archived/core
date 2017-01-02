@@ -384,6 +384,59 @@ describe('Network/Transport', function() {
 
   });
 
+  // This test ensures the OPTIONS route on a farmer echos back Access-Control
+  // headers, this test is extremely restrictive and will probably break on
+  // code changes, can be improved moving forward.
+  describe('#_handleOpts', function() {
+
+    it('should echo back access control requests', function(done) {
+      var req = {
+        header: function(key) {
+          switch(key) {
+          case 'Access-Control-Request-Headers':
+            return 'foobar, buzzbazz';
+          case 'Access-Control-Request-Method':
+            return 'POST, GET, OPTIONS';
+          default:
+            expect.fail('Should not have been requested');
+            break;
+          }
+        }
+      };
+
+      var expected = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+        'Access-Control-Allow-Headers': 'foobar, buzzbazz'
+      };
+
+      var encountered = {};
+      var status = null;
+
+      var res = {
+        header: function (key, val){
+          encountered[key] = val;
+        },
+        send: function (s) {
+          expect(s).equal(200);
+          status = s;
+        }
+      };
+
+      var next = function (e) {
+        expect(e).to.eql(undefined);
+        expect(status).to.equal(200);
+        expect(encountered.length).to.equal(expected.length);
+        Object.keys(encountered).forEach((v) => {
+          expect(encountered[v]).to.equal(expected[v]);
+        });
+        done();
+      };
+
+      Transport.prototype._handleOpts.call(null, req, res, next);
+    });
+  });
+
   describe('#_handleRPC', function() {
 
     it('should respond 400 if cannot parse message', function(done) {

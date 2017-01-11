@@ -110,6 +110,29 @@ describe('Network (public)', function() {
 
   });
 
+  describe('#ping', function() {
+
+    it('should call send with ping message', function() {
+      const _send = sinon.stub();
+      const farmer = {};
+      const contact = {};
+      Network.prototype.ping.call({
+        transport: {
+          send: _send,
+          contact: contact
+        },
+        farmer
+      }, contact, () => {
+        expect(_send.callCount).to.equal(1);
+        expect(_send.args[0][0]).to.equal(contact);
+        expect(_send.args[0][0].method).to.equal('PING');
+        expect(_send.args[0][0].params.contact).to.equal(contact);
+      });
+
+    });
+
+  });
+
   describe('#publish', function() {
 
     it('should call #_pubsub#publish', function() {

@@ -1492,7 +1492,7 @@ describe('Network (private)', function() {
         'getContactList'
       ).callsArgWith(1, null, [
         {
-          address: '0.0.0.0',
+          address: '8.8.8.8',
           port: 1234,
           nodeID: utils.rmd160('nodeid'),
           protocol: VERSION.protocol

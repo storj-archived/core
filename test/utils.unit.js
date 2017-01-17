@@ -45,6 +45,12 @@ describe('utils', function() {
       ).to.equal(true);
     });
 
+    it('should be compatible (different minor)', function() {
+      expect(
+        utils.isCompatibleVersion(semver.inc(version.protocol, 'minor'))
+      ).to.equal(true);
+    });
+
     it('should not be compatible (different build tag)', function() {
       expect(
         utils.isCompatibleVersion(version.protocol + '-buildtag')

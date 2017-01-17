@@ -193,7 +193,7 @@ describe('Network/Transport', function() {
       });
     });
 
-    it('should bubble private ip error', function(done) {
+    it('should bubble private ip 127.0.0.1 error', function(done) {
       var BadIPTransport = proxyquire('../../lib/network/transport', {
         'nat-upnp': {
           createClient: function() {
@@ -206,6 +206,33 @@ describe('Network/Transport', function() {
       });
       var transport = new BadIPTransport(Contact({
         address: '127.0.0.1',
+        port: 0,
+        nodeID: KeyPair().getNodeID()
+      }), {
+        storageManager: StorageManager(RamAdapter())
+      });
+      transport.on('ready', function() {
+        expect(transport._isPublic).to.equal(false);
+        transport._forwardPort(function(err) {
+          expect(err.message).to.equal('UPnP device has no public IP address');
+          done();
+        });
+      });
+    });
+
+    it('should bubble private ip 0.0.0.0 error', function(done) {
+      var BadIPTransport = proxyquire('../../lib/network/transport', {
+        'nat-upnp': {
+          createClient: function() {
+            return {
+              portMapping: sinon.stub().callsArg(1),
+              externalIp: sinon.stub().callsArgWith(0, null, '0.0.0.0')
+            };
+          }
+        }
+      });
+      var transport = new BadIPTransport(Contact({
+        address: '0.0.0.0',
         port: 0,
         nodeID: KeyPair().getNodeID()
       }), {

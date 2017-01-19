@@ -16,7 +16,7 @@
     "build": "./node_modules/.bin/browserify index.js -s storj -o dist/storj.browser.js",
     "make-docs": "mkdir -p ./jsdoc && rm -r ./jsdoc && ./node_modules/.bin/jsdoc index.js lib -r -R README.md -u ./doc -c .jsdoc.json --verbose -d ./jsdoc && cp -r doc/assets jsdoc/assets",
     "publish-docs": "npm run make-docs && node script/publishdoc.js"
-  },
+    },
   "keywords": [
     "storj",
     "p2p"
@@ -71,6 +71,7 @@
     "bitcore-message": "^1.0.2",
     "bitcore-mnemonic": "^1.1.1",
     "diglet": "^1.0.6",
+    "fs-blob-store": "^5.2.1",
     "hdkey": "^0.7.1",
     "ip": "littleskunk/node-ip#b1e7ec0cbff9f7841b1584e50339a774363437c0",
     "jsen": "bugventure/jsen#9e57a9d653ff4ea47d364fc37da0f1659bfb8e89",

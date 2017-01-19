@@ -1595,8 +1595,11 @@ describe('BridgeClient', function() {
           setImmediate(function() {
             _transferShard.restore();
             _transferComplete.restore();
-            expect(_retry.called).to.equal(true);
-            done();
+            // Make sure callback is triggered to avoid race
+            client._blacklist.push('foo', function () {
+              expect(_retry.called).to.equal(true);
+              done();
+            });
           });
         });
       });

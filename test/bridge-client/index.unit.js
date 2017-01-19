@@ -568,7 +568,6 @@ describe('BridgeClient', function() {
           createWriteStream: function () {
             var ws = new Writable();
             ws.write = function(chunk, encoding, next) {
-              console.log('create writable: ', chunk.toString());
               done();
             }
             return ws;
@@ -706,7 +705,6 @@ describe('BridgeClient', function() {
           createWriteStream: function () {
             var ws = new Writable();
             ws.write = function(chunk, encoding, next) {
-              console.log('create writable: ', chunk.toString());
               done();
             }
             return ws;

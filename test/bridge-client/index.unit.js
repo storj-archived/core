@@ -568,7 +568,6 @@ describe('BridgeClient', function() {
           createWriteStream: function () {
             var ws = new Writable();
             ws.write = function(chunk, encoding, next) {
-              console.log('create writable: ', chunk.toString());
               done();
             }
             return ws;
@@ -586,6 +585,14 @@ describe('BridgeClient', function() {
         var _demuxer = new EventEmitter();
         var StubbedClient = proxyquire('../../lib/bridge-client', {
           fs: {
+            createReadStream: function () {
+              var bytes = crypto.randomBytes(64);
+              var rs = new Readable();
+              rs._read = function () {};
+              rs.push(bytes);
+              rs.push(null);
+              return rs;
+            },
             statSync: sinon.stub().returns({ size: 64 }),
             unlinkSync: sinon.stub()
           },
@@ -706,7 +713,6 @@ describe('BridgeClient', function() {
           createWriteStream: function () {
             var ws = new Writable();
             ws.write = function(chunk, encoding, next) {
-              console.log('create writable: ', chunk.toString());
               done();
             }
             return ws;
@@ -724,7 +730,12 @@ describe('BridgeClient', function() {
       it('should return error if file is unsupported size', function(done) {
         var StubbedClient = proxyquire('../../lib/bridge-client', {
           fs: {
-            statSync: sinon.stub().returns({ size: 0 })
+            createReadStream: function () {
+              var rs = new Readable();
+              rs._read = function () {};
+              rs.push(null);
+              return rs;
+            }
           }
         });
         var client = new StubbedClient();

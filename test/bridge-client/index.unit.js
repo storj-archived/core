@@ -11,8 +11,6 @@ var KeyPair = require('../../lib/crypto-tools/keypair');
 var utils = require('../../lib/utils');
 var EventEmitter = require('events').EventEmitter;
 var stream = require('readable-stream');
-var Stream = require('stream');
-var Duplex = require('stream').Duplex;
 var Readable = require('stream').Readable;
 var Writable = require('stream').Writable;
 var FileMuxer = require('../../lib/file-handling/file-muxer');
@@ -484,7 +482,7 @@ describe('BridgeClient', function() {
           rs.push(bytes);
           rs.push(null);
           return rs;
-        }
+        };
         var StubbedClient = proxyquire('../../lib/bridge-client', {
           fs: {
             statSync: sinon.stub().returns({ size: 64 }),
@@ -564,16 +562,16 @@ describe('BridgeClient', function() {
         ).callsArg(3);
         var client = new StubbedClient();
         client._store = {
-          createReadStream: function () { return createReadable() },
+          createReadStream: function () { return createReadable(); },
           createWriteStream: function () {
             var ws = new Writable();
-            ws.write = function(chunk, encoding, next) {
+            ws.write = function() {
               done();
-            }
+            };
             return ws;
           }
         };
-        client.storeFileInBucket('bucket', 'token', createReadable(), function() {
+        client.storeFileInBucket('b', 't', createReadable(), function() {
           _createFrame.restore();
           _addShard.restore();
           _request.restore();
@@ -630,7 +628,7 @@ describe('BridgeClient', function() {
           rs.push(bytes);
           rs.push(null);
           return rs;
-        }
+        };
 
         var StubbedClient = proxyquire('../../lib/bridge-client', {
           fs: {
@@ -709,16 +707,16 @@ describe('BridgeClient', function() {
         );
         var client = new StubbedClient();
         client._store = {
-          createReadStream: function () { return createReadable() },
+          createReadStream: function () { return createReadable(); },
           createWriteStream: function () {
             var ws = new Writable();
-            ws.write = function(chunk, encoding, next) {
+            ws.write = function() {
               done();
-            }
+            };
             return ws;
           }
         };
-        client.storeFileInBucket('bucket', 'token', createReadable(), function(err) {
+        client.storeFileInBucket('b', 't', createReadable(), function(err) {
           _createFrame.restore();
           _addShard.restore();
           _request.restore();

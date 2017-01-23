@@ -1,6 +1,3 @@
-/* jshint maxstatements: false */
-/* jshint expr: true */
-
 'use strict';
 
 

@@ -61,7 +61,7 @@ describe('FileDemuxer', function() {
     it('should correctly demux the even file stream', function(done) {
       this.timeout(6000);
       var dmx = new FileDemuxer(filePathEven);
-      var shards = 0;
+      var shards = 0; // eslint-disable-line no-unused-vars
       var bytes = 0;
 
       dmx.on('shard', function(shard) {

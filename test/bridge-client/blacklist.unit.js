@@ -154,6 +154,123 @@ describe('Blacklist', function() {
         if (arr[1] && arr[2]) {return done(); }
       });
     });
-  });
 
+    it('callback should be optional', function(done) {
+      var client = BridgeClient();
+      var called = 0;
+      client._options.store = {
+        createReadStream: function() {
+          var rs = new Stream.Readable();
+          rs.push('{}');
+          rs.push(null);
+          return rs;
+        },
+        createWriteStream: function() {
+          called++;
+          var ws = Stream.Writable({
+            write: function(data, enc, done) {
+              expect(called).to.be.below(3);
+              done();
+              return {data:data, enc: enc};
+            }
+          });
+          return ws;
+        },
+      };
+      var blacklist = new Blacklist(client._options);
+      blacklist.push('1');
+      blacklist.push('2', function(err){
+        expect(err).to.not.be.instanceOf(Error);
+        done();
+      });
+    });
+
+    it('should be able to read empty items without error', function(done) {
+      var client = BridgeClient();
+      var called = 0;
+      client._options.store = {
+        createReadStream: function() {
+          var rs = new Stream.Readable();
+          rs.push('{}');
+          rs.push(null);
+          return rs;
+        },
+        createWriteStream: function() {
+          called++;
+          var ws = Stream.Writable({
+            write: function(data, enc, done) {
+              expect(called).to.be.below(3);
+              done();
+              return {data:data, enc: enc};
+            }
+          });
+          return ws;
+        },
+      };
+      var blacklist = new Blacklist(client._options);
+      blacklist.push();
+      blacklist.push('1', function(err) {
+        expect(err).to.not.be.instanceOf(Error);
+        done();
+      });
+    });
+
+    it('should return empty array if given incorrect JSON', function(done) {
+      var client = BridgeClient();
+      var called = 0;
+      client._options.store = {
+        createReadStream: function() {
+          var rs = new Stream.Readable();
+          rs.push('{"asdf": ,}');
+          rs.push(null);
+          return rs;
+        },
+        createWriteStream: function() {
+          called++;
+          var ws = Stream.Writable({
+            write: function(data, enc, done) {
+              expect(called).to.be.below(3);
+              done();
+              return {data:data, enc: enc};
+            }
+          });
+          return ws;
+        },
+      };
+      var blacklist = new Blacklist(client._options);
+      blacklist.toObject(function(err, object) {
+        expect(object).to.deep.equal([]);
+        done();
+      });
+    });
+
+    it('should return empty if file is empty', function(done) {
+      var client = BridgeClient();
+      var called = 0;
+      client._options.store = {
+        createReadStream: function() {
+          var rs = new Stream.Readable();
+          rs.push('');
+          rs.push(null);
+          return rs;
+        },
+        createWriteStream: function() {
+          called++;
+          var ws = Stream.Writable({
+            write: function(data, enc, done) {
+              expect(called).to.be.below(3);
+              done();
+              return {data:data, enc: enc};
+            }
+          });
+          return ws;
+        },
+      };
+      var blacklist = new Blacklist(client._options);
+      blacklist.toObject(function(err, object) {
+        expect(object).to.deep.equal([]);
+        done();
+      });
+    });
+  });
 });

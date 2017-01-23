@@ -1,5 +1,3 @@
-/* jshint maxstatements: false */
-
 'use strict';
 
 var ReadableStream = require('readable-stream');
@@ -489,7 +487,9 @@ describe('BridgeClient', function() {
             unlinkSync: sinon.stub(),
             createWriteStream: function() {
               return new stream.Writable({
-                write: function(data, enc, done) { done(); }
+                write: function(data, enc, done) {
+                  done();
+                }
               });
             },
             createReadStream: function() {
@@ -562,7 +562,9 @@ describe('BridgeClient', function() {
         ).callsArg(3);
         var client = new StubbedClient();
         client._store = {
-          createReadStream: function () { return createReadable(); },
+          createReadStream: function () {
+            return createReadable();
+          },
           createWriteStream: function () {
             var ws = new Writable();
             ws.write = function() {
@@ -636,7 +638,9 @@ describe('BridgeClient', function() {
             unlinkSync: sinon.stub(),
             createWriteStream: function() {
               return new stream.Writable({
-                write: function(data, enc, done) { done(); }
+                write: function(data, enc, done) {
+                  done();
+                }
               });
             },
             createReadStream: function() {
@@ -707,7 +711,9 @@ describe('BridgeClient', function() {
         );
         var client = new StubbedClient();
         client._store = {
-          createReadStream: function () { return createReadable(); },
+          createReadStream: function () {
+            return createReadable();
+          },
           createWriteStream: function () {
             var ws = new Writable();
             ws.write = function() {
@@ -1765,7 +1771,9 @@ describe('BridgeClient', function() {
           completed: 1,
           numShards: 2,
           file: 'file',
-          cleanup: sinon.stub(),
+          cleanup: function(cb) {
+            cb();
+          },
           callback: sinon.stub()
         };
         var client = new BridgeClient();

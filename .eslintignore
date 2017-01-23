@@ -1,0 +1,3 @@
+doc/**/*.js
+doc/*.js
+node_modules/**/*.js

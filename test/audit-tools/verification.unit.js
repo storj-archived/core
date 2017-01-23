@@ -18,8 +18,8 @@ describe('Verification', function() {
 
     it('should throw without a proof response', function() {
       expect(function() {
-        Verification(null);}
-      ).to.throw(Error, 'Proof must be an array');
+        Verification(null);
+      }).to.throw(Error, 'Proof must be an array');
     });
 
   });

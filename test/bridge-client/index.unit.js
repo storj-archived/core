@@ -11,6 +11,8 @@ var KeyPair = require('../../lib/crypto-tools/keypair');
 var utils = require('../../lib/utils');
 var EventEmitter = require('events').EventEmitter;
 var stream = require('readable-stream');
+var Readable = require('stream').Readable;
+var Writable = require('stream').Writable;
 var FileMuxer = require('../../lib/file-handling/file-muxer');
 var crypto = require('crypto');
 var utils = require('../../lib/utils');
@@ -473,6 +475,14 @@ describe('BridgeClient', function() {
         var _demuxer = new EventEmitter();
         var _shard1 = new stream.Readable({ read: function noop() {} });
         var _shard2 = new stream.Readable({ read: function noop() {} });
+        var createReadable = function () {
+          var bytes = crypto.randomBytes(64);
+          var rs = new Readable();
+          rs._read = function () {};
+          rs.push(bytes);
+          rs.push(null);
+          return rs;
+        };
         var StubbedClient = proxyquire('../../lib/bridge-client', {
           fs: {
             statSync: sinon.stub().returns({ size: 64 }),
@@ -551,7 +561,17 @@ describe('BridgeClient', function() {
           '_request'
         ).callsArg(3);
         var client = new StubbedClient();
-        client.storeFileInBucket('bucket', 'token', 'file', function() {
+        client._store = {
+          createReadStream: function () { return createReadable(); },
+          createWriteStream: function () {
+            var ws = new Writable();
+            ws.write = function() {
+              done();
+            };
+            return ws;
+          }
+        };
+        client.storeFileInBucket('b', 't', createReadable(), function() {
           _createFrame.restore();
           _addShard.restore();
           _request.restore();
@@ -563,6 +583,14 @@ describe('BridgeClient', function() {
         var _demuxer = new EventEmitter();
         var StubbedClient = proxyquire('../../lib/bridge-client', {
           fs: {
+            createReadStream: function () {
+              var bytes = crypto.randomBytes(64);
+              var rs = new Readable();
+              rs._read = function () {};
+              rs.push(bytes);
+              rs.push(null);
+              return rs;
+            },
             statSync: sinon.stub().returns({ size: 64 }),
             unlinkSync: sinon.stub()
           },
@@ -593,6 +621,15 @@ describe('BridgeClient', function() {
         var _demuxer = new EventEmitter();
         var _shard1 = new stream.Readable({ read: function noop() {} });
         var _shard2 = new stream.Readable({ read: function noop() {} });
+        var createReadable = function () {
+          var bytes = crypto.randomBytes(64);
+          var rs = new Readable();
+          rs._read = function () {};
+          rs.push(bytes);
+          rs.push(null);
+          return rs;
+        };
+
         var StubbedClient = proxyquire('../../lib/bridge-client', {
           fs: {
             statSync: sinon.stub().returns({ size: 64 }),
@@ -669,7 +706,17 @@ describe('BridgeClient', function() {
           '_request'
         );
         var client = new StubbedClient();
-        client.storeFileInBucket('bucket', 'token', 'file', function(err) {
+        client._store = {
+          createReadStream: function () { return createReadable(); },
+          createWriteStream: function () {
+            var ws = new Writable();
+            ws.write = function() {
+              done();
+            };
+            return ws;
+          }
+        };
+        client.storeFileInBucket('b', 't', createReadable(), function(err) {
           _createFrame.restore();
           _addShard.restore();
           _request.restore();
@@ -681,7 +728,12 @@ describe('BridgeClient', function() {
       it('should return error if file is unsupported size', function(done) {
         var StubbedClient = proxyquire('../../lib/bridge-client', {
           fs: {
-            statSync: sinon.stub().returns({ size: 0 })
+            createReadStream: function () {
+              var rs = new Readable();
+              rs._read = function () {};
+              rs.push(null);
+              return rs;
+            }
           }
         });
         var client = new StubbedClient();
@@ -1552,8 +1604,11 @@ describe('BridgeClient', function() {
           setImmediate(function() {
             _transferShard.restore();
             _transferComplete.restore();
-            expect(_retry.called).to.equal(true);
-            done();
+            // Make sure callback is triggered to avoid race
+            client._blacklist.push('foo', function () {
+              expect(_retry.called).to.equal(true);
+              done();
+            });
           });
         });
       });
@@ -1563,23 +1618,7 @@ describe('BridgeClient', function() {
     describe('#_handleShardTmpFileFinish', function() {
 
       it('should callback early if the queue is killed', function(done) {
-        var StubbedClient = proxyquire('../../lib/bridge-client', {
-          fs: {
-            createReadStream: function() {
-              var wasRead = false;
-              return new stream.Readable({
-                read: function() {
-                  if (wasRead) {
-                    return this.push(null);
-                  }
-
-                  wasRead = true;
-                  this.push(Buffer('test'));
-                }
-              });
-            }
-          }
-        });
+        var StubbedClient = proxyquire('../../lib/bridge-client', {});
         var client = new StubbedClient();
         var state = new UploadState({
           worker: utils.noop
@@ -1588,9 +1627,25 @@ describe('BridgeClient', function() {
           client,
           'addShardToFileStagingFrame'
         ).callsArg(2);
+
+        function createReadStream () {
+          var wasRead = false;
+          return new stream.Readable({
+            read: function() {
+              if (wasRead) {
+                return this.push(null);
+              }
+
+              wasRead = true;
+              this.push(Buffer('test'));
+            }
+          });
+        }
+
         state.cleanup();
         client._handleShardTmpFileFinish(state, {
           frame: {},
+          stream: createReadStream(),
           hash: utils.sha256('')
         }, function() {
           _addShardToFileStagingFrame.restore();
@@ -1599,23 +1654,22 @@ describe('BridgeClient', function() {
       });
 
       it('should not duplicate audit generation', function(done) {
-        var StubbedClient = proxyquire('../../lib/bridge-client', {
-          fs: {
-            createReadStream: function() {
-              var wasRead = false;
-              return new stream.Readable({
-                read: function() {
-                  if (wasRead) {
-                    return this.push(null);
-                  }
+        var StubbedClient = proxyquire('../../lib/bridge-client', {});
 
-                  wasRead = true;
-                  this.push(Buffer('test'));
-                }
-              });
+        function createReadStream () {
+          var wasRead = false;
+          return new stream.Readable({
+            read: function() {
+              if (wasRead) {
+                return this.push(null);
+              }
+
+              wasRead = true;
+              this.push(Buffer('test'));
             }
-          }
-        });
+          });
+        }
+
         var client = new StubbedClient();
         var state = new UploadState({
           worker: utils.noop
@@ -1635,6 +1689,7 @@ describe('BridgeClient', function() {
         client._handleShardTmpFileFinish(state, {
           frame: {},
           hash: utils.sha256(''),
+          stream: createReadStream(),
           challenges: 'CHALLENGES',
           tree: 'TREE'
         }, function() {
@@ -1644,23 +1699,20 @@ describe('BridgeClient', function() {
       });
 
       it('should callback early if the queue is killed', function(done) {
-        var StubbedClient = proxyquire('../../lib/bridge-client', {
-          fs: {
-            createReadStream: function() {
-              var wasRead = false;
-              return new stream.Readable({
-                read: function() {
-                  if (wasRead) {
-                    return this.push(null);
-                  }
+        var StubbedClient = proxyquire('../../lib/bridge-client', {});
+        function createReadStream () {
+          var wasRead = false;
+          return new stream.Readable({
+            read: function() {
+              if (wasRead) {
+                return this.push(null);
+              }
 
-                  wasRead = true;
-                  this.push(Buffer('test'));
-                }
-              });
+              wasRead = true;
+              this.push(Buffer('test'));
             }
-          }
-        });
+          });
+        }
         var client = new StubbedClient();
         var state = new UploadState({
           worker: utils.noop
@@ -1675,6 +1727,7 @@ describe('BridgeClient', function() {
         );
         client._handleShardTmpFileFinish(state, {
           frame: {},
+          stream: createReadStream(),
           hash: utils.sha256('')
         }, function() {
           _addShardToFileStagingFrame.restore();

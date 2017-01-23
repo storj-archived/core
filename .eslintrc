@@ -73,6 +73,7 @@
           "after": false
         }
       }
-    }]
+    }],
+    "brace-style": [2, "1tbs"]
   }
 }

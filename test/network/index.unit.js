@@ -1400,7 +1400,9 @@ describe('Network (private)', function() {
       };
       var TunClientStubNetwork = proxyquire('../../lib/network', {
         diglet: {
-          Tunnel: function() { return emitter; }
+          Tunnel: function() {
+            return emitter;
+          }
         }
       });
       var net = TunClientStubNetwork({

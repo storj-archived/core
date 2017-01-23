@@ -110,7 +110,6 @@
     "ink-docstrap": "bookchin/docstrap",
     "istanbul": "^0.4.5",
     "jsdoc": "^3.4.0",
-    "jshint": "2.8.0",
     "mocha": "^2.2.4",
     "node-mocks-http": "^1.5.4",
     "noisegen": "^1.0.0",

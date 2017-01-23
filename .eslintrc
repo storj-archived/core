@@ -64,6 +64,15 @@
         "ignoreComments": true
       }
     ],
-    "no-multi-str": 2
+    "no-multi-str": 2,
+    "keyword-spacing": [2, {
+      "after": true,
+      "before": true,
+      "overrides": {
+        "function": {
+          "after": false
+        }
+      }
+    }]
   }
 }

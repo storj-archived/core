@@ -93,6 +93,7 @@
     "node-tar.gz": "^1.0.0",
     "node-uuid": "^1.4.7",
     "ntp-client": "bookchin/node-ntp-client#v0.5.5",
+    "once": "^1.4.0",
     "portfinder": "^1.0.3",
     "readable-stream": "^2.0.6",
     "request": "^2.70.0",

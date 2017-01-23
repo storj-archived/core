@@ -1,7 +1,5 @@
 'use strict';
 
-/* jshint maxstatements: false */
-
 var util = require('util');
 var sinon = require('sinon');
 var expect = require('chai').expect;

@@ -12,7 +12,7 @@
     "test": "npm run testsuite && npm run linter",
     "testsuite": "STORJ_ALLOW_LOOPBACK=1 ./node_modules/.bin/mocha test/** --recursive",
     "coverage": "STORJ_ALLOW_LOOPBACK=1 ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha -- --recursive",
-    "linter": "./node_modules/.bin/jshint --config .jshintrc ./index.js ./lib ./test",
+    "linter": "./node_modules/.bin/eslint ./index.js ./lib ./test",
     "build": "./node_modules/.bin/browserify index.js -s storj -o dist/storj.browser.js",
     "make-docs": "mkdir -p ./jsdoc && rm -r ./jsdoc && ./node_modules/.bin/jsdoc index.js lib -r -R README.md -u ./doc -c .jsdoc.json --verbose -d ./jsdoc && cp -r doc/assets jsdoc/assets",
     "publish-docs": "npm run make-docs && node script/publishdoc.js"
@@ -105,6 +105,7 @@
     "browserify": "^11.1.0",
     "chai": "^2.2.0",
     "coveralls": "^2.11.2",
+    "eslint": "^3.14.0",
     "gh-pages": "^0.9.0",
     "ink-docstrap": "bookchin/docstrap",
     "istanbul": "^0.4.5",

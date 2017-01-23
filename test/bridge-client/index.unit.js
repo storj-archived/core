@@ -1,5 +1,3 @@
-/* jshint maxstatements: false */
-
 'use strict';
 
 var ReadableStream = require('readable-stream');

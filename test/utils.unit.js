@@ -13,7 +13,6 @@ var stream = require('readable-stream');
 var EventEmitter = require('events').EventEmitter;
 
 describe('utils', function() {
-  /* jshint maxstatements: false */
 
   describe('#getContactURL', function() {
 

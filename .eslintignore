@@ -1,4 +1,3 @@
-jsdoc/**/*.js
-jsdoc/*.js
+doc/**/*.js
+doc/*.js
 node_modules/**/*.js
-storj.*.js

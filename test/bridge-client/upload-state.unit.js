@@ -30,10 +30,10 @@ describe('UploadState', function() {
       var uploadState = new StubUploadState();
       uploadState.cleanQueue.push({
         store: {
-          exists: function (key, cb) {
+          exists: function(key, cb) {
             return cb(null, true);
           },
-          remove: function () {
+          remove: function() {
             return done();
           }
         }

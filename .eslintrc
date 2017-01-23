@@ -74,6 +74,7 @@
         }
       }
     }],
+    "space-before-function-paren": [2, "never"],
     "brace-style": [2, "1tbs"]
   }
 }

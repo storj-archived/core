@@ -473,10 +473,10 @@ describe('BridgeClient', function() {
         var _demuxer = new EventEmitter();
         var _shard1 = new stream.Readable({ read: function noop() {} });
         var _shard2 = new stream.Readable({ read: function noop() {} });
-        var createReadable = function () {
+        var createReadable = function() {
           var bytes = crypto.randomBytes(64);
           var rs = new Readable();
-          rs._read = function () {};
+          rs._read = function() {};
           rs.push(bytes);
           rs.push(null);
           return rs;
@@ -562,10 +562,10 @@ describe('BridgeClient', function() {
         ).callsArg(3);
         var client = new StubbedClient();
         client._store = {
-          createReadStream: function () {
+          createReadStream: function() {
             return createReadable();
           },
-          createWriteStream: function () {
+          createWriteStream: function() {
             var ws = new Writable();
             ws.write = function() {
               done();
@@ -585,10 +585,10 @@ describe('BridgeClient', function() {
         var _demuxer = new EventEmitter();
         var StubbedClient = proxyquire('../../lib/bridge-client', {
           fs: {
-            createReadStream: function () {
+            createReadStream: function() {
               var bytes = crypto.randomBytes(64);
               var rs = new Readable();
-              rs._read = function () {};
+              rs._read = function() {};
               rs.push(bytes);
               rs.push(null);
               return rs;
@@ -623,10 +623,10 @@ describe('BridgeClient', function() {
         var _demuxer = new EventEmitter();
         var _shard1 = new stream.Readable({ read: function noop() {} });
         var _shard2 = new stream.Readable({ read: function noop() {} });
-        var createReadable = function () {
+        var createReadable = function() {
           var bytes = crypto.randomBytes(64);
           var rs = new Readable();
-          rs._read = function () {};
+          rs._read = function() {};
           rs.push(bytes);
           rs.push(null);
           return rs;
@@ -711,10 +711,10 @@ describe('BridgeClient', function() {
         );
         var client = new StubbedClient();
         client._store = {
-          createReadStream: function () {
+          createReadStream: function() {
             return createReadable();
           },
-          createWriteStream: function () {
+          createWriteStream: function() {
             var ws = new Writable();
             ws.write = function() {
               done();
@@ -734,9 +734,9 @@ describe('BridgeClient', function() {
       it('should return error if file is unsupported size', function(done) {
         var StubbedClient = proxyquire('../../lib/bridge-client', {
           fs: {
-            createReadStream: function () {
+            createReadStream: function() {
               var rs = new Readable();
-              rs._read = function () {};
+              rs._read = function() {};
               rs.push(null);
               return rs;
             }
@@ -1611,7 +1611,7 @@ describe('BridgeClient', function() {
             _transferShard.restore();
             _transferComplete.restore();
             // Make sure callback is triggered to avoid race
-            client._blacklist.push('foo', function () {
+            client._blacklist.push('foo', function() {
               expect(_retry.called).to.equal(true);
               done();
             });
@@ -1634,7 +1634,7 @@ describe('BridgeClient', function() {
           'addShardToFileStagingFrame'
         ).callsArg(2);
 
-        function createReadStream () {
+        function createReadStream() {
           var wasRead = false;
           return new stream.Readable({
             read: function() {
@@ -1662,7 +1662,7 @@ describe('BridgeClient', function() {
       it('should not duplicate audit generation', function(done) {
         var StubbedClient = proxyquire('../../lib/bridge-client', {});
 
-        function createReadStream () {
+        function createReadStream() {
           var wasRead = false;
           return new stream.Readable({
             read: function() {
@@ -1706,7 +1706,7 @@ describe('BridgeClient', function() {
 
       it('should callback early if the queue is killed', function(done) {
         var StubbedClient = proxyquire('../../lib/bridge-client', {});
-        function createReadStream () {
+        function createReadStream() {
           var wasRead = false;
           return new stream.Readable({
             read: function() {

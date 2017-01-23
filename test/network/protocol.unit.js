@@ -1,5 +1,3 @@
-/* jshint maxstatements: false */
-
 'use strict';
 
 var proxyquire = require('proxyquire');

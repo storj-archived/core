@@ -1,5 +1,3 @@
-/* jshint maxstatements: false */
-
 'use strict';
 
 var ReadableStream = require('readable-stream');
@@ -479,7 +477,9 @@ describe('BridgeClient', function() {
             unlinkSync: sinon.stub(),
             createWriteStream: function() {
               return new stream.Writable({
-                write: function(data, enc, done) { done(); }
+                write: function(data, enc, done) {
+                  done();
+                }
               });
             },
             createReadStream: function() {
@@ -599,7 +599,9 @@ describe('BridgeClient', function() {
             unlinkSync: sinon.stub(),
             createWriteStream: function() {
               return new stream.Writable({
-                write: function(data, enc, done) { done(); }
+                write: function(data, enc, done) {
+                  done();
+                }
               });
             },
             createReadStream: function() {

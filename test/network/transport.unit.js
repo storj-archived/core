@@ -393,13 +393,13 @@ describe('Network/Transport', function() {
       var req = {
         header: function(key) {
           switch(key) {
-          case 'Access-Control-Request-Headers':
-            return 'foobar, buzzbazz';
-          case 'Access-Control-Request-Method':
-            return 'POST, GET, OPTIONS';
-          default:
-            expect.fail('Should not have been requested');
-            break;
+            case 'Access-Control-Request-Headers':
+              return 'foobar, buzzbazz';
+            case 'Access-Control-Request-Method':
+              return 'POST, GET, OPTIONS';
+            default:
+              expect.fail('Should not have been requested');
+              break;
           }
         }
       };

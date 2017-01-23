@@ -140,7 +140,9 @@ describe('Blacklist', function() {
         expect(arr[1]).to.equal(false);
         arr[1] = true;
         expect(err).to.not.be.instanceOf(Error);
-        if (arr[1] && arr[2]) {return done();}
+        if (arr[1] && arr[2]) {
+          return done();
+        }
       });
       blacklist.push('3', function(err) {
         expect(called).to.equal(2);
@@ -148,7 +150,9 @@ describe('Blacklist', function() {
         expect(arr[2]).to.equal(false);
         arr[2] = true;
         expect(err).to.not.be.instanceOf(Error);
-        if (arr[1] && arr[2]) {return done(); }
+        if (arr[1] && arr[2]) {
+          return done();
+        }
       });
     });
 

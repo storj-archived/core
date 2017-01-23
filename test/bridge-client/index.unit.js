@@ -562,7 +562,9 @@ describe('BridgeClient', function() {
         ).callsArg(3);
         var client = new StubbedClient();
         client._store = {
-          createReadStream: function () { return createReadable(); },
+          createReadStream: function () {
+            return createReadable();
+          },
           createWriteStream: function () {
             var ws = new Writable();
             ws.write = function() {
@@ -709,7 +711,9 @@ describe('BridgeClient', function() {
         );
         var client = new StubbedClient();
         client._store = {
-          createReadStream: function () { return createReadable(); },
+          createReadStream: function () {
+            return createReadable();
+          },
           createWriteStream: function () {
             var ws = new Writable();
             ws.write = function() {

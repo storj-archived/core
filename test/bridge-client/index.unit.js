@@ -1771,7 +1771,9 @@ describe('BridgeClient', function() {
           completed: 1,
           numShards: 2,
           file: 'file',
-          cleanup: sinon.stub(),
+          cleanup: function(cb) {
+            cb();
+          },
           callback: sinon.stub()
         };
         var client = new BridgeClient();

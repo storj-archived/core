@@ -441,16 +441,16 @@ describe('Network/Transport', function() {
       var status = null;
 
       var res = {
-        header: function (key, val){
+        header: function(key, val){
           encountered[key] = val;
         },
-        send: function (s) {
+        send: function(s) {
           expect(s).equal(200);
           status = s;
         }
       };
 
-      var next = function (e) {
+      var next = function(e) {
         expect(e).to.eql(undefined);
         expect(status).to.equal(200);
         expect(encountered.length).to.equal(expected.length);

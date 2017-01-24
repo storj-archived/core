@@ -41,6 +41,36 @@ describe('UploadState', function() {
       uploadState.cleanup();
     });
 
+    it('should close uploaders', function(done) {
+      var StubUploadState = proxyquire('../../lib/bridge-client/upload-state', {
+      });
+      var uploadState = new StubUploadState();
+      var end = false;
+      uploadState.uploaders = [{
+        end: function() {
+          done();
+        }
+      }];
+      uploadState.cleanup();
+    });
+
+    it('should handle non-existant keys', function(done) {
+      var StubUploadState = proxyquire('../../lib/bridge-client/upload-state', {
+      });
+      var uploadState = new StubUploadState();
+      uploadState.cleanQueue.push({
+        store: {
+          exists: function(key, cb) {
+            return cb(null, false);
+          }
+        }
+      });
+      uploadState.cleanup(function(e) {
+        expect(e).to.be.equal(null);
+        done();
+      });
+    });
+
   });
 
 });

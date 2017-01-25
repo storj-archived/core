@@ -1,7 +1,5 @@
 'use strict';
 
-/* jshint maxstatements: false */
-
 var util = require('util');
 var sinon = require('sinon');
 var expect = require('chai').expect;
@@ -1402,7 +1400,9 @@ describe('Network (private)', function() {
       };
       var TunClientStubNetwork = proxyquire('../../lib/network', {
         diglet: {
-          Tunnel: function() { return emitter; }
+          Tunnel: function() {
+            return emitter;
+          }
         }
       });
       var net = TunClientStubNetwork({
@@ -1492,7 +1492,7 @@ describe('Network (private)', function() {
         'getContactList'
       ).callsArgWith(1, null, [
         {
-          address: '0.0.0.0',
+          address: '8.8.8.8',
           port: 1234,
           nodeID: utils.rmd160('nodeid'),
           protocol: VERSION.protocol

@@ -1,7 +1,5 @@
 'use strict';
 
-/* jshint maxstatements: 100 */
-
 var proxyquire = require('proxyquire');
 var expect = require('chai').expect;
 var sinon = require('sinon');

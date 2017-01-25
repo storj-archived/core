@@ -17,7 +17,7 @@ describe('UploadState', function() {
 
   describe('#cleanup', function() {
 
-    it('should unlink the tmpfile if it exists', function() {
+    it('should unlink the tmpfile if it exists', function(done) {
       var rimrafSync = sinon.stub();
       var StubUploadState = proxyquire('../../lib/bridge-client/upload-state', {
         rimraf: {
@@ -28,9 +28,47 @@ describe('UploadState', function() {
         }
       });
       var uploadState = new StubUploadState();
-      uploadState.cleanQueue.push('/some/tmp/file');
+      uploadState.cleanQueue.push({
+        store: {
+          exists: function(key, cb) {
+            return cb(null, true);
+          },
+          remove: function() {
+            return done();
+          }
+        }
+      });
       uploadState.cleanup();
-      expect(rimrafSync.called).to.equal(true);
+    });
+
+    it('should close uploaders', function(done) {
+      var StubUploadState = proxyquire('../../lib/bridge-client/upload-state', {
+      });
+      var uploadState = new StubUploadState();
+      var end = false;
+      uploadState.uploaders = [{
+        end: function() {
+          done();
+        }
+      }];
+      uploadState.cleanup();
+    });
+
+    it('should handle non-existant keys', function(done) {
+      var StubUploadState = proxyquire('../../lib/bridge-client/upload-state', {
+      });
+      var uploadState = new StubUploadState();
+      uploadState.cleanQueue.push({
+        store: {
+          exists: function(key, cb) {
+            return cb(null, false);
+          }
+        }
+      });
+      uploadState.cleanup(function(e) {
+        expect(e).to.be.equal(null);
+        done();
+      });
     });
 
   });

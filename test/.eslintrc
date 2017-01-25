@@ -1,0 +1,24 @@
+{
+  "env": {
+    "node": true,
+    "es6": true
+  },
+  "globals": {
+    "it": true,
+    "describe": true,
+    "before": true,
+    "after": true,
+    "beforeEach": true,
+    "afterEach": true
+  },
+  "rules": {
+    "max-statements": [
+      2,
+      100
+    ],
+    "complexity": [
+      2,
+      100
+    ]
+  }
+}

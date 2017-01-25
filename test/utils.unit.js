@@ -13,7 +13,6 @@ var stream = require('readable-stream');
 var EventEmitter = require('events').EventEmitter;
 
 describe('utils', function() {
-  /* jshint maxstatements: false */
 
   describe('#getContactURL', function() {
 
@@ -42,6 +41,12 @@ describe('utils', function() {
     it('should be compatible (different patch)', function() {
       expect(
         utils.isCompatibleVersion(semver.inc(version.protocol, 'patch'))
+      ).to.equal(true);
+    });
+
+    it('should be compatible (different minor)', function() {
+      expect(
+        utils.isCompatibleVersion(semver.inc(version.protocol, 'minor'))
       ).to.equal(true);
     });
 
@@ -125,13 +130,13 @@ describe('utils', function() {
     });
 
     it('returns false for any string with non-base16 characters', function() {
-      ['g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q',
-       'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '!', '@',
-       '#', '$', '%', '^', '&', '*', '(', ')', 'G', 'H', 'I',
-       'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
-       'U', 'V', 'W', 'X', 'Y', 'Z', '\'', '"'].forEach((a) => {
-         expect(utils.isHexaString(a)).to.equal(false);
-       });
+      [ 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q',
+        'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '!', '@',
+        '#', '$', '%', '^', '&', '*', '(', ')', 'G', 'H', 'I',
+        'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
+        'U', 'V', 'W', 'X', 'Y', 'Z', '\'', '"'].forEach((a) => {
+          expect(utils.isHexaString(a)).to.equal(false);
+        });
     });
 
     it('returns true for hexadecimal string (lowercase)', function() {

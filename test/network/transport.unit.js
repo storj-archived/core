@@ -193,7 +193,7 @@ describe('Network/Transport', function() {
       });
     });
 
-    it('should bubble private ip error', function(done) {
+    it('should bubble private ip 127.0.0.1 error', function(done) {
       var BadIPTransport = proxyquire('../../lib/network/transport', {
         'nat-upnp': {
           createClient: function() {
@@ -206,6 +206,33 @@ describe('Network/Transport', function() {
       });
       var transport = new BadIPTransport(Contact({
         address: '127.0.0.1',
+        port: 0,
+        nodeID: KeyPair().getNodeID()
+      }), {
+        storageManager: StorageManager(RamAdapter())
+      });
+      transport.on('ready', function() {
+        expect(transport._isPublic).to.equal(false);
+        transport._forwardPort(function(err) {
+          expect(err.message).to.equal('UPnP device has no public IP address');
+          done();
+        });
+      });
+    });
+
+    it('should bubble private ip 0.0.0.0 error', function(done) {
+      var BadIPTransport = proxyquire('../../lib/network/transport', {
+        'nat-upnp': {
+          createClient: function() {
+            return {
+              portMapping: sinon.stub().callsArg(1),
+              externalIp: sinon.stub().callsArgWith(0, null, '0.0.0.0')
+            };
+          }
+        }
+      });
+      var transport = new BadIPTransport(Contact({
+        address: '0.0.0.0',
         port: 0,
         nodeID: KeyPair().getNodeID()
       }), {
@@ -392,14 +419,14 @@ describe('Network/Transport', function() {
     it('should echo back access control requests', function(done) {
       var req = {
         header: function(key) {
-          switch(key) {
-          case 'Access-Control-Request-Headers':
-            return 'foobar, buzzbazz';
-          case 'Access-Control-Request-Method':
-            return 'POST, GET, OPTIONS';
-          default:
-            expect.fail('Should not have been requested');
-            break;
+          switch (key) {
+            case 'Access-Control-Request-Headers':
+              return 'foobar, buzzbazz';
+            case 'Access-Control-Request-Method':
+              return 'POST, GET, OPTIONS';
+            default:
+              expect.fail('Should not have been requested');
+              break;
           }
         }
       };
@@ -414,16 +441,16 @@ describe('Network/Transport', function() {
       var status = null;
 
       var res = {
-        header: function (key, val){
+        header: function(key, val){
           encountered[key] = val;
         },
-        send: function (s) {
+        send: function(s) {
           expect(s).equal(200);
           status = s;
         }
       };
 
-      var next = function (e) {
+      var next = function(e) {
         expect(e).to.eql(undefined);
         expect(status).to.equal(200);
         expect(encountered.length).to.equal(expected.length);

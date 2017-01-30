@@ -1702,23 +1702,6 @@ describe('Network (private/jobs)', function() {
 
   });
 
-  describe('#_updateActivityCounter', function() {
-
-    it('should reset the timeout and set it again', function(done) {
-      var clock = sinon.useFakeTimers();
-      var context = {
-        _reentranceCountdown: null,
-        _enterOverlay: function() {
-          clock.restore();
-          done();
-        }
-      };
-      Network.prototype._updateActivityCounter.call(context);
-      clock.tick(constants.NET_REENTRY);
-    });
-
-  });
-
   after(function(done) {
     _ntp.restore();
     async.eachSeries(CLEANUP, function(net, cb) {

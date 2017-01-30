@@ -1580,8 +1580,7 @@ describe('Network (private)', function() {
       );
       sandbox.stub(net, '_setupTunnelClient').callsArg(0);
       net.join(function(err) {
-        expect(err).to.be.instanceOf(Error);
-        expect(err.message).to.equal('Failed to join the network');
+        expect(err).to.equal(null);
         expect(net.connect.callCount).to.equal(3);
         done();
       });

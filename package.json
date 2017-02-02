@@ -1,6 +1,6 @@
 {
   "name": "storj-lib",
-  "version": "6.1.0",
+  "version": "6.1.1",
   "description": "implementation of the storj protocol for node.js and the browser",
   "main": "index.js",
   "directories": {
@@ -80,7 +80,7 @@
     "kad-quasar": "^1.0.1",
     "kfs": "^3.1.0",
     "knuth-shuffle": "^1.0.1",
-    "leveldown": "^1.4.6",
+    "leveldown": "bookchin/leveldown#feature/compact-range",
     "levelup": "^1.3.1",
     "merge": "^1.2.0",
     "mime": "^1.3.4",

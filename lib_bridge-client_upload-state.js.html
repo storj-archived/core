@@ -112,7 +112,7 @@ var rimraf = require('rimraf');
  * @param {Function} options.onComplete - Reference to callback after complete
  */
 function UploadState(options) {
-  /* jshint maxstatements: 16 */
+  /* eslint max-statements: [2, 16] */
   if (!(this instanceof UploadState)) {
     return new UploadState(options);
   }

@@ -110,7 +110,7 @@ var ExchangeReport = require('../bridge-client/exchange-report');
  * @param {String} options.nodeID - The farmer nodeID
  * @param {StorageManager} options.storageManager - Storage manager backend
  * @param {kad.Logger} options.logger - Logger to use from {@link Network}
- * @param {Number} [options.tokenTtl=86400000] - Close after idle
+ * @param {Number} [options.tokenTtl=1800000] - Close after idle
  */
 function ShardServer(options) {
   if (!(this instanceof ShardServer)) {
@@ -120,6 +120,7 @@ function ShardServer(options) {
   this._checkOptions(options);
   events.EventEmitter.call(this);
 
+  this.activeTransfers = 0;
   this._nodeID = options.nodeID;
   this._bridgeClient = options.bridgeClient || new BridgeClient();
   this._manager = options.storageManager;
@@ -216,6 +217,24 @@ ShardServer.prototype.isAuthorized = function(token, hash) {
 };
 
 /**
+ * Decrements the active transfer count on early socket close
+ * @private
+ */
+ShardServer.prototype._handleEarlySocketClose = function() {
+  this._log.warn('channel terminated early (possibly by client)');
+  this.activeTransfers--;
+};
+
+/**
+ * Decrements the active transfer count on request error
+ * @private
+ */
+ShardServer.prototype._handleRequestError = function(err) {
+  this._log.warn('channel encountered an error: %s', err.message);
+  this.activeTransfers--;
+};
+
+/**
  * Receives the data stream and writes it to storage
  * @param {http.IncomingMessage} req
  * @param {http.ServerResponse} req
@@ -254,6 +273,9 @@ ShardServer.prototype.routeConsignment = function(req, res) {
 
     let received = 0;
 
+    self.activeTransfers++;
+    req.on('error', self._handleRequestError.bind(self));
+    res.on('close', self._handleEarlySocketClose.bind(self));
     req.on('data', function(chunk) {
       received += chunk.length;
 
@@ -263,7 +285,8 @@ ShardServer.prototype.routeConsignment = function(req, res) {
       if (received > shardsize) {
         report.end(ExchangeReport.FAILURE, 'FAILED_INTEGRITY');
         self._bridgeClient.createExchangeReport(report);
-        item.shard.destroy(utils.noop);
+        item.shard.destroy(utils.warnOnError(self._log));
+        self.activeTransfers--;
         return res.send(400, {
           result: 'Shard exceeds the amount defined in the contract'
         });
@@ -271,13 +294,15 @@ ShardServer.prototype.routeConsignment = function(req, res) {
     });
 
     req.on('end', function() {
+      /* eslint max-statements: [2, 15] */
       var calculatedHash = utils.rmd160(hasher.digest());
+      self.activeTransfers--;
 
       if (calculatedHash !== hash) {
         report.end(ExchangeReport.FAILURE, 'FAILED_INTEGRITY');
         self._bridgeClient.createExchangeReport(report);
         self._log.warn('calculated hash does not match the expected result');
-        item.shard.destroy(utils.noop);
+        item.shard.destroy(utils.warnOnError(self._log));
         return res.send(400, {
           result: 'Calculated hash does not match the expected result'
         });
@@ -318,18 +343,23 @@ ShardServer.prototype.routeRetrieval = function(req, res) {
     }
 
     function _handleReadFailure(err) {
+      self.activeTransfers--;
       report.end(ExchangeReport.FAILURE, 'READ_FAILED');
       self._bridgeClient.createExchangeReport(report);
       res.send(500, { result: err.message });
     }
 
     function _handleTransferFinish() {
+      self.activeTransfers--;
       report.end(ExchangeReport.SUCCESS, 'SHARD_DOWNLOADED');
       self._bridgeClient.createExchangeReport(report);
       self.emit('shardDownloaded', item, contact);
       self.reject(req.query.token);
     }
 
+    self.activeTransfers++;
+    req.on('error', self._handleRequestError.bind(self));
+    res.on('close', self._handleEarlySocketClose.bind(self));
     res.header('content-type', 'application/octet-stream');
     report.begin(hash);
     item.shard

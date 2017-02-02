@@ -131,10 +131,10 @@ DataCipherKeyIv.SALT_BYTES = 32;
  * @returns {Array}
  */
 DataCipherKeyIv.prototype.getCipherKeyIv = function() {
- return [
-   Buffer(utils.sha256(this._pbkdf2), 'hex'),
-   Buffer(utils.rmd160(this._salt), 'hex').slice(0, 16)
- ];
+  return [
+    Buffer(utils.sha256(this._pbkdf2), 'hex'),
+    Buffer(utils.rmd160(this._salt), 'hex').slice(0, 16)
+  ];
 };
 
 /**

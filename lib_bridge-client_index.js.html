@@ -139,7 +139,7 @@ function BridgeClient(uri, options) {
   }
 
   this._options = this._checkOptions(uri, options);
-  this._blacklist = new Blacklist(this._options.blacklistFolder);
+  this._blacklist = new Blacklist(this._options);
   this._logger = this._options.logger;
   this._transferConcurrency = this._options.transferConcurrency;
 }
@@ -151,7 +151,7 @@ BridgeClient.DEFAULTS = {
   transferRetries: 0,
   blacklistFolder: utils.tmpdir(),
   requestTimeout: 30000,
-  retryThrottle: 2000
+  retryThrottle: 500
 };
 
 /**
@@ -490,6 +490,21 @@ BridgeClient.prototype.replicateFileFromBucket = function(id, file, n, cb) {
 };
 
 /**
+ * Returns the established and available mirrors for a given file
+ * @param {String} id - Unique bucket ID
+ * @param {String} file - Unique file ID
+ * @param {Function} callback
+ */
+BridgeClient.prototype.listMirrorsForFile = function(id, file, cb) {
+  return this._request(
+    'GET',
+    '/buckets/' + id + '/files/' + file + '/mirrors',
+    {},
+    cb
+  );
+};
+
+/**
  * Stores a file in the bucket
  * @param {String} id - Unique bucket ID
  * @param {String} token - Token from {@link BridgeClient#createToken}
@@ -499,7 +514,6 @@ BridgeClient.prototype.replicateFileFromBucket = function(id, file, n, cb) {
 BridgeClient.prototype.storeFileInBucket = function(id, token, file, cb) {
   var self = this;
   var fileSize = fs.statSync(file).size;
-  var retry = 0;
 
   if (fileSize &lt;= 0) {
     return cb(new Error(fileSize +' bytes is not a supported file size.'));
@@ -521,16 +535,9 @@ BridgeClient.prototype.storeFileInBucket = function(id, token, file, cb) {
   });
 
   function _createFileStagingFrame() {
-    self._logger.info('Creating file staging frame.. (retry: %s)', retry);
-
+    self._logger.info('Creating file staging frame');
     self.createFileStagingFrame(function(err, frame) {
       if (err) {
-
-        if (retry &lt; 6) {
-          retry++;
-          return _createFileStagingFrame();
-        }
-
         self._logger.error(err.message);
         return cb(err);
       }
@@ -731,7 +738,7 @@ BridgeClient.prototype._startTransfer = function(pointer, state, meta, done) {
   transferStatus.removeAllListeners('finish');
   transferStatus.once('finish', function() {
     self._shardTransferComplete(state, meta.frame, done);
-    meta.exchangeReport.end(ExchangeReport.SUCCESS, 'SUCCESS');
+    meta.exchangeReport.end(ExchangeReport.SUCCESS, 'SHARD_UPLOADED');
     self._logger.info('sending exchange report');
     self.createExchangeReport(meta.exchangeReport);
   });
@@ -845,7 +852,7 @@ BridgeClient.prototype._transferShard = function(evt, name, pointer, state) {
   state.uploaders.push(uploader);
   uploader.on('response', _handleResponse);
   uploader.on('error', (err) => _handleUploadError(err));
-  shardFile.pipe(uploader).on('end', function() {
+  shardFile.pipe(uploader).on('finish', function() {
     state.removeListener('killed', _handleStateKilled);
     evt.emit('finish');
     evt.removeAllListeners('finish');
@@ -867,33 +874,46 @@ BridgeClient.prototype._transferShard = function(evt, name, pointer, state) {
 BridgeClient.prototype.getFilePointers = function(options, cb) {
   var self = this;
 
-  request({
-    method: 'GET',
-    baseUrl: self._options.baseURI,
-    uri: '/buckets/' + options.bucket + '/files/' + options.file,
-    timeout: this._options.requestTimeout,
-    headers: {
-      'x-token': options.token
-    },
-    qs: {
-      skip: options.skip,
-      limit: options.limit,
-      exclude: Array.isArray(options.exclude) ? options.exclude.join() : null
-    },
-    json: true
-  }, function(err, res, body) {
-    self._logger.debug('Body: %s', JSON.stringify(body));
+  function _request(done) {
+    request({
+      method: 'GET',
+      baseUrl: self._options.baseURI,
+      uri: '/buckets/' + options.bucket + '/files/' + options.file,
+      timeout: self._options.requestTimeout,
+      headers: {
+        'x-token': options.token
+      },
+      qs: {
+        skip: options.skip,
+        limit: options.limit,
+        exclude: Array.isArray(options.exclude) ? options.exclude.join() : null
+      },
+      json: true
+    }, function(err, res, body) {
+      self._logger.debug('Response Body: %s', JSON.stringify(body));
 
-    if (err) {
-      return cb(err);
+      if (err) {
+        return done(err);
+      }
+
+      if (res.statusCode !== 200 &amp;&amp; res.statusCode !== 304) {
+        return done(new Error(body.error || body));
+      }
+
+      done(null, body);
+    });
+  }
+
+  async.retry({
+    times: 3,
+    interval: self._options.retryThrottle,
+    errorFilter: (e) => {
+      const shouldRetry = ['ETIMEDOUT'].includes(e.message);
+      self._logger.debug('Request failed, reason: %s - retrying (%s)...',
+                        e.message, shouldRetry);
+      return shouldRetry;
     }
-
-    if (res.statusCode !== 200 &amp;&amp; res.statusCode !== 304) {
-      return cb(new Error(body.error || body));
-    }
-
-    cb(null, body);
-  });
+  }, _request, cb);
 };
 
 /**
@@ -933,10 +953,6 @@ BridgeClient.prototype.resolveFileFromPointers = function(pointers, mOpts, cb) {
   });
 
   function _addInputToMultiplexer(pointer, onInputAdded) {
-    if (!pointer) {
-      return onInputAdded();
-    }
-
     const inputStream = self._createInputFromPointer(pointer);
     const exchangeReport = new ExchangeReport({
       reporterId: self._getReporterId(),
@@ -961,9 +977,8 @@ BridgeClient.prototype.resolveFileFromPointers = function(pointers, mOpts, cb) {
     queue.push(pointers.shift(), done);
   }
 
-  muxer.on('drain', _addPointerToInputQueue.bind(null, null));
   async.times(
-    this._transferConcurrency,
+    pointers.length,
     function addInputSource(n, next) {
       _addPointerToInputQueue(next);
     },
@@ -1021,7 +1036,7 @@ BridgeClient.prototype.createFileStream = function(bucket, file, opt, cb) {
       bucket: bucket,
       token: token,
       file: file,
-      skip: skip += limit,
+      skip: skip + limit,
       limit: limit,
       exclude: opt.exclude
     }, function(err, pointers) {
@@ -1029,6 +1044,7 @@ BridgeClient.prototype.createFileStream = function(bucket, file, opt, cb) {
         return done(err);
       }
 
+      skip += limit;
       done(null, pointers);
     });
   }
@@ -1040,6 +1056,7 @@ BridgeClient.prototype.createFileStream = function(bucket, file, opt, cb) {
       if (err) {
         return done(err);
       }
+
       done(null, stream, queue);
     });
   }
@@ -1159,39 +1176,57 @@ BridgeClient.prototype.createExchangeReport = function(report) {
  */
 BridgeClient.prototype._request = function(method, path, params, callback) {
   var self = this;
+  var currentRequest = null;
 
-  var opts = {
-    baseUrl: this._options.baseURI,
-    uri: path,
-    method: method,
-    timeout: this._options.requestTimeout
-  };
+  function _request(done) {
+    var opts = {
+      baseUrl: self._options.baseURI,
+      uri: path,
+      method: method,
+      timeout: self._options.requestTimeout
+    };
 
-  params.__nonce = uuid.v4();
+    params.__nonce = uuid.v4();
 
-  if (['GET', 'DELETE'].indexOf(method) !== -1) {
-    opts.qs = params;
-    opts.json = true;
-  } else {
-    opts.json = params;
+    if (['GET', 'DELETE'].indexOf(method) !== -1) {
+      opts.qs = params;
+      opts.json = true;
+    } else {
+      opts.json = params;
+    }
+
+    self._authenticate(opts);
+    self._logger.debug('Request Options: %s', JSON.stringify(opts));
+
+    currentRequest = request(opts, function(err, res, body) {
+      self._logger.debug('Response Body: %s', JSON.stringify(body));
+
+      if (err) {
+        return done(err);
+      }
+
+      if (res.statusCode >= 400) {
+        return done(new Error(body.error || body));
+      }
+
+      done(null, body);
+    });
   }
 
-  this._authenticate(opts);
-  self._logger.debug('Request: %s', JSON.stringify(opts));
-
-  return request(opts, function(err, res, body) {
-    self._logger.debug('Body: %s', JSON.stringify(body));
-
-    if (err) {
-      return callback(err);
+  async.retry({
+    times: 3,
+    interval: self._options.retryThrottle,
+    errorFilter: (e) => {
+      const shouldRetry = ['ETIMEDOUT', 'ESOCKETTIMEDOUT'].includes(e.message);
+      self._logger.warn('Request failed, reason: %s - retrying(%s)...',
+                        e.message, shouldRetry);
+      return shouldRetry;
     }
+  }, _request, callback);
 
-    if (res.statusCode >= 400) {
-      return callback(new Error(body.error || body));
-    }
-
-    callback(null, body);
-  });
+  return {
+    abort: () => currentRequest.abort()
+  };
 };
 
 /**

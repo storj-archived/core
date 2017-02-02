@@ -231,7 +231,7 @@ EmbeddedStorageAdapter.prototype._put = function(key, item, callback) {
 EmbeddedStorageAdapter.prototype._del = function(key, callback) {
   var self = this;
 
-  this._db.del(key + '.info', function(err) {
+  this._db.del(key, function(err) {
     if (err) {
       return callback(err);
     }
@@ -244,6 +244,15 @@ EmbeddedStorageAdapter.prototype._del = function(key, callback) {
       callback(null);
     });
   });
+};
+
+/**
+ * Implements the abstract {@link StorageAdapter#_flush}
+ * @private
+ * @param {Function} callback
+ */
+EmbeddedStorageAdapter.prototype._flush = function(callback) {
+  this._fs.flush(callback);
 };
 
 /**

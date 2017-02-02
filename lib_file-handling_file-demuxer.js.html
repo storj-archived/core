@@ -133,7 +133,7 @@ function FileDemuxer(filePath, options) {
   setImmediate(this._openStream.bind(this));
 }
 
-FileDemuxer.SHARD_MULTIPLES_BACK = 5;
+FileDemuxer.SHARD_MULTIPLES_BACK = 4;
 FileDemuxer.DEFAULTS = {
   shardSize: 1024 * 1024 * 8
 };

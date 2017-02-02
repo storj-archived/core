@@ -182,6 +182,8 @@
         
 
         
+        <th>Default</th>
+        
 
         <th class="last">Description</th>
     </tr>
@@ -216,6 +218,10 @@
             
 
             
+                <td class="default">
+                
+                </td>
+            
 
             <td class="description last">Optional payment address</td>
         </tr>
@@ -247,6 +253,10 @@
                 </td>
             
 
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last">Contract opcodes to farm</td>
@@ -280,6 +290,10 @@
             
 
             
+                <td class="default">
+                
+                </td>
+            
 
             <td class="description last">Max offers to have pending</td>
         </tr>
@@ -311,6 +325,10 @@
                 </td>
             
 
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"></td>
@@ -344,6 +362,10 @@
             
 
             
+                <td class="default">
+                
+                </td>
+            
 
             <td class="description last">Node's cryptographic identity</td>
         </tr>
@@ -375,6 +397,10 @@
                 </td>
             
 
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last">Storage manager backend</td>
@@ -408,6 +434,10 @@
             
 
             
+                <td class="default">
+                
+                </td>
+            
 
             <td class="description last">URL for bridge server seed lookup</td>
         </tr>
@@ -439,6 +469,10 @@
                 </td>
             
 
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last">Logger instance</td>
@@ -472,6 +506,10 @@
             
 
             
+                <td class="default">
+                
+                </td>
+            
 
             <td class="description last">List of seed URIs to join</td>
         </tr>
@@ -503,6 +541,10 @@
                 </td>
             
 
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last">Public node IP or hostname</td>
@@ -536,6 +578,10 @@
             
 
             
+                <td class="default">
+                
+                </td>
+            
 
             <td class="description last">Listening port for RPC</td>
         </tr>
@@ -567,6 +613,10 @@
                 </td>
             
 
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last">Skip NAT traversal strategies</td>
@@ -600,6 +650,10 @@
             
 
             
+                <td class="default">
+                
+                </td>
+            
 
             <td class="description last">Max number of tunnels to provide</td>
         </tr>
@@ -632,6 +686,10 @@
             
 
             
+                <td class="default">
+                
+                </td>
+            
 
             <td class="description last">Port for tunnel server to use</td>
         </tr>
@@ -663,6 +721,10 @@
                 </td>
             
 
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last">
@@ -746,13 +808,13 @@
 
         <tr>
             
-                <td class="name"><code>rateLimiterOpts</code></td>
+                <td class="name"><code>offerBackoffLimit</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Object</span>
+<span class="param-type">Number</span>
 
 
 
@@ -772,8 +834,15 @@
             
 
             
+                <td class="default">
+                
+                    4
+                
+                </td>
+            
 
-            <td class="description last">Options for RateLimiter</td>
+            <td class="description last">Do not send offers if more
+than N transfers are active</td>
         </tr>
 
     
@@ -805,6 +874,10 @@
                 </td>
             
 
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last">Node IDs to offer storage to</td>
@@ -839,6 +912,10 @@
                 </td>
             
 
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last">
@@ -1810,6 +1887,176 @@ successfully establishing a connection to the network
 		<ul class="dummy">
 			<li>
 				<a href="Network.html#leave">Network#leave</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_network_index.js.html">lib/network/index.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="ping"><span class="type-signature"></span>ping(neighbor, callback)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Will ping a neighbor
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>neighbor</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">A contact</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Called on connection or error</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="Network.html#ping">Network#ping</a>
 			</li>
 		</ul>
 	</dd>

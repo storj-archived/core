@@ -527,7 +527,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id=".getDeterministicKey"><span class="type-signature">&lt;static> </span>getDeterministicKey(seed, bucketId)</h4>
+    <h4 class="name" id=".getDeterministicKey"><span class="type-signature">&lt;static> </span>getDeterministicKey(seed, id)</h4>
     
     
 </dt>
@@ -535,7 +535,7 @@
 
     
     <div class="description">
-        Calculates a deterministic bucket key
+        Calculates a deterministic key
     </div>
     
 
@@ -576,6 +576,9 @@
             <td class="type">
             
                 
+<span class="param-type">Buffer</span>
+|
+
 <span class="param-type">String</span>
 
 
@@ -587,19 +590,22 @@
 
             
 
-            <td class="description last">Deterministic seed</td>
+            <td class="description last">Deterministic seed or bucket key</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>bucketId</code></td>
+                <td class="name"><code>id</code></td>
             
 
             <td class="type">
             
                 
+<span class="param-type">Buffer</span>
+|
+
 <span class="param-type">String</span>
 
 
@@ -611,7 +617,7 @@
 
             
 
-            <td class="description last">Unique bucket id</td>
+            <td class="description last">Unique bucket or file id</td>
         </tr>
 
     

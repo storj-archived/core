@@ -245,6 +245,16 @@ StorageAdapter.prototype.size = function(callback) {
 };
 
 /**
+ * Calls the implemented {@link StorageAdapter#_flush}
+ * @param {Function} callback - Called with error or null
+ */
+StorageAdapter.prototype.flush = function(callback) {
+  assert(typeof callback === 'function', 'Callback function must be supplied');
+
+  return this._flush(callback);
+};
+
+/**
  * Calls the implemented {@link StorageAdapter#_keys} and returns a readable
  * stream containing each stored item
  * @return {ReadableStream}
@@ -301,6 +311,16 @@ StorageAdapter.prototype.createReadStream = function() {
       });
     }
   });
+};
+
+/**
+ * Performs lookup and provides an {@link StorageItem} to the callback
+ * @abstract
+ * @param {String} key - Shard hash
+ * @param {Function} callback - Called on complete
+ */
+StorageAdapter.prototype._flush = function(/* callback */) {
+  throw new Error('Method not implemented');
 };
 
 /**

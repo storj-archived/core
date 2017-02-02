@@ -92,6 +92,7 @@
         <pre
             class="sunlight-highlight-javascript ">'use strict';
 
+var assert = require('assert');
 var utils = require('../utils');
 
 /**
@@ -111,13 +112,23 @@ function DeterministicKeyIv(fileKey, fileId) {
 }
 
 /**
- * Calculates a deterministic bucket key
- * @param {String} seed - Deterministic seed
- * @param {String} bucketId - Unique bucket id
+ * Calculates a deterministic key
+ * @param {Buffer|String} seed - Deterministic seed or bucket key
+ * @param {Buffer|String} id - Unique bucket or file id
  * @returns {String}
  */
 DeterministicKeyIv.getDeterministicKey = function(key, id){
-  var buffer = utils.sha512(key + id);
+  if (!Buffer.isBuffer(key)) {
+    assert(utils.isHexaString(key),
+           'key is expected to be a buffer or hex string');
+    key = Buffer.from(key, 'hex');
+  }
+  if (!Buffer.isBuffer(id)) {
+    assert(utils.isHexaString(id),
+           'id is expected to be a buffer or hex string');
+    id = Buffer.from(id, 'hex');
+  }
+  var buffer = utils.sha512(Buffer.concat([key, id]));
   return buffer.toString('hex').substring(0, 64);
 };
 

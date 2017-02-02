@@ -92,6 +92,8 @@
         <pre
             class="sunlight-highlight-javascript ">'use strict';
 
+var fs = require('fs');
+var path = require('path');
 var kad = require('kad');
 var Network = require('./');
 var inherits = require('util').inherits;
@@ -124,7 +126,8 @@ var utils = require('../utils');
  * @param {Object} options.tunnelGatewayRange
  * @param {Number} options.tunnelGatewayRange.min - Min port for gateway binding
  * @param {Number} options.tunnelGatewayRange.max - Max port for gateway binding
- * @param {Object} [options.rateLimiterOpts] - Options for {@link RateLimiter}
+ * @param {Number} [options.offerBackoffLimit=4] - Do not send offers if more
+ * than N transfers are active
  * @param {String[]} [options.renterWhitelist] - Node IDs to offer storage to
  * @param {Object} [options.joinRetry]
  * @param {Number} [options.joinRetry.times] - Times to retry joining net
@@ -150,6 +153,7 @@ function FarmerInterface(options) {
   this._hasFreeSpace = true;
   this._negotiator = options.contractNegotiator;
   this._pendingOffers = [];
+  this._offerBackoffLimit = options.offerBackoffLimit;
   this._renterWhitelist = Array.isArray(options.renterWhitelist) ?
                           options.renterWhitelist :
                           null;
@@ -195,6 +199,12 @@ FarmerInterface.Negotiator = function(contract, callback) {
     return callback(false);
   }
 
+  // NB: Backoff on sending offers if we are already have high active transfer
+  if (self.transport.shardServer.activeTransfers >= self._offerBackoffLimit) {
+    self._logger.warn('too many active transfers, not sending offer');
+    return callback(false);
+  }
+
   // NB: Only bid on contracts for data we don't have
   this.storageManager.load(contract.get('data_hash'), function(err, item) {
     if (err) {
@@ -219,11 +229,14 @@ FarmerInterface.Negotiator = function(contract, callback) {
 };
 
 FarmerInterface.DEFAULTS = {
-  renterWhitelist: null,
+  renterWhitelist: fs.readFileSync(
+    path.join(__dirname, '../../TRUSTED_KEYS')
+  ).toString().split('\n').filter((k) => !!k),
   paymentAddress: '',
   opcodeSubscriptions: ['0f01020202', '0f02020202', '0f03020202'],
   contractNegotiator: FarmerInterface.Negotiator,
-  maxOfferConcurrency: constants.MAX_CONCURRENT_OFFERS
+  maxOfferConcurrency: constants.MAX_CONCURRENT_OFFERS,
+  offerBackoffLimit: 4
 };
 
 /**
@@ -240,6 +253,10 @@ FarmerInterface.prototype.join = function(callback) {
     }
 
     self._listenForContracts(self._options.opcodeSubscriptions);
+    self.on(
+      'connected',
+      self._listenForContracts.bind(self, self._options.opcodeSubscriptions)
+    );
     callback();
   });
 };
@@ -363,7 +380,6 @@ FarmerInterface.prototype._shouldSendOffer = function(contract, callback) {
 
   this._negotiator.call(this, contract, function(shouldNegotiate) {
     self._logger.debug('negotiator returned: %s', shouldNegotiate);
-    self._logger.debug('we have enough free space: %s', self._hasFreeSpace);
     self.storageManager._storage.size(function(err, usedSpace) {
       if (err) {
         self._logger.error('Could not get usedSpace: %s',err.message);
@@ -371,11 +387,13 @@ FarmerInterface.prototype._shouldSendOffer = function(contract, callback) {
       }
 
       var freeSpace = self.storageManager._options.maxCapacity - usedSpace;
+      var enoughFreeSpace = self._hasFreeSpace &amp;&amp;
+        (contract.get('data_size') &lt;= freeSpace);
+      self._logger.debug('we have enough free space: %s', enoughFreeSpace);
 
       callback(
         (self._pendingOffers.length &lt; self._options.maxOfferConcurrency) &amp;&amp;
-        shouldNegotiate &amp;&amp; self._hasFreeSpace &amp;&amp;
-        (contract.get('data_size') &lt;= freeSpace)
+        shouldNegotiate &amp;&amp; enoughFreeSpace
       );
     });
   });

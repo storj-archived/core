@@ -92,7 +92,6 @@
         <pre
             class="sunlight-highlight-javascript ">'use strict';
 
-var url = require('url');
 var assert = require('assert');
 var merge = require('merge');
 var async = require('async');
@@ -282,7 +281,6 @@ Network.prototype._bindTransportHooks = function() {
   this.transport.before('receive', kad.hooks.protocol(
     this._protocol.getRouteMap()
   ));
-  this.transport.after('receive', this._updateActivityCounter.bind(this));
 };
 
 /**
@@ -351,7 +349,7 @@ Network.prototype.join = function(callback) {
  * Iteratively attempt connection to network via supplied seeds
  * @private
  */
-Network.prototype._enterOverlay = function(callback) {
+Network.prototype._enterOverlay = function(onConnected) {
   var self = this;
 
   function _trySeeds() {
@@ -360,18 +358,21 @@ Network.prototype._enterOverlay = function(callback) {
       self.connect(uri, function(err) {
         if (err) {
           self._logger.warn('failed to connect to seed %s', uri);
-          next(false);
+          next(null, false);
         } else {
           self._logger.info('connected to the storj network via %s', uri);
-          next(true);
+          next(null, true);
         }
       });
-    }, function(result) {
-      if (!result) {
-        return callback(new Error('Failed to join the network'));
+    }, function(err, result) {
+      if (err || !result) {
+        // NB: If we fail to join log a warning and retry in 10 mins
+        self._logger.warn('failed to join the network, queuing re-entry');
       }
 
-      callback(null);
+      // NB: Force re-entry into network to refresh routes every 10 minutes
+      setTimeout(_trySeeds, constants.NET_REENTRY);
+      onConnected(null);
     });
   }
 
@@ -381,19 +382,24 @@ Network.prototype._enterOverlay = function(callback) {
 
   if (this._options.bridgeUri === null) {
     self._logger.warn('no bridge uri or seeds provided, not connected');
-    return callback(null);
+    return onConnected(null);
   }
 
   this._logger.info('resolving seeds from %s', this._options.bridgeUri);
   this.bridgeClient.getContactList({ connected: true }, function(err, seeds) {
     if (err) {
-      return callback(
+      return onConnected(
         new Error('Failed to discover seeds from bridge: ' + err.message)
       );
     }
 
     self._options.seedList = shuffle(seeds)
       .filter((c) => c.nodeID !== self.contact.nodeID)
+      .filter((c) => utils.isCompatibleVersion(
+        c.protocol,
+        process.env.STORJ_ALLOW_LOOPBACK
+      ))
+      .filter((c) => utils.isValidContact(c))
       .map(utils.getContactURL);
 
     _trySeeds();
@@ -455,22 +461,36 @@ Network.prototype.subscribe = function(topic, handler) {
  * @param {Function} callback - Called on connection or error
  */
 Network.prototype.connect = function(uri, callback) {
-  return this.node.connect(this._createContact(uri), callback);
+  const self = this;
+
+  callback = typeof callback === 'function' ? callback : function(err) {
+    if (err) {
+      self._logger.warn('failed to connect to %s, reason: %s',
+                        uri, err.message);
+    } else {
+      self._logger.info('connection established with %s', uri);
+    }
+  };
+
+  if (!Contact.isValidUrl(uri)) {
+    return callback(new Error('Invalid contact URI supplied'));
+  }
+
+  return this.node.connect(Contact.fromUrl(uri), callback);
 };
 
 /**
- * Returns a Storj contact from the URI
- * @private
- * @param {String} uri
+ * Will ping a neighbor
+ * @param {String} neighbor - A contact
+ * @param {Function} callback - Called on connection or error
  */
-Network.prototype._createContact = function(uri) {
-  var parsed = url.parse(uri);
-
-  return new Contact({
-    address: parsed.hostname,
-    port: Number(parsed.port),
-    nodeID: parsed.path.substr(1)
+Network.prototype.ping = function(neighbor, callback) {
+  var message = new kad.Message({
+    method: 'PING',
+    params: { contact: this.contact }
   });
+
+  this.transport.send(neighbor, message, callback);
 };
 
 /**
@@ -540,7 +560,7 @@ Network.prototype._signMessage = function(message, callback) {
 
   try {
     signature = this.keyPair.sign(target);
-  } catch(err) {
+  } catch (err) {
     return callback(err);
   }
 
@@ -616,7 +636,7 @@ Network.prototype._verifyMessage = function(message, contact, callback) {
  * @private
  */
 Network.prototype._verifySignature = function(options, callback) {
-  /* jshint maxstatements: 20 */
+  /* eslint max-statements: [2, 20] */
   if (!options.signobj) {
     return callback(new Error('Invalid signature supplied'));
   }
@@ -631,7 +651,7 @@ Network.prototype._verifySignature = function(options, callback) {
     try {
       pubKey = secp256k1.recover(magic, sig, recovery, true);
       this._pubkeys[options.contact.nodeID] = pubKey;
-    } catch(e) {
+    } catch (e) {
       return callback(e);
     }
   }
@@ -748,7 +768,8 @@ Network.prototype._setupTunnelClient = function(callback) {
   }
 
   var neighbors = this._options.seedList
-    .map(this._createContact)
+    .filter(Contact.isValidUrl)
+    .map(Contact.fromUrl)
     .filter((c) => c.nodeID !== self.contact.nodeID);
 
   function _discoverIfReachable() {
@@ -833,18 +854,18 @@ Network.prototype._findTunnel = function(neighbors, callback) {
     self._logger.info('requesting tunnelers from neighbor');
     self.transport.send(neighbor, message, function(err, resp) {
       if (err) {
-        return callback(false);
+        return callback(null, false);
       }
 
       if (!resp.result.tunnels.length) {
-        return callback(false);
+        return callback(null, false);
       }
 
       tunnelers = tunnelers.concat(resp.result.tunnels).filter(
         t => t.nodeID !== self.contact.nodeID
       );
 
-      callback(true);
+      callback(null, true);
     });
   }, function() {
     if (!tunnelers.length) {
@@ -994,19 +1015,6 @@ Network.prototype._startRouterCleaner = function() {
 };
 
 /**
- * Resets the countdown until network re-entry due to inactivity
- * @private
- */
-Network.prototype._updateActivityCounter = function() {
-  clearTimeout(this._reentranceCountdown);
-
-  this._reentranceCountdown = setTimeout(
-    this._enterOverlay.bind(this, utils.noop),
-    constants.NET_REENTRY
-  );
-};
-
-/**
  * Warns the user if their clock is not synchronized with NTP server
  * @private
  */
@@ -1017,7 +1025,7 @@ Network.prototype._warnIfClockNotSynced = function(callback) {
     if (err) {
       self._logger.warn(err.message);
     } else {
-      self._logger.info('clock is synchronized with ntp, delta: %s', delta);
+      self._logger.info('clock is synchronized with ntp, delta: %s ms', delta);
     }
 
     callback(null);

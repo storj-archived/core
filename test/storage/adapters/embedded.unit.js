@@ -143,6 +143,19 @@ describe('EmbeddedStorageAdapter', function() {
 
   });
 
+  describe('#_flush', function() {
+
+    it('should cass underlying flush method', function(done) {
+      var _flush = sinon.stub(store._fs, 'flush').callsArg(0);
+      store._flush(function() {
+        _flush.restore();
+        expect(_flush.called).to.equal(true);
+        done();
+      });
+    });
+
+  });
+
   describe('#_peek', function() {
 
     it('should return the stored item', function(done) {

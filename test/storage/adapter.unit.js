@@ -60,6 +60,17 @@ describe('StorageAdapter', function() {
 
   });
 
+  describe('#_flush', function() {
+
+    it('should throw a not implemented error', function() {
+      expect(function() {
+        StorageAdapter()._flush();
+      }).to.throw(Error, 'Method not implemented');
+    });
+
+  });
+
+
   describe('#_del', function() {
 
     it('should throw a not implemented error', function() {

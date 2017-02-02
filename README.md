@@ -11,7 +11,7 @@ integrate with the Storj network. You must have Node.js v6.9.1, Python v2.x.x,
 and Git installed. [Complete documentation can be found here](http://storj.github.io/core).
 
 ```
-npm install storj-lib --save
+npm install storj-lib --build-from-source --save
 ```
 
 > If you want access to the [Storj CLI](https://github.com/storj/core-cli), 

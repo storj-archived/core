@@ -10,7 +10,6 @@ var utils = require('../../lib/utils');
 var EventEmitter = require('events').EventEmitter;
 var stream = require('readable-stream');
 var Readable = require('stream').Readable;
-var Writable = require('stream').Writable;
 var FileMuxer = require('../../lib/file-handling/file-muxer');
 var crypto = require('crypto');
 var utils = require('../../lib/utils');
@@ -1566,7 +1565,7 @@ describe('BridgeClient', function() {
           worker: utils.noop
         });
         state.file = new Readable({ read: function noop() {} });
-        state._store
+        state.callback = function noop() {};
         var _addShardToFileStagingFrame = sinon.stub(
           client,
           'addShardToFileStagingFrame'
@@ -1586,7 +1585,6 @@ describe('BridgeClient', function() {
           });
         }
 
-        state.cleanup();
         client._handleShardTmpFileFinish(state, {
           frame: {},
           tmpName: 'foobar',
@@ -1621,6 +1619,7 @@ describe('BridgeClient', function() {
           worker: utils.noop
         });
         state.file = new Readable({ read: function noop() {} });
+        state.callback = function noop() {};
         var _addShardToFileStagingFrame = sinon.stub(
           client,
           'addShardToFileStagingFrame',
@@ -1667,6 +1666,7 @@ describe('BridgeClient', function() {
           worker: utils.noop
         });
         state.file = new Readable({ read: function noop() {} });
+        state.callback = function noop() {};
         var _addShardToFileStagingFrame = sinon.stub(
           client,
           'addShardToFileStagingFrame',
@@ -1716,6 +1716,7 @@ describe('BridgeClient', function() {
           completed: 1,
           numShards: 2,
           file: 'file',
+          fileName: 'foo.mp3',
           cleanup: function(cb) {
             cb();
           },

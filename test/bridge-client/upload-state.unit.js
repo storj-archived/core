@@ -45,7 +45,6 @@ describe('UploadState', function() {
       var StubUploadState = proxyquire('../../lib/bridge-client/upload-state', {
       });
       var uploadState = new StubUploadState();
-      var end = false;
       uploadState.uploaders = [{
         end: function() {
           done();

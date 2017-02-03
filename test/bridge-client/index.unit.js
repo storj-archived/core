@@ -469,6 +469,15 @@ describe('BridgeClient', function() {
 
     describe('#storeFileInBucket', function() {
 
+      it('should scrub file type', function(done) {
+        var StubbedClient = proxyquire('../../lib/bridge-client', {});
+        var client = new StubbedClient();
+        client.storeFileInBucket('b', 't', 31337, function(e) {
+          expect(e).to.be.instanceof(Error);
+          done();
+        });
+      });
+
       it('should create frame, stage the shards, and upload', function(done) {
         var _demuxer = new EventEmitter();
         var _shard1 = new stream.Readable({ read: function noop() {} });
@@ -1470,6 +1479,9 @@ describe('BridgeClient', function() {
           transferRetries: 3,
           retryThrottle: 0
         });
+        client._store = new MemBlobStore();
+        var ws = client._store.createWriteStream('tmpname');
+        ws.end('hello_world');
         sinon.stub(client, 'createExchangeReport');
         var pointer = {
           farmer: {
@@ -1514,6 +1526,9 @@ describe('BridgeClient', function() {
         var _transferStatus = new EventEmitter();
         var _kill = sinon.stub();
         var client = new BridgeClient();
+        client._store = new MemBlobStore();
+        var ws = client._store.createWriteStream('tmpname');
+        ws.end('hello_world');
         sinon.stub(client, 'createExchangeReport');
         var state = new EventEmitter();
         state.file = new stream.Readable({ read: function noop() {} });
@@ -1536,6 +1551,7 @@ describe('BridgeClient', function() {
         ).callsArg(2);
         var _retry = sinon.stub(client, '_handleShardTmpFileFinish');
         client._startTransfer(pointer, state, {
+          tmpName: 'tmpname',
           excludeFarmers: [],
           transferRetries: 3
         });

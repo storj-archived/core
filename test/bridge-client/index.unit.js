@@ -667,7 +667,8 @@ describe('BridgeClient', function() {
         var client = new StubbedClient();
         client._store = new MemBlobStore();
         client.storeFileInBucket('b', 't', createReadable(), {
-          fileName: 'foobar.buzz'
+          fileName: 'foobar.buzz',
+          fileSize: 1337
         }, function(err) {
           _createFrame.restore();
           _addShard.restore();

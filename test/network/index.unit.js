@@ -97,7 +97,7 @@ describe('Network (public)', function() {
       var _info = sinon.stub();
       Network.prototype.connect.call({
         node: { connect: _connect },
-        _logger: { info: _info }
+        _logger: { info: _info, warn: sinon.stub() }
       }, 'storj://127.0.0.1:1337/f39bc0ae7b79e89dca5100d7577fde0559bcda8c');
       expect(_connect.called).to.equal(true);
       setImmediate(() => {
@@ -348,6 +348,40 @@ describe('Network (public)', function() {
 });
 
 describe('Network (private)', function() {
+
+  describe('#_bindTransportHooks', function() {
+
+    it('should reset re-entry timeout after message receipt', function(done) {
+      var transport = new EventEmitter();
+      transport.before = sinon.stub();
+      transport.after = transport.on;
+      var _enterOverlay = sinon.stub();
+      var net = {
+        transport: transport,
+        _protocol: { getRouteMap: () => ({}) },
+        _enterOverlay: _enterOverlay,
+        _handleTransportError: sinon.stub(),
+        _signMessage: sinon.stub(),
+        _verifyMessage: sinon.stub()
+      };
+      Network.prototype._bindTransportHooks.call(net);
+      setImmediate(() => {
+        var clock = sinon.useFakeTimers();
+        transport.emit('receive');
+        setImmediate(() => {
+          expect(net._reEntryTimeout).to.not.equal(undefined);
+          clock.tick(constants.NET_REENTRY);
+          clock.restore();
+          setImmediate(() => {
+            expect(_enterOverlay.called).to.equal(true);
+            done();
+          });
+        });
+        clock.tick(10);
+      });
+    });
+
+  });
 
   describe('#_warnIfClockNotSynced', function() {
 

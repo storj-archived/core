@@ -683,7 +683,7 @@ describe('BridgeClient', function() {
         self.addShardToFileStagingFrame = function(a, b, c) {
           state.killed = true;
           setImmediate(c);
-          return { cancel: function () {} };
+          return { cancel: function() {} };
         };
         self._store.createReadStream = function() {
           var rs = new Readable();
@@ -691,7 +691,9 @@ describe('BridgeClient', function() {
           rs.push(null);
           return rs;
         };
-        self._blacklist.toObject = function(cb) { return cb(null, {}); };
+        self._blacklist.toObject = function(cb) {
+          return cb(null, {});
+        };
         var meta = { frame: {}, challenges: true, tree: true, hash: 'foo' };
         BridgeClient.prototype._handleShardTmpFileFinish
           .bind(self, state, meta, done)();
@@ -703,7 +705,7 @@ describe('BridgeClient', function() {
         var state = new EventEmitter();
         self.addShardToFileStagingFrame = function(a, b, c) {
           setImmediate(c);
-          return { cancel: function () {} };
+          return { cancel: function() {} };
         };
         self._store.createReadStream = function() {
           var rs = new Readable();
@@ -714,7 +716,9 @@ describe('BridgeClient', function() {
         self._startTransfer = function(a, b, c, d) {
           d();
         };
-        self._blacklist.toObject = function(cb) { return cb(null, {}); };
+        self._blacklist.toObject = function(cb) {
+          return cb(null, {});
+        };
         var meta = { frame: {}, challenges: true, tree: true, hash: 'foo' };
         BridgeClient.prototype._handleShardTmpFileFinish
           .bind(self, state, meta, done)();
@@ -1823,13 +1827,6 @@ describe('BridgeClient', function() {
       });
 
       it('should error if state cleanup fails', function(done) {
-        var _request = sinon.stub(
-          BridgeClient.prototype,
-          '_request'
-        ).callsArgWith(
-          3,
-          new Error('Request failed')
-        );
         var fakeState = {
           completed: 1,
           numShards: 2,

@@ -1513,6 +1513,37 @@ describe('BridgeClient', function() {
         });
       });
 
+      it('should emit a finish on success', function(done) {
+        var clientEmitter = new stream.Writable({ write: utils.noop });
+        function createReadable() {
+          return new stream.Readable({ read: function noop() {} });
+        }
+        var StubbedClient = proxyquire('../../lib/bridge-client', {
+          '../utils': {
+            createShardUploader: sinon.stub().returns(clientEmitter)
+          }
+        });
+        var client = new StubbedClient();
+        var emitter = new EventEmitter();
+        var state = new EventEmitter();
+        state.uploaders = [];
+        var pointer = {
+          farmer: {
+            address: '127.0.0.1',
+            port: 1337,
+            nodeID: utils.rmd160('nodeid')
+          },
+          hash: utils.rmd160('')
+        };
+        client._transferShard(emitter, createReadable(), pointer, state);
+        setImmediate(function() {
+          clientEmitter.emit('finish');
+        });
+        emitter.on('finish', function() {
+          done();
+        });
+      });
+
     });
 
     describe('#_startTransfer', function() {
@@ -1787,6 +1818,31 @@ describe('BridgeClient', function() {
         setImmediate(function() {
           _request.restore();
           expect(fakeState.callback.called).to.equal(true);
+          done();
+        });
+      });
+
+      it('should error if state cleanup fails', function(done) {
+        var _request = sinon.stub(
+          BridgeClient.prototype,
+          '_request'
+        ).callsArgWith(
+          3,
+          new Error('Request failed')
+        );
+        var fakeState = {
+          completed: 1,
+          numShards: 2,
+          file: 'file',
+          fileName: 'foo.mp3',
+          cleanup: function(cb) {
+            cb(new Error('oops'));
+          },
+          callback: sinon.stub()
+        };
+        var client = new BridgeClient();
+        client._shardTransferComplete(fakeState, {}, function(e) {
+          expect(e).to.be.instanceof(Error);
           done();
         });
       });

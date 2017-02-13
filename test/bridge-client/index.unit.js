@@ -472,10 +472,9 @@ describe('BridgeClient', function() {
       it('should scrub file type', function(done) {
         var StubbedClient = proxyquire('../../lib/bridge-client', {});
         var client = new StubbedClient();
-        client.storeFileInBucket('b', 't', 31337, function(e) {
-          expect(e).to.be.instanceof(Error);
-          done();
-        });
+        var fn = client.storeFileInBucket.bind(client, 'b', 't', 13337);
+        expect(fn).to.throw(Error);
+        done();
       });
 
       it('should create frame, stage the shards, and upload', function(done) {

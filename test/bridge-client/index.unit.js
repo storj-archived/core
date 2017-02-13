@@ -676,6 +676,51 @@ describe('BridgeClient', function() {
         });
       });
 
+      it('should call done if killed', function(done) {
+        var StubbedClient = proxyquire('../../lib/bridge-client', {});
+        var self = new StubbedClient();
+        var state = new EventEmitter();
+        self.addShardToFileStagingFrame = function(a, b, c) {
+          state.killed = true;
+          setImmediate(c);
+          return { cancel: function () {} };
+        };
+        self._store.createReadStream = function() {
+          var rs = new Readable();
+          rs.push('foo');
+          rs.push(null);
+          return rs;
+        };
+        self._blacklist.toObject = function(cb) { return cb(null, {}); };
+        var meta = { frame: {}, challenges: true, tree: true, hash: 'foo' };
+        BridgeClient.prototype._handleShardTmpFileFinish
+          .bind(self, state, meta, done)();
+      });
+
+      it('should start transfer on success', function(done) {
+        var StubbedClient = proxyquire('../../lib/bridge-client', {});
+        var self = new StubbedClient();
+        var state = new EventEmitter();
+        self.addShardToFileStagingFrame = function(a, b, c) {
+          setImmediate(c);
+          return { cancel: function () {} };
+        };
+        self._store.createReadStream = function() {
+          var rs = new Readable();
+          rs.push('foo');
+          rs.push(null);
+          return rs;
+        };
+        self._startTransfer = function(a, b, c, d) {
+          d();
+        };
+        self._blacklist.toObject = function(cb) { return cb(null, {}); };
+        var meta = { frame: {}, challenges: true, tree: true, hash: 'foo' };
+        BridgeClient.prototype._handleShardTmpFileFinish
+          .bind(self, state, meta, done)();
+      });
+
+
       it('should return error if file is unsupported size', function(done) {
         var StubbedClient = proxyquire('../../lib/bridge-client', {
           fs: {

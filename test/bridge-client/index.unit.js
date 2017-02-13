@@ -1,6 +1,5 @@
 'use strict';
 
-var ReadableStream = require('readable-stream');
 var BridgeClient = require('../../lib/bridge-client');
 var proxyquire = require('proxyquire');
 var sinon = require('sinon');

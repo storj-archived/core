@@ -1,6 +1,5 @@
 'use strict';
 
-var ReadableStream = require('readable-stream');
 var BridgeClient = require('../../lib/bridge-client');
 var proxyquire = require('proxyquire');
 var sinon = require('sinon');
@@ -9,11 +8,13 @@ var KeyPair = require('../../lib/crypto-tools/keypair');
 var utils = require('../../lib/utils');
 var EventEmitter = require('events').EventEmitter;
 var stream = require('readable-stream');
+var Readable = require('stream').Readable;
 var FileMuxer = require('../../lib/file-handling/file-muxer');
 var crypto = require('crypto');
 var utils = require('../../lib/utils');
 var UploadState = require('../../lib/bridge-client/upload-state');
 var ExchangeReport = require('../../lib/bridge-client/exchange-report');
+var MemBlobStore = require('memory-blob-store');
 
 describe('BridgeClient', function() {
 
@@ -467,10 +468,26 @@ describe('BridgeClient', function() {
 
     describe('#storeFileInBucket', function() {
 
+      it('should scrub file type', function(done) {
+        var StubbedClient = proxyquire('../../lib/bridge-client', {});
+        var client = new StubbedClient();
+        var fn = client.storeFileInBucket.bind(client, 'b', 't', 13337);
+        expect(fn).to.throw(Error);
+        done();
+      });
+
       it('should create frame, stage the shards, and upload', function(done) {
         var _demuxer = new EventEmitter();
         var _shard1 = new stream.Readable({ read: function noop() {} });
         var _shard2 = new stream.Readable({ read: function noop() {} });
+        var createReadable = function() {
+          var bytes = crypto.randomBytes(64);
+          var rs = new Readable();
+          rs._read = function() {};
+          rs.push(bytes);
+          rs.push(null);
+          return rs;
+        };
         var StubbedClient = proxyquire('../../lib/bridge-client', {
           fs: {
             statSync: sinon.stub().returns({ size: 64 }),
@@ -551,18 +568,31 @@ describe('BridgeClient', function() {
           '_request'
         ).callsArg(3);
         var client = new StubbedClient();
-        client.storeFileInBucket('bucket', 'token', 'file', function() {
+        client._store = new MemBlobStore();
+        client.storeFileInBucket('b', 't', createReadable(), {
+          fileName: 'fizzbuzz.txt'
+        }, stored);
+
+        function stored() {
           _createFrame.restore();
           _addShard.restore();
           _request.restore();
           done();
-        });
+        };
       });
 
       it('should return error if create frame fails', function(done) {
         var _demuxer = new EventEmitter();
         var StubbedClient = proxyquire('../../lib/bridge-client', {
           fs: {
+            createReadStream: function() {
+              var bytes = crypto.randomBytes(64);
+              var rs = new Readable();
+              rs._read = function() {};
+              rs.push(bytes);
+              rs.push(null);
+              return rs;
+            },
             statSync: sinon.stub().returns({ size: 64 }),
             unlinkSync: sinon.stub()
           },
@@ -593,54 +623,16 @@ describe('BridgeClient', function() {
         var _demuxer = new EventEmitter();
         var _shard1 = new stream.Readable({ read: function noop() {} });
         var _shard2 = new stream.Readable({ read: function noop() {} });
-        var StubbedClient = proxyquire('../../lib/bridge-client', {
-          fs: {
-            statSync: sinon.stub().returns({ size: 64 }),
-            unlinkSync: sinon.stub(),
-            createWriteStream: function() {
-              return new stream.Writable({
-                write: function(data, enc, done) {
-                  done();
-                }
-              });
-            },
-            createReadStream: function() {
-              var called = false;
-              function data() {
-                if (called) {
-                  return null;
-                }
+        var createReadable = function() {
+          var bytes = crypto.randomBytes(64);
+          var rs = new Readable();
+          rs._read = function() {};
+          rs.push(bytes);
+          rs.push(null);
+          return rs;
+        };
 
-                called = true;
-                return crypto.randomBytes(32);
-              }
-              return new stream.Readable({
-                read: function() {
-                  this.push(data());
-                }
-              });
-            }
-          },
-          '../data-channels/client': function() {
-            var emitter = new EventEmitter();
-            emitter.createWriteStream = function() {
-              return new stream.Writable({
-                write: function(c, e, cb) {
-                  cb();
-                }
-              });
-            };
-            setTimeout(function() {
-              emitter.emit('open');
-            }, 20);
-            return emitter;
-          },
-          '../file-handling/file-demuxer': function() {
-            _demuxer.DEFAULTS = { shardSize: 32 };
-            return _demuxer;
-          },
-          request: sinon.stub()
-        });
+        var StubbedClient = proxyquire('../../lib/bridge-client', {});
         var _createFrame = sinon.stub(
           StubbedClient.prototype,
           'createFileStagingFrame',
@@ -671,7 +663,11 @@ describe('BridgeClient', function() {
           '_request'
         );
         var client = new StubbedClient();
-        client.storeFileInBucket('bucket', 'token', 'file', function(err) {
+        client._store = new MemBlobStore();
+        client.storeFileInBucket('b', 't', createReadable(), {
+          fileName: 'foobar.buzz',
+          fileSize: 1337
+        }, function(err) {
           _createFrame.restore();
           _addShard.restore();
           _request.restore();
@@ -680,10 +676,67 @@ describe('BridgeClient', function() {
         });
       });
 
+      it('should call done if killed', function(done) {
+        var StubbedClient = proxyquire('../../lib/bridge-client', {});
+        var self = new StubbedClient();
+        var state = new EventEmitter();
+        self.addShardToFileStagingFrame = function(a, b, c) {
+          state.killed = true;
+          setImmediate(c);
+          return { cancel: function() {} };
+        };
+        self._store.createReadStream = function() {
+          var rs = new Readable();
+          rs.push('foo');
+          rs.push(null);
+          return rs;
+        };
+        self._blacklist.toObject = function(cb) {
+          return cb(null, {});
+        };
+        var meta = { frame: {}, challenges: true, tree: true, hash: 'foo' };
+        BridgeClient.prototype._handleShardTmpFileFinish
+          .bind(self, state, meta, done)();
+      });
+
+      it('should start transfer on success', function(done) {
+        var StubbedClient = proxyquire('../../lib/bridge-client', {});
+        var self = new StubbedClient();
+        var state = new EventEmitter();
+        self.addShardToFileStagingFrame = function(a, b, c) {
+          setImmediate(c);
+          return { cancel: function() {} };
+        };
+        self._store.createReadStream = function() {
+          var rs = new Readable();
+          rs.push('foo');
+          rs.push(null);
+          return rs;
+        };
+        self._startTransfer = function(a, b, c, d) {
+          d();
+        };
+        self._blacklist.toObject = function(cb) {
+          return cb(null, {});
+        };
+        var meta = { frame: {}, challenges: true, tree: true, hash: 'foo' };
+        BridgeClient.prototype._handleShardTmpFileFinish
+          .bind(self, state, meta, done)();
+      });
+
+
       it('should return error if file is unsupported size', function(done) {
         var StubbedClient = proxyquire('../../lib/bridge-client', {
           fs: {
-            statSync: sinon.stub().returns({ size: 0 })
+            createReadStream: function() {
+              var rs = new Readable();
+              rs._read = function() {};
+              rs.push(null);
+              return rs;
+            },
+            statSync: function() {
+              return { size: 0 };
+            }
           }
         });
         var client = new StubbedClient();
@@ -1319,12 +1372,10 @@ describe('BridgeClient', function() {
 
       it('should emit a retry on non 200 status', function(done) {
         var clientEmitter = new stream.Writable({ write: utils.noop });
+        function createReadable() {
+          return new stream.Readable({ read: function noop() {} });
+        }
         var StubbedClient = proxyquire('../../lib/bridge-client', {
-          fs: {
-            createReadStream: sinon.stub().returns(
-              new stream.Readable({ read: utils.noop })
-            )
-          },
           '../utils': {
             createShardUploader: sinon.stub().returns(clientEmitter)
           }
@@ -1341,9 +1392,9 @@ describe('BridgeClient', function() {
           },
           hash: utils.rmd160('')
         };
-        client._transferShard(emitter, 'name', pointer, state);
-        emitter.once('retry', function(name, pointer2) {
-          expect(name).to.equal('name');
+        client._transferShard(emitter, createReadable(), pointer, state);
+        emitter.once('retry', function(shardStream, pointer2) {
+          expect(shardStream.constructor).to.equal(stream.Readable);
           expect(pointer).to.equal(pointer2);
           done();
         });
@@ -1360,12 +1411,10 @@ describe('BridgeClient', function() {
 
       it('should emit a retry on non 200 status', function(done) {
         var clientEmitter = new stream.Writable({ write: utils.noop });
+        function createReadable() {
+          return new stream.Readable({ read: function noop() {} });
+        }
         var StubbedClient = proxyquire('../../lib/bridge-client', {
-          fs: {
-            createReadStream: sinon.stub().returns(
-              new stream.Readable({ read: utils.noop })
-            )
-          },
           '../utils': {
             createShardUploader: sinon.stub().returns(clientEmitter)
           }
@@ -1382,9 +1431,9 @@ describe('BridgeClient', function() {
           },
           hash: utils.rmd160('')
         };
-        client._transferShard(emitter, 'name', pointer, state);
-        emitter.once('retry', function(name, pointer2) {
-          expect(name).to.equal('name');
+        client._transferShard(emitter, createReadable(), pointer, state);
+        emitter.once('retry', function(shardStream, pointer2) {
+          expect(shardStream.constructor).to.equal(stream.Readable);
           expect(pointer).to.equal(pointer2);
           done();
         });
@@ -1403,12 +1452,10 @@ describe('BridgeClient', function() {
 
       it('should emit a retry on client error', function(done) {
         var clientEmitter = new stream.Writable({ write: utils.noop });
+        function createReadable() {
+          return new stream.Readable({ read: function noop() {} });
+        }
         var StubbedClient = proxyquire('../../lib/bridge-client', {
-          fs: {
-            createReadStream: sinon.stub().returns(
-              new stream.Readable({ read: utils.noop })
-            )
-          },
           '../utils': {
             createShardUploader: sinon.stub().returns(clientEmitter)
           }
@@ -1425,9 +1472,9 @@ describe('BridgeClient', function() {
           },
           hash: utils.rmd160('')
         };
-        client._transferShard(emitter, 'name', pointer, state);
-        emitter.once('retry', function(name, pointer2) {
-          expect(name).to.equal('name');
+        client._transferShard(emitter, createReadable(), pointer, state);
+        emitter.once('retry', function(shardStream, pointer2) {
+          expect(shardStream.constructor).to.equal(stream.Readable);
           expect(pointer).to.equal(pointer2);
           done();
         });
@@ -1439,12 +1486,10 @@ describe('BridgeClient', function() {
       it('should cleanup when state killed', function(done) {
         var clientEmitter = new stream.Writable({ write: utils.noop });
         var _end = sinon.stub(clientEmitter, 'end');
+        function createReadable() {
+          return new stream.Readable({ read: function noop() {} });
+        }
         var StubbedClient = proxyquire('../../lib/bridge-client', {
-          fs: {
-            createReadStream: sinon.stub().returns(new ReadableStream({
-              read: utils.noop
-            }))
-          },
           '../utils': {
             createShardUploader: sinon.stub().returns(clientEmitter)
           }
@@ -1460,7 +1505,7 @@ describe('BridgeClient', function() {
             nodeID: utils.rmd160('nodeid')
           }
         };
-        client._transferShard(emitter, 'name', pointer, state);
+        client._transferShard(emitter, createReadable(), pointer, state);
         emitter.on('finish', function() {
           expect(_end.called).to.equal(true);
           done();
@@ -1469,6 +1514,37 @@ describe('BridgeClient', function() {
           setImmediate(function() {
             state.emit('killed');
           });
+        });
+      });
+
+      it('should emit a finish on success', function(done) {
+        var clientEmitter = new stream.Writable({ write: utils.noop });
+        function createReadable() {
+          return new stream.Readable({ read: function noop() {} });
+        }
+        var StubbedClient = proxyquire('../../lib/bridge-client', {
+          '../utils': {
+            createShardUploader: sinon.stub().returns(clientEmitter)
+          }
+        });
+        var client = new StubbedClient();
+        var emitter = new EventEmitter();
+        var state = new EventEmitter();
+        state.uploaders = [];
+        var pointer = {
+          farmer: {
+            address: '127.0.0.1',
+            port: 1337,
+            nodeID: utils.rmd160('nodeid')
+          },
+          hash: utils.rmd160('')
+        };
+        client._transferShard(emitter, createReadable(), pointer, state);
+        setImmediate(function() {
+          clientEmitter.emit('finish');
+        });
+        emitter.on('finish', function() {
+          done();
         });
       });
 
@@ -1482,6 +1558,9 @@ describe('BridgeClient', function() {
           transferRetries: 3,
           retryThrottle: 0
         });
+        client._store = new MemBlobStore();
+        var ws = client._store.createWriteStream('tmpname');
+        ws.end('hello_world');
         sinon.stub(client, 'createExchangeReport');
         var pointer = {
           farmer: {
@@ -1499,6 +1578,7 @@ describe('BridgeClient', function() {
           '_shardTransferComplete'
         ).callsArg(2);
         var state = new EventEmitter();
+        state.file = new stream.Readable({ read: function noop() {} });
         client._startTransfer(pointer, state, {
           frame: 'frame',
           tmpName: 'tmpname',
@@ -1525,8 +1605,12 @@ describe('BridgeClient', function() {
         var _transferStatus = new EventEmitter();
         var _kill = sinon.stub();
         var client = new BridgeClient();
+        client._store = new MemBlobStore();
+        var ws = client._store.createWriteStream('tmpname');
+        ws.end('hello_world');
         sinon.stub(client, 'createExchangeReport');
         var state = new EventEmitter();
+        state.file = new stream.Readable({ read: function noop() {} });
         state.queue = { kill: _kill };
         state.callback = sinon.stub();
         var pointer = {
@@ -1546,6 +1630,7 @@ describe('BridgeClient', function() {
         ).callsArg(2);
         var _retry = sinon.stub(client, '_handleShardTmpFileFinish');
         client._startTransfer(pointer, state, {
+          tmpName: 'tmpname',
           excludeFarmers: [],
           transferRetries: 3
         });
@@ -1554,8 +1639,11 @@ describe('BridgeClient', function() {
           setImmediate(function() {
             _transferShard.restore();
             _transferComplete.restore();
-            expect(_retry.called).to.equal(true);
-            done();
+            // Make sure callback is triggered to avoid race
+            client._blacklist.push('foo', function() {
+              expect(_retry.called).to.equal(true);
+              done();
+            });
           });
         });
       });
@@ -1565,34 +1653,37 @@ describe('BridgeClient', function() {
     describe('#_handleShardTmpFileFinish', function() {
 
       it('should callback early if the queue is killed', function(done) {
-        var StubbedClient = proxyquire('../../lib/bridge-client', {
-          fs: {
-            createReadStream: function() {
-              var wasRead = false;
-              return new stream.Readable({
-                read: function() {
-                  if (wasRead) {
-                    return this.push(null);
-                  }
-
-                  wasRead = true;
-                  this.push(Buffer('test'));
-                }
-              });
-            }
-          }
-        });
+        var StubbedClient = proxyquire('../../lib/bridge-client', {});
         var client = new StubbedClient();
+        client._store = new MemBlobStore();
         var state = new UploadState({
           worker: utils.noop
         });
+        state.file = new Readable({ read: function noop() {} });
+        state.callback = function noop() {};
         var _addShardToFileStagingFrame = sinon.stub(
           client,
           'addShardToFileStagingFrame'
         ).callsArg(2);
-        state.cleanup();
+
+        function createReadStream() {
+          var wasRead = false;
+          return new stream.Readable({
+            read: function() {
+              if (wasRead) {
+                return this.push(null);
+              }
+
+              wasRead = true;
+              this.push(Buffer('test'));
+            }
+          });
+        }
+
         client._handleShardTmpFileFinish(state, {
           frame: {},
+          tmpName: 'foobar',
+          stream: createReadStream(),
           hash: utils.sha256('')
         }, function() {
           _addShardToFileStagingFrame.restore();
@@ -1601,27 +1692,29 @@ describe('BridgeClient', function() {
       });
 
       it('should not duplicate audit generation', function(done) {
-        var StubbedClient = proxyquire('../../lib/bridge-client', {
-          fs: {
-            createReadStream: function() {
-              var wasRead = false;
-              return new stream.Readable({
-                read: function() {
-                  if (wasRead) {
-                    return this.push(null);
-                  }
+        var StubbedClient = proxyquire('../../lib/bridge-client', {});
 
-                  wasRead = true;
-                  this.push(Buffer('test'));
-                }
-              });
+        function createReadStream() {
+          var wasRead = false;
+          return new stream.Readable({
+            read: function() {
+              if (wasRead) {
+                return this.push(null);
+              }
+
+              wasRead = true;
+              this.push(Buffer('test'));
             }
-          }
-        });
+          });
+        }
+
         var client = new StubbedClient();
+        client._store = new MemBlobStore();
         var state = new UploadState({
           worker: utils.noop
         });
+        state.file = new Readable({ read: function noop() {} });
+        state.callback = function noop() {};
         var _addShardToFileStagingFrame = sinon.stub(
           client,
           'addShardToFileStagingFrame',
@@ -1635,8 +1728,10 @@ describe('BridgeClient', function() {
           }
         );
         client._handleShardTmpFileFinish(state, {
+          tmpName: 'foobar',
           frame: {},
           hash: utils.sha256(''),
+          stream: createReadStream(),
           challenges: 'CHALLENGES',
           tree: 'TREE'
         }, function() {
@@ -1646,27 +1741,27 @@ describe('BridgeClient', function() {
       });
 
       it('should callback early if the queue is killed', function(done) {
-        var StubbedClient = proxyquire('../../lib/bridge-client', {
-          fs: {
-            createReadStream: function() {
-              var wasRead = false;
-              return new stream.Readable({
-                read: function() {
-                  if (wasRead) {
-                    return this.push(null);
-                  }
+        var StubbedClient = proxyquire('../../lib/bridge-client', {});
+        function createReadStream() {
+          var wasRead = false;
+          return new stream.Readable({
+            read: function() {
+              if (wasRead) {
+                return this.push(null);
+              }
 
-                  wasRead = true;
-                  this.push(Buffer('test'));
-                }
-              });
+              wasRead = true;
+              this.push(Buffer('test'));
             }
-          }
-        });
+          });
+        }
         var client = new StubbedClient();
+        client._store = new MemBlobStore();
         var state = new UploadState({
           worker: utils.noop
         });
+        state.file = new Readable({ read: function noop() {} });
+        state.callback = function noop() {};
         var _addShardToFileStagingFrame = sinon.stub(
           client,
           'addShardToFileStagingFrame',
@@ -1677,6 +1772,8 @@ describe('BridgeClient', function() {
         );
         client._handleShardTmpFileFinish(state, {
           frame: {},
+          tmpName: 'foobar',
+          stream: createReadStream(),
           hash: utils.sha256('')
         }, function() {
           _addShardToFileStagingFrame.restore();
@@ -1714,7 +1811,10 @@ describe('BridgeClient', function() {
           completed: 1,
           numShards: 2,
           file: 'file',
-          cleanup: sinon.stub(),
+          fileName: 'foo.mp3',
+          cleanup: function(cb) {
+            cb();
+          },
           callback: sinon.stub()
         };
         var client = new BridgeClient();
@@ -1722,6 +1822,24 @@ describe('BridgeClient', function() {
         setImmediate(function() {
           _request.restore();
           expect(fakeState.callback.called).to.equal(true);
+          done();
+        });
+      });
+
+      it('should error if state cleanup fails', function(done) {
+        var fakeState = {
+          completed: 1,
+          numShards: 2,
+          file: 'file',
+          fileName: 'foo.mp3',
+          cleanup: function(cb) {
+            cb(new Error('oops'));
+          },
+          callback: sinon.stub()
+        };
+        var client = new BridgeClient();
+        client._shardTransferComplete(fakeState, {}, function(e) {
+          expect(e).to.be.instanceof(Error);
           done();
         });
       });

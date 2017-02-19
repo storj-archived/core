@@ -54,6 +54,15 @@ describe('FileDemuxer', function() {
       expect(FileDemuxer(filePathEven)).to.be.instanceOf(FileDemuxer);
     });
 
+    it('should gracefully handle errors when reading from fs', function(done) {
+      var dmux = new FileDemuxer(filePathEven);
+      dmux.on('error', function(err) {
+        expect(err.message).to.equal('HDD FAILING! WUT DO?!?');
+        done();
+      });
+      dmux._source.emit('error', new Error('HDD FAILING! WUT DO?!?'));
+    });
+
   });
 
   describe('#event:shard', function() {

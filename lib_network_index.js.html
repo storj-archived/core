@@ -123,19 +123,19 @@ var OfferManager = require('../contract/offer-manager');
  * @param {Object}  options
  * @param {String} [options.hdKey] - Extended SIP32 private key at 'group index'
  * @param {Number} [options.hdIndex] - Derivation index for hdKey
- * @param {KeyPair}[options.keyPair] - Node's cryptographic identity
+ * @param {KeyPair} [options.keyPair] - Node's cryptographic identity
  * @param {StorageManager} options.storageManager - Storage manager backend
- * @param {String}  options.bridgeUri - URL for bridge server seed lookup
- * @param {Object}  options.logger - Logger instance
- * @param {Array}   options.seedList - List of seed URIs to join
- * @param {String}  options.rpcAddress - Public node IP or hostname
- * @param {Number}  options.rpcPort - Listening port for RPC
+ * @param {String} options.bridgeUri - URL for bridge server seed lookup
+ * @param {Object} options.logger - Logger instance
+ * @param {Array} options.seedList - List of seed URIs to join
+ * @param {String} options.rpcAddress - Public node IP or hostname
+ * @param {Number} options.rpcPort - Listening port for RPC
  * @param {Boolean} options.doNotTraverseNat - Skip NAT traversal strategies
- * @param {Number}  options.maxTunnels - Max number of tunnels to provide
- * @param {Number}  options.maxConnections - Max concurrent connections
- * @param {Object}  options.tunnelGatewayRange
- * @param {Number}  options.tunnelGatewayRange.min - Min port for gateway bind
- * @param {Number}  options.tunnelGatewayRange.max - Max port for gateway bind
+ * @param {Number} options.maxTunnels - Max number of tunnels to provide
+ * @param {Number} options.maxConnections - Max concurrent connections
+ * @param {Object} options.tunnelGatewayRange
+ * @param {Number} options.tunnelGatewayRange.min - Min port for gateway bind
+ * @param {Number} options.tunnelGatewayRange.max - Max port for gateway bind
  * @param {Object} [options.joinRetry]
  * @param {Number} [options.joinRetry.times] - Times to retry joining net
  * @param {Number} [options.joinRetry.interval] - MS to wait before retrying
@@ -281,6 +281,14 @@ Network.prototype._bindTransportHooks = function() {
   this.transport.before('receive', kad.hooks.protocol(
     this._protocol.getRouteMap()
   ));
+  // NB: After receiving a message, reset the net re-entry timeout
+  this.transport.after('receive', () => {
+    clearTimeout(this._reEntryTimeout);
+    this._reEntryTimeout = setTimeout(
+      () => this._enterOverlay(utils.noop),
+      constants.NET_REENTRY
+    );
+  });
 };
 
 /**
@@ -371,7 +379,8 @@ Network.prototype._enterOverlay = function(onConnected) {
       }
 
       // NB: Force re-entry into network to refresh routes every 10 minutes
-      setTimeout(_trySeeds, constants.NET_REENTRY);
+      clearTimeout(self._reEntryTimeout);
+      self._reEntryTimeout = setTimeout(_trySeeds, constants.NET_REENTRY);
       onConnected(null);
     });
   }

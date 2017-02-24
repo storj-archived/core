@@ -113,6 +113,8 @@ var Blacklist = require('./blacklist');
 var stream = require('readable-stream');
 var async = require('async');
 var ExchangeReport = require('./exchange-report');
+var FsBlobStore = require('fs-blob-store');
+var once = require('once');
 
 /**
  * Represents a client interface to a given bridge server
@@ -132,6 +134,11 @@ var ExchangeReport = require('./exchange-report');
  * @param {Object} options.basicAuth
  * @param {String} options.basicAuth.email - Email address for HTTP basic auth
  * @param {String} options.basicAuth.password - Password for HTTP basic auth
+ * @param {String} [options.blacklistFolder] - The folder that blacklist
+ * entries will be persisted to if using the default fs-store
+ * @param {Object} [options.store] - The store that blacklist enteries will be
+ * persisted to. This object must be compatible with the API of
+ * {@link https://github.com/maxogden/abstract-blob-store|abstract-blob-store}
  */
 function BridgeClient(uri, options) {
   if (!(this instanceof BridgeClient)) {
@@ -142,6 +149,7 @@ function BridgeClient(uri, options) {
   this._blacklist = new Blacklist(this._options);
   this._logger = this._options.logger;
   this._transferConcurrency = this._options.transferConcurrency;
+  this._store = this._options.store;
 }
 
 BridgeClient.DEFAULTS = {
@@ -149,7 +157,6 @@ BridgeClient.DEFAULTS = {
   logger: new Logger(0),
   transferConcurrency: 3,
   transferRetries: 0,
-  blacklistFolder: utils.tmpdir(),
   requestTimeout: 30000,
   retryThrottle: 500
 };
@@ -165,6 +172,35 @@ BridgeClient.prototype._checkOptions = function(uri, options) {
   options.baseURI = options.baseURI || uri;
   options = merge(Object.create(BridgeClient.DEFAULTS), options);
   assert.ok(utils.validateLogger(options.logger), 'Invalid logger supplied');
+
+  return this._configureBlacklist(options);
+};
+
+/**
+ * Setup the store for our blacklist
+ * @private
+ */
+BridgeClient.prototype._configureBlacklist = function(options) {
+  // If we were not given a store, STORJ_TEMP or os.tmpdir. This is
+  // intentionally left out of BridgeClient.DEFAULTS since utils.tmpdir()
+  // accesses the filesystem, breaking storj-lib's compatibility with browsers
+  if (options.store === undefined) {
+    if (options.blacklistFolder === undefined) {
+      options.blacklistFolder = utils.tmpdir();
+    }
+    options.store = new FsBlobStore(options.blacklistFolder);
+  }
+
+  // Only test for the parts of abstract-blob-store that we need
+  assert.ok(typeof options.store.createWriteStream === 'function',
+    'Supplied store must implement abstract-blob-store');
+
+  assert.ok(typeof options.store.createReadStream === 'function',
+    'Supplied store must implement abstract-blob-store');
+
+  assert.ok(typeof options.store.exists === 'function',
+    'Supplied store must implement abstract-blob-store');
+
   return options;
 };
 
@@ -511,9 +547,39 @@ BridgeClient.prototype.listMirrorsForFile = function(id, file, cb) {
  * @param {String} file - Path to file to store
  * @param {Function} callback
  */
-BridgeClient.prototype.storeFileInBucket = function(id, token, file, cb) {
+// eslint-disable-next-line max-params
+BridgeClient.prototype.storeFileInBucket = function(id, token, file, opts, cb) {
+  assert(typeof file === 'string' || file.readable,
+    'File name must be a string or readable stream.'
+  );
   var self = this;
-  var fileSize = fs.statSync(file).size;
+  if (typeof opts === 'function') {
+    cb = opts;
+    opts = {};
+  }
+  cb = once(cb);
+
+  var fileName = opts.fileName;
+  var fileSize = opts.fileSize || 0;
+
+  if (file.constructor === String) {
+    fileName = path.basename(file).split('.crypt')[0];
+    fileSize = fs.statSync(file).size;
+    file = fs.createReadStream(file);
+  }
+
+  self._startDemuxing({
+    file: file,
+    fileName: fileName,
+    fileSize: fileSize,
+    id: id,
+    token: token
+  }, cb);
+};
+
+BridgeClient.prototype._startDemuxing = function(options, cb) {
+  var self = this;
+  const {file, fileSize, fileName, id} = options;
 
   if (fileSize &lt;= 0) {
     return cb(new Error(fileSize +' bytes is not a supported file size.'));
@@ -525,9 +591,11 @@ BridgeClient.prototype.storeFileInBucket = function(id, token, file, cb) {
       shardConcurrency: this._transferConcurrency
     }
   );
+
   var uploadState = new UploadState({
     id: id,
     file: file,
+    fileName: fileName,
     onComplete: cb,
     worker: this._shardUploadWorker.bind(this),
     numShards: Math.ceil(fileSize / shardSize),
@@ -542,17 +610,30 @@ BridgeClient.prototype.storeFileInBucket = function(id, token, file, cb) {
         return cb(err);
       }
 
-      var demuxer = new FileDemuxer(file, { shardSize: shardSize });
+      var demuxer = new FileDemuxer(uploadState.file, {
+        shardSize: shardSize,
+        fileSize: fileSize
+      });
 
       demuxer.on('shard', function(shardStream, index) {
-        self._handleShardStream(shardStream, index, frame, uploadState);
+        self._handleShardStream({
+          shardStream: shardStream,
+          index: index,
+          frame: frame,
+          uploadState: uploadState
+        });
       }).on('error', cb);
     });
   }
-
   return _createFileStagingFrame();
 };
 
+/**
+ * BridgeClient.prototype._shardUploadWorker - description
+ *
+ * @param  {type} task description
+ * @param  {type} done description
+ */
 BridgeClient.prototype._shardUploadWorker = function(task, done) {
   var self = this;
 
@@ -561,7 +642,8 @@ BridgeClient.prototype._shardUploadWorker = function(task, done) {
     task.meta.tmpName,
     task.meta.index
   );
-  task.state.cleanQueue.push(task.meta.tmpName);
+
+  task.state.cleanQueue.push({store: self._store, key: task.meta.tmpName});
 
   task.shard.on('data', function(data) {
     task.meta.size += data.length;
@@ -569,7 +651,9 @@ BridgeClient.prototype._shardUploadWorker = function(task, done) {
     task.tmpFile.write(data);
   }).resume();
 
-  task.shard.on('end', task.tmpFile.end.bind(task.tmpFile));
+  task.shard.on('end', function() {
+    task.tmpFile.end()
+  });
 
   task.tmpFile.on('finish', function() {
     task.meta.hash = task.meta.hasher.digest();
@@ -580,33 +664,42 @@ BridgeClient.prototype._shardUploadWorker = function(task, done) {
 /**
  * Handles a demuxed shard and writes it to tmp and updates the state
  * @private
- * @param {stream.Readable} shard - Shard stream
- * @param {Number} i  - Index of the demuxed shard
- * @param {Object} frame - Frame object returned from bridge
- * @param {UploadState} state - The upload state machine
+ * @param {Object} options - Pass in configuration vars to this function
+ * @param {stream.Readable} options.shardStream - Shard stream
+ * @param {Number} options.index  - Index of the demuxed shard
+ * @param {Object} options.frame - Frame object returned from bridge
+ * @param {UploadState} options.uploadState - The upload state machine
  */
-BridgeClient.prototype._handleShardStream = function(shard, i, frame, state) {
-  var tmpdir = utils.tmpdir();
-  var meta = {
-    frame: frame,
-    tmpName: path.join(tmpdir, crypto.randomBytes(6).toString('hex')),
-    size: 0,
-    index: i,
-    hasher: crypto.createHash('sha256'),
-    hash: null,
-    excludeFarmers: this._blacklist.toObject(),
-    transferRetries: 0
-  };
-  var tmpFile = fs.createWriteStream(meta.tmpName);
-  var passthrough = new stream.PassThrough();
+BridgeClient.prototype._handleShardStream = function(options) {
+  var self = this;
+  const {shardStream, index, frame, uploadState} = options;
 
-  passthrough.pause();
-  state.queue.push({
-    state: state,
-    tmpFile: tmpFile,
-    meta: meta,
-    shard: shard.pipe(passthrough)
-  });
+  var tmpName = crypto.randomBytes(6).toString('hex')
+  var tmpFile = self._store.createWriteStream(tmpName)
+
+  this._blacklist.toObject(function(err, blacklist){
+    var meta = {
+      frame: frame,
+      tmpName: tmpName,
+      size: 0,
+      index: index,
+      hasher: crypto.createHash('sha256'),
+      hash: null,
+      excludeFarmers: blacklist,
+      transferRetries: 0
+    };
+
+    var passthrough = new stream.PassThrough();
+
+    passthrough.pause();
+
+    uploadState.queue.push({
+      state: uploadState,
+      tmpFile: tmpFile,
+      meta: meta,
+      shard: shardStream.pipe(passthrough)
+    });
+  })
 };
 
 /**
@@ -620,24 +713,30 @@ BridgeClient.prototype._handleShardTmpFileFinish = function(state, meta, done) {
   var self = this;
   var hash = utils.rmd160(meta.hash);
   var auditGenerator = new AuditStream(3);
-  var shardFile = fs.createReadStream(meta.tmpName);
+
+  var rs = self._store.createReadStream(meta.tmpName);
 
   self._logger.info('Hash for this shard is: %s', hash);
 
   function _handleError(err) {
     self._logger.warn('Failed to upload shard...');
-    state.cleanup();
-    return state.callback(err);
+    state.cleanup(function(err2){
+      // If there was an error, and we failed to cleanup temporary files, we
+      // propogate the collection of files that failed back to the caller. The
+      // logic is that the upload error isn't as immediately important as
+      // loosing track of files in the user's blobstore (s3, filesystem, etc)
+      return state.callback(err2 || err);
+    });
   }
 
   function _teardownAuditListeners() {
     auditGenerator.removeAllListeners();
   }
 
-  shardFile.on('error', _handleError);
+  rs.on('error', _handleError);
   state.on('killed', _teardownAuditListeners);
 
-  function _getContract() {
+  function _getContract(blacklist) {
     if (state.killed) {
       return done();
     }
@@ -645,7 +744,6 @@ BridgeClient.prototype._handleShardTmpFileFinish = function(state, meta, done) {
     if (!meta.challenges &amp;&amp; !meta.tree) {
       meta.challenges = auditGenerator.getPrivateRecord().challenges;
       meta.tree = auditGenerator.getPublicRecord();
-
       self._logger.info('Audit generation for shard done.');
     }
 
@@ -657,7 +755,7 @@ BridgeClient.prototype._handleShardTmpFileFinish = function(state, meta, done) {
       index: meta.index,
       challenges: meta.challenges,
       tree: meta.tree,
-      exclude: self._blacklist.toObject()
+      exclude: blacklist,
     }, function(err, pointer) {
       if (state.killed) {
         return done();
@@ -670,15 +768,20 @@ BridgeClient.prototype._handleShardTmpFileFinish = function(state, meta, done) {
       self._startTransfer(pointer, state, meta, done);
     });
 
-    state.removeListener('killed', _teardownAuditListeners);
-    state.on('killed', addShardToFrame.cancel);
+    // Only register listener if addShardToFrame succeeds
+    if (addShardToFrame) {
+      state.removeListener('killed', _teardownAuditListeners);
+      state.on('killed', addShardToFrame.cancel);
+    }
   }
 
-  if (meta.challenges &amp;&amp; meta.tree) {
-    _getContract();
-  } else {
-    shardFile.pipe(auditGenerator).on('finish', _getContract);
-  }
+  self._blacklist.toObject(function(e, blacklist) {
+    if (meta.challenges &amp;&amp; meta.tree) {
+      _getContract(blacklist);
+    } else {
+      rs.pipe(auditGenerator).on('finish', _getContract, blacklist);
+    }
+  });
 };
 
 /**
@@ -691,9 +794,11 @@ BridgeClient.prototype._handleShardTmpFileFinish = function(state, meta, done) {
  */
 BridgeClient.prototype._startTransfer = function(pointer, state, meta, done) {
   var self = this;
+  var rs = self._store.createReadStream(meta.tmpName);
+
   var transferStatus = self._transferShard(
     new EventEmitter(),
-    meta.tmpName,
+    rs,
     pointer,
     state
   );
@@ -708,9 +813,8 @@ BridgeClient.prototype._startTransfer = function(pointer, state, meta, done) {
     meta.exchangeReport.begin(pointer.hash);
   }
 
-  state.on('killed', function() {
-    transferStatus.removeAllListeners();
-  });
+  state.on('killed', transferStatus.removeAllListeners.bind(transferStatus));
+
   self._logger.info('Contract negotiated with: %j', pointer.farmer);
 
   transferStatus.on('retry', function() {
@@ -726,12 +830,13 @@ BridgeClient.prototype._startTransfer = function(pointer, state, meta, done) {
         meta.transferRetries
       );
       transferStatus.removeAllListeners();
-      self._blacklist.push(pointer.farmer.nodeID);
       meta.exchangeReport.end(ExchangeReport.FAILURE, 'TRANSFER_FAILED');
       self.createExchangeReport(meta.exchangeReport);
       meta.exchangeReport = null;
       meta.transferRetries = 0;
-      self._handleShardTmpFileFinish(state, meta, done);
+      self._blacklist.push(pointer.farmer.nodeID, function() {
+        self._handleShardTmpFileFinish(state, meta, done);
+      });
     }
   });
 
@@ -765,18 +870,12 @@ BridgeClient.prototype._shardTransferComplete = function(state, frame, done) {
     return done();
   }
 
-  // NB: use the original filename if called from cli
-  var origFileName = path.basename(state.file).split('.crypt')[0];
-
-  state.cleanup();
-
   function _shardTransferComplete() {
     self._logger.info('Transfer finished, creating entry.. (retry: %s)', retry);
-
     self._request('POST', '/buckets/' + state.bucketId + '/files', {
       frame: frame.id,
-      mimetype: mime.lookup(origFileName),
-      filename: origFileName
+      mimetype: mime.lookup(state.fileName),
+      filename: state.fileName
     }, function(err, file) {
       if (err) {
 
@@ -787,40 +886,44 @@ BridgeClient.prototype._shardTransferComplete = function(state, frame, done) {
 
         self._logger.error(err.message);
       }
-
       state.callback(err, file);
       return done();
     });
-  }
+  };
 
-  return _shardTransferComplete();
+  state.cleanup(function(err) {
+    if (err) {
+      return done(err);
+    }
+    return _shardTransferComplete();
+  });
 };
 
 /**
  * Transfers a shard to a specified farmer
  * @private
- * @param {events.EventEmitter} emitter - For getting status events
- * @param {String} tmpName - Path to shard file
- * @param {Object} pointer - Farmer Contact information
+ * @param {events.EventEmitter} evt - For getting status events
+ * @param {String} shardStream - readable stream of the shard
+ * @param {Object} p - Short for pointer, farmer Contact information
  * @param {UploadState} state - The upload state machine
  */
-BridgeClient.prototype._transferShard = function(evt, name, pointer, state) {
+BridgeClient.prototype._transferShard = function(evt, shardStream, p, state) {
   var self = this;
-  var shardFile = fs.createReadStream(name);
+
   var uploader = utils.createShardUploader(
-    new Contact(pointer.farmer),
-    pointer.hash,
-    pointer.token
+    new Contact(p.farmer),
+    p.hash,
+    p.token
   );
 
   function _handleUploadError(err) {
     self._logger.warn('Failed to transfer shard, reason: %s', err.message);
     uploader.removeAllListeners();
-    evt.emit('retry', name, pointer);
+    evt.emit('retry', shardStream, p);
   }
 
   function _handleStateKilled() {
-    shardFile.unpipe(uploader);
+    shardStream.unpipe(uploader);
     uploader.end();
     evt.emit('finish');
     evt.removeAllListeners('finish');
@@ -852,7 +955,8 @@ BridgeClient.prototype._transferShard = function(evt, name, pointer, state) {
   state.uploaders.push(uploader);
   uploader.on('response', _handleResponse);
   uploader.on('error', (err) => _handleUploadError(err));
-  shardFile.pipe(uploader).on('finish', function() {
+
+  shardStream.pipe(uploader).on('finish', function() {
     state.removeListener('killed', _handleStateKilled);
     evt.emit('finish');
     evt.removeAllListeners('finish');

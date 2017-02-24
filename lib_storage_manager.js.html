@@ -273,7 +273,7 @@ StorageManager.prototype.clean = function(callback) {
   });
 
   rstream.on('end', function() {
-    self._logger.info('flushing shards, some buckets will be inaccessbile');
+    self._logger.info('flushing shards, some buckets will be inaccessible');
     self._storage.flush(function(err) {
       /* istanbul ignore if */
       if (err) {
@@ -281,6 +281,7 @@ StorageManager.prototype.clean = function(callback) {
       }
 
       self._checkCapacity();
+      self._logger.info('flushing shards finished');
       callback();
     });
   });

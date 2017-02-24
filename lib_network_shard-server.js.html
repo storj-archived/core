@@ -351,6 +351,7 @@ ShardServer.prototype.routeRetrieval = function(req, res) {
 
     function _handleTransferFinish() {
       self.activeTransfers--;
+      self._log.debug('Shard download completed');
       report.end(ExchangeReport.SUCCESS, 'SHARD_DOWNLOADED');
       self._bridgeClient.createExchangeReport(report);
       self.emit('shardDownloaded', item, contact);

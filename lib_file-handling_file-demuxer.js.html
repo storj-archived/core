@@ -100,6 +100,7 @@ var EventEmitter = require('events').EventEmitter;
 var merge = require('merge');
 var utils = require('../utils');
 var os = require('os');
+var timers = require('timers');
 
 /**
  * Takes a single file read stream and outputs several output streams, used for
@@ -116,21 +117,29 @@ function FileDemuxer(filePath, options) {
     return new FileDemuxer(filePath, options);
   }
 
-  assert(
-    utils.existsSync(filePath),
-    'File does not exist at the supplied path'
-  );
-
   options = merge(Object.create(FileDemuxer.DEFAULTS), options);
 
-  this._fileSize = fs.statSync(filePath).size;
+  //turn filePath into a readable Stream
+  if (typeof filePath === 'string') {
+    assert(
+      utils.existsSync(filePath),
+      'File does not exist at the supplied path'
+    );
+    options.fileSize = fs.statSync(filePath).size;
+    filePath = fs.createReadStream(filePath).on('error',
+      this.emit.bind(this, 'error'));
+  }
+
+  this._fileSize = options.fileSize;
   this._filePosition = 0;
   this._shardSize = options.shardSize;
-  this._source = fs.createReadStream(filePath);
+
+  // at this point node and browser converge to a readable stream _source
+  this._source = filePath;
   this._currentShardIndex = 0;
 
   EventEmitter.call(this);
-  setImmediate(this._openStream.bind(this));
+  timers.setImmediate(this._openStream.bind(this));
 }
 
 FileDemuxer.SHARD_MULTIPLES_BACK = 4;
@@ -160,7 +169,7 @@ FileDemuxer.prototype._openStream = function() {
     this._currentOutput = new stream.Readable({ read: utils.noop });
     return this.emit('error', new Error('File size cannot be 0 Bytes.'));
   }
-
+  
   this._source.on('data', this._handleSourceBytes.bind(this));
   this._source.on('end', this._handleSourceEnded.bind(this));
 };
@@ -184,7 +193,7 @@ FileDemuxer.prototype._handleSourceBytes = function(chunk) {
     this.emit('shard', this._currentOutput, ++this._currentShardIndex);
   }
 
-  setImmediate(this._pushBytesToOutput.bind(this, chunk));
+  this._pushBytesToOutput(chunk);
 };
 
 /**
@@ -192,7 +201,7 @@ FileDemuxer.prototype._handleSourceBytes = function(chunk) {
  * @private
  */
 FileDemuxer.prototype._handleSourceEnded = function() {
-  this._closeCurrentOutput();
+  timers.setImmediate(this._closeCurrentOutput.bind(this));
   this.emit('finish');
 };
 

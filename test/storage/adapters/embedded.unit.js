@@ -182,23 +182,26 @@ describe('EmbeddedStorageAdapter', function() {
 
   describe('#_keys', function() {
 
-    it('should return all of the keys', function(done) {
-      store._keys(function(err, keys) {
-        expect(keys[0]).to.equal('5e52fee47e6b070565f74372468cdc699de89107');
-        done();
-      });
+    it('should stream all of the keys', function(done) {
+      var keyStream = store._keys();
+      keyStream.on('data', function(key) {
+        expect(key.toString()).to.equal(
+          '5e52fee47e6b070565f74372468cdc699de89107'
+        );
+      }).on('end', done);
     });
 
-    it('should callback with error if emitted from stream', function(done) {
+    it('should bubble error if emitted from stream', function(done) {
       var emitter = new EventEmitter();
       var _createKeyStream = sinon.stub(store._db, 'createKeyStream').returns(
         emitter
       );
-      store._keys(function(err) {
+      var keyStream = store._keys();
+      keyStream.on('error', function(err) {
         _createKeyStream.restore();
         expect(err.message).to.equal('Failed');
         done();
-      });
+      })
       setImmediate(function() {
         emitter.emit('error', new Error('Failed'));
       });

@@ -1,5 +1,6 @@
 'use strict';
 
+var stream = require('readable-stream');
 var sinon = require('sinon');
 var utils = require('../../lib/utils');
 var expect = require('chai').expect;
@@ -126,11 +127,8 @@ describe('StorageAdapter', function() {
     it('should emit an error if _keys fails', function(done) {
       var a = new StorageAdapter();
       var s = a.createReadStream();
-      a._keys = function(callback) {
-        callback(new Error('Something broke'));
-      };
       s.on('error', function(err) {
-        expect(err.message).to.equal('Something broke');
+        expect(err.message).to.equal('Method not implemented');
         done();
       }).read();
     });
@@ -138,11 +136,16 @@ describe('StorageAdapter', function() {
     it('should emit an error if peek fails', function(done) {
       var a = new StorageAdapter();
       var s = a.createReadStream();
-      a._keys = function(callback) {
-        callback(null, [
+      a._keys = function() {
+        let keys = [
           '1261d3f171c23169c893a21be1f03bacafad26d7',
           '5968d0cec66aefb9f4c7ffa5b2637152db1059cf'
-        ]);
+        ];
+        return new stream.Readable({
+          read: function() {
+            this.push(keys.shift() || null);
+          }
+        });
       };
       a.peek = function(key, callback) {
         callback(new Error('Shard data not found'));
@@ -156,14 +159,19 @@ describe('StorageAdapter', function() {
     it('should emit an error if peek fails later', function(done) {
       var a = new StorageAdapter();
       var s = a.createReadStream();
-      a._keys = function(callback) {
-        callback(null, [
+      a._keys = function() {
+        let keys = [
           '1261d3f171c23169c893a21be1f03bacafad26d7',
           '5968d0cec66aefb9f4c7ffa5b2637152db1059cf'
-        ]);
+        ];
+        return new stream.Readable({
+          read: function() {
+            this.push(keys.shift() || null);
+          }
+        });
       };
       a.peek = function(key, callback) {
-        if (key === '5968d0cec66aefb9f4c7ffa5b2637152db1059cf') {
+        if (key.toString() === '5968d0cec66aefb9f4c7ffa5b2637152db1059cf') {
           callback(new Error('Shard data not found'));
         } else {
           callback(null, {});
@@ -177,13 +185,15 @@ describe('StorageAdapter', function() {
 
     it('should end the stream when all keys are read', function(done) {
       var a = new StorageAdapter();
-      var s = a.createReadStream();
-      a._keys = function(callback) {
-        callback(null, []);
+      a._keys = function() {
+        return new stream.Readable({
+          read: function() {
+            this.push(null);
+          }
+        });
       };
-      s.on('end', function() {
-        done();
-      }).read();
+      var s = a.createReadStream();
+      s.on('data', utils.noop).on('end', done);
     });
 
   });

@@ -12,7 +12,6 @@ var utils = require('../../lib/utils');
 var StorageItem = require('../../lib/storage/item');
 var StorageManager = require('../../lib/storage/manager');
 var RAMStorageAdapter = require('../../lib/storage/adapters/ram');
-var EventEmitter = require('events').EventEmitter;
 var CLEANUP = [];
 
 describe('FarmerInterface', function() {
@@ -105,7 +104,7 @@ describe('FarmerInterface', function() {
       var _size = sinon.stub(
         farmer.storageManager._storage,
         'size'
-      ).callsArgWith(0, new Error('Cannot get farmer disk space'));
+      ).callsArgWith(1, new Error('Cannot get farmer disk space'));
       var _addTo = sinon.stub(farmer, '_addContractToPendingList');
       farmer._handleContractPublication(Contract({}));
       _size.restore();
@@ -133,7 +132,7 @@ describe('FarmerInterface', function() {
       var _size = sinon.stub(
         farmer.storageManager._storage,
         'size'
-      ).callsArgWith(0, null, 1000);
+      ).callsArgWith(1, null, 1000);
       farmer.storageManager._options.maxCapacity = 2000;
       var _addTo = sinon.stub(farmer, '_addContractToPendingList');
       //execute
@@ -671,69 +670,6 @@ describe('FarmerInterface', function() {
         subscribe: _subscribe,
         _handleContractPublication: done
       }, []);
-    });
-
-  });
-
-  describe('#_listenForCapacityChanges', function() {
-
-    it('should set the free space to true', function(done) {
-      var farmer = new FarmerInterface({
-        keyPair: KeyPair(),
-        rpcPort: 0,
-        tunnelServerPort: 0,
-        doNotTraverseNat: true,
-        logger: kad.Logger(0),
-        storageManager: new StorageManager(new RAMStorageAdapter())
-      });
-      CLEANUP.push(farmer);
-      var manager = new EventEmitter();
-      farmer._listenForCapacityChanges(manager);
-      manager.emit('unlocked');
-      setImmediate(function() {
-        expect(farmer._hasFreeSpace).to.equal(true);
-        done();
-      });
-    });
-
-    it('should set the free space to false', function(done) {
-      var farmer = new FarmerInterface({
-        keyPair: KeyPair(),
-        rpcPort: 0,
-        tunnelServerPort: 0,
-        doNotTraverseNat: true,
-        logger: kad.Logger(0),
-        storageManager: new StorageManager(new RAMStorageAdapter())
-      });
-      CLEANUP.push(farmer);
-      var manager = new EventEmitter();
-      farmer._listenForCapacityChanges(manager);
-      manager.emit('locked');
-      setImmediate(function() {
-        expect(farmer._hasFreeSpace).to.equal(false);
-        done();
-      });
-    });
-
-    it('should log the error', function(done) {
-      var logger = kad.Logger(0);
-      var _warn = sinon.stub(logger, 'warn');
-      var farmer = new FarmerInterface({
-        keyPair: KeyPair(),
-        rpcPort: 0,
-        tunnelServerPort: 0,
-        doNotTraverseNat: true,
-        logger: logger,
-        storageManager: new StorageManager(new RAMStorageAdapter())
-      });
-      CLEANUP.push(farmer);
-      var manager = new EventEmitter();
-      farmer._listenForCapacityChanges(manager);
-      manager.emit('error', new Error('Failed'));
-      setImmediate(function() {
-        expect(_warn.called).to.equal(true);
-        done();
-      });
     });
 
   });

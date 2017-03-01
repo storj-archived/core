@@ -124,18 +124,15 @@ describe('StorageAdapter', function() {
 
   describe('#createReadStream', function() {
 
-    it('should emit an error if _keys fails', function(done) {
+    it('should emit an error if _keys fails', function() {
       var a = new StorageAdapter();
-      var s = a.createReadStream();
-      s.on('error', function(err) {
-        expect(err.message).to.equal('Method not implemented');
-        done();
-      }).read();
+      expect(function() {
+        a.createReadStream();
+      }).to.throw(Error, 'Method not implemented');
     });
 
     it('should emit an error if peek fails', function(done) {
       var a = new StorageAdapter();
-      var s = a.createReadStream();
       a._keys = function() {
         let keys = [
           '1261d3f171c23169c893a21be1f03bacafad26d7',
@@ -150,6 +147,7 @@ describe('StorageAdapter', function() {
       a.peek = function(key, callback) {
         callback(new Error('Shard data not found'));
       };
+      var s = a.createReadStream();
       s.on('error', function(err) {
         expect(err.message).to.equal('Shard data not found');
         done();
@@ -158,7 +156,6 @@ describe('StorageAdapter', function() {
 
     it('should emit an error if peek fails later', function(done) {
       var a = new StorageAdapter();
-      var s = a.createReadStream();
       a._keys = function() {
         let keys = [
           '1261d3f171c23169c893a21be1f03bacafad26d7',
@@ -177,6 +174,7 @@ describe('StorageAdapter', function() {
           callback(null, {});
         }
       };
+      var s = a.createReadStream();
       s.on('error', function(err) {
         expect(err.message).to.equal('Shard data not found');
         done();

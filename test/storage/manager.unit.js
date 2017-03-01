@@ -131,56 +131,7 @@ describe('Manager', function() {
 
   });
 
-  describe('#_checkCapacity', function() {
-
-    it('should emit an error if size fails', function(done) {
-      var db = new RAMStorageAdapter();
-      var _size = sinon.stub(db, '_size', function(callback) {
-        setTimeout(function() {
-          callback(new Error('Failed'));
-        }, 10);
-      });
-      var man = new Manager(db);
-      man.on('error', function(err) {
-        _size.restore();
-        expect(err.message).to.equal('Failed');
-        done();
-      })._checkCapacity();
-    });
-
-    it('should emit locked if the status changes', function(done) {
-      var db = new RAMStorageAdapter();
-      var _size = sinon.stub(db, '_size').callsArgWith(0, null, 1);
-      var man = new Manager(db, { maxCapacity: 0 });
-      man.on('locked', function() {
-        _size.restore();
-        done();
-      })._checkCapacity();
-    });
-
-    it('should emit unlocked if the status changes', function(done) {
-      var db = new RAMStorageAdapter();
-      var _size = sinon.stub(db, '_size').callsArgWith(0, null, 5);
-      var man = new Manager(db, { maxCapacity: 10 });
-      man._capacityReached = true;
-      man.on('unlocked', function() {
-        _size.restore();
-        done();
-      })._checkCapacity();
-    });
-
-  });
-
   describe('#save', function() {
-
-    it('should return error if capacity reached', function(done) {
-      var man = new Manager(new RAMStorageAdapter());
-      man._capacityReached = true;
-      man.save(StorageItem(), function(err) {
-        expect(err.message).to.equal('Storage capacity reached');
-        done();
-      });
-    });
 
     it('should bubble error from underlying db', function(done) {
       var db = new RAMStorageAdapter();
@@ -188,7 +139,9 @@ describe('Manager', function() {
       var _peek = sinon.stub(db, 'peek').callsArgWith(1, new Error('Failed'));
       var _put = sinon.stub(db, '_put').callsArgWith(2, new Error('Failed'));
       var _get = sinon.stub(db, 'get').callsArgWith(1, new Error('Failed'));
-      man.save(StorageItem(), function(err) {
+      man.save(StorageItem({
+        hash: utils.rmd160('hash')
+      }), function(err) {
         _put.restore();
         _peek.restore();
         _get.restore();

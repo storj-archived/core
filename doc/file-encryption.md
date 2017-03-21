@@ -82,37 +82,28 @@ offers tools for this based on Bitcoin's BIP39 Mnemonic passphrases.
 
 {@link KeyRing} provides tools for generating a mnemonic passphrase and
 writing it to disk. If a mnemonic is found, Storj Core will prefer
-passphrase-based key derivation to PBKDF2 derivation. {@link DeterministicKeyIV},
-creates a file key as follows:
+passphrase-based key derivation to PBKDF2 derivation. Storj clients should
+create a file key as follows:
 
-1. Prepend the passphrase to the file id
+1. Prepend the passphrase to the Bucket ID
 2. Calculate the `sha512` hash of the resulting string
-3. Hex encode the first 64 bytes of the hash
+3. Take the first 64 bits of the resulting hash to make the **Bucket Key**
+4. Prepend the Bucket Key to the File ID
+5. Calculate the `sha512` hash of the resulting string
+6. Take the first 64 bits of the resulting hash to make the **File Key**
 
 As any client with access to the passphrase can easily generate file keys on
 demand, this provides additional portability of files between machines and
 applications.
 
 It is strongly recommended that users write down the passphrase, and keep it in
-a secure place. It is possible to generate multiple mnemonics for each account,
-and in the future mnemonics may be generated on a per-bucket level.
+a secure place.
 
-###### Public Bucket Key Derivation
+###### Public Bucket Key Storage
 
-Users may designate a bucket for public use by setting public-push and/or
-public-pull flags. Files in public buckets user a variation on the
-deterministic key generation process to allow public access. Rather than basing
-key generation on a passphrase, each public bucket has a shared "bucket key,"
-which is used to generate keys for files in that bucket.
-
-Keys are generated as follows:
-
-1. Prepend the bucket key to the file id
-2. Calculate the `sha512` hash of the resulting string
-3. Hex encode the first 64 bytes of the hash
-
-The bucket key is typically cached on the Bridge server, and provided to
-clients when they request files.
+Public Buckets are a feature of Bridge, not a feature of Storj. When a Public
+Bucket is created, the Bucket Key is stored with Bridge. It is then provided to
+clients requesting PUSH or PULL tokens from that bucket.
 
 #### References
 

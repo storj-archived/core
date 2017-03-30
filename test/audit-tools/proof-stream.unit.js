@@ -8,12 +8,14 @@ var sinon = require('sinon');
 
 describe('Proof', function() {
 
-  var SHARD = new Buffer('testshard');
+  const CHALLENGE = new Buffer('d3ccb55d5c9bd56606bca0187ecf28699cb674fb7e243' +
+                               'fb4f180078735181686', 'hex');
+  const SHARD = new Buffer('testshard');
 
   describe('@constructor', function() {
 
     it('should create instance without the new keyword', function() {
-      expect(ProofStream([], 'challenge')).to.be.instanceOf(ProofStream);
+      expect(ProofStream([], CHALLENGE)).to.be.instanceOf(ProofStream);
     });
 
   });
@@ -24,11 +26,11 @@ describe('Proof', function() {
       var audit = new AuditStream(12);
       audit.end(SHARD);
       setImmediate(function() {
-        var proof = new ProofStream(audit.getPublicRecord(), 'challenge');
+        var proof = new ProofStream(audit.getPublicRecord(), CHALLENGE);
         var leaves = proof._generateLeaves(Array(12));
         expect(leaves.length).to.equal(16);
         leaves.splice(12).forEach(function(leaf) {
-          expect(leaf).to.equal(utils.rmd160sha256(''));
+          expect(leaf).to.equal(utils.rmd160sha256b(''));
         });
       });
     });
@@ -38,7 +40,7 @@ describe('Proof', function() {
   describe('#_flush', function() {
 
     it('should emit an error if generate proof fails', function(done) {
-      var proof = ProofStream([], 'challenge');
+      var proof = ProofStream([], CHALLENGE);
       var _generateProof = sinon.stub(proof, '_generateProof').throws(
         new Error('Failed')
       );
@@ -53,11 +55,12 @@ describe('Proof', function() {
 
   describe('#getProofResult', function() {
 
-    it('should create a recursive tuple structure with leaves', function() {
+    it('should create a recursive tuple structure with leaves', function(done) {
       var audit = new AuditStream(12);
       audit.end(SHARD);
       setImmediate(function() {
         var challenge = audit.getPrivateRecord().challenges[1];
+        console.log('challenge', challenge);
         var proof = new ProofStream(audit.getPublicRecord(), challenge);
 
         proof.end(SHARD);
@@ -94,7 +97,7 @@ describe('Proof', function() {
 
           function _getChallengeResponse(data) {
             if (data.length === 1) {
-              return utils.rmd160sha256(data[0]);
+              return utils.rmd160sha256b(data[0]);
             }
 
             if (Array.isArray(data[0])) {
@@ -107,11 +110,12 @@ describe('Proof', function() {
           var result = proof.getProofResult();
 
           expect(result).to.have.lengthOf(2);
-          expect(_getChallengeResponse(result)).to.equal(
-            utils.rmd160sha256(utils.rmd160sha256(
-              challenge + SHARD.toString('hex')
-            ))
+          expect(_getChallengeResponse(result)).to.eql(
+            utils.rmd160sha256b(utils.rmd160sha256b(
+              Buffer.concat([Buffer.from(challenge, 'hex'), SHARD])
+          ))
           );
+          done();
         });
       });
     });

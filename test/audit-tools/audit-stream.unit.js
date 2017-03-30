@@ -90,7 +90,8 @@ describe('AuditStream', function() {
         var secret = audit.getPrivateRecord();
         expect(secret.root).to.equal(audit._tree.root());
         expect(secret.depth).to.equal(audit._tree.levels());
-        expect(secret.challenges).to.equal(audit._challenges);
+        expect(secret.challenges)
+          .to.eql(audit._challenges.map((i) => i.toString('hex')));
         done();
       });
       audit.write(SHARD);

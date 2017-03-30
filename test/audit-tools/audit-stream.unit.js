@@ -66,7 +66,7 @@ describe('AuditStream', function() {
       var audit = new AuditStream(12);
       audit.on('finish', function() {
         var secret = audit.getPrivateRecord();
-        expect(secret.root).to.equal(audit._tree.root().toLowerCase());
+        expect(secret.root).to.equal(audit._tree.root());
         expect(secret.depth).to.equal(audit._tree.levels());
         expect(secret.challenges).to.equal(audit._challenges);
         done();
@@ -102,7 +102,7 @@ describe('AuditStream#fromRecords', function() {
       );
       expect(
         audit1.getPrivateRecord().root
-      ).to.equal(
+      ).to.eql(
         audit2.getPrivateRecord().root
       );
       done();

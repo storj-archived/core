@@ -60,7 +60,6 @@ describe('Proof', function() {
       audit.end(SHARD);
       setImmediate(function() {
         var challenge = audit.getPrivateRecord().challenges[1];
-        console.log('challenge', challenge);
         var proof = new ProofStream(audit.getPublicRecord(), challenge);
 
         proof.end(SHARD);

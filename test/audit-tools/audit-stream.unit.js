@@ -1,10 +1,11 @@
 'use strict';
 
-var crypto = require('crypto');
-var expect = require('chai').expect;
-var AuditStream = require('../../lib/audit-tools/audit-stream');
+const sinon = require('sinon');
+const crypto = require('crypto');
+const expect = require('chai').expect;
+const AuditStream = require('../../lib/audit-tools/audit-stream');
 
-var SHARD = new Buffer('testshard');
+const SHARD = new Buffer('testshard');
 
 describe('AuditStream', function() {
 
@@ -31,6 +32,27 @@ describe('AuditStream', function() {
 
   });
 
+  describe('#_generateTree', function() {
+    const sandbox = sinon.sandbox.create();
+    afterEach(() => sandbox.restore());
+
+    it('should generate the correct tree', function() {
+      const fauxChallenge = new Buffer(new Array(32));
+      sandbox.stub(AuditStream.prototype, '_generateChallenge')
+        .returns(fauxChallenge);
+
+      var stream = new AuditStream(6);
+      stream._generateTree();
+      expect(stream._tree._leaves.length).to.equal(8);
+      for (let i = 0; i < 8; i++) {
+        expect(Buffer.isBuffer(stream._tree._leaves[i])).to.equal(true);
+      }
+      expect(stream._tree._leaves[0].toString('hex'))
+        .to.equal('6017f1105942c0a7da8845b91da6871685fe2927');
+    });
+
+  });
+
   describe('#_createResponseInput', function() {
 
     it('should return double hash of data plus hex encoded shard', function() {
@@ -48,7 +70,7 @@ describe('AuditStream', function() {
       var audit = new AuditStream(12);
       audit.on('finish', function() {
         var leaves = audit.getPublicRecord();
-        var branch = audit._tree.level(4);
+        var branch = audit._tree.level(4).map((i) => i.toString('hex'));
         leaves.forEach(function(leaf) {
           expect(branch.indexOf(leaf)).to.not.equal(-1);
         });

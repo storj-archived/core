@@ -25,8 +25,8 @@ describe('AuditStream', function() {
 
     it('should return a random 256 bit challenge', function() {
       var challenge = AuditStream(6)._generateChallenge();
-      expect(challenge).to.have.lengthOf(64);
-      expect(Buffer(challenge, 'hex')).to.have.lengthOf(32);
+      expect(challenge).to.have.lengthOf(32);
+      expect(Buffer.isBuffer(challenge)).to.equal(true);
     });
 
   });

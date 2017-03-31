@@ -88,7 +88,7 @@
     "mime": "^1.3.4",
     "mkdirp": "^0.5.1",
     "ms": "^0.7.1",
-    "mtree": "^0.0.1",
+    "mtree": "braydonf/mtree#77a8f27976e72644a13c11cd0ca7dc35616f1c06",
     "nat-upnp": "^1.0.2",
     "node-tar.gz": "^1.0.0",
     "node-uuid": "^1.4.7",

@@ -31,14 +31,14 @@ describe('Verification', function() {
       var challengeResp = verification._getChallengeResponse(
         ['beep', ['boop', [['bar'], 'foo']]]
       );
-      expect(challengeResp).to.equal(utils.rmd160sha256('bar'));
+      expect(challengeResp).to.eql(utils.rmd160sha256b('bar'));
     });
 
   });
 
   describe('#verify', function() {
 
-    it('should verify the proof response', function() {
+    it('should verify the proof response', function(done) {
       var audit = new AuditStream(12);
       audit.end(SHARD);
       setImmediate(function() {
@@ -50,7 +50,8 @@ describe('Verification', function() {
           var response = proof.getProofResult();
           var verification = new Verification(response);
           var result = verification.verify(secret.root, secret.depth);
-          expect(result[0]).to.equal(result[1]);
+          expect(result[0]).to.eql(result[1]);
+          done();
         });
       });
     });

@@ -14,6 +14,55 @@ var EventEmitter = require('events').EventEmitter;
 
 describe('utils', function() {
 
+  describe('#sha256', function() {
+    it('it will give digest as buffer', function() {
+      const digest = utils.sha256b('hello, world', 'utf8');
+      expect(Buffer.isBuffer(digest)).to.equal(true);
+      expect(digest.toString('hex'))
+        .to.equal('09ca7e4eaa6e8ae9c7d261167129184883644d07dfba7cbfbc4c8a2e08' +
+                  '360d5b');
+    });
+    it('it will give digest as hex string', function() {
+      const digest = utils.sha256('hello, world', 'utf8');
+      expect(digest).to.be.a('string');
+      expect(digest)
+        .to.equal('09ca7e4eaa6e8ae9c7d261167129184883644d07dfba7cbfbc4c8a2e08' +
+                  '360d5b');
+    });
+  });
+
+  describe('#rmd160', function() {
+    it('it will give digest as buffer', function() {
+      const digest = utils.rmd160b('hello, world', 'utf8');
+      expect(Buffer.isBuffer(digest)).to.equal(true);
+      expect(digest.toString('hex'))
+        .to.equal('a3201f82fca034e46d10cd7b27e174976e241da2');
+    });
+
+    it('it will give digest as hex string', function() {
+      const digest = utils.rmd160('hello, world', 'utf8');
+      expect(digest).to.be.a('string');
+      expect(digest)
+        .to.equal('a3201f82fca034e46d10cd7b27e174976e241da2');
+    });
+  });
+
+  describe('#rmd160sha256b', function() {
+    it('will give digest as buffer', function() {
+      const digest = utils.rmd160sha256b('hello, world', 'utf8');
+      expect(Buffer.isBuffer(digest)).to.equal(true);
+      expect(digest.toString('hex'))
+        .to.equal('cf7c332804ab8ae1df7d7cbe7517b82edb83c680');
+    });
+
+    it('will give digest as hex string', function() {
+      const digest = utils.rmd160sha256('hello, world', 'utf8');
+      expect(digest).to.be.a('string');
+      expect(digest)
+        .to.equal('cf7c332804ab8ae1df7d7cbe7517b82edb83c680');
+    });
+  });
+
   describe('#getContactURL', function() {
 
     it('should return the proper URI format of the contact', function() {

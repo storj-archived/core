@@ -15,7 +15,7 @@
     "linter": "./node_modules/.bin/eslint ./index.js ./lib ./test",
     "build": "./node_modules/.bin/browserify index.js -s storj -o dist/storj.browser.js",
     "make-docs": "mkdir -p ./jsdoc && rm -r ./jsdoc && ./node_modules/.bin/jsdoc index.js lib -r -R README.md -u ./doc -c .jsdoc.json --verbose -d ./jsdoc && cp -r doc/assets jsdoc/assets",
-    "publish-docs": "npm run make-docs && node script/publishdoc.js"
+    "publish-docs": "gh-pages -d jsdoc --repo git@github.com:Storj/core.git"
   },
   "keywords": [
     "storj",
@@ -60,7 +60,7 @@
       "url": "https://github.com/cseale"
     }
   ],
-  "license": "(AGPL-3.0 AND LGPL-3.0)",
+  "license": "AGPL-3.0",
   "engines": {
     "node": "^6.9.1"
   },
@@ -82,17 +82,12 @@
     "levelup": "^1.3.1",
     "merge": "^1.2.0",
     "mkdirp": "^0.5.1",
-    "ms": "^0.7.1",
     "mtree": "^1.0.0",
-    "ntp-client": "bookchin/node-ntp-client#v0.5.5",
-    "portfinder": "^1.0.3",
     "restify": "^4.3.0",
     "secp256k1": "^3.2.2",
     "semver": "^5.1.0"
   },
   "devDependencies": {
-    "benchmark": "^2.1.1",
-    "browserify": "^11.1.0",
     "chai": "^2.2.0",
     "coveralls": "^2.11.2",
     "eslint": "^3.14.0",
@@ -100,10 +95,8 @@
     "ink-docstrap": "bookchin/docstrap",
     "istanbul": "^0.4.5",
     "jsdoc": "^3.4.0",
-    "memory-blob-store": "^5.0.0",
     "mocha": "^2.2.4",
     "node-mocks-http": "^1.5.4",
-    "noisegen": "^1.0.0",
     "proxyquire": "^1.7.3",
     "rimraf": "^2.6.1",
     "sinon": "^1.14.1"

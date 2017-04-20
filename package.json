@@ -94,6 +94,7 @@
     "jsdoc": "^3.4.0",
     "mocha": "^2.2.4",
     "node-mocks-http": "^1.5.4",
+    "pem": "^1.9.4",
     "proxyquire": "^1.7.3",
     "rimraf": "^2.6.1",
     "sinon": "^1.14.1"

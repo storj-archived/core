@@ -6,7 +6,7 @@
 'use strict';
 
 /**
- * Returns a new {@link StorjNode}
+ * Returns a new {@link Node}
  * @function
  */
 module.exports = function(options) {

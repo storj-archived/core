@@ -1695,7 +1695,8 @@ describe('Protocol', function() {
       oldContract.sign('renter', renterKp.getPrivateKey());
       var item = new StorageItem({ hash: utils.rmd160('') });
       item.addContract({
-        nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc'
+        nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc',
+        hdKey: 'renter_hd_key'
       }, oldContract);
       var proto = new Protocol({
         network: {
@@ -1705,7 +1706,10 @@ describe('Protocol', function() {
         }
       });
       proto.handleRenew({
-        contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
+        contact: {
+          nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc',
+          hdKey: 'different_renter_key'
+        },
         renter_id: renterKp.getNodeID(),
         renter_signature: oldContract.signExternal(renterKp.getPrivateKey()),
         contract: oldContract.toObject()
@@ -1724,7 +1728,8 @@ describe('Protocol', function() {
       oldContract.sign('renter', renterKp.getPrivateKey());
       var item = new StorageItem({ hash: utils.rmd160('') });
       item.addContract({
-        nodeID: renterKp.getNodeID()
+        nodeID: renterKp.getNodeID(),
+        hdKey: 'renter_hd_key'
       }, oldContract);
       var proto = new Protocol({
         network: {
@@ -1737,7 +1742,10 @@ describe('Protocol', function() {
       newContract.set('payment_destination', renterKp.getAddress());
       newContract.sign('renter', renterKp.getPrivateKey());
       proto.handleRenew({
-        contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
+        contact: {
+          nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc',
+          hdKey: 'renter_hd_key'
+        },
         renter_id: renterKp.getNodeID(),
         renter_signature: newContract.signExternal(renterKp.getPrivateKey()),
         contract: newContract.toObject()
@@ -1756,7 +1764,8 @@ describe('Protocol', function() {
       oldContract.sign('renter', renterKp.getPrivateKey());
       var item = new StorageItem({ hash: utils.rmd160('') });
       item.addContract({
-        nodeID: renterKp.getNodeID()
+        nodeID: renterKp.getNodeID(),
+        hdKey: 'renter_hd_key'
       }, oldContract);
       var proto = new Protocol({
         network: {
@@ -1769,7 +1778,10 @@ describe('Protocol', function() {
       });
       var newContract = new Contract(oldContract.toObject());
       proto.handleRenew({
-        contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
+        contact: {
+          nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc',
+          hdKey: 'renter_hd_key'
+        },
         renter_id: renterKp.getNodeID(),
         renter_signature: newContract.signExternal(renterKp.getPrivateKey()),
         contract: newContract.toObject()
@@ -1789,7 +1801,8 @@ describe('Protocol', function() {
       oldContract.sign('renter', renterKp.getPrivateKey());
       var item = new StorageItem({ hash: utils.rmd160('') });
       item.addContract({
-        nodeID: renterKp.getNodeID()
+        nodeID: renterKp.getNodeID(),
+        hdKey: 'renter_hd_key'
       }, oldContract);
       var proto = new Protocol({
         network: {
@@ -1802,7 +1815,10 @@ describe('Protocol', function() {
       });
       var newContract = new Contract(oldContract.toObject());
       proto.handleRenew({
-        contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
+        contact: {
+          nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc',
+          hdKey: 'renter_hd_key'
+        },
         renter_id: renterKp.getNodeID(),
         renter_signature: newContract.signExternal(renterKp.getPrivateKey()),
         contract: newContract.toObject()

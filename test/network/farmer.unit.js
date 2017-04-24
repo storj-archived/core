@@ -856,12 +856,17 @@ describe('FarmerInterface#Negotiator', function() {
           contracts: {
             '5ebef6c9f0cabf23c3565941e76fb6e5320143d3': {}
           },
+          contractsHDMap: {
+            'xpub6AHweYHAxk1EhJSBctQD1nLWPog6Sy2eTpKQLExR1hfzTyyZQWvU4EYNXv1NJN7GpLYXnDLt4PzN874g6zSjAQdFCHZN7U7nbYKYVDUzD42': {}
+          },
           shard: { read: sinon.stub() }
         })
       }
     }, new Contract({
       data_hash: utils.rmd160(''),
-      renter_id: '5ebef6c9f0cabf23c3565941e76fb6e5320143d3'
+      renter_id: utils.rmd160('nodeid'),
+      renter_hd_key: 'xpub6AHweYHAxk1EhJSBctQD1nLWPog6Sy2eTpKQLExR1hfzTyyZQ' +
+        'WvU4EYNXv1NJN7GpLYXnDLt4PzN874g6zSjAQdFCHZN7U7nbYKYVDUzD42'
     }), function(result) {
       expect(result).to.equal(false);
       done();

@@ -857,7 +857,8 @@ describe('FarmerInterface#Negotiator', function() {
             '5ebef6c9f0cabf23c3565941e76fb6e5320143d3': {}
           },
           contractsHDMap: {
-            'xpub6AHweYHAxk1EhJSBctQD1nLWPog6Sy2eTpKQLExR1hfzTyyZQWvU4EYNXv1NJN7GpLYXnDLt4PzN874g6zSjAQdFCHZN7U7nbYKYVDUzD42': {}
+            'xpub6AHweYHAxk1EhJSBctQD1nLWPog6Sy2eTpKQLExR1hfzTyyZQ' +
+              'WvU4EYNXv1NJN7GpLYXnDLt4PzN874g6zSjAQdFCHZN7U7nbYKYVDUzD42': {}
           },
           shard: { read: sinon.stub() }
         })

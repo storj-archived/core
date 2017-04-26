@@ -1253,6 +1253,51 @@ describe('BridgeClient', function() {
         });
       });
 
+      it('should error if farmer is missing to download', function(done) {
+        var client = new BridgeClient();
+        var _getFilePointers = sinon.stub(
+          client,
+          'getFilePointers'
+        );
+        _getFilePointers.onFirstCall().callsArgWith(1, null, [
+          {
+            size: 512,
+            farmer: {
+              address: '127.0.0.1',
+              port: 8080,
+              nodeID: utils.rmd160('nodeid')
+            }
+          },
+          {
+            size: 512,
+          }
+        ]);
+        _getFilePointers.onSecondCall().callsArgWith(1, null, [
+          {
+            size: 512,
+            farmer: {
+              address: '127.0.0.1',
+              port: 8080,
+              nodeID: utils.rmd160('nodeid')
+            }
+          }
+        ]);
+        sinon.stub(client, 'getFileInfo').callsArgWith(2, null, {
+          size: 512 * 3
+        });
+        _getFilePointers.onThirdCall().callsArgWith(1, null, []);
+        var _createToken = sinon.stub(
+          client,
+          'createToken'
+        ).callsArgWith(2, null, 'token');
+        client.createFileStream('bucket', 'file', {}, function(err) {
+          _createToken.restore();
+          _getFilePointers.restore();
+          expect(err.message).to.equal('Missing shard');
+          done();
+        });
+      });
+
       it('should emit stream error if slice cannot get token', function(done) {
         var client = new BridgeClient();
         var _getFilePointers = sinon.stub(

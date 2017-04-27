@@ -1,28 +1,29 @@
 'use strict';
 
-var expect = require('chai').expect;
-var AuditStream = require('../../lib/audit-tools/audit-stream');
-var ProofStream = require('../../lib/audit-tools/proof-stream');
-var utils = require('../../lib/utils');
-var sinon = require('sinon');
+const expect = require('chai').expect;
+const AuditStream = require('../lib/audit');
+const ProofStream = require('../lib/proof');
+const utils = require('../lib/utils');
+const sinon = require('sinon');
+
 
 describe('Proof', function() {
 
-  const CHALLENGE = new Buffer('d3ccb55d5c9bd56606bca0187ecf28699cb674fb7e243' +
-                               'fb4f180078735181686', 'hex');
-  const SHARD = new Buffer('testshard');
+  const CHALLENGE = Buffer.from('d3ccb55d5c9bd56606bca0187ecf28699cb674fb7e243' +
+                                'fb4f180078735181686', 'hex');
+  const SHARD = Buffer.from('testshard');
 
   describe('@constructor', function() {
 
     it('should create instance without the new keyword', function() {
-      expect(ProofStream([], CHALLENGE)).to.be.instanceOf(ProofStream);
+      expect(new ProofStream([], CHALLENGE)).to.be.instanceOf(ProofStream);
     });
 
   });
 
   describe('#_generateLeaves', function() {
 
-    it('should append empty bottom leaves to the power of two', function() {
+    it('should append empty bottom leaves to the power of two', function(done) {
       var audit = new AuditStream(12);
       audit.end(SHARD);
       setImmediate(function() {
@@ -30,8 +31,9 @@ describe('Proof', function() {
         var leaves = proof._generateLeaves(Array(12));
         expect(leaves.length).to.equal(16);
         leaves.splice(12).forEach(function(leaf) {
-          expect(leaf).to.equal(utils.rmd160sha256b(''));
+          expect(leaf).to.equal(utils.rmd160sha256(''));
         });
+        done();
       });
     });
 
@@ -40,7 +42,7 @@ describe('Proof', function() {
   describe('#_flush', function() {
 
     it('should emit an error if generate proof fails', function(done) {
-      var proof = ProofStream([], CHALLENGE);
+      var proof = new ProofStream([], CHALLENGE);
       var _generateProof = sinon.stub(proof, '_generateProof').throws(
         new Error('Failed')
       );
@@ -96,7 +98,7 @@ describe('Proof', function() {
 
           function _getChallengeResponse(data) {
             if (data.length === 1) {
-              return utils.rmd160sha256b(data[0]);
+              return utils.rmd160sha256(data[0]);
             }
 
             if (Array.isArray(data[0])) {
@@ -109,10 +111,10 @@ describe('Proof', function() {
           var result = proof.getProofResult();
 
           expect(result).to.have.lengthOf(2);
-          expect(_getChallengeResponse(result)).to.eql(
-            utils.rmd160sha256b(utils.rmd160sha256b(
+          expect(_getChallengeResponse(result)).to.equal(
+            utils.rmd160sha256(utils.rmd160sha256b(
               Buffer.concat([Buffer.from(challenge, 'hex'), SHARD])
-          ))
+            ))
           );
           done();
         });

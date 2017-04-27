@@ -10,7 +10,7 @@
  * @function
  */
 module.exports = function(options) {
-  return module.exports.Node(options);
+  return new module.exports.Node(options);
 };
 
 /** {@link Node} */

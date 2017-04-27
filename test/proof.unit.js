@@ -1,6 +1,6 @@
 'use strict';
 
-const expect = require('chai').expect;
+const { expect } = require('chai');
 const AuditStream = require('../lib/audit');
 const ProofStream = require('../lib/proof');
 const utils = require('../lib/utils');

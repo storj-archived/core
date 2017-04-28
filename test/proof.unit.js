@@ -9,8 +9,10 @@ const sinon = require('sinon');
 
 describe('Proof', function() {
 
-  const CHALLENGE = Buffer.from('d3ccb55d5c9bd56606bca0187ecf28699cb674fb7e243' +
-                                'fb4f180078735181686', 'hex');
+  const CHALLENGE = Buffer.from(
+    'd3ccb55d5c9bd56606bca0187ecf28699cb674fb7e243fb4f180078735181686',
+    'hex'
+  );
   const SHARD = Buffer.from('testshard');
 
   describe('@constructor', function() {
@@ -24,14 +26,14 @@ describe('Proof', function() {
   describe('#_generateLeaves', function() {
 
     it('should append empty bottom leaves to the power of two', function(done) {
-      var audit = new AuditStream(12);
+      const audit = new AuditStream(12);
       audit.end(SHARD);
       setImmediate(function() {
-        var proof = new ProofStream(audit.getPublicRecord(), CHALLENGE);
-        var leaves = proof._generateLeaves(Array(12));
+        const proof = new ProofStream(audit.getPublicRecord(), CHALLENGE);
+        const leaves = proof._generateLeaves(Array(12));
         expect(leaves.length).to.equal(16);
         leaves.splice(12).forEach(function(leaf) {
-          expect(leaf).to.equal(utils.rmd160sha256(''));
+          expect(Buffer.compare(leaf, utils.rmd160sha256(''))).to.equal(0);
         });
         done();
       });
@@ -111,10 +113,10 @@ describe('Proof', function() {
           var result = proof.getProofResult();
 
           expect(result).to.have.lengthOf(2);
-          expect(_getChallengeResponse(result)).to.equal(
-            utils.rmd160sha256(utils.rmd160sha256b(
+          expect(_getChallengeResponse(result).toString('hex')).to.equal(
+            utils.rmd160sha256(utils.rmd160sha256(
               Buffer.concat([Buffer.from(challenge, 'hex'), SHARD])
-            ))
+            )).toString('hex')
           );
           done();
         });

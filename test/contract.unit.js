@@ -1,9 +1,9 @@
 'use strict';
 
+const { utils: keyutils } = require('kad-spartacus');
 const crypto = require('crypto');
 const expect = require('chai').expect;
 const Contract = require('../lib/contract');
-const HDKey = require('hdkey');
 const constants = require('../lib/constants');
 const ms = require('ms');
 const utils = require('../lib/utils');
@@ -210,15 +210,22 @@ describe('Contract (private)', function() {
     });
 
     it('should return true if fields are not null', function() {
-      var contract = new Contract({
-        renter_id: null,
-        farmer_id: null,
-        payment_source: null,
-        payment_destination: null,
+      const renterHdKey = keyutils.toHDKeyFromSeed().deriveChild(1);
+      const farmerHdKey = keyutils.toHDKeyFromSeed().deriveChild(1);
+      const contract = new Contract({
+        renter_id: keyutils.toPublicKeyHash(renterHdKey.publicKey)
+                     .toString('hex'),
+        farmer_id: keyutils.toPublicKeyHash(farmerHdKey.publicKey)
+                     .toString('hex'),
+        renter_hd_key: renterHdKey.publicExtendedKey,
+        farmer_hd_key: farmerHdKey.publicExtendedKey,
+        renter_hd_index: 1,
+        farmer_hd_index: 1,
+        payment_destination: '14WNyp8paus83JoDvv2SowKb3j1cZBhJoV',
         data_hash: crypto.createHash('rmd160').update('test').digest('hex')
       });
-      contract.sign('renter', null);
-      contract.sign('farmer', null);
+      contract.sign('renter', renterHdKey.privateKey);
+      contract.sign('farmer', farmerHdKey.privateKey);
       expect(contract.isComplete()).to.equal(true);
     });
 
@@ -267,16 +274,16 @@ describe('Contract (public)', function() {
   describe('#sign', function() {
 
     it('should add the farmer signature', function() {
-      var contract = new Contract();
+      const contract = new Contract();
       expect(contract._properties.renter_signature).to.equal(null);
-      contract.sign('renter', null);
+      contract.sign('renter', keyutils.toHDKeyFromSeed().privateKey);
       expect(contract._properties.renter_signature).to.not.equal(null);
     });
 
     it('should add the renter signature', function() {
-      var contract = new Contract();
+      const contract = new Contract();
       expect(contract._properties.farmer_signature).to.equal(null);
-      contract.sign('farmer', null);
+      contract.sign('farmer', keyutils.toHDKeyFromSeed().privateKey);
       expect(contract._properties.farmer_signature).to.not.equal(null);
     });
 
@@ -285,15 +292,35 @@ describe('Contract (public)', function() {
   describe('#verify', function() {
 
     it('should verify farmer signature', function() {
-      var contract = new Contract();
-      contract.sign('farmer', null);
-      expect(contract.verify('farmer', null)).to.equal(true);
+      const farmerBaseKey = keyutils.toHDKeyFromSeed(
+        null,
+        constants.HD_KEY_DERIVATION_PATH
+      );
+      const farmerChildKey = farmerBaseKey.deriveChild(6);
+      const contract = new Contract({
+        farmer_id: keyutils.toPublicKeyHash(farmerChildKey.publicKey)
+                     .toString('hex'),
+        farmer_hd_key: farmerBaseKey.publicExtendedKey,
+        farmer_hd_index: 6
+      });
+      contract.sign('farmer', farmerChildKey.privateKey);
+      expect(contract.verify('farmer')).to.equal(true);
     });
 
     it('should invalidate renter signature', function() {
-      var contract = new Contract();
-      contract.sign('renter', null);
-      expect(contract.verify('renter', null)).to.equal(false);
+      const renterBaseKey = keyutils.toHDKeyFromSeed(
+        null,
+        constants.HD_KEY_DERIVATION_PATH
+      );
+      const renterChildKey = renterBaseKey.deriveChild(6);
+      const contract = new Contract({
+        renter_id: keyutils.toPublicKeyHash(renterChildKey.publicKey)
+                     .toString('hex'),
+        renter_hd_key: renterBaseKey.publicExtendedKey,
+        renter_hd_index: 6
+      });
+      contract.sign('renter', keyutils.toHDKeyFromSeed().privateKey);
+      expect(contract.verify('renter')).to.equal(false);
     });
 
   });

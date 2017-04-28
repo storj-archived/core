@@ -6,38 +6,18 @@ const semver = require('semver');
 const version = require('../lib/version');
 const proxyquire = require('proxyquire');
 const sinon = require('sinon');
-const constants = require('../lib/constants');
-const stream = require('readable-stream');
+const stream = require('stream');
 const { EventEmitter } = require('events');
 
 describe('@module utils', function() {
 
-  describe('#rmd160sha256b', function() {
+  describe('@function rmd160sha256', function() {
+
     it('will give digest as buffer', function() {
-      const digest = utils.rmd160sha256b('hello, world', 'utf8');
+      const digest = utils.rmd160sha256('hello, world', 'utf8');
       expect(Buffer.isBuffer(digest)).to.equal(true);
       expect(digest.toString('hex'))
         .to.equal('cf7c332804ab8ae1df7d7cbe7517b82edb83c680');
-    });
-
-    it('will give digest as hex string', function() {
-      const digest = utils.rmd160sha256('hello, world', 'utf8');
-      expect(digest).to.be.a('string');
-      expect(digest)
-        .to.equal('cf7c332804ab8ae1df7d7cbe7517b82edb83c680');
-    });
-  });
-
-  describe('#getContactURL', function() {
-
-    it('should return the proper URI format of the contact', function() {
-      expect(utils.getContactURL({
-        address: '127.0.0.1',
-        port: 1337,
-        nodeID: '7a728a8c27fa378cafbd300c1e38639362f87ee8'
-      })).to.equal(
-        'storj://127.0.0.1:1337/7a728a8c27fa378cafbd300c1e38639362f87ee8'
-      );
     });
 
   });
@@ -75,49 +55,45 @@ describe('@module utils', function() {
   describe('#isValidContact', function() {
 
     it('should allow loopback iface if enabled', function() {
-      expect(utils.isValidContact({
-        address: '127.0.0.1',
+      expect(utils.isValidContact(['nodeid', {
+        hostname: '127.0.0.1',
         port: 1337
-      }, true)).to.equal(true);
+      }], true)).to.equal(true);
     });
 
     it('should not allow loopback iface if disabled', function() {
-      expect(utils.isValidContact({
-        address: '127.0.0.1',
+      expect(utils.isValidContact(['nodeid', {
+        hostname: '127.0.0.1',
         port: 1337
-      })).to.equal(false);
-    });
-
-    it('should allow valid public address', function() {
-      expect(utils.isValidContact({
-        address: '104.200.143.243',
-        port: 1337
-      })).to.equal(true);
+      }])).to.equal(false);
     });
 
     it('should allow valid public hostname', function() {
-      expect(utils.isValidContact({
-        address: 'some.domain.name',
+      expect(utils.isValidContact(['nodeid', {
+        hostname: '104.200.143.243',
         port: 1337
-      })).to.equal(true);
+      }])).to.equal(true);
+    });
+
+    it('should allow valid public hostname', function() {
+      expect(utils.isValidContact(['nodeid', {
+        hostname: 'some.domain.name',
+        port: 1337
+      }])).to.equal(true);
     });
 
     it('should allow valid port', function() {
-      expect(utils.isValidContact({
-        address: 'some.domain.name',
+      expect(utils.isValidContact(['nodeid', {
+        hostname: 'some.domain.name',
         port: 80
-      })).to.equal(true);
+      }])).to.equal(true);
     });
 
     it('should not allow invalid port', function() {
-      expect(utils.isValidContact({
-        address: 'some.domain.name',
+      expect(utils.isValidContact(['nodeid', {
+        hostname: 'some.domain.name',
         port: 0
-      })).to.equal(false);
-    });
-
-    it('should return false if no contact is supplied', function() {
-      expect(utils.isValidContact(null)).to.equal(false);
+      }])).to.equal(false);
     });
 
   });
@@ -174,14 +150,14 @@ describe('@module utils', function() {
     });
 
     it('will return false for non-base58 characters', function() {
-      var hdKey = 'xpub68Gmy5EdvgibQVfPdqkBBCHxA5htiqg55crXYuXoQRKfDBFA1WEjWg' +
-          'P6LHhwBZeNK1VTsfTFUHCdrfp1bgwQ9xv5ski8PX9rL2dZXvgGDn0';
+      const hdKey = 'xpub68Gmy5EdvgibQVfPdqkBBCHxA5htiqg55crXYuXoQRKfDBFA1WE' +
+                    'jWgP6LHhwBZeNK1VTsfTFUHCdrfp1bgwQ9xv5ski8PX9rL2dZXvgGDn0';
       expect(utils.isValidHDNodeKey(hdKey)).to.equal(false);
     });
 
     it('will return true for extended public key string', function() {
-      var hdKey = 'xpub68Gmy5EdvgibQVfPdqkBBCHxA5htiqg55crXYuXoQRKfDBFA1WEjWg' +
-          'P6LHhwBZeNK1VTsfTFUHCdrfp1bgwQ9xv5ski8PX9rL2dZXvgGDnw';
+      const hdKey = 'xpub68Gmy5EdvgibQVfPdqkBBCHxA5htiqg55crXYuXoQRKfDBFA1WE' +
+                    'jWgP6LHhwBZeNK1VTsfTFUHCdrfp1bgwQ9xv5ski8PX9rL2dZXvgGDnw';
       expect(utils.isValidHDNodeKey(hdKey)).to.equal(true);
     });
   });
@@ -213,12 +189,13 @@ describe('@module utils', function() {
   describe('#createComplexKeyFromSeed', function() {
 
     it('should return the expected extended key', function() {
-      var seed = 'a0c42a9c3ac6abf2ba6a9946ae83af18f51bf1c9fa7dacc4c92513cc4d' +
-        'd015834341c775dcd4c0fac73547c5662d81a9e9361a0aac604a73a321bd9103b' +
-        'ce8af';
-      var seedBuffer = new Buffer(seed, 'hex');
-      var expectedKey = 'xprv9xJ62Jwpr14Bbz63pamJV4Z3qT67JfqddRW55LR2bUQ38jt' +
-        'y7G2TSVkE5Ro8yYZjrJGVhN8Z3qvmM9XWgGvyceNMUj7xozR4LZS1eEFP5W3';
+      const seed = 'a0c42a9c3ac6abf2ba6a9946ae83af18f51bf1c9fa7dacc4c92513cc' +
+                   '4dd015834341c775dcd4c0fac73547c5662d81a9e9361a0aac604a73' +
+                   'a321bd9103bce8af';
+      const seedBuffer = new Buffer(seed, 'hex');
+      const expectedKey = 'xprv9xJ62Jwpr14Bbz63pamJV4Z3qT67JfqddRW55LR2bUQ3' +
+                          '8jty7G2TSVkE5Ro8yYZjrJGVhN8Z3qvmM9XWgGvyceNMUj7x' +
+                          'ozR4LZS1eEFP5W3';
       expect(utils.createComplexKeyFromSeed(seedBuffer)).to.equal(expectedKey);
     });
 
@@ -227,8 +204,8 @@ describe('@module utils', function() {
   describe('#createShardDownloader', function() {
 
     it('should return a readable stream object', function(done) {
-      var requestObj = new EventEmitter();
-      var utils = proxyquire('../lib/utils', {
+      const requestObj = new EventEmitter();
+      const utils = proxyquire('../lib/utils', {
         http: {
           get: function(opts) {
             expect(opts.path).to.equal('/shards/hash?token=token');
@@ -237,7 +214,7 @@ describe('@module utils', function() {
         }
       });
       let download = utils.createShardDownloader(
-        { address: 'farmer.host', port: 6666 },
+        ['nodeid', { hostname: 'farmer.host', port: 6666 }],
         'hash',
         'token'
       );
@@ -257,9 +234,9 @@ describe('@module utils', function() {
   describe('#createShardUploader', function() {
 
     it('should return a bubble error', function(done) {
-      var requestObj = new EventEmitter();
+      const requestObj = new EventEmitter();
       requestObj.write = sinon.stub();
-      var utils = proxyquire('../lib/utils', {
+      const utils = proxyquire('../lib/utils', {
         http: {
           request: function(opts) {
             expect(opts.method).to.equal('POST');
@@ -271,7 +248,7 @@ describe('@module utils', function() {
         }
       });
       let upload = utils.createShardUploader(
-        { address: 'farmer.host', port: 6666 },
+        ['nodeid', { hostname: 'farmer.host', port: 6666 }],
         'hash',
         'token'
       );
@@ -287,10 +264,10 @@ describe('@module utils', function() {
     });
 
     it('should return a transform stream', function(done) {
-      var requestObj = new EventEmitter();
+      const requestObj = new EventEmitter();
       requestObj.write = sinon.stub().callsArg(2);
       requestObj.end = sinon.stub();
-      var utils = proxyquire('../lib/utils', {
+      const utils = proxyquire('../lib/utils', {
         http: {
           request: function(opts) {
             expect(opts.method).to.equal('POST');
@@ -302,7 +279,7 @@ describe('@module utils', function() {
         }
       });
       let upload = utils.createShardUploader(
-        { address: 'farmer.host', port: 6666 },
+        ['nodeid', { hostname: 'farmer.host', port: 6666 }],
         'hash',
         'token'
       );

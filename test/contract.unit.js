@@ -7,58 +7,106 @@ const Contract = require('../lib/contract');
 const constants = require('../lib/constants');
 const ms = require('ms');
 const utils = require('../lib/utils');
+const sinon = require('sinon');
 
 
-describe('Contract#fromObject', function() {
+describe('@class Contract', function() {
 
-  it('should return an instance from the object', function() {
-    expect(Contract.fromObject({})).to.be.instanceOf(Contract);
+  describe('@static createTopic', function() {
+
+    it('should return the topic buffer', function() {
+      expect(Contract.createTopic().toString('hex')).to.equal('0f02020202');
+    });
+
   });
 
-});
+  describe('@static from', function() {
 
-describe('Contract#fromJSON', function() {
+    let fromObject, fromJSON, fromBuffer;
+    let sandbox = sinon.sandbox.create();
 
-  it('should return an instance from the json string', function() {
-    expect(Contract.fromJSON('{}')).to.be.instanceOf(Contract);
+    before(() => {
+      fromBuffer = sandbox.stub(Contract, 'fromBuffer');
+      fromObject = sandbox.stub(Contract, 'fromObject');
+      fromJSON = sandbox.stub(Contract, 'fromJSON');
+    });
+
+    it('should call Contract#fromBuffer', function() {
+      Contract.from(Buffer.from('{}'));
+      expect(fromBuffer.called).to.equal(true);
+    });
+
+    it('should call Contract#fromJSON', function() {
+      Contract.from('{}');
+      expect(fromJSON.called).to.equal(true);
+    });
+
+    it('should call Contract#fromObject', function() {
+      Contract.from({});
+      expect(fromObject.called).to.equal(true);
+    });
+
+    after(() => {
+      sandbox.restore();
+    });
+
   });
 
-});
+  describe('@static fromObject', function() {
 
-describe('Contract#fromBuffer', function() {
+    it('should return an instance from the object', function() {
+      expect(Contract.fromObject({})).to.be.instanceOf(Contract);
+    });
 
-  it('should return an instance from the object', function() {
-    expect(Contract.fromBuffer(Buffer.from('{}'))).to.be.instanceOf(Contract);
   });
 
-});
+  describe('@static fromJSON', function() {
 
-describe('Contract#compare', function() {
+    it('should return an instance from the json string', function() {
+      expect(Contract.fromJSON('{}')).to.be.instanceOf(Contract);
+    });
 
-  it('should return true for the same contract', function() {
-    const c1 = Contract.fromBuffer(Buffer.from('{}'));
-    const c2 = Contract.fromBuffer(Buffer.from('{}'));
-    expect(Contract.compare(c1, c2)).to.be.equal(true);
   });
 
-});
+  describe('@static fromBuffer', function() {
 
-describe('Contract#diff', function() {
+    it('should return an instance from the object', function() {
+      expect(Contract.fromBuffer(Buffer.from('{}'))).to.be.instanceOf(Contract);
+    });
 
-  it('should return an array of differing properties', function() {
-    const diff = Contract.diff(
-      new Contract({ data_hash: utils.rmd160('beep').toString('hex') }),
-      new Contract({ data_hash: utils.rmd160('boop').toString('hex') })
-    );
-    expect(diff).to.have.lengthOf(1);
-    expect(diff[0]).to.equal('data_hash');
   });
 
-});
+  describe('@static compare', function() {
 
-describe('Contract#MATRIX', function() {
+    it('should return true for the same contract', function() {
+      const c1 = Contract.fromBuffer(Buffer.from('{}'));
+      const c2 = Contract.fromBuffer(Buffer.from('{}'));
+      expect(Contract.compare(c1, c2)).to.be.equal(true);
+    });
 
-  describe('#size', function() {
+  });
+
+  describe('@static diff', function() {
+
+    it('should return an array of differing properties', function() {
+      const diff = Contract.diff(
+        new Contract({
+          data_hash: utils.rmd160('beep').toString('hex'),
+          audit_leaves: ['one', 'two']
+        }),
+        new Contract({
+          data_hash: utils.rmd160('boop').toString('hex'),
+          audit_leaves: ['three', 'four']
+        })
+      );
+      expect(diff).to.have.lengthOf(2);
+      expect(diff[0]).to.equal('audit_leaves');
+      expect(diff[1]).to.equal('data_hash');
+    });
+
+  });
+
+  describe('@static MATRIX#size', function() {
 
     it('should return low degree', function() {
       expect(Contract.MATRIX.size(
@@ -86,7 +134,7 @@ describe('Contract#MATRIX', function() {
 
   });
 
-  describe('#duration', function() {
+  describe('@static MATRIX#duration', function() {
 
     it('should return low degree', function() {
       expect(Contract.MATRIX.duration(
@@ -114,7 +162,7 @@ describe('Contract#MATRIX', function() {
 
   });
 
-  describe('#availability', function() {
+  describe('@static MATRIX#availability', function() {
 
     it('should return low degree', function() {
       expect(Contract.MATRIX.availability(
@@ -142,7 +190,7 @@ describe('Contract#MATRIX', function() {
 
   });
 
-  describe('#speed', function() {
+  describe('@static MATRIX#speed', function() {
 
     it('should return low degree', function() {
       expect(Contract.MATRIX.speed(6)).to.equal(constants.OPCODE_DEG_LOW);
@@ -162,11 +210,7 @@ describe('Contract#MATRIX', function() {
 
   });
 
-});
-
-describe('Contract (private)', function() {
-
-  describe('#_clean', function() {
+  describe('@private _clean', function() {
 
     it('should remove any non-standard contract fields', function() {
       const contract = new Contract();
@@ -177,7 +221,7 @@ describe('Contract (private)', function() {
 
   });
 
-  describe('#getSigningData', function() {
+  describe('@method getSigningData', function() {
 
     it('should remove the signature fields', function() {
       const contract = new Contract();
@@ -188,7 +232,7 @@ describe('Contract (private)', function() {
 
   });
 
-  describe('#isValid', function() {
+  describe('@method isValid', function() {
 
     it('should validate the contract specification', function() {
       const c = new Contract();
@@ -202,7 +246,7 @@ describe('Contract (private)', function() {
 
   });
 
-  describe('#isComplete', function() {
+  describe('@method isComplete', function() {
 
     it('should return false if fields are null', function() {
       const c = new Contract();
@@ -231,11 +275,7 @@ describe('Contract (private)', function() {
 
   });
 
-});
-
-describe('Contract (public)', function() {
-
-  describe('#getHash', function() {
+  describe('@method getHash', function() {
 
     it('should return the SHA-256 hash of the serialized contract', function() {
       const c = new Contract();
@@ -244,7 +284,7 @@ describe('Contract (public)', function() {
 
   });
 
-  describe('#toObject', function() {
+  describe('@method toObject', function() {
 
     it('should return an object representation of the contract', function() {
       const c = new Contract();
@@ -253,7 +293,7 @@ describe('Contract (public)', function() {
 
   });
 
-  describe('#toJSON', function() {
+  describe('@method toJSON', function() {
 
     it('should return a JSON representation of the contract', function() {
       const c = new Contract();
@@ -262,7 +302,7 @@ describe('Contract (public)', function() {
 
   });
 
-  describe('#toBuffer', function() {
+  describe('@method toBuffer', function() {
 
     it('should return a buffer representation of the contract', function() {
       const c = new Contract();
@@ -271,7 +311,7 @@ describe('Contract (public)', function() {
 
   });
 
-  describe('#sign', function() {
+  describe('@method sign', function() {
 
     it('should add the farmer signature', function() {
       const contract = new Contract();
@@ -289,7 +329,7 @@ describe('Contract (public)', function() {
 
   });
 
-  describe('#verify', function() {
+  describe('@method verify', function() {
 
     it('should verify farmer signature', function() {
       const farmerBaseKey = keyutils.toHDKeyFromSeed(
@@ -325,7 +365,7 @@ describe('Contract (public)', function() {
 
   });
 
-  describe('#get', function() {
+  describe('@method get', function() {
 
     it('should return the property value', function() {
       const c = new Contract();
@@ -347,7 +387,7 @@ describe('Contract (public)', function() {
 
   });
 
-  describe('#set', function() {
+  describe('@method set', function() {
 
     it('should set and return the property value', function() {
       var contract = new Contract();
@@ -365,7 +405,7 @@ describe('Contract (public)', function() {
 
   });
 
-  describe('#update', function() {
+  describe('@method update', function() {
 
     it('should update all the supplied fields', function() {
       var contract = new Contract();
@@ -375,6 +415,27 @@ describe('Contract (public)', function() {
       });
       expect(contract._properties.payment_storage_price).to.equal(100);
       expect(contract._properties.invalid_property).to.equal(undefined);
+    });
+
+  });
+
+  describe('@method getTopicBuffer', function() {
+
+    it('should return the topic code as a buffer', function() {
+      const contract = new Contract({});
+      expect(Buffer.compare(
+        Buffer.from('0f01010202', 'hex'),
+        contract.getTopicBuffer()
+      )).to.equal(0);
+    });
+
+  });
+
+  describe('@method getTopicString', function() {
+
+    it('should return the topic code as a string', function() {
+      const contract = new Contract({});
+      expect(contract.getTopicString()).to.equal('0f01010202');
     });
 
   });

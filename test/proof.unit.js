@@ -47,7 +47,7 @@ describe('Proof', function() {
       setImmediate(() => {
         const leaves = audit.getPublicRecord();
         const { challenges, root, depth } = audit.getPrivateRecord();
-        const proof = new ProofStream(leaves, challenges[0]);
+        const proof = new ProofStream(leaves, challenges[1]);
         proof.on('finish', () => {
           const [result, expected] = ProofStream.verify(proof.getProofResult(),
                                                         root, depth);

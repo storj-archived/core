@@ -18,4 +18,9 @@ describe('@module version', function() {
     process.env.STORJ_NETWORK = '';
   });
 
+  describe('@method toString', function() {
+    const v = proxyquire('../lib/version', {});
+    expect(typeof v.toString()).to.equal('string');
+  });
+
 });

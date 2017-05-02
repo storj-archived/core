@@ -7,7 +7,7 @@ const AuditStream = require('../lib/audit');
 const shard = Buffer.from('testshard');
 
 
-describe('AuditStream', function() {
+describe('@class AuditStream', function() {
 
   describe('@constructor', function() {
 
@@ -18,7 +18,7 @@ describe('AuditStream', function() {
 
   });
 
-  describe('#_generateChallenge', function() {
+  describe('@private _generateChallenge', function() {
 
     it('should return a random 256 bit challenge', function() {
       var challenge = new AuditStream(6)._generateChallenge();
@@ -28,7 +28,7 @@ describe('AuditStream', function() {
 
   });
 
-  describe('#_generateTree', function() {
+  describe('@private _generateTree', function() {
 
     const sandbox = sinon.sandbox.create();
 
@@ -50,7 +50,7 @@ describe('AuditStream', function() {
 
   });
 
-  describe('#_createResponseInput', function() {
+  describe('@private _createResponseInput', function() {
 
     it('should return double hash of data plus hex encoded shard', function() {
       const audit = new AuditStream(6);
@@ -61,7 +61,7 @@ describe('AuditStream', function() {
 
   });
 
-  describe('#getPublicRecord', function() {
+  describe('@method getPublicRecord', function() {
 
     it('should return the bottom leaves of the merkle tree', function(done) {
       const audit = new AuditStream(12);
@@ -79,7 +79,7 @@ describe('AuditStream', function() {
 
   });
 
-  describe('#getPrivateRecord', function() {
+  describe('@method getPrivateRecord', function() {
 
     it('should return the root, depth, and challenges', function(done) {
       const audit = new AuditStream(12);
@@ -97,38 +97,38 @@ describe('AuditStream', function() {
 
   });
 
-});
+  describe('@static fromRecords', function() {
 
-describe('AuditStream#fromRecords', function() {
-
-  it('should return the same result when created from record', function(done) {
-    const audit1 = new AuditStream(12);
-    audit1.on('finish', function() {
-      const tree1 = audit1.getPublicRecord();
-      const challenges1 = audit1.getPrivateRecord().challenges;
-      const audit2 = AuditStream.fromRecords(challenges1, tree1);
-      const tree2 = audit2.getPublicRecord();
-      const challenges2 = audit2.getPrivateRecord().challenges;
-      challenges2.forEach(function(c, i) {
-        expect(c).to.equal(challenges1[i]);
+    it('should return the same result when created from record', function(done) {
+      const audit1 = new AuditStream(12);
+      audit1.on('finish', function() {
+        const tree1 = audit1.getPublicRecord();
+        const challenges1 = audit1.getPrivateRecord().challenges;
+        const audit2 = AuditStream.fromRecords(challenges1, tree1);
+        const tree2 = audit2.getPublicRecord();
+        const challenges2 = audit2.getPrivateRecord().challenges;
+        challenges2.forEach(function(c, i) {
+          expect(c).to.equal(challenges1[i]);
+        });
+        tree2.forEach(function(l, i) {
+          expect(l).to.equal(tree1[i]);
+        });
+        expect(
+          audit1.getPrivateRecord().depth
+        ).to.equal(
+          audit2.getPrivateRecord().depth
+        );
+        expect(
+          audit1.getPrivateRecord().root
+        ).to.eql(
+          audit2.getPrivateRecord().root
+        );
+        done();
       });
-      tree2.forEach(function(l, i) {
-        expect(l).to.equal(tree1[i]);
-      });
-      expect(
-        audit1.getPrivateRecord().depth
-      ).to.equal(
-        audit2.getPrivateRecord().depth
-      );
-      expect(
-        audit1.getPrivateRecord().root
-      ).to.eql(
-        audit2.getPrivateRecord().root
-      );
-      done();
+      audit1.write(shard);
+      audit1.end();
     });
-    audit1.write(shard);
-    audit1.end();
+
   });
 
 });

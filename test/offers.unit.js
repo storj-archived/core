@@ -1,7 +1,7 @@
 'use strict';
 
 
-describe('Offers', function() {
+describe('@class Offers', function() {
 
 
 

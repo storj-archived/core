@@ -1,7 +1,7 @@
 'use strict';
 
 
-describe('Node', function() {
+describe('@class Node', function() {
 
 
 

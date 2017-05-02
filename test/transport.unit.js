@@ -1,7 +1,7 @@
 'use strict';
 
 
-describe('Transport', function() {
+describe('@class Transport', function() {
 
 
 

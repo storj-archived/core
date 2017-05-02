@@ -1,7 +1,7 @@
 'use strict';
 
 
-describe('Rules', function() {
+describe('@class Rules', function() {
 
 
 

@@ -7,7 +7,7 @@ const utils = require('../lib/utils');
 const sinon = require('sinon');
 
 
-describe('Proof', function() {
+describe('@class Proof', function() {
 
   const CHALLENGE = Buffer.from(
     'd3ccb55d5c9bd56606bca0187ecf28699cb674fb7e243fb4f180078735181686',

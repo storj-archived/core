@@ -5,9 +5,9 @@ const { expect } = require('chai');
 const Triggers = require('../lib/triggers');
 
 
-describe('Triggers', function() {
+describe('@class Triggers', function() {
 
-  describe('#add', function() {
+  describe('@method add', function() {
 
     it('should add the behavior for the identity', function() {
       const triggers = new Triggers();
@@ -27,7 +27,7 @@ describe('Triggers', function() {
 
   });
 
-  describe('#remove', function() {
+  describe('@method remove', function() {
 
     it('should remove the behavior for the identity', function() {
       const triggers = new Triggers();
@@ -68,7 +68,7 @@ describe('Triggers', function() {
 
   });
 
-  describe('#process', function() {
+  describe('@method process', function() {
 
     it('should fail if not defined', function(done) {
       const triggers = new Triggers();

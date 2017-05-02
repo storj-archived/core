@@ -22,7 +22,7 @@ describe('@module utils', function() {
 
   });
 
-  describe('#isCompatibleVersion', function() {
+  describe('@function isCompatibleVersion', function() {
 
     it('should be compatible (same version)', function() {
       expect(utils.isCompatibleVersion(version.protocol)).to.equal(true);
@@ -52,7 +52,7 @@ describe('@module utils', function() {
 
   });
 
-  describe('#isValidContact', function() {
+  describe('@function isValidContact', function() {
 
     it('should allow loopback iface if enabled', function() {
       expect(utils.isValidContact(['nodeid', {
@@ -98,7 +98,7 @@ describe('@module utils', function() {
 
   });
 
-  describe('#isHexaString', function() {
+  describe('@function isHexaString', function() {
     it('returns false for object', function() {
       expect(utils.isHexaString({})).to.equal(false);
     });
@@ -139,7 +139,7 @@ describe('@module utils', function() {
 
   });
 
-  describe('#isValidHDNodeKey', function() {
+  describe('@function isValidHDNodeKey', function() {
 
     it('will return false for a number', function() {
       expect(utils.isValidHDNodeKey(10000)).to.equal(false);
@@ -162,7 +162,7 @@ describe('@module utils', function() {
     });
   });
 
-  describe('#isValidNodeIndex', function() {
+  describe('@function isValidNodeIndex', function() {
 
     it('will return false for NaN', function() {
       expect(utils.isValidNodeIndex(NaN)).to.equal(false);
@@ -186,7 +186,7 @@ describe('@module utils', function() {
 
   });
 
-  describe('#createComplexKeyFromSeed', function() {
+  describe('@function createComplexKeyFromSeed', function() {
 
     it('should return the expected extended key', function() {
       const seed = 'a0c42a9c3ac6abf2ba6a9946ae83af18f51bf1c9fa7dacc4c92513cc' +
@@ -201,7 +201,7 @@ describe('@module utils', function() {
 
   });
 
-  describe('#createShardDownloader', function() {
+  describe('@function createShardDownloader', function() {
 
     it('should return a readable stream object', function(done) {
       const requestObj = new EventEmitter();
@@ -231,7 +231,7 @@ describe('@module utils', function() {
 
   });
 
-  describe('#createShardUploader', function() {
+  describe('@function createShardUploader', function() {
 
     it('should return a bubble error', function(done) {
       const requestObj = new EventEmitter();
@@ -289,6 +289,18 @@ describe('@module utils', function() {
         upload.write(Buffer.from('somedata'));
         upload.end();
       }, 30);
+    });
+
+  });
+
+  describe('@function getContactURL', function() {
+
+    it('should return the contact object as a url', function() {
+      expect(utils.getContactURL(['identitykey', {
+        hostname: 'my.farmer.hostname',
+        port: 8080,
+        protocol: 'https:'
+      }])).to.equal('https://my.farmer.hostname:8080/identitykey')
     });
 
   });

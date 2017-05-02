@@ -23,7 +23,44 @@ describe('Proof', function() {
 
   });
 
-  describe('#_generateLeaves', function() {
+  describe('@static verify', function() {
+
+    it('should fail the invalid proof', function(done) {
+      const audit = new AuditStream(12);
+      audit.end(SHARD);
+      setImmediate(() => {
+        const leaves = audit.getPublicRecord();
+        const { challenges } = audit.getPrivateRecord();
+        const proof = new ProofStream(leaves,
+                                      Buffer.from(challenges[0], 'hex'));
+        proof.on('error', (err) => {
+          expect(err.message).to.equal('Failed to generate proof');
+          done();
+        });
+        proof.end(Buffer.from('wrongshard'));
+      });
+    });
+
+    it('should pass the valid proof', function(done) {
+      const audit = new AuditStream(12);
+      audit.end(SHARD);
+      setImmediate(() => {
+        const leaves = audit.getPublicRecord();
+        const { challenges, root, depth } = audit.getPrivateRecord();
+        const proof = new ProofStream(leaves, challenges[0]);
+        proof.on('finish', () => {
+          const [result, expected] = ProofStream.verify(proof.getProofResult(),
+                                                        root, depth);
+          expect(Buffer.compare(result, expected)).to.equal(0);
+          done();
+        });
+        proof.end(SHARD);
+      });
+    });
+
+  });
+
+  describe('@private _generateLeaves', function() {
 
     it('should append empty bottom leaves to the power of two', function(done) {
       const audit = new AuditStream(12);
@@ -41,7 +78,7 @@ describe('Proof', function() {
 
   });
 
-  describe('#_flush', function() {
+  describe('@private _flush', function() {
 
     it('should emit an error if generate proof fails', function(done) {
       var proof = new ProofStream([], CHALLENGE);
@@ -57,7 +94,7 @@ describe('Proof', function() {
 
   });
 
-  describe('#getProofResult', function() {
+  describe('@method getProofResult', function() {
 
     it('should create a recursive tuple structure with leaves', function(done) {
       var audit = new AuditStream(12);

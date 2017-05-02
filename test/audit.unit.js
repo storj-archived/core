@@ -99,7 +99,7 @@ describe('@class AuditStream', function() {
 
   describe('@static fromRecords', function() {
 
-    it('should return the same result when created from record', function(done) {
+    it('should return same when created from record', function(done) {
       const audit1 = new AuditStream(12);
       audit1.on('finish', function() {
         const tree1 = audit1.getPublicRecord();

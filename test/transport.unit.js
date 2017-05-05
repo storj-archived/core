@@ -65,10 +65,9 @@ describe('@class Transport', function() {
 
   });
 
-  describe('@private _cors', function() {
+  describe('@static CORS', function() {
 
     it('should set the cors headers and respond to options', function(done) {
-      const transport = new Transport(ssl);
       const setHeader = sinon.stub();
       const response = {
         setHeader,
@@ -82,17 +81,16 @@ describe('@class Transport', function() {
           done();
         }
       };
-      transport._cors({ headers: [], method: 'OPTIONS' }, response);
+      Transport.CORS({ headers: [], method: 'OPTIONS' }, response);
     });
 
     it('should set the cors headers and callback', function(done) {
-      const transport = new Transport(ssl);
       const setHeader = sinon.stub();
       const response = {
         setHeader,
         end: () => done(new Error('res.end() should not be called'))
       };
-      transport._cors({ headers: [], method: 'POST' }, response, () => {
+      Transport.CORS({ headers: [], method: 'POST' }, response, () => {
         expect(setHeader.calledWithMatch('access-control-allow-origin'))
           .to.equal(true);
         expect(setHeader.calledWithMatch('access-control-allow-methods'))

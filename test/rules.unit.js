@@ -3,6 +3,7 @@
 const { expect } = require('chai');
 const sinon = require('sinon');
 const crypto = require('crypto');
+const { randomBytes } = crypto;
 const { utils: keyutils } = require('kad-spartacus');
 const { Readable: ReadableStream } = require('stream');
 const OfferStream = require('../lib/offers');
@@ -497,7 +498,7 @@ describe('@class Rules', function() {
     });
 
     it('should callback result from trigger processing', function(done) {
-       const rules = new Rules({
+      const rules = new Rules({
         triggers: {
           process: sinon.stub().callsArgWith(3, null, ['result'])
         }
@@ -519,7 +520,119 @@ describe('@class Rules', function() {
 
   describe('@method renew', function() {
 
+    it('should callback error if contract invalid', function(done) {
+      const rules = new Rules();
+      const request = {
+        params: [{}],
+        contact: [
+          'identity',
+          { xpub: 'xpubkey' }
+        ]
+      };
+      const response = {};
+      rules.renew(request, response, (err) => {
+        expect(err.message).to.equal('Descriptor is invalid or incomplete');
+        done();
+      });
+    });
 
+    it('should callback error if cannot load contract', function(done) {
+      const rules = new Rules({
+        contracts: {
+          get: sinon.stub().callsArgWith(1, new Error('Not found'))
+        }
+      });
+      const request = {
+        params: [createValidContract().toObject()],
+        contact: [
+          'identity',
+          { xpub: 'xpubkey' }
+        ]
+      };
+      const response = {};
+      rules.renew(request, response, (err) => {
+        expect(err.message).to.equal('Not found');
+        done();
+      });
+    });
+
+    it('should callback error if restricted property', function(done) {
+      const c1 = createValidContract();
+      const c2 = createValidContract();
+      const rules = new Rules({
+        contracts: {
+          get: sinon.stub().callsArgWith(1, null, c2.toObject())
+        }
+      });
+      const request = {
+        params: [c1.toObject()],
+        contact: [
+          'identity',
+          { xpub: 'xpubkey' }
+        ]
+      };
+      const response = {};
+      rules.renew(request, response, (err) => {
+        expect(err.message).to.equal('Rejecting renewal of farmer_hd_key');
+        done();
+      });
+    });
+
+    it('should callback error if cannot update local record', function(done) {
+      const c1 = createValidContract();
+      const c2 = Contract.from(c1.toObject());
+      c2.set('store_end', 0);
+      const rules = new Rules({
+        contracts: {
+          get: sinon.stub().callsArgWith(1, null, c2.toObject()),
+          put: sinon.stub().callsArgWith(2, new Error('Failed to write'))
+        },
+        spartacus: {
+          privateKey: randomBytes(32)
+        }
+      });
+      const request = {
+        params: [c1.toObject()],
+        contact: [
+          'identity',
+          { xpub: 'xpubkey' }
+        ]
+      };
+      const response = {};
+      rules.renew(request, response, (err) => {
+        expect(err.message).to.equal('Failed to write');
+        done();
+      });
+    });
+
+    it('should sign and echo back the renewal', function(done) {
+      const c1 = createValidContract();
+      const c2 = Contract.from(c1.toObject());
+      c1.set('store_end', 0);
+      const rules = new Rules({
+        contracts: {
+          get: sinon.stub().callsArgWith(1, null, c2.toObject()),
+          put: sinon.stub().callsArgWith(2, null)
+        },
+        spartacus: {
+          privateKey: randomBytes(32)
+        }
+      });
+      const request = {
+        params: [c1.toObject()],
+        contact: [
+          'identity',
+          { xpub: 'xpubkey' }
+        ]
+      };
+      const response = {
+        send: (params) => {
+          expect(params.store_end).to.equal(0);
+          done();
+        }
+      };
+      rules.renew(request, response, done);
+    });
 
   });
 

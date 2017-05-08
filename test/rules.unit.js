@@ -281,7 +281,76 @@ describe('@class Rules', function() {
 
   describe('@method consign', function() {
 
+    it('should callback error if cannot load contract', function(done) {
+      const rules = new Rules({
+        contracts: {
+          get: sinon.stub().callsArgWith(1, new Error('Not found'))
+        }
+      });
+      const request = {
+        params: ['datahash'],
+        contact: [
+          'identity',
+          { xpub: 'xpubkey' }
+        ]
+      };
+      const response = {};
+      rules.consign(request, response, (err) => {
+        expect(err.message).to.equal('Not found');
+        done();
+      })
+    });
 
+    it('should callback error if contract is expired', function(done) {
+      const rules = new Rules({
+        contracts: {
+          get: sinon.stub().callsArgWith(1, null, {
+            store_end: 0
+          })
+        }
+      });
+      const request = {
+        params: ['datahash'],
+        contact: [
+          'identity',
+          { xpub: 'xpubkey' }
+        ]
+      };
+      const response = {};
+      rules.consign(request, response, (err) => {
+        expect(err.message).to.equal('Contract has expired');
+        done();
+      });
+    });
+
+    it('should create a token and respond with it', function(done) {
+      const accept = sinon.stub();
+      const rules = new Rules({
+        contracts: {
+          get: sinon.stub().callsArgWith(1, null, {
+            store_end: Infinity
+          })
+        },
+        server: {
+          accept: accept
+        }
+      });
+      const request = {
+        params: ['datahash'],
+        contact: [
+          'identity',
+          { xpub: 'xpubkey' }
+        ]
+      };
+      const response = {
+        send: (params) => {
+          expect(typeof params[0]).to.equal('string');
+          expect(accept.calledWithMatch(params[0])).to.equal(true);
+          done();
+        }
+      };
+      rules.consign(request, response, done);
+    });
 
   });
 

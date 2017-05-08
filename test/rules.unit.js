@@ -356,13 +356,84 @@ describe('@class Rules', function() {
 
   describe('@method mirror', function() {
 
-
+    // TODO
 
   });
 
   describe('@method retrieve', function() {
 
+    it('should callback error if contract cannot load', function(done) {
+      const rules = new Rules({
+        contracts: {
+          get: sinon.stub().callsArgWith(1, new Error('Not found'))
+        }
+      });
+      const request = {
+        params: ['datahash'],
+        contact: [
+          'identity',
+          { xpub: 'xpubkey' }
+        ]
+      };
+      const response = {};
+      rules.retrieve(request, response, (err) => {
+        expect(err.message).to.equal('Not found');
+        done();
+      });
+    });
 
+    it('should callback error if shard data not found', function(done) {
+      const rules = new Rules({
+        contracts: {
+          get: sinon.stub().callsArgWith(1, null, {})
+        },
+        shards: {
+          exists: sinon.stub().callsArgWith(1, null, false)
+        }
+      });
+      const request = {
+        params: ['datahash'],
+        contact: [
+          'identity',
+          { xpub: 'xpubkey' }
+        ]
+      };
+      const response = {};
+      rules.retrieve(request, response, (err) => {
+        expect(err.message).to.equal('Shard not found');
+        done();
+      });
+    });
+
+    it('should create token and respond with it', function(done) {
+      const accept = sinon.stub();
+      const rules = new Rules({
+        contracts: {
+          get: sinon.stub().callsArgWith(1, null, {})
+        },
+        shards: {
+          exists: sinon.stub().callsArgWith(1, null, true)
+        },
+        server: {
+          accept: accept
+        }
+      });
+      const request = {
+        params: ['datahash'],
+        contact: [
+          'identity',
+          { xpub: 'xpubkey' }
+        ]
+      };
+      const response = {
+        send: (params) => {
+          expect(typeof params[0]).to.equal('string');
+          expect(accept.calledWithMatch(params[0])).to.equal(true);
+          done();
+        }
+      };
+      rules.retrieve(request, response, done);
+    });
 
   });
 

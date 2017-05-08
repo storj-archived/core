@@ -439,13 +439,81 @@ describe('@class Rules', function() {
 
   describe('@method probe', function() {
 
+    it('should callback error if ping fails', function(done) {
+      const rules = new Rules({
+        ping: sinon.stub().callsArgWith(1, new Error('Timed out'))
+      });
+      const request = {
+        contact: [
+          'identity',
+          { xpub: 'xpubkey' }
+        ]
+      };
+      const response = {};
+      rules.probe(request, response, (err) => {
+        expect(err.message).to.equal('Failed to reach probe originator');
+        done();
+      });
+    });
 
+    it('should callback empty if ping succeeds', function(done) {
+      const rules = new Rules({
+        ping: sinon.stub().callsArgWith(1, null, [])
+      });
+      const request = {
+        contact: [
+          'identity',
+          { xpub: 'xpubkey' }
+        ]
+      };
+      const response = {
+        send: (params) => {
+          expect(params).to.have.lengthOf(0);
+          done();
+        }
+      };
+      rules.probe(request, response, done)
+    });
 
   });
 
   describe('@method trigger', function() {
 
+    it('should callback error if trigger fails', function(done) {
+      const rules = new Rules({
+        triggers: {
+          process: sinon.stub().callsArgWith(3, new Error('Failed'))
+        }
+      });
+      const request = {
+        params: ['behavior', 'contents'],
+        contact: ['identity', { xpub: 'xpubkey' }]
+      };
+      const response = {};
+      rules.trigger(request, response, (err) => {
+        expect(err.message).to.equal('Failed');
+        done();
+      });
+    });
 
+    it('should callback result from trigger processing', function(done) {
+       const rules = new Rules({
+        triggers: {
+          process: sinon.stub().callsArgWith(3, null, ['result'])
+        }
+      });
+      const request = {
+        params: ['behavior', 'contents'],
+        contact: ['identity', { xpub: 'xpubkey' }]
+      };
+      const response = {
+        send: (params) => {
+          expect(params[0]).to.equal('result');
+          done();
+        }
+      };
+      rules.trigger(request, response, done);
+    });
 
   });
 

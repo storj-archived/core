@@ -2,9 +2,24 @@
 
 const { expect } = require('chai');
 const sinon = require('sinon');
+const { createRequest, createResponse } = require('node-mocks-http');
+const levelup = require('levelup');
+const memdown = require('memdown');
+const { randomBytes } = require('crypto');
 const constants = require('../lib/constants');
 const Server = require('../lib/server');
 
+
+function createMocks(requestOptions) {
+  const req = createRequest(requestOptions);
+  const res = createResponse({
+    req,
+    writableStream: require('stream').Writable,
+    eventEmitter: require('events').EventEmitter
+  });
+
+  return [req, res];
+}
 
 describe('@class Server', function() {
 
@@ -104,13 +119,146 @@ describe('@class Server', function() {
 
   describe('@method upload', function() {
 
+    const sandbox = sinon.sandbox.create();
+    const contracts = levelup('', { db: memdown });
+    const identity = randomBytes(20);
 
+    after(() => sandbox.restore());
+
+    it.skip('should respond with 401 if not authorized', function(done) {
+      const server = new Server({ contracts, identity });
+      const [req, res] = createMocks({
+
+      });
+      res.on('end', () => {
+
+      });
+      server.upload(req, res);
+    });
+
+    it.skip('should respond with 404 if contract not found', function(done) {
+      const server = new Server({ contracts, identity });
+      const [req, res] = createMocks({
+
+      });
+      server.upload(req, res);
+    });
+
+    it.skip('should respond with 400 if size exceeds expected', function(done) {
+      const shards = {
+        createWriteStream: function(key, callback) {
+
+        }
+      };
+      const server = new Server({ contracts, identity, shards });
+      const [req, res] = createMocks({
+
+      });
+      res.on('end', () => {
+
+      });
+      server.upload(req, res);
+    });
+
+    it.skip('should respond with 400 if integrity fails', function(done) {
+      const shards = {
+        createWriteStream: function(key, callback) {
+
+        }
+      };
+      const server = new Server({ contracts, identity, shards });
+      const [req, res] = createMocks({
+
+      });
+      res.on('end', () => {
+
+      });
+      server.upload(req, res);
+    });
+
+    it.skip('should respond with 200 with upload accepted', function(done) {
+      const shards = {
+        createWriteStream: function(key, callback) {
+
+        }
+      };
+      const server = new Server({ contracts, identity, shards });
+      const [req, res] = createMocks({
+
+      });
+      res.on('end', () => {
+
+      });
+      server.upload(req, res);
+    });
 
   });
 
   describe('@method download', function() {
 
+    const sandbox = sinon.sandbox.create();
+    const identity = randomBytes(20);
 
+    after(() => sandbox.restore());
+
+    it.skip('should respond with 401 if not authorized', function(done) {
+      const server = new Server({ identity });
+      const [req, res] = createMocks({
+
+      });
+      res.on('end', () => {
+
+      });
+      server.download(req, res);
+    });
+
+    it.skip('should respond with 404 if shard not found', function(done) {
+      const shards = {
+        createReadStream: function(key, callback) {
+
+        }
+      };
+      const server = new Server({ identity, shards });
+      const [req, res] = createMocks({
+
+      });
+      res.on('end', () => {
+
+      });
+      server.download(req, res);
+    });
+
+    it.skip('should end the stream if there is an error', function(done) {
+      const shards = {
+        createReadStream: function(key, callback) {
+
+        }
+      };
+      const server = new Server({ identity, shards });
+      const [req, res] = createMocks({
+
+      });
+      res.on('end', () => {
+
+      });
+      server.download(req, res);
+    });
+
+    it.skip('should respond with the shard data', function(done) {
+      const shards = {
+        createReadStream: function(key, callback) {
+
+        }
+      };
+      const server = new Server({ identity, shards });
+      const [req, res] = createMocks({
+
+      });
+      res.on('end', () => {
+
+      });
+      server.download(req, res);
+    });
 
   });
 

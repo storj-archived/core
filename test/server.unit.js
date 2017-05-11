@@ -3,10 +3,12 @@
 const { expect } = require('chai');
 const sinon = require('sinon');
 const { createRequest, createResponse } = require('node-mocks-http');
+const stream = require('stream');
 const levelup = require('levelup');
 const memdown = require('memdown');
 const { randomBytes } = require('crypto');
 const constants = require('../lib/constants');
+const utils = require('../lib/utils');
 const Server = require('../lib/server');
 
 
@@ -119,77 +121,157 @@ describe('@class Server', function() {
 
   describe('@method upload', function() {
 
+    const shard = Buffer.from('test shard');
+    const hash = utils.rmd160sha256(shard).toString('hex');
     const sandbox = sinon.sandbox.create();
-    const contracts = levelup('', { db: memdown });
+    const contracts = levelup('', {
+      db: memdown,
+      valueEncoding: 'json'
+    });
     const identity = randomBytes(20);
 
-    after(() => sandbox.restore());
+    before((done) => {
+      contracts.put(`${hash}:xpub`, {
+        data_hash: hash,
+        data_size: shard.length
+      }, done);
+    });
 
-    it.skip('should respond with 401 if not authorized', function(done) {
+    after(() => {
+      sandbox.restore()
+    });
+
+    it('should respond with 401 if not authorized', function(done) {
       const server = new Server({ contracts, identity });
       const [req, res] = createMocks({
-
+        method: 'POST',
+        path: '/shards/hash',
+        query: {
+          token: 'token'
+        },
+        params: {
+          hash: 'hash'
+        }
       });
       res.on('end', () => {
-
+        expect(res.statusCode).to.equal(401);
+        done();
       });
       server.upload(req, res);
     });
 
-    it.skip('should respond with 404 if contract not found', function(done) {
+    it('should respond with 404 if contract not found', function(done) {
       const server = new Server({ contracts, identity });
       const [req, res] = createMocks({
-
+        method: 'POST',
+        path: '/shards/hash',
+        query: {
+          token: 'token'
+        },
+        params: {
+          hash: 'hash'
+        }
       });
+      res.on('end', () => {
+        expect(res.statusCode).to.equal(404);
+        done();
+      });
+      server.accept('token', 'hash', ['identity', { xpub: 'xpub' }]);
       server.upload(req, res);
     });
 
-    it.skip('should respond with 400 if size exceeds expected', function(done) {
+    it('should respond with 400 if size exceeds expected', function(done) {
       const shards = {
         createWriteStream: function(key, callback) {
-
+          let ws = new stream.Writable({ write: (d, e, cb) => cb() });
+          ws.destroy = sandbox.stub();
+          callback(null, ws);
         }
       };
       const server = new Server({ contracts, identity, shards });
       const [req, res] = createMocks({
-
+        method: 'POST',
+        path: `/shards/${hash}`,
+        query: {
+          token: 'token'
+        },
+        params: {
+          hash: hash
+        }
       });
       res.on('end', () => {
-
+        expect(res.statusCode).to.equal(400);
+        expect(res._getData()).to.equal('Shard exceeds size defined in contract');
+        done();
       });
+      server.accept('token', hash, [identity, { xpub: 'xpub' }]);
       server.upload(req, res);
+      setTimeout(() => {
+        req.emit('data', Buffer.from('a much longer shard test'));
+      }, 50);
     });
 
-    it.skip('should respond with 400 if integrity fails', function(done) {
+    it('should respond with 400 if integrity fails', function(done) {
       const shards = {
         createWriteStream: function(key, callback) {
-
+          let ws = new stream.Writable({ write: (d, e, cb) => cb() });
+          ws.destroy = sandbox.stub();
+          callback(null, ws);
         }
       };
       const server = new Server({ contracts, identity, shards });
       const [req, res] = createMocks({
-
+        method: 'POST',
+        path: `/shards/${hash}`,
+        query: {
+          token: 'token'
+        },
+        params: {
+          hash: hash
+        }
       });
       res.on('end', () => {
-
+        expect(res.statusCode).to.equal(400);
+        expect(res._getData()).to.equal('Hash does not match contract');
+        done();
       });
+      server.accept('token', hash, [identity, { xpub: 'xpub' }]);
       server.upload(req, res);
+      setTimeout(() => {
+        req.emit('data', randomBytes(shard.length));
+        req.emit('end');
+      }, 50);
     });
 
-    it.skip('should respond with 200 with upload accepted', function(done) {
+    it('should respond with 200 with upload accepted', function(done) {
       const shards = {
         createWriteStream: function(key, callback) {
-
+          let ws = new stream.Writable({ write: (d, e, cb) => cb() });
+          ws.destroy = sandbox.stub();
+          callback(null, ws);
         }
       };
       const server = new Server({ contracts, identity, shards });
       const [req, res] = createMocks({
-
+        method: 'POST',
+        path: `/shards/${hash}`,
+        query: {
+          token: 'token'
+        },
+        params: {
+          hash: hash
+        }
       });
       res.on('end', () => {
-
+        expect(res.statusCode).to.equal(200);
+        done();
       });
+      server.accept('token', hash, [identity, { xpub: 'xpub' }]);
       server.upload(req, res);
+      setTimeout(() => {
+        req.emit('data', shard);
+        req.emit('end');
+      }, 50);
     });
 
   });

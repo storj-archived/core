@@ -184,7 +184,7 @@ describe('@class Server', function() {
       const shards = {
         createWriteStream: function(key, callback) {
           let ws = new stream.Writable({ write: (d, e, cb) => cb() });
-          ws.destroy = sandbox.stub();
+          ws.destroy = sandbox.stub().callsArg(0);
           callback(null, ws);
         }
       };
@@ -201,7 +201,9 @@ describe('@class Server', function() {
       });
       res.on('end', () => {
         expect(res.statusCode).to.equal(400);
-        expect(res._getData()).to.equal('Shard exceeds size defined in contract');
+        expect(res._getData()).to.equal(
+          'Shard exceeds size defined in contract'
+        );
         done();
       });
       server.accept('token', hash, [identity, { xpub: 'xpub' }]);
@@ -215,7 +217,7 @@ describe('@class Server', function() {
       const shards = {
         createWriteStream: function(key, callback) {
           let ws = new stream.Writable({ write: (d, e, cb) => cb() });
-          ws.destroy = sandbox.stub();
+          ws.destroy = sandbox.stub().callsArg(0);
           callback(null, ws);
         }
       };
@@ -247,7 +249,7 @@ describe('@class Server', function() {
       const shards = {
         createWriteStream: function(key, callback) {
           let ws = new stream.Writable({ write: (d, e, cb) => cb() });
-          ws.destroy = sandbox.stub();
+          ws.destroy = sandbox.stub().callsArg(0);
           callback(null, ws);
         }
       };
@@ -279,66 +281,111 @@ describe('@class Server', function() {
   describe('@method download', function() {
 
     const sandbox = sinon.sandbox.create();
+    const shard = Buffer.from('test shard');
+    const hash = utils.rmd160sha256(shard).toString('hex');
     const identity = randomBytes(20);
 
     after(() => sandbox.restore());
 
-    it.skip('should respond with 401 if not authorized', function(done) {
+    it('should respond with 401 if not authorized', function(done) {
       const server = new Server({ identity });
       const [req, res] = createMocks({
-
+        method: 'GET',
+        path: `/shards/${hash}`,
+        query: {
+          token: 'token'
+        },
+        params: {
+          hash: hash
+        }
       });
       res.on('end', () => {
-
+        expect(res.statusCode).to.equal(401);
+        done();
       });
       server.download(req, res);
     });
 
-    it.skip('should respond with 404 if shard not found', function(done) {
+    it('should respond with 404 if shard not found', function(done) {
       const shards = {
         createReadStream: function(key, callback) {
-
+          callback(new Error('Not found'));
         }
       };
       const server = new Server({ identity, shards });
       const [req, res] = createMocks({
-
+        method: 'GET',
+        path: `/shards/${hash}`,
+        query: {
+          token: 'token'
+        },
+        params: {
+          hash: hash
+        }
       });
       res.on('end', () => {
-
+        expect(res.statusCode).to.equal(404);
+        done();
       });
+      server.accept('token', hash), [identity, { xpub: 'xpub' }];
       server.download(req, res);
     });
 
-    it.skip('should end the stream if there is an error', function(done) {
+    it('should end the stream if there is an error', function(done) {
+      const rs = new stream.Readable({ read: () => null });
       const shards = {
         createReadStream: function(key, callback) {
-
+          callback(null, rs);
         }
       };
       const server = new Server({ identity, shards });
       const [req, res] = createMocks({
-
+        method: 'GET',
+        path: `/shards/${hash}`,
+        query: {
+          token: 'token'
+        },
+        params: {
+          hash: hash
+        }
       });
       res.on('end', () => {
-
+        expect(res._getData()).to.equal('error after this');
+        done();
       });
+      server.accept('token', hash, [identity, { xpub: 'xpub' }]);
       server.download(req, res);
+      setTimeout(() => {
+        rs.push('error after this');
+        rs.emit('error', new Error('Failed to read'));
+      }, 50);
     });
 
-    it.skip('should respond with the shard data', function(done) {
+    it('should respond with the shard data', function(done) {
+      const parts = [shard, null];
+      const rs = new stream.Readable({ read: () => rs.push(parts.shift()) });
       const shards = {
         createReadStream: function(key, callback) {
-
+          callback(null, rs);
         }
       };
       const server = new Server({ identity, shards });
       const [req, res] = createMocks({
-
+        method: 'GET',
+        path: `/shards/${hash}`,
+        query: {
+          token: 'token'
+        },
+        params: {
+          hash: hash
+        }
       });
       res.on('end', () => {
-
+        expect(res.statusCode).to.equal(200);
+        expect(res._getData()).to.equal('test shard');
+        done();
       });
+      server.accept('token', hash, [identity, { xpub: 'xpub' }]);
       server.download(req, res);
     });
 

@@ -71,7 +71,7 @@
     "ip": "littleskunk/node-ip#b1e7ec0cbff9f7841b1584e50339a774363437c0",
     "jsen": "bugventure/jsen#9e57a9d653ff4ea47d364fc37da0f1659bfb8e89",
     "json-stable-stringify": "^1.0.1",
-    "kad": "^2.2.0",
+    "kad": "^2.2.1",
     "kad-quasar": "^2.0.0",
     "kad-spartacus": "^2.0.0",
     "kfs": "^3.1.4",

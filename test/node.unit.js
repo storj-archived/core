@@ -5,6 +5,9 @@ const sinon = require('sinon');
 const levelup = require('levelup');
 const memdown = require('memdown');
 const { KademliaNode } = require('kad');
+const { utils: keyutils } = require('kad-spartacus');
+const utils = require('../lib/utils');
+const Contract = require('../lib/contract');
 const Node = require('../lib/node');
 
 
@@ -175,13 +178,52 @@ describe('@class Node', function() {
       sandbox.restore();
     });
 
+    it('should callback error if publication fails', function(done) {
+      const node = createNode({});
+      const quasarPublish = sandbox.stub(node, 'quasarPublish')
+                             .callsArgWith(3, new Error('Failed'));
+      const shard = Buffer.from('shard');
+      const renterHdKey = keyutils.toHDKeyFromSeed().deriveChild(1);
+      const descriptor = new Contract({
+        renter_id: keyutils.toPublicKeyHash(renterHdKey.publicKey)
+                     .toString('hex'),
+        renter_hd_key: renterHdKey.publicExtendedKey,
+        renter_hd_index: 1,
+        payment_destination: '14WNyp8paus83JoDvv2SowKb3j1cZBhJoV',
+        data_hash: utils.rmd160sha256(shard).toString('hex'),
+        data_size: shard.length
+      });
+      descriptor.sign('renter', renterHdKey.privateKey);
+      node.publishShardDescriptor(descriptor.toObject(), (err) => {
+        expect(quasarPublish.called).to.equal(true);
+        expect(err.message).to.equal('Failed');
+        done();
+      });
+    });
+
     it('should send a perform a publish of the descriptor', function(done) {
       const node = createNode({});
       const quasarPublish = sandbox.stub(node, 'quasarPublish').callsArg(3);
-      const
-      node.publishShardDescriptor(descriptor, {}, () => {
-
-        done();
+      const shard = Buffer.from('shard');
+      const renterHdKey = keyutils.toHDKeyFromSeed().deriveChild(1);
+      const descriptor = new Contract({
+        renter_id: keyutils.toPublicKeyHash(renterHdKey.publicKey)
+                     .toString('hex'),
+        renter_hd_key: renterHdKey.publicExtendedKey,
+        renter_hd_index: 1,
+        payment_destination: '14WNyp8paus83JoDvv2SowKb3j1cZBhJoV',
+        data_hash: utils.rmd160sha256(shard).toString('hex'),
+        data_size: shard.length
+      });
+      descriptor.sign('renter', renterHdKey.privateKey);
+      node.publishShardDescriptor(descriptor.toObject(), () => {
+        expect(quasarPublish.called).to.equal(true);
+        expect(node.offers.size).to.equal(1);
+        node.offers.get(descriptor.get('data_hash')).emit('end');
+        setImmediate(() => {
+          expect(node.offers.size).to.equal(0);
+          done();
+        });
       });
     });
 
@@ -189,7 +231,56 @@ describe('@class Node', function() {
 
   describe('@method subscribeShardDescriptor', function() {
 
+    const sandbox = sinon.sandbox.create();
 
+    after(() => {
+      sandbox.restore();
+    });
+
+    it('should push valid descriptors through the stream', function(done) {
+      const node = createNode({});
+      const renterHdKey = keyutils.toHDKeyFromSeed().deriveChild(1);
+      const farmerHdKey = keyutils.toHDKeyFromSeed().deriveChild(1);
+      const contract = new Contract({
+        renter_id: keyutils.toPublicKeyHash(renterHdKey.publicKey)
+                     .toString('hex'),
+        farmer_id: keyutils.toPublicKeyHash(farmerHdKey.publicKey)
+                     .toString('hex'),
+        renter_hd_key: renterHdKey.publicExtendedKey,
+        farmer_hd_key: farmerHdKey.publicExtendedKey,
+        renter_hd_index: 1,
+        farmer_hd_index: 1,
+        payment_destination: '14WNyp8paus83JoDvv2SowKb3j1cZBhJoV',
+        data_hash: utils.rmd160sha256(Buffer.from('test')).toString('hex'),
+        data_size: Buffer.from('test').length
+      });
+      contract.sign('renter', renterHdKey.privateKey);
+      contract.sign('farmer', farmerHdKey.privateKey);
+      const descriptors = [
+        {
+          renter_id: 'invalid id'
+        },
+        contract.toObject(),
+        contract.toObject()
+      ];
+      const quasarSubscribe = sandbox.stub(
+        node,
+        'quasarSubscribe',
+        function(codes, handler) {
+          setImmediate(() => descriptors.forEach((d) => handler(d)));
+        }
+      );
+      node.subscribeShardDescriptor(['topic1', 'topic2'], (err, stream) => {
+        let count = 0;
+        expect(err).to.equal(null);
+        stream.on('data', (desc) => {
+          count++;
+          if (count >= 2) {
+            done();
+          }
+        });
+      });
+    });
 
   });
 

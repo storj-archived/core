@@ -2,10 +2,12 @@
 
 const { expect } = require('chai');
 const sinon = require('sinon');
+const proxyquire = require('proxyquire');
 const crypto = require('crypto');
 const { randomBytes } = crypto;
 const { utils: keyutils } = require('kad-spartacus');
-const { Readable: ReadableStream } = require('stream');
+const { Readable, Transform } = require('stream');
+const utils = require('../lib/utils');
 const OfferStream = require('../lib/offers');
 const AuditStream = require('../lib/audit');
 const ProofStream = require('../lib/proof');
@@ -196,7 +198,7 @@ describe('@class Rules', function() {
 
     it('should return null if proof fails', function(done) {
       const shardParts = [dataShard];
-      const readStream = new ReadableStream({
+      const readStream = new Readable({
         read: function() {
           if (shardParts.length) {
             this.push(shardParts.shift());
@@ -234,7 +236,7 @@ describe('@class Rules', function() {
 
     it('should return { hash, proof } if successful', function(done) {
       const shardParts = [dataShard];
-      const readStream = new ReadableStream({
+      const readStream = new Readable({
         read: function() {
           if (shardParts.length) {
             this.push(shardParts.shift());
@@ -357,7 +359,144 @@ describe('@class Rules', function() {
 
   describe('@method mirror', function() {
 
-    // TODO
+    it('should callback error if contract cannot load', function(done) {
+      const rules = new Rules({
+        contracts: {
+          get: sinon.stub().callsArgWith(1, new Error('Not found'))
+        }
+      });
+      const request = {
+        params: [
+          utils.rmd160sha256('shard'),
+          'token',
+          ['identity', { xpub: 'xpub' }]
+        ],
+        contact: [
+          'identity',
+          { xpub: 'xpubkey' }
+        ]
+      };
+      const response = {};
+      rules.mirror(request, response, (err) => {
+        expect(err.message).to.equal('Not found');
+        done();
+      });
+    });
+
+    it('should callback error if shard stream cannot open', function(done) {
+      const rules = new Rules({
+        contracts: {
+          get: sinon.stub().callsArgWith(1, null)
+        },
+        shards: {
+          createReadStream: sinon.stub().callsArgWith(1, new Error('Failed'))
+        }
+      });
+      const request = {
+        params: [
+          utils.rmd160sha256('shard'),
+          'token',
+          ['identity', { xpub: 'xpub' }]
+        ],
+        contact: [
+          'identity',
+          { xpub: 'xpubkey' }
+        ]
+      };
+      const response = {};
+      rules.mirror(request, response, (err) => {
+        expect(err.message).to.equal('Failed');
+        done();
+      });
+    });
+
+    it('should callback error if upload fails', function(done) {
+      const StubbedRules = proxyquire('../lib/rules', {
+        './utils': {
+          rmd160: utils.rmd160,
+          createShardUploader: () => {
+            return new Transform({
+              transform: (chunk, enc, cb) => {
+                cb(new Error('Upload failed'));
+              }
+            })
+          }
+        }
+      });
+      const parts = [Buffer.from('hello'), null];
+      const rs = new Readable({
+        read: function() {
+          this.push(parts.shift());
+        }
+      });
+      const rules = new StubbedRules({
+        contracts: {
+          get: sinon.stub().callsArgWith(1, null)
+        },
+        shards: {
+          createReadStream: sinon.stub().callsArgWith(1, null, rs)
+        }
+      });
+      const request = {
+        params: [
+          utils.rmd160sha256('shard'),
+          'token',
+          ['identity', { xpub: 'xpub' }]
+        ],
+        contact: [
+          'identity',
+          { xpub: 'xpubkey' }
+        ]
+      };
+      const response = {};
+      rules.mirror(request, response, (err) => {
+        expect(err.message).to.equal('Upload failed');
+        done();
+      });
+    });
+
+    it('should respond acknowledgement if upload succeeds', function(done) {
+      const StubbedRules = proxyquire('../lib/rules', {
+        './utils': {
+          rmd160: utils.rmd160,
+          createShardUploader: () => {
+            return new Transform({ transform: (chunk, enc, cb) => cb() })
+          }
+        }
+      });
+      const parts = [Buffer.from('hello'), null];
+      const rs = new Readable({
+        read: function() {
+          this.push(parts.shift());
+        }
+      });
+      const rules = new StubbedRules({
+        contracts: {
+          get: sinon.stub().callsArgWith(1, null)
+        },
+        shards: {
+          createReadStream: sinon.stub().callsArgWith(1, null, rs)
+        }
+      });
+      const request = {
+        params: [
+          utils.rmd160sha256('shard'),
+          'token',
+          ['identity', { xpub: 'xpub' }]
+        ],
+        contact: [
+          'identity',
+          { xpub: 'xpubkey' }
+        ]
+      };
+      const response = {
+        send: (params) => {
+          expect(params).to.have.lengthOf(0);
+          done();
+        }
+      };
+      rules.mirror(request, response, done);
+    });
 
   });
 

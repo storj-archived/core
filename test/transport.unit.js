@@ -5,6 +5,7 @@ const { EventEmitter } = require('events');
 const http = require('http');
 const https = require('https');
 const pem = require('pem');
+const createMocks = require('./fixtures/http-mocks');
 const { expect } = require('chai');
 const Transport = require('../lib/transport');
 
@@ -57,10 +58,15 @@ describe('@class Transport', function() {
 
   describe('@private _handle', function() {
 
-    it('should return a handler function', function() {
+    it('should respond via the middleware stack', function(done) {
       const transport = new Transport(ssl);
-      const handler = transport._handle();
-      expect(typeof handler).to.equal('function');
+      const [req, res] = createMocks({
+        method: 'OPTIONS',
+        path: '/rpc/',
+        url: 'https://localhost:8080/rpc'
+      });
+      res.on('end', done);
+      transport._handle(req, res);
     });
 
   });

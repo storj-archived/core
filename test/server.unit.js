@@ -2,7 +2,7 @@
 
 const { expect } = require('chai');
 const sinon = require('sinon');
-const { createRequest, createResponse } = require('node-mocks-http');
+const createMocks = require('./fixtures/http-mocks');
 const stream = require('stream');
 const levelup = require('levelup');
 const memdown = require('memdown');
@@ -11,17 +11,6 @@ const constants = require('../lib/constants');
 const utils = require('../lib/utils');
 const Server = require('../lib/server');
 
-
-function createMocks(requestOptions) {
-  const req = createRequest(requestOptions);
-  const res = createResponse({
-    req,
-    writableStream: require('stream').Writable,
-    eventEmitter: require('events').EventEmitter
-  });
-
-  return [req, res];
-}
 
 describe('@class Server', function() {
 

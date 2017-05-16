@@ -273,7 +273,8 @@ describe('@class Node', function() {
       node.subscribeShardDescriptor(['topic1', 'topic2'], (err, stream) => {
         let count = 0;
         expect(err).to.equal(null);
-        stream.on('data', (desc) => {
+        expect(quasarSubscribe.callCount).to.equal(1);
+        stream.on('data', () => {
           count++;
           if (count >= 2) {
             done();

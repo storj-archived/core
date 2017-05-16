@@ -287,13 +287,285 @@ describe('@class Node', function() {
 
   describe('@method offerShardAllocation', function() {
 
+    const sandbox = sinon.sandbox.create();
 
+    after(() => {
+      sandbox.restore();
+    });
+
+    it('should callback error if peer returns one', function(done) {
+      const node = createNode({});
+      const peer = ['identity', { xpub: 'xpub' }];
+      const renterHdKey = keyutils.toHDKeyFromSeed().deriveChild(1);
+      const farmerHdKey = keyutils.toHDKeyFromSeed().deriveChild(1);
+      const contract = new Contract({
+        renter_id: keyutils.toPublicKeyHash(renterHdKey.publicKey)
+                     .toString('hex'),
+        farmer_id: keyutils.toPublicKeyHash(farmerHdKey.publicKey)
+                     .toString('hex'),
+        renter_hd_key: renterHdKey.publicExtendedKey,
+        farmer_hd_key: farmerHdKey.publicExtendedKey,
+        renter_hd_index: 1,
+        farmer_hd_index: 1,
+        payment_destination: '14WNyp8paus83JoDvv2SowKb3j1cZBhJoV',
+        data_hash: utils.rmd160sha256(Buffer.from('test')).toString('hex'),
+        data_size: Buffer.from('test').length
+      });
+      const send = sandbox.stub(node, 'send').callsArgWith(
+        3,
+        new Error('Failed')
+      );
+      node.offerShardAllocation(peer, contract.toObject(), (err) => {
+        expect(send.calledWithMatch('OFFER', [
+          contract.toObject()
+        ])).to.equal(true);
+        expect(err.message).to.equal('Failed');
+        done();
+      });
+    });
+
+    it('should callback error if descriptor invalid', function(done) {
+      const node = createNode({});
+      const peer = ['identity', { xpub: 'xpub' }];
+      const renterHdKey = keyutils.toHDKeyFromSeed().deriveChild(1);
+      const farmerHdKey = keyutils.toHDKeyFromSeed().deriveChild(1);
+      const contract = new Contract({
+        renter_id: keyutils.toPublicKeyHash(renterHdKey.publicKey)
+                     .toString('hex'),
+        farmer_id: keyutils.toPublicKeyHash(farmerHdKey.publicKey)
+                     .toString('hex'),
+        renter_hd_key: renterHdKey.publicExtendedKey,
+        farmer_hd_key: farmerHdKey.publicExtendedKey,
+        renter_hd_index: 1,
+        farmer_hd_index: 1,
+        payment_destination: '14WNyp8paus83JoDvv2SowKb3j1cZBhJoV',
+        data_hash: utils.rmd160sha256(Buffer.from('test')).toString('hex'),
+        data_size: 'invalid size'
+      });
+      const send = sandbox.stub(node, 'send').callsArgWith(
+        3,
+        null,
+        contract.toObject()
+      );
+      node.offerShardAllocation(peer, contract.toObject(), (err) => {
+        expect(send.calledWithMatch('OFFER', [
+          contract.toObject()
+        ])).to.equal(true);
+        expect(err.message).to.equal(
+          'Peer replied with invalid or incomplete contract'
+        );
+        done();
+      });
+    });
+
+    it('should callback error if descriptor not complete', function(done) {
+      const node = createNode({});
+      const peer = ['identity', { xpub: 'xpub' }];
+      const renterHdKey = keyutils.toHDKeyFromSeed().deriveChild(1);
+      const farmerHdKey = keyutils.toHDKeyFromSeed().deriveChild(1);
+      const contract = new Contract({
+        renter_id: keyutils.toPublicKeyHash(renterHdKey.publicKey)
+                     .toString('hex'),
+        farmer_id: keyutils.toPublicKeyHash(farmerHdKey.publicKey)
+                     .toString('hex'),
+        renter_hd_key: renterHdKey.publicExtendedKey,
+        farmer_hd_key: farmerHdKey.publicExtendedKey,
+        renter_hd_index: 1,
+        farmer_hd_index: 1,
+        data_hash: utils.rmd160sha256(Buffer.from('test')).toString('hex'),
+        data_size: 'invalid size'
+      });
+      const send = sandbox.stub(node, 'send').callsArgWith(
+        3,
+        null,
+        contract.toObject()
+      );
+      node.offerShardAllocation(peer, contract.toObject(), (err) => {
+        expect(send.calledWithMatch('OFFER', [
+          contract.toObject()
+        ])).to.equal(true);
+        expect(err.message).to.equal(
+          'Peer replied with invalid or incomplete contract'
+        );
+        done();
+      });
+    });
+
+    it('should store the completed contract and callback', function(done) {
+      const node = createNode({});
+      const peer = ['identity', { xpub: 'xpub' }];
+      const renterHdKey = keyutils.toHDKeyFromSeed().deriveChild(1);
+      const farmerHdKey = keyutils.toHDKeyFromSeed().deriveChild(1);
+      const contract = new Contract({
+        renter_id: keyutils.toPublicKeyHash(renterHdKey.publicKey)
+                     .toString('hex'),
+        farmer_id: keyutils.toPublicKeyHash(farmerHdKey.publicKey)
+                     .toString('hex'),
+        renter_hd_key: renterHdKey.publicExtendedKey,
+        farmer_hd_key: farmerHdKey.publicExtendedKey,
+        renter_hd_index: 1,
+        farmer_hd_index: 1,
+        payment_destination: '14WNyp8paus83JoDvv2SowKb3j1cZBhJoV',
+        data_hash: utils.rmd160sha256(Buffer.from('test')).toString('hex'),
+        data_size: Buffer.from('test').length
+      });
+      contract.sign('renter', renterHdKey.privateKey);
+      contract.sign('farmer', farmerHdKey.privateKey);
+      const send = sandbox.stub(node, 'send').callsArgWith(
+        3,
+        null,
+        contract.toObject()
+      );
+      node.offerShardAllocation(peer, contract.toObject(), (err, result) => {
+        expect(send.calledWithMatch('OFFER', [
+          contract.toObject()
+        ])).to.equal(true);
+        expect(result).to.be.instanceOf(Contract);
+        done();
+      });
+    });
 
   });
 
   describe('@method requestContractRenewal', function() {
 
+    const sandbox = sinon.sandbox.create();
 
+    after(() => {
+      sandbox.restore();
+    });
+
+    it('should callback error if peer returns one', function(done) {
+      const node = createNode({});
+      const peer = ['identity', { xpub: 'xpub' }];
+      const renterHdKey = keyutils.toHDKeyFromSeed().deriveChild(1);
+      const farmerHdKey = keyutils.toHDKeyFromSeed().deriveChild(1);
+      const contract = new Contract({
+        renter_id: keyutils.toPublicKeyHash(renterHdKey.publicKey)
+                     .toString('hex'),
+        farmer_id: keyutils.toPublicKeyHash(farmerHdKey.publicKey)
+                     .toString('hex'),
+        renter_hd_key: renterHdKey.publicExtendedKey,
+        farmer_hd_key: farmerHdKey.publicExtendedKey,
+        renter_hd_index: 1,
+        farmer_hd_index: 1,
+        payment_destination: '14WNyp8paus83JoDvv2SowKb3j1cZBhJoV',
+        data_hash: utils.rmd160sha256(Buffer.from('test')).toString('hex'),
+        data_size: Buffer.from('test').length
+      });
+      const send = sandbox.stub(node, 'send').callsArgWith(
+        3,
+        new Error('Failed')
+      );
+      node.requestContractRenewal(peer, contract.toObject(), (err) => {
+        expect(send.calledWithMatch('RENEW', [
+          contract.toObject()
+        ])).to.equal(true);
+        expect(err.message).to.equal('Failed');
+        done();
+      });
+    });
+
+    it('should callback error if descriptor invalid', function(done) {
+      const node = createNode({});
+      const peer = ['identity', { xpub: 'xpub' }];
+      const renterHdKey = keyutils.toHDKeyFromSeed().deriveChild(1);
+      const farmerHdKey = keyutils.toHDKeyFromSeed().deriveChild(1);
+      const contract = new Contract({
+        renter_id: keyutils.toPublicKeyHash(renterHdKey.publicKey)
+                     .toString('hex'),
+        farmer_id: keyutils.toPublicKeyHash(farmerHdKey.publicKey)
+                     .toString('hex'),
+        renter_hd_key: renterHdKey.publicExtendedKey,
+        farmer_hd_key: farmerHdKey.publicExtendedKey,
+        renter_hd_index: 1,
+        farmer_hd_index: 1,
+        payment_destination: '14WNyp8paus83JoDvv2SowKb3j1cZBhJoV',
+        data_hash: utils.rmd160sha256(Buffer.from('test')).toString('hex'),
+        data_size: 'invalid size'
+      });
+      const send = sandbox.stub(node, 'send').callsArgWith(
+        3,
+        null,
+        contract.toObject()
+      );
+      node.requestContractRenewal(peer, contract.toObject(), (err) => {
+        expect(send.calledWithMatch('RENEW', [
+          contract.toObject()
+        ])).to.equal(true);
+        expect(err.message).to.equal(
+          'Peer replied with invalid or incomplete contract'
+        );
+        done();
+      });
+    });
+
+    it('should callback error if descriptor not complete', function(done) {
+      const node = createNode({});
+      const peer = ['identity', { xpub: 'xpub' }];
+      const renterHdKey = keyutils.toHDKeyFromSeed().deriveChild(1);
+      const farmerHdKey = keyutils.toHDKeyFromSeed().deriveChild(1);
+      const contract = new Contract({
+        renter_id: keyutils.toPublicKeyHash(renterHdKey.publicKey)
+                     .toString('hex'),
+        farmer_id: keyutils.toPublicKeyHash(farmerHdKey.publicKey)
+                     .toString('hex'),
+        renter_hd_key: renterHdKey.publicExtendedKey,
+        farmer_hd_key: farmerHdKey.publicExtendedKey,
+        renter_hd_index: 1,
+        farmer_hd_index: 1,
+        data_hash: utils.rmd160sha256(Buffer.from('test')).toString('hex'),
+        data_size: 'invalid size'
+      });
+      const send = sandbox.stub(node, 'send').callsArgWith(
+        3,
+        null,
+        contract.toObject()
+      );
+      node.requestContractRenewal(peer, contract.toObject(), (err) => {
+        expect(send.calledWithMatch('RENEW', [
+          contract.toObject()
+        ])).to.equal(true);
+        expect(err.message).to.equal(
+          'Peer replied with invalid or incomplete contract'
+        );
+        done();
+      });
+    });
+
+    it('should store the completed contract and callback', function(done) {
+      const node = createNode({});
+      const peer = ['identity', { xpub: 'xpub' }];
+      const renterHdKey = keyutils.toHDKeyFromSeed().deriveChild(1);
+      const farmerHdKey = keyutils.toHDKeyFromSeed().deriveChild(1);
+      const contract = new Contract({
+        renter_id: keyutils.toPublicKeyHash(renterHdKey.publicKey)
+                     .toString('hex'),
+        farmer_id: keyutils.toPublicKeyHash(farmerHdKey.publicKey)
+                     .toString('hex'),
+        renter_hd_key: renterHdKey.publicExtendedKey,
+        farmer_hd_key: farmerHdKey.publicExtendedKey,
+        renter_hd_index: 1,
+        farmer_hd_index: 1,
+        payment_destination: '14WNyp8paus83JoDvv2SowKb3j1cZBhJoV',
+        data_hash: utils.rmd160sha256(Buffer.from('test')).toString('hex'),
+        data_size: Buffer.from('test').length
+      });
+      contract.sign('renter', renterHdKey.privateKey);
+      contract.sign('farmer', farmerHdKey.privateKey);
+      const send = sandbox.stub(node, 'send').callsArgWith(
+        3,
+        null,
+        contract.toObject()
+      );
+      node.requestContractRenewal(peer, contract.toObject(), (err, result) => {
+        expect(send.calledWithMatch('RENEW', [
+          contract.toObject()
+        ])).to.equal(true);
+        expect(result).to.be.instanceOf(Contract);
+        done();
+      });
+    });
 
   });
 

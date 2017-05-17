@@ -9,8 +9,10 @@
     "doc": "doc"
   },
   "scripts": {
-    "test": "npm run testsuite && npm run linter",
-    "testsuite": "STORJ_ALLOW_LOOPBACK=1 ./node_modules/.bin/mocha test/** --recursive",
+    "test": "npm run unit-tests && npm run integration-tests && npm run e2e-tests && npm run linter",
+    "unit-tests": "STORJ_ALLOW_LOOPBACK=1 ./node_modules/.bin/mocha test/*.unit.js",
+    "integration-tests": "STORJ_ALLOW_LOOPBACK=1 ./node_modules/.bin/mocha test/*.integration.js",
+    "e2e-tests": "STORJ_ALLOW_LOOPBACK=1 ./node_modules/.bin/mocha test/*.e2e.js",
     "coverage": "STORJ_ALLOW_LOOPBACK=1 ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha -- --recursive",
     "linter": "./node_modules/.bin/eslint ./index.js ./lib ./test",
     "build": "./node_modules/.bin/browserify index.js -s storj -o dist/storj.browser.js",

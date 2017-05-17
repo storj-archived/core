@@ -4,7 +4,7 @@ const { expect } = require('chai');
 const netgen = require('./fixtures/node-generator');
 
 
-describe('@class Node + @class Transport', function() {
+describe('@class Node + @class Transport (integration)', function() {
 
   let node1, node2;
 

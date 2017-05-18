@@ -1,6 +1,6 @@
 'use strict';
 
-// const { expect } = require('chai');
+const { expect } = require('chai');
 const async = require('async');
 const netgen = require('./fixtures/node-generator');
 // const storj = require('..');
@@ -8,12 +8,13 @@ const netgen = require('./fixtures/node-generator');
 
 describe('@module storj-lib (end-to-end)', function() {
 
-  let nodes;
+  const NUM_NODES = 12;
+  const nodes = [];
 
   before(function(done) {
     this.timeout(12000);
     netgen(12, (n) => {
-      nodes = n;
+      n.forEach((node) => nodes.push(node));
       async.eachSeries(nodes, (n, done) => {
         n.listen(n.contact.port, n.contact.hostname, done)
       }, done);
@@ -38,6 +39,27 @@ describe('@module storj-lib (end-to-end)', function() {
           nodes[0].contact
         ], next);
       }
+    }, () => {
+      nodes.forEach((n) => {
+        expect(n.router.size > 0.75 / NUM_NODES).to.equal(true);
+      });
+      done();
+    });
+  });
+
+  it('should subscribe farmers to the topic', function(done) {
+    this.timeout(0);
+    async.eachOfSeries(nodes.slice(11), (n, i, next) => {
+      n.subscribeShardDescriptor(['0f02020202'], (err, descriptors) => {
+        descriptors.on('data', ({ contract, callback }) => {
+          contract.set('farmer_id', n.identity.toString('hex'));
+          contract.set('farmer_hd_key', n.contact.xpub);
+          contract.set('farmer_hd_index', n.contact.index);
+          contract.sign('farmer', n.spartacus.privateKey);
+          callback(null, contract);
+        });
+        next();
+      });
     }, done);
   });
 

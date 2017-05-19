@@ -28,7 +28,10 @@ module.exports = function(numNodes, callback) {
       name: 'node-kademlia'
     });
     const storage = levelup('node-kademlia', { db: memdown });
-    const contracts = levelup('node-storj', { db: memdown });
+    const contracts = levelup('node-storj', {
+      db: memdown,
+      valueEncoding: 'json'
+    });
     const contact = {
       hostname: 'localhost',
       port: startPort++,

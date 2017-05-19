@@ -414,9 +414,10 @@ describe('@class Node', function() {
       const send = sandbox.stub(node, 'send').callsArgWith(
         3,
         null,
-        contract.toObject()
+        [contract.toObject()]
       );
       node.offerShardAllocation(peer, contract.toObject(), (err, result) => {
+        expect(err).to.equal(undefined);
         expect(send.calledWithMatch('OFFER', [
           contract.toObject()
         ])).to.equal(true);

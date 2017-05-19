@@ -206,7 +206,7 @@ describe('@module utils', function() {
     it('should return a readable stream object', function(done) {
       const requestObj = new EventEmitter();
       const utils = proxyquire('../lib/utils', {
-        http: {
+        https: {
           get: function(opts) {
             expect(opts.path).to.equal('/shards/hash?token=token');
             return requestObj;
@@ -237,7 +237,7 @@ describe('@module utils', function() {
       const requestObj = new EventEmitter();
       requestObj.write = sinon.stub();
       const utils = proxyquire('../lib/utils', {
-        http: {
+        https: {
           request: function(opts) {
             expect(opts.method).to.equal('POST');
             expect(opts.path).to.equal(
@@ -268,7 +268,7 @@ describe('@module utils', function() {
       requestObj.write = sinon.stub().callsArg(2);
       requestObj.end = sinon.stub();
       const utils = proxyquire('../lib/utils', {
-        http: {
+        https: {
           request: function(opts) {
             expect(opts.method).to.equal('POST');
             expect(opts.path).to.equal(

@@ -13,7 +13,6 @@ describe('@module storj-lib (end-to-end)', function() {
   const shard = Buffer.from('i am a test shard');
   const audit = new storj.Audit(4);
   const offers = [];
-  const token = { consign: null, retrieve: null };
 
   before(function(done) {
     this.timeout(12000);
@@ -69,7 +68,7 @@ describe('@module storj-lib (end-to-end)', function() {
         });
         next();
       });
-    }, () => setTimeout(() => done(), 4000));
+    }, () => setTimeout(() => done(), 1000));
   });
 
   it('should receive offer for contracts published', function(done) {
@@ -119,10 +118,42 @@ describe('@module storj-lib (end-to-end)', function() {
           result[0]
         );
         uploader.on('error', done);
-        uploader.on('finish', done);
-        uploader.end(shard);
+        uploader.on('response', (res) => {
+          let body = '';
+          res.on('data', (data) => body += data.toString());
+          res.on('end', () => {
+            if (res.statusCode !== 200) {
+              done(new Error(body));
+            } else {
+              done();
+            }
+          });
+        });
+        uploader.write(shard);
+        uploader.end();
       }
     );
+  });
+
+  it('should succeed in auditing the shard', function(done) {
+    this.timeout(6000);
+    const renter = nodes[0];
+    const farmer = offers[0].contact;
+    const challenge = audit.getPrivateRecord().challenges[0];
+    const hash = offers[0].contract.get('data_hash');
+    renter.auditRemoteShards(farmer, [
+      { hash, challenge }
+    ], (err, result) => {
+      expect(err).to.equal(null);
+      expect(result[0].proof).to.not.equal(null);
+      const proof = storj.Proof.verify(
+        result[0].proof,
+        audit.getPrivateRecord().root,
+        audit.getPrivateRecord().depth
+      );
+      expect(Buffer.compare(...proof)).to.equal(0);
+      done();
+    });
   });
 
 });

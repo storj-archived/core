@@ -137,7 +137,7 @@ describe('@class Proof', function() {
 
           function _getChallengeResponse(data) {
             if (data.length === 1) {
-              return utils.rmd160sha256(data[0]);
+              return utils.rmd160sha256(data[0], 'hex');
             }
 
             if (Array.isArray(data[0])) {

@@ -114,7 +114,7 @@ describe('@class Transport', function() {
     it('should emit upload event with request and response', function(done) {
       const transport = new Transport(ssl);
       const request = {
-        url: 'https://localhost:8080/shards/{hash}?token={token}',
+        originalUrl: 'https://localhost:8080/shards/{hash}?token={token}',
         method: 'POST'
       };
       const response = {};
@@ -130,7 +130,7 @@ describe('@class Transport', function() {
     it('should emit download event qith request and response', function(done) {
       const transport = new Transport(ssl);
       const request = {
-        url: 'https://localhost:8080/shards/{hash}?token={token}',
+        originalUrl: 'https://localhost:8080/shards/{hash}?token={token}',
         method: 'GET'
       };
       const response = {};
@@ -146,7 +146,7 @@ describe('@class Transport', function() {
     it('should end the response with a 405 status code', function(done) {
       const transport = new Transport(ssl);
       const request = {
-        url: 'https://localhost:8080/shards/{hash}?token={token}',
+        originalUrl: 'https://localhost:8080/shards/{hash}?token={token}',
         method: 'PUT'
       };
       const response = {

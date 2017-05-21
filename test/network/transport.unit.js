@@ -96,6 +96,21 @@ describe('Network/Transport', function() {
       });
     });
 
+    it('should use listenPort if supplied', function(done) {
+      var transport = new Transport(Contact({
+        address: '127.0.0.1',
+        port: 0,
+        nodeID: KeyPair().getNodeID()
+      }), {
+        storageManager: StorageManager(RamAdapter()),
+        listenPort: 10001
+      });
+      transport.on('ready', function() {
+        expect(transport._server.address().port).to.equal(10001);
+        done();
+      });
+    });
+
   });
 
   describe('#_checkIfReachable', function() {

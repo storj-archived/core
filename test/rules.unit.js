@@ -825,7 +825,7 @@ describe('@class Rules', function() {
       };
       const response = {
         send: (params) => {
-          expect(params.store_end).to.equal(0);
+          expect(params[0].store_end).to.equal(0);
           done();
         }
       };

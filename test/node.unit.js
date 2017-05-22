@@ -488,7 +488,7 @@ describe('@class Node', function() {
       const send = sandbox.stub(node, 'send').callsArgWith(
         3,
         null,
-        contract.toObject()
+        [contract.toObject()]
       );
       node.requestContractRenewal(peer, contract.toObject(), (err) => {
         expect(send.calledWithMatch('RENEW', [
@@ -521,7 +521,7 @@ describe('@class Node', function() {
       const send = sandbox.stub(node, 'send').callsArgWith(
         3,
         null,
-        contract.toObject()
+        [contract.toObject()]
       );
       node.requestContractRenewal(peer, contract.toObject(), (err) => {
         expect(send.calledWithMatch('RENEW', [
@@ -557,7 +557,7 @@ describe('@class Node', function() {
       const send = sandbox.stub(node, 'send').callsArgWith(
         3,
         null,
-        contract.toObject()
+        [contract.toObject()]
       );
       node.requestContractRenewal(peer, contract.toObject(), (err, result) => {
         expect(send.calledWithMatch('RENEW', [

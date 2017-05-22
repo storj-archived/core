@@ -93,7 +93,6 @@ describe('@module storj-lib (end-to-end)', function() {
         contract.toObject(),
         { maxOffers: 3 },
         (err, offerStream) => {
-          let received = 0;
           offerStream.on('data', (offer) => {
             offer.contract.sign('renter', renter.spartacus.privateKey);
             offers.push(offer);

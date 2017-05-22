@@ -5,17 +5,14 @@ Want to contribute, but not sure where to start? Check out our [issue
 board](http://waffle.io/storj/core)!
 
 This document outlines general patterns and conventions for contributing
-to the project. For in-depth documentation on StorjCORE, [read the
+to the project. For in-depth documentation on Storj Core, [read the
 documentation](http://storj.github.io/core).
 
 Contributor License Agreement
 -----------------------------
 
 By submitting pull requests, you agree that your work may be licensed under
-one of:
-
-* GNU Affero General Public License Version 3 (or later)
-* GNU Lesser General Public License Version 3 (or later)
+the GNU Affero General Public License Version 3 (or later).
 
 You also assert that you have completed the
 [Contributor License Agreement](https://storj.io/cla)
@@ -47,17 +44,14 @@ Style & Conventions
 
 ### Style Guide
 
-StorjCORE adheres to
+Storj Core adheres to
 [Felix's Node.js Style Guide](https://github.com/felixge/node-style-guide).
 Please take the time to review the style guide and take care to follow it.
 
 ### Project Structure
 
-* `bin/` - Command line utilities linked during global installation
-* `dist/` - Placeholder for browser bundles generated with `npm run build`
 * `doc/` - Markdown documentation on various topics not covered by JSDoc
 * `lib/` - All core classes and modules
-* `script/` - Miscellaneous scripts and utilities used for development
 * `test/` - Unit and integration tests for core classes and modules
 
 ### Inline Documentation

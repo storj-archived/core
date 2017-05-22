@@ -6,32 +6,7 @@
 [![NPM](https://img.shields.io/npm/v/storj-lib.svg?style=flat-square)](https://www.npmjs.com/package/storj-lib)
 [![License](https://img.shields.io/badge/license-AGPL3.0-blue.svg?style=flat-square)](https://raw.githubusercontent.com/Storj/core/master/LICENSE)
 
-This package exposes a module that provides all of the tools needed to
-integrate with the Storj network. You must have Node.js v6.9.1, Python v2.x.x,
-and Git installed. [Complete documentation can be found here](http://storj.github.io/core).
-
-```
-npm install storj-lib --save
-```
-
-> If you want access to the [Storj CLI](https://github.com/storj/core-cli), 
-> you must install it separately or use the [`storj`](https://github.com/storj/npm-meta) 
-> metapackage to install both the core library *and* command line interface.
-
-Usage Examples
---------------
-
-- [Example 1 - Creating a User](https://github.com/Storj/core/blob/master/example/1-create-user.js)
-- [Example 2 - Generating a KeyPair](https://github.com/Storj/core/blob/master/example/2-generate-keypair.js)
-- [Example 3 - Authenticating with a KeyPair](https://github.com/Storj/core/blob/master/example/3-authenticate-with-keypair.js)
-- [Example 4 - Listing Keys](https://github.com/Storj/core/blob/master/example/4a-list-keys.js)
-- [Example 4b - Add/Remove Keys](https://github.com/Storj/core/blob/master/example/4b-add-remove-keys.js)
-- [Example 5a - List Buckets](https://github.com/Storj/core/blob/master/example/5a-list-buckets.js)
-- [Example 5b - Add/Remove Bucket](https://github.com/Storj/core/blob/master/example/5b-add-remove-bucket.js)
-- [Example 6a - Upload File](https://github.com/Storj/core/blob/master/example/6a-upload-file.js)
-- [Example 6b - Download File](https://github.com/Storj/core/blob/master/example/6b-download-file.js)
-- [Example 6c - List Bucket Files](https://github.com/Storj/core/blob/master/example/6c-list-bucket-files.js)
-- [Example 6d - Delete File from Bucket](https://github.com/Storj/core/blob/master/example/6d-delete-file-from-bucket.js)
+TODO
 
 License
 -------

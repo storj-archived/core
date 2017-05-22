@@ -10,24 +10,27 @@
   },
   "scripts": {
     "test": "npm run unit-tests && npm run integration-tests && npm run e2e-tests && npm run linter",
-    "unit-tests": "STORJ_ALLOW_LOOPBACK=1 ./node_modules/.bin/mocha test/*.unit.js",
-    "integration-tests": "STORJ_ALLOW_LOOPBACK=1 ./node_modules/.bin/mocha test/*.integration.js",
-    "e2e-tests": "STORJ_ALLOW_LOOPBACK=1 ./node_modules/.bin/mocha test/*.e2e.js",
-    "coverage": "STORJ_ALLOW_LOOPBACK=1 ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha -- --recursive",
-    "linter": "./node_modules/.bin/eslint ./index.js ./lib ./test",
-    "build": "./node_modules/.bin/browserify index.js -s storj -o dist/storj.browser.js",
-    "make-docs": "mkdir -p ./jsdoc && rm -r ./jsdoc && ./node_modules/.bin/jsdoc index.js lib -r -R README.md -u ./doc -c .jsdoc.json --verbose -d ./jsdoc && cp -r doc/assets jsdoc/assets",
+    "unit-tests": "mocha test/*.unit.js",
+    "integration-tests": "mocha test/*.integration.js",
+    "e2e-tests": "mocha test/*.e2e.js",
+    "coverage": "istanbul cover _mocha -- --recursive",
+    "linter": "eslint ./index.js ./lib ./test",
+    "generate-docs": "mkdir -p ./jsdoc && rm -r ./jsdoc && jsdoc index.js lib -r -R README.md -u ./doc -c .jsdoc.json --verbose -d ./jsdoc",
     "publish-docs": "gh-pages -d jsdoc --repo git@github.com:Storj/core.git"
   },
   "keywords": [
     "storj",
-    "p2p"
+    "p2p",
+    "kademlia",
+    "quasar",
+    "cloud",
+    "distributed"
   ],
   "repository": {
     "type": "git",
     "url": "https://github.com/storj/core.git"
   },
-  "author": "Gordon Hall <gordon@gordonwritescode.com>",
+  "author": "Gordon Hall <gordonh@member.fsf.org>",
   "contributors": [
     {
       "name": "littleskunk",
@@ -64,7 +67,7 @@
   ],
   "license": "AGPL-3.0",
   "engines": {
-    "node": "^6.9.1"
+    "node": "6.x.x"
   },
   "dependencies": {
     "async": "^2.1.4",

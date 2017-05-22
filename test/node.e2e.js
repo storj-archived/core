@@ -54,7 +54,7 @@ describe('@module storj-lib (end-to-end)', function() {
 
   it('should send offer for contracts received', function(done) {
     this.timeout(8000);
-    async.eachOfSeries(nodes.slice(11), (n, i, next) => {
+    async.eachOfSeries(nodes.slice(1), (n, i, next) => {
       n.subscribeShardDescriptor(['0f01010202'], (err, descriptors) => {
         descriptors.on('data', (contract) => {
           contract.set('farmer_id', n.identity.toString('hex'));
@@ -91,12 +91,15 @@ describe('@module storj-lib (end-to-end)', function() {
       contract.sign('renter', renter.spartacus.privateKey);
       renter.publishShardDescriptor(
         contract.toObject(),
-        { maxOffers: 1 },
+        { maxOffers: 3 },
         (err, offerStream) => {
-          offerStream.once('data', (offer) => {
+          let received = 0;
+          offerStream.on('data', (offer) => {
             offer.contract.sign('renter', renter.spartacus.privateKey);
             offers.push(offer);
             offer.callback(null, offer.contract);
+          }).on('end', () => {
+            expect(offers).to.have.lengthOf(3);
             done();
           });
         }
@@ -152,6 +155,60 @@ describe('@module storj-lib (end-to-end)', function() {
         audit.getPrivateRecord().depth
       );
       expect(Buffer.compare(...proof)).to.equal(0);
+      done();
+    });
+  });
+
+  it('should succeed in mirroring the shard', function(done) {
+    this.timeout(6000);
+    const renter = nodes[0];
+    const source = offers[0].contact;
+    const destination = offers[1].contact;
+    const hash = storj.utils.rmd160sha256(shard).toString('hex');
+    renter.authorizeConsignment(destination, [hash], (err, result) => {
+      expect(err).to.equal(null);
+      const [token] = result;
+      renter.createShardMirror(source, { destination, hash, token }, (err) => {
+        expect(err).to.equal(null);
+        done();
+      });
+    });
+  });
+
+  it('should succeed in retrieving the shard from mirror', function(done) {
+    this.timeout(6000);
+    const renter = nodes[0];
+    const mirror = offers[1].contact;
+    const hash = storj.utils.rmd160sha256(shard).toString('hex');
+    renter.authorizeRetrieval(mirror, [hash], (err, result) => {
+      expect(err).to.equal(null);
+      const [token] = result;
+      const downloader = storj.utils.createShardDownloader(
+        mirror,
+        hash,
+        token
+      );
+      let payload = Buffer.from([]);
+      downloader.on('data', (data) => payload = Buffer.concat([payload, data]));
+      downloader.on('end', () => {
+        expect(shard.compare(payload)).to.equal(0);
+        done();
+      });
+    });
+  });
+
+  it('should succeed in renewing/nullifying the contract', function(done) {
+    this.timeout(6000);
+    const now = Date.now();
+    const renter = nodes[0];
+    const farmer = offers[2].contact;
+    const contract = offers[2].contract;
+    contract.set('store_end', now);
+    contract.sign('renter', renter.spartacus.privateKey);
+    const descriptor = contract.toObject();
+    renter.requestContractRenewal(farmer, descriptor, (err, result) => {
+      expect(err).to.equal(undefined);
+      expect(result.get('store_end')).to.equal(now);
       done();
     });
   });

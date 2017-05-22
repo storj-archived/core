@@ -7,6 +7,7 @@ const crypto = require('crypto');
 const { randomBytes } = crypto;
 const { utils: keyutils } = require('kad-spartacus');
 const { Readable, Transform } = require('stream');
+const { EventEmitter } = require('events');
 const utils = require('../lib/utils');
 const OfferStream = require('../lib/offers');
 const AuditStream = require('../lib/audit');
@@ -455,12 +456,64 @@ describe('@class Rules', function() {
       });
     });
 
-    it('should respond acknowledgement if upload succeeds', function(done) {
+    it('should respond error if uploader fails', function(done) {
+      const uploader = new Transform({ transform: (chunk, enc, cb) => cb() });
       const StubbedRules = proxyquire('../lib/rules', {
         './utils': {
           rmd160: utils.rmd160,
           createShardUploader: () => {
-            return new Transform({ transform: (chunk, enc, cb) => cb() })
+            return uploader;
+          }
+        }
+      });
+      const parts = [Buffer.from('hello'), null];
+      const rs = new Readable({
+        read: function() {
+          this.push(parts.shift());
+        }
+      });
+      const rules = new StubbedRules({
+        contracts: {
+          get: sinon.stub().callsArgWith(1, null)
+        },
+        shards: {
+          createReadStream: sinon.stub().callsArgWith(1, null, rs)
+        }
+      });
+      const request = {
+        params: [
+          utils.rmd160sha256('shard'),
+          'token',
+          ['identity', { xpub: 'xpub' }]
+        ],
+        contact: [
+          'identity',
+          { xpub: 'xpubkey' }
+        ]
+      };
+      const response = {};
+      rules.mirror(request, response, (err) => {
+        expect(err.message).to.equal('Not authorized');
+        done();
+      });
+      setImmediate(() => {
+        const res = new EventEmitter();
+        res.statusCode = 401;
+        uploader.emit('response', res);
+        setImmediate(() => {
+          res.emit('data', 'Not authorized');
+          res.emit('end');
+        });
+      });
+    });
+
+    it('should respond acknowledgement if upload succeeds', function(done) {
+      const uploader = new Transform({ transform: (chunk, enc, cb) => cb() });
+      const StubbedRules = proxyquire('../lib/rules', {
+        './utils': {
+          rmd160: utils.rmd160,
+          createShardUploader: () => {
+            return uploader;
           }
         }
       });
@@ -491,11 +544,17 @@ describe('@class Rules', function() {
       };
       const response = {
         send: (params) => {
-          expect(params).to.have.lengthOf(0);
+          expect(params).to.have.lengthOf(1);
           done();
         }
       };
       rules.mirror(request, response, done);
+      setImmediate(() => {
+        const res = new EventEmitter();
+        res.statusCode = 200;
+        uploader.emit('response', res);
+        setImmediate(() => res.emit('end'));
+      });
     });
 
   });

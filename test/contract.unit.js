@@ -46,6 +46,15 @@ describe('@class Contract', function() {
       expect(fromObject.called).to.equal(true);
     });
 
+    it('should call Contract#fromObject and c#toObject', function() {
+      let toObject = sinon.stub();
+      let contract = new Contract();
+      contract.toObject = toObject;
+      Contract.from(contract);
+      expect(fromObject.called).to.equal(true);
+      expect(toObject.called).to.equal(true);
+    });
+
     after(() => {
       sandbox.restore();
     });

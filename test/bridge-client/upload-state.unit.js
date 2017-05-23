@@ -10,7 +10,7 @@ describe('UploadState', function() {
   describe('@constructor', function() {
 
     it('should create an instance without the new keyword', function() {
-      expect(UploadState()).to.be.instanceOf(UploadState);
+      expect(UploadState({worker: {}})).to.be.instanceOf(UploadState);
     });
 
   });
@@ -27,7 +27,7 @@ describe('UploadState', function() {
           existsSync: sinon.stub().returns(true)
         }
       });
-      var uploadState = new StubUploadState();
+      var uploadState = new StubUploadState({worker: {}});
       uploadState.cleanQueue.push({
         store: {
           exists: function(key, cb) {
@@ -44,7 +44,7 @@ describe('UploadState', function() {
     it('should close uploaders', function(done) {
       var StubUploadState = proxyquire('../../lib/bridge-client/upload-state', {
       });
-      var uploadState = new StubUploadState();
+      var uploadState = new StubUploadState({worker: {}});
       uploadState.uploaders = [{
         end: function() {
           done();
@@ -56,7 +56,7 @@ describe('UploadState', function() {
     it('should handle non-existant keys', function(done) {
       var StubUploadState = proxyquire('../../lib/bridge-client/upload-state', {
       });
-      var uploadState = new StubUploadState();
+      var uploadState = new StubUploadState({worker: {}});
       uploadState.cleanQueue.push({
         store: {
           exists: function(key, cb) {

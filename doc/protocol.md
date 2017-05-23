@@ -5,6 +5,7 @@ Version 2 (May 23, 2017)
 
 Gordon Hall (gordonh@member.fsf.org)  
 Braydon Fuller (braydon@storj.io)
+Ryan Foran (ryan@storj.io)
 
 ---
 
@@ -132,3 +133,23 @@ TODO
 ### 5.2: Downloading
 
 TODO
+
+6: Storage Contracts
+--------------------
+
+TODO
+
+### 6.1: Descriptor Schema
+
+TODO
+
+### 6.2: Topic Codes
+
+TODO
+
+7: Retrievability Proofs
+------------------------
+
+TODO
+
+

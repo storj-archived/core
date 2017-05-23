@@ -755,7 +755,8 @@ describe('Protocol', function() {
         }
       });
       proto.handleRetrieve({
-        data_hash: utils.rmd160('')
+        data_hash: utils.rmd160(''),
+        contact: { nodeID: 'nodeid' }
       }, function(err) {
         expect(err.message).to.equal('Failed');
         done();
@@ -782,6 +783,7 @@ describe('Protocol', function() {
     it('should error with unauthorized contact', function() {
       var proto = new Protocol({
         network: {
+          _logger: Logger(0),
           storageManager: {
             load: sinon.stub().callsArgWith(1, null, {
               getContract: function() {
@@ -1596,7 +1598,7 @@ describe('Protocol', function() {
 
     it('should fail with no renter_id', function(done) {
       var proto = new Protocol({
-        network: {}
+        network: {_logger: Logger(0)}
       });
       proto.handleRenew({
         contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' }
@@ -1608,7 +1610,7 @@ describe('Protocol', function() {
 
     it('should fail with no renter_signature', function(done) {
       var proto = new Protocol({
-        network: {}
+        network: {_logger: Logger(0)}
       });
       proto.handleRenew({
         contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
@@ -1623,7 +1625,7 @@ describe('Protocol', function() {
 
     it('should fail if bad original renter signature', function(done) {
       var proto = new Protocol({
-        network: {}
+        network: {_logger: Logger(0)}
       });
       proto.handleRenew({
         contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' },
@@ -1639,7 +1641,7 @@ describe('Protocol', function() {
 
     it('should fail if bad updated signature', function(done) {
       var proto = new Protocol({
-        network: {}
+        network: {_logger: Logger(0)}
       });
       var renterKp = new KeyPair();
       var badKp = new KeyPair();
@@ -1664,6 +1666,7 @@ describe('Protocol', function() {
     it('should fail if storage manager cannot load item', function(done) {
       var proto = new Protocol({
         network: {
+          _logger: Logger(0),
           storageManager: {
             load: sinon.stub().callsArgWith(1, new Error('Not found'))
           }
@@ -1700,6 +1703,7 @@ describe('Protocol', function() {
       }, oldContract);
       var proto = new Protocol({
         network: {
+          _logger: Logger(0),
           storageManager: {
             load: sinon.stub().callsArgWith(1, null, item)
           }
@@ -1733,6 +1737,7 @@ describe('Protocol', function() {
       }, oldContract);
       var proto = new Protocol({
         network: {
+          _logger: Logger(0),
           storageManager: {
             load: sinon.stub().callsArgWith(1, null, item)
           }
@@ -1769,6 +1774,7 @@ describe('Protocol', function() {
       }, oldContract);
       var proto = new Protocol({
         network: {
+          _logger: Logger(0),
           keyPair: new KeyPair(),
           storageManager: {
             load: sinon.stub().callsArgWith(1, null, item),
@@ -1806,6 +1812,7 @@ describe('Protocol', function() {
       }, oldContract);
       var proto = new Protocol({
         network: {
+          _logger: Logger(0),
           keyPair: farmerKp,
           storageManager: {
             load: sinon.stub().callsArgWith(1, null, item),

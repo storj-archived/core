@@ -15,6 +15,7 @@
     "e2e-tests": "mocha test/*.e2e.js",
     "coverage": "istanbul cover _mocha -- --recursive",
     "linter": "eslint ./index.js ./lib ./test",
+    "generate-spec": "cat ./doc/protocol.md | pandoc -o ./doc/protocol.pdf && zathura ./doc/protocol.pdf",
     "generate-docs": "mkdir -p ./jsdoc && rm -r ./jsdoc && jsdoc index.js lib -r -R README.md -u ./doc -c .jsdoc.json --verbose -d ./jsdoc",
     "publish-docs": "gh-pages -d jsdoc --repo git@github.com:Storj/core.git"
   },

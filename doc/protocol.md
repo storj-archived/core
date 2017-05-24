@@ -300,7 +300,13 @@ TODO
 5: Data Transfer Endpoints
 --------------------------
 
-TODO
+Initiating the transfer of data between nodes after a contract has been signed 
+is straightforward. First, the initiator must request a transfer token from the 
+custodian. If uploading the shard for the first time to a farmer, a CONSIGN RPC
+_(4.13 CONSIGN)_ must be sent. If downloading the shard, a RETRIEVE RPC 
+_(4.14 RETRIEVE)_ is sent. The result of either of those messages should yield 
+an authorization token that is included in the query string of the next 
+request.
 
 ### 5.1: Uploading 
 
@@ -344,20 +350,8 @@ At the time of writing, there are 3 descriptor opcodes representing *low*,
 * **Medium:** `0x02`
 * **High:** `0x03`
 
-The ranges represented by these descriptors are advisory and may change based
-on network performance and improvements to hardware over time.
-
-```
-+------------------------------------------------------------------------+
-| Descriptor | Size        | Duration   | Availability | Speed           |
-|------------+-------------+------------+--------------+-----------------|
-| Low        | 0mb - 8mb   | 0d - 30d   | 0% - 50%     | 0mbps - 6mbps   |
-|------------+-------------+------------+--------------+-----------------|
-| Medium     | 8mb - 16mb  | 30d - 90d  | 50% - 80%    | 6mbps - 12mbps  |
-|------------+-------------+------------+--------------+-----------------|
-| High       | 16mb - 32mb | 90d - 270d | 80% - 99%    | 12mbps - 32mbps |
-+------------------------------------------------------------------------+
-```
+> The ranges represented by these descriptors are advisory and may change based
+> on network performance and improvements to hardware over time.
 
 When publishing or subscribing to a given topic representing the degrees of
 these criteria, nodes must serialize the opcodes as the hex representation of

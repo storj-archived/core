@@ -198,12 +198,32 @@ relayed to nodes who are most likely to be subscribed to the given topic.
 
 ### 3.3: Transport
 
-TODO
+The Storj network operates entirely over HTTPS. TLS *must* be used - there is 
+no cleartext supported. In general this means that certificates are self-signed 
+and you must accept them in order to communicate with others on the network. 
+Because of this, it is recommended that certificate pinning be used when 
+implementing the Storj protocol.
+
+> It's important to note that while it may be possible for a man-in-the-middle 
+> to intercept RPC messages if certificate pinning is not used, it is not 
+> possible for this attacker to manipulate messages. Furthermore, data transfer 
+> is encrypted such that only the sender is capable of decrypting it. The most 
+> damage this type of attack could cause is targeted denial-of-service.
+
+Each Storj node exposes 2 endpoints to other nodes; one for receiving RPC 
+messages _(4. Remote Procedure Calls)_ and the other for serving and accepting 
+raw data streams associated with held contracts _(5. Data Transfer Endpoints)_. 
+Requests sent to the RPC endpoint require a special HTTP header 
+`x-kad-message-id` to be included that matches the `id` parameter in the 
+associated RPC message _(4.1 Structure and Authentication)_.
 
 4: Remote Procedure Calls
 -------------------------
 
-TODO
+* **Method:** `POST`
+* **Path:** `/rpc/`
+* **Content Type:** `application/json`
+* **Headers:** `x-kad-message-id`
 
 ### 4.1: Structure and Authentication
 
@@ -284,11 +304,15 @@ TODO
 
 ### 5.1: Uploading 
 
-TODO
+* **Method:** `POST`
+* **Path:** `/shards/{hash}?token={consign_token}`
+* **Content Type:** `binary/octet-stream`
 
 ### 5.2: Downloading
 
-TODO
+* **Method:** `GET`
+* **Path:** `/shards/{hash}?token={retrieve_token}`
+* **Content Type:** `binary/octet-stream`
 
 6: Storage Contracts
 --------------------
@@ -301,7 +325,98 @@ TODO
 
 ### 6.2: Topic Codes
 
-TODO
+Storj defines a matrix of *criteria* and *descriptors* in the form of codes 
+representing the degree of which the criteria must be met. The resulting topic 
+code is derived from the associated contract and is used as the key for cross-
+referencing neighborhood bloom filters to determine how the publication should 
+be routed. At the time of writing, there are 4 criteria column in the topic 
+matrix:
+
+* **Size:** refers to the size of the data to be stored
+* **Duration:** refers to the length of time which the data should be stored
+* **Availability:** refers to the relative uptime of required by the contract
+* **Speed:** refers to the throughput desired for retrieval of the stored data
+
+At the time of writing, there are 3 descriptor opcodes representing *low*,
+*medium*, and *high* degrees of the criteria.
+
+* **Low:** `0x01`
+* **Medium:** `0x02`
+* **High:** `0x03`
+
+The ranges represented by these descriptors are advisory and may change based
+on network performance and improvements to hardware over time.
+
+```
++------------------------------------------------------------------------+
+| Descriptor | Size        | Duration   | Availability | Speed           |
+|------------+-------------+------------+--------------+-----------------|
+| Low        | 0mb - 8mb   | 0d - 30d   | 0% - 50%     | 0mbps - 6mbps   |
+|------------+-------------+------------+--------------+-----------------|
+| Medium     | 8mb - 16mb  | 30d - 90d  | 50% - 80%    | 6mbps - 12mbps  |
+|------------+-------------+------------+--------------+-----------------|
+| High       | 16mb - 32mb | 90d - 270d | 80% - 99%    | 12mbps - 32mbps |
++------------------------------------------------------------------------+
+```
+
+When publishing or subscribing to a given topic representing the degrees of
+these criteria, nodes must serialize the opcodes as the hex representation of
+the bytes in proper sequence. This sequence is defined as:
+
+```
+prefix + size + duration + availability + speed
+```
+
+The prefix byte is the static identifier for a contract publication. Contracts 
+may not be the only type of publication relayed in the network, so the prefix 
+acts as a namespace for a type of publication topic. The prefix for a contract 
+publication is `0x0f`.
+
+To illustrate by example, we can determine the proper topic by analyzing the
+use case for a given file shard. For instance, if we want to store an asset
+that is displayed on a web page we can infer the following:
+
+* The file is small
+* The file may change often, so we should only store it for medium duration
+* The file needs to always be available
+* The file should be transferred quickly
+
+Using the matrix, we can determine the proper opcode sequence:
+
+```
+[0x0f, 0x01, 0x02, 0x03, 0x03]
+```
+
+Serialized as hex, our topic string becomes:
+
+```
+0f01020303
+```
+
+Another example, by contrast, is data backup. Data backup is quite different
+than the previous example:
+
+* The file is large (perhaps part of a hard drive backup)
+* The file will not change and should be stored long term
+* The file will not be accessed often, if ever
+* The file does not need to be transferred at high speed
+
+Using the matrix, we can determine the proper opcode sequence:
+
+```
+[0x0f, 0x03, 0x03, 0x01, 0x01]
+```
+
+Serialized as hex, our topic string becomes:
+
+```
+0f03030101
+```
+
+The resulting hex string from the serialized opcode byte sequence should be
+used as the `topic` parameter of a `PUBLISH` RPC _(4.9 PUBLISH)_. Nodes that 
+are subscribed to the topic will receive the proposed storage contract and may 
+begin contract negotiation with you directly.
 
 7: Retrievability Proofs
 ------------------------

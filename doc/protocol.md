@@ -28,7 +28,8 @@ the purpose of enabling its implementation in other languages. Described here,
 is the protocol **base** - the minimum specification for compatibility with 
 the Storj network. Additional optional extensions to this work are defined as 
 [Storj Improvement Proposals](https://github.com/storj/sips) (or "SIPs"), some 
-of which have been folded into the base protocol since Version 1.
+of which have been folded into the base protocol since Version 1, such as SIP-4 
+and SIP-32.
 
 2    Identities
 ----------------
@@ -632,6 +633,11 @@ used as the `topic` parameter of a `PUBLISH` RPC _(4.9 PUBLISH)_ and the
 descriptor itself as the `contents` property. Nodes that are subscribed to the 
 topic will receive the proposed storage contract and may begin contract 
 negotiation with you directly.
+
+6.3    Announcing Capacity
+--------------------------
+
+TODO
 
 7    Retrievability Proofs
 --------------------------

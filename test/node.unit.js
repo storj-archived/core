@@ -67,7 +67,6 @@ describe('@class Node', function() {
       expect(use.calledWithMatch('MIRROR')).to.equal(true);
       expect(use.calledWithMatch('RETRIEVE')).to.equal(true);
       expect(use.calledWithMatch('PROBE')).to.equal(true);
-      expect(use.calledWithMatch('TRIGGER')).to.equal(true);
       expect(use.calledWithMatch('RENEW')).to.equal(true);
       expect(listen.called).to.equal(true);
     });

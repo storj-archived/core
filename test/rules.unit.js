@@ -676,46 +676,6 @@ describe('@class Rules', function() {
 
   });
 
-  describe('@method trigger', function() {
-
-    it('should callback error if trigger fails', function(done) {
-      const rules = new Rules({
-        triggers: {
-          process: sinon.stub().callsArgWith(3, new Error('Failed'))
-        }
-      });
-      const request = {
-        params: ['behavior', 'contents'],
-        contact: ['identity', { xpub: 'xpubkey' }]
-      };
-      const response = {};
-      rules.trigger(request, response, (err) => {
-        expect(err.message).to.equal('Failed');
-        done();
-      });
-    });
-
-    it('should callback result from trigger processing', function(done) {
-      const rules = new Rules({
-        triggers: {
-          process: sinon.stub().callsArgWith(3, null, ['result'])
-        }
-      });
-      const request = {
-        params: ['behavior', 'contents'],
-        contact: ['identity', { xpub: 'xpubkey' }]
-      };
-      const response = {
-        send: (params) => {
-          expect(params[0]).to.equal('result');
-          done();
-        }
-      };
-      rules.trigger(request, response, done);
-    });
-
-  });
-
   describe('@method renew', function() {
 
     it('should callback error if contract invalid', function(done) {

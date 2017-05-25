@@ -34,9 +34,6 @@ module.exports.Proof = require('./lib/proof');
 /** {@link Offers} */
 module.exports.Offers = require('./lib/offers');
 
-/** {@link Triggers} */
-module.exports.Triggers = require('./lib/triggers');
-
 /** {@link Contract} */
 module.exports.Contract = require('./lib/contract');
 

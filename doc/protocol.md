@@ -9,8 +9,8 @@ Ryan Foran (ryan@storj.io)
 
 ---
 
-0: License
-----------
+0    License
+-------------
 
 Copyright (C) 2017 Storj Labs, Inc.
 
@@ -20,8 +20,8 @@ or any later version published by the Free Software Foundation;
 with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
 A copy of the license is included in the "LICENSE" file.
 
-1: Introduction
----------------
+1    Introduction
+------------------
 
 This specification documents the Storj network protocol in its entirety for 
 the purpose of enabling its implementation in other languages. Described here, 
@@ -30,8 +30,8 @@ the Storj network. Additional optional extensions to this work are defined as
 [Storj Improvement Proposals](https://github.com/storj/sips) (or "SIPs"), some 
 of which have been folded into the base protocol since Version 1.
 
-2: Identities
--------------
+2    Identities
+----------------
 
 Every node (host computer speaking the Storj protocol) on the network possesses 
 a unique cryptographic identity. This identity is used to derive a special 
@@ -82,10 +82,10 @@ structure which includes enough information to locate and authenticate each
 party.
 
 ```
-["<node_id>", { /* <contact_hash_map> */ }]
+["<node_id>", { /* <contact> */ }]
 ```
 
-### 2.1: Node ID Generation
+### 2.1    Node ID Generation
 
 Once a HD identity has been generated, a child identity should be derived and 
 used for a single node. The resulting public key from that child identity is 
@@ -94,10 +94,10 @@ used to derive the Node ID. The node's identifier is the
 is inserted as the first item in the identity tuple.
 
 ```
-["705e93f855e60847fda4c48adff0dc1b1f7c40ef", { /* <contact_hash_map> */ }]
+["705e93f855e60847fda4c48adff0dc1b1f7c40ef", { /* <contact> */ }]
 ```
 
-### 2.2: Contact Hash Map
+### 2.2    Contact Hash Map
 
 The second entry in the identity tuple contains additional information specific 
 to addressing the node on the network. This includes:
@@ -115,8 +115,8 @@ to addressing the node on the network. This includes:
 Additional properties may be included based on individual use cases within the 
 network, however the properties above are **required**.
 
-3: Network Structure
---------------------
+3    Network Structure
+----------------------
 
 Storj employs a **structured** network, meaning that nodes are organized and 
 route messages based on a deterministic metric. The network uses a 
@@ -131,7 +131,7 @@ publish-subscribe system,
 atop the Kademlia overlay to provide effective delivery of publications related 
 to the solicitation of storage space _(6: Storage Contracts)_.
 
-### 3.1: Kademlia
+### 3.1    Kademlia
 
 Once a Storj node has completed generating its identity, it bootstraps its 
 routing table by following the Kademlia "join" procedure. This involves 
@@ -142,7 +142,7 @@ _(4.4 FIND_NODE)_. This is done iteratively, sending the same query to the
 yield results that are closer or the routing table is sufficiently 
 bootstrapped.
 
-### 3.2: Quasar
+### 3.2    Quasar
 
 Upon successfully bootstrapping a routing table, a node may choose to subscribe 
 to certain publication topics related to types of storage contracts they wish 
@@ -152,9 +152,9 @@ a **list** of exactly 3 bloom filters, each containing the the topics in which
 neighboring nodes are interested.
 
 ```
-Filter 0 [...] - Topics which WE are subscribed
-Filter 1 [...] - Topics which OUR 3 NEAREST NEIGHBORS are subscribed
-Filter 2 [...] - Topics which OUR NEIGHBORS' 3 NEAREST NEIGHBORS' are subscribed
+Filter 0 [...] - WE are subscribed
+Filter 1 [...] - 3 NEAREST NEIGHBORS are subscribed
+Filter 2 [...] - NEIGHBORS' 3 NEAREST NEIGHBORS' are subscribed
 ```
 
 The Storj network expects these blooms filters to be constructed and modified 
@@ -196,7 +196,7 @@ to receive, it must exchange this information with its 3 nearest neighbors
 _(4.7 SUBSCRIBE + 4.8 UPDATE)_. This allows publications to be properly 
 relayed to nodes who are most likely to be subscribed to the given topic.
 
-### 3.3: Transport
+### 3.3    Transport
 
 The Storj network operates entirely over HTTPS. TLS *must* be used - there is 
 no cleartext supported. In general this means that certificates are self-signed 
@@ -217,88 +217,202 @@ Requests sent to the RPC endpoint require a special HTTP header
 `x-kad-message-id` to be included that matches the `id` parameter in the 
 associated RPC message _(4.1 Structure and Authentication)_.
 
-4: Remote Procedure Calls
--------------------------
+4    Remote Procedure Calls
+---------------------------
 
 * **Method:** `POST`
 * **Path:** `/rpc/`
 * **Content Type:** `application/json`
 * **Headers:** `x-kad-message-id`
 
-### 4.1: Structure and Authentication
+### 4.1    Structure and Authentication
+
+Each remote procedure call sent and received between nodes is composed in the 
+same structure. Messages are formatted as a 
+[JSON-RPC 2.0](http://www.jsonrpc.org/specification) *batch* payload containing 
+3 objects. These objects are positional, so ordering matters. The anatomy of a 
+message takes the form of:
+
+```
+[{ /* rpc */ },{ /* notification */ },{ /* notification */ }]
+```
+
+At position 0 is the RPC request/response object, which must follow the 
+JSON-RPC specification for such an object. It must contain the properties: 
+`jsonrpc`, `id`, `method`, and `params` if it is a request. It must contain the 
+properties: `jsonrpc`, `id`, and one of `result` or `error` if it is a 
+response.
+
+At positions 1 and 2 are a JSON-RPC notification object, meaning that it is not 
+required to contain an `id` property since no response is required. These two 
+notifications always assert methods `IDENTIFY` and `AUTHENTICATE` respectively.
+Together, these objects provide the recipient with information regarding the 
+identity and addressing information of the sender as well as a cryptographic 
+signature to authenticate the payload.
+
+> Positions 3 and beyond in this structure are reserved for future protocol 
+> extensions related to global message processing.
+
+#### Example: Request
+
+```
+[
+  {
+    "jsonrpc": "2.0",
+    "id": "<uuid_version_4>",
+    "method": "<method_name>",
+    "params": ["<parameter_one>", "<parameter_two>"]
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "IDENTIFY",
+    "params": [
+      "<public_key_hash>", 
+      {
+        "hostname": "sender.hostname",
+        "port": 8443,
+        "protocol": "https:",
+        "xpub": "<public_extended_key>",
+        "index": "<child_key_derivation_index>"
+      }
+    ]
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "AUTHENTICATE",
+    "params": [
+      "<payload_signature>",
+      "<child_public_key>",
+      ["<public_extended_key>", "<child_key_derivation_index>"]
+    ]
+  }
+]
+```
+
+#### Example: Response
+
+```
+[
+  {
+    "jsonrpc": "2.0",
+    "id": "<uuid_version_4_from_request>",
+    "result": ["<result_one>", "<result_two>"]
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "IDENTIFY",
+    "params": [
+      "<public_key_hash>", 
+      {
+        "hostname": "receiver.hostname",
+        "port": 8443,
+        "protocol": "https:",
+        "xpub": "<public_extended_key>",
+        "index": "<child_key_derivation_index>"
+      }
+    ]
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "AUTHENTICATE",
+    "params": [
+      "<payload_signature>",
+      "<child_public_key>",
+      ["<public_extended_key>", "<child_key_derivation_index>"]
+    ]
+  }
+]
+```
+
+In the examples above, `public_key_hash` and `child_public_key` must be encoded 
+as hexidecimal strings, `public_extended_key` must be encoded as a base58 
+string (in accordance with BIP32), and `payload_signature` must be encoded as a
+base64 string which is the concatenation of the public key recovery number with 
+the actual signature of the payload - excluding the object at index 2 
+(`AUTHENTICATE`). This means that the message to be signed is 
+`[rpc, identify]`.
+
+> Note the exclusion of a timestamp or incrementing nonce in the payload means 
+> that a man-in-the-middle could carry out a replay attack. To combat this, it 
+> is urged that the `id` parameter of the RPC message (which is a universally 
+> unique identifier) be stored for a reasonable period of time and nodes should 
+> reject messages that attempt to use a duplicate UUID.
+
+The rest of this section describes each individual method in the base protocol 
+and defines the parameter and result signatures that are expected. If any RPC 
+message yields an error, then an `error` property including `code` and 
+`message` should be send in place of the `result` property.
+
+### 4.2    `PROBE`
 
 TODO
 
-### 4.2: `PROBE`
+### 4.3    `PING`
 
 TODO
 
-### 4.3: `PING`
+### 4.4    `FIND_NODE`
 
 TODO
 
-### 4.4: `FIND_NODE`
+### 4.5    `FIND_VALUE`
 
 TODO
 
-### 4.5: `FIND_VALUE`
+### 4.6    `STORE`
 
 TODO
 
-### 4.6: `STORE`
+### 4.7    `SUBSCRIBE`
 
 TODO
 
-### 4.7: `SUBSCRIBE`
+### 4.8    `UPDATE`
 
 TODO
 
-### 4.8: `UPDATE`
+### 4.9    `PUBLISH`
 
 TODO
 
-### 4.9: `PUBLISH`
+### 4.10    `OFFER`
 
 TODO
 
-### 4.10: `OFFER`
+### 4.11    `CONSIGN`
 
 TODO
 
-### 4.11: `CONSIGN`
+### 4.12    `AUDIT`
 
 TODO
 
-### 4.12: `AUDIT`
+### 4.13    `MIRROR`
 
 TODO
 
-### 4.13: `MIRROR`
+### 4.14    `RETRIEVE`
 
 TODO
 
-### 4.14: `RETRIEVE`
+### 4.15    `RENEW`
 
 TODO
 
-### 4.15: `RENEW`
+### 4.16    `ALLOCATE`
 
 TODO
 
-### 4.16: `ALLOCATE`
+### 4.17    `CLAIM`
 
 TODO
 
-### 4.17: `CLAIM`
+### 4.18    `TRIGGER`
 
 TODO
 
-### 4.18: `TRIGGER`
-
-TODO
-
-5: Data Transfer Endpoints
---------------------------
+5    Data Transfer Endpoints
+-----------------------------
 
 Initiating the transfer of data between nodes after a contract has been signed 
 is straightforward. First, the initiator must request a transfer token from the 
@@ -308,28 +422,28 @@ _(4.14 RETRIEVE)_ is sent. The result of either of those messages should yield
 an authorization token that is included in the query string of the next 
 request.
 
-### 5.1: Uploading 
+### 5.1    Uploading 
 
 * **Method:** `POST`
 * **Path:** `/shards/{hash}?token={consign_token}`
 * **Content Type:** `binary/octet-stream`
 
-### 5.2: Downloading
+### 5.2    Downloading
 
 * **Method:** `GET`
 * **Path:** `/shards/{hash}?token={retrieve_token}`
 * **Content Type:** `binary/octet-stream`
 
-6: Storage Contracts
---------------------
+6    Storage Contracts
+----------------------
 
 TODO
 
-### 6.1: Descriptor Schema
+### 6.1    Descriptor Schema
 
 TODO
 
-### 6.2: Topic Codes
+### 6.2    Topic Codes
 
 Storj defines a matrix of *criteria* and *descriptors* in the form of codes 
 representing the degree of which the criteria must be met. The resulting topic 
@@ -412,13 +526,13 @@ used as the `topic` parameter of a `PUBLISH` RPC _(4.9 PUBLISH)_. Nodes that
 are subscribed to the topic will receive the proposed storage contract and may 
 begin contract negotiation with you directly.
 
-7: Retrievability Proofs
-------------------------
+7    Retrievability Proofs
+--------------------------
 
 TODO
 
-8: References
--------------
+8    References
+---------------
 
 * Storj Improvement Proposals (`https://github.com/storj/sips`)
 * BIP32 (`https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki`)

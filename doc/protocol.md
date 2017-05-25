@@ -634,8 +634,7 @@ descriptor itself as the `contents` property. Nodes that are subscribed to the
 topic will receive the proposed storage contract and may begin contract 
 negotiation with you directly.
 
-6.3    Announcing Capacity
---------------------------
+### 6.3    Announcing Capacity
 
 TODO
 

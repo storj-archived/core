@@ -345,71 +345,177 @@ message yields an error, then an `error` property including `code` and
 
 ### 4.2    `PROBE`
 
-TODO
+Upon receipt of a `PROBE` message, the node must attempt to send a `PING` 
+message to the originator using the declared contact information. If 
+successful, it must respond positively, otherwise error. Used for joining nodes 
+to verify they are publicly addressable.
+
+Parameters: `[]`  
+Results: `[]`
 
 ### 4.3    `PING`
 
-TODO
+This RPC involves one node sending a `PING` message to another, which 
+presumably replies. This has a two-fold effect: the recipient of the `PING` 
+must update the bucket corresponding to the sender; and, if there is a reply, 
+the sender must update the bucket appropriate to the recipient.
+
+Parameters: `[]`  
+Results: `[]`
 
 ### 4.4    `FIND_NODE`
 
-TODO
+Basic kademlia lookup operation that builds a set of K contacts closest to the 
+the given key. The `FIND_NODE` RPC includes a 160-bit key. The recipient of the 
+RPC returns up to K contacts that it knows to be closest to the key. The 
+recipient must return K contacts if at all possible. It may only return fewer 
+than K if it is returning all of the contacts that it has knowledge of.
+
+Parameters: `[key_160_hex]`  
+Results: `[contact_0, contact_1, ...contactN]`
 
 ### 4.5    `FIND_VALUE`
 
-TODO
+Kademlia search operation that is conducted as a node lookup and builds a list 
+of K closest contacts. If at any time during the lookup the value is returned, 
+the search is abandoned. If no value is found, the K closest contacts are 
+returned. Upon success, we must store the value at the nearest node seen during 
+the search that did not return the value.
+
+A `FIND_VALUE` RPC includes a B=160-bit key. If a corresponding value is 
+present on the recipient, the associated data is returned. Otherwise the RPC is 
+equivalent to a `FIND_NODE` and a set of K contacts is returned.
+
+If a value is returned, it must be in the form of an object with properties: 
+`timestamp` as a UNIX timestamp in milliseconds, `publisher` as a 160 bit 
+public key hash in hexidecimal of the original publisher, and `value` which may 
+be of mixed type that is valid JSON.
+
+Parameters: `[key_160_hex]`  
+Results: `{ timestamp, publisher, value }` or `[...contactN]`
 
 ### 4.6    `STORE`
 
-TODO
+The sender of the `STORE` RPC provides a key and a block of data and requires 
+that the recipient store the data and make it available for later retrieval by 
+that key .
+
+Parameters: `[key_160_hex, { timestamp, publisher, value }]`  
+Results: `[key_160_hex, { timestamp, publisher, value }]`
 
 ### 4.7    `SUBSCRIBE`
 
-TODO
+Upon receipt of a `SUBSCRIBE` message, we simply respond with a serialized 
+version of our attenuated bloom filter. Senders of this message must merge the 
+response with their local attenuated bloom filter starting at their filter at 
+index 1.
+
+Parameters: `[]`  
+Results: `[filter_0_hex, filter_1_hex, filter_2_hex]`
 
 ### 4.8    `UPDATE`
 
-TODO
+Upon receipt of an `UPDATE` message we merge the delivered attenuated bloom 
+filter with our own. This is the inverse of `SUBSCRIBE`, where a peer requests 
+a copy of our attenuated bloom filter. 
+
+Parameters: `[filter_0_hex, filter_1_hex, filter_2_hex]`  
+Results: `[]`
 
 ### 4.9    `PUBLISH`
 
-TODO
+Upon receipt of a `PUBLISH` message, we validate it, then check if we or our 
+neighbors are subscribed. If we are subscribed, we execute our handler. If our 
+neighbors are subscribed, we relay the publication to ALPHA random of the 
+closest K. If our neighbors are not subscribed, we relay the publication to a 
+random contact.
+
+The parameters for a `PUBLISH` message are named, not positional. It must be 
+a JSON object containing: `uuid`, a version 4 UUID string, `topic`, the topic 
+string to which a node may be subscribed, `publishers`, an array of 160 bit 
+public key hash strings in hexidecimal representing nodes that have relayed the 
+message previously, `ttl` the number of hops left for relaying the publication, 
+and `contents`, any arbitrary valid JSON data associated with the publication.
+
+Before relaying the message to others, we must add our public key hash to the 
+`publishers` list and decrement the `ttl`.
+
+Parameters: `{ uuid, topic, publishers, ttl, contents }`  
+Results: `[]`  
 
 ### 4.10    `OFFER`
 
-TODO
+Upon receipt of an `OFFER` message, nodes must validate the descriptor, then 
+ensure that the referenced shard is awaiting allocation(s). If both checks 
+succeed, then the descriptor is added to the appropriate offer processing 
+stream. Once the descriptor is processed, we respond back to the originator 
+with the final copy of the contract _(6.1 Descriptor Schema)_.
+
+Parameters: `[descriptor_map]`  
+Results: `[descriptor_map]`
 
 ### 4.11    `CONSIGN`
 
-TODO
+Upon receipt of a `CONSIGN` message, the node must verify that it has a valid 
+storage allocation and contract for the supplied hash and identity of the 
+originator. If so, it must generate an authorization token which will be 
+checked by the shard server before accepting the transfer of the associated 
+shard.
+
+Parameters: `[hash_160_hex]`  
+Results: `[token_256_hex]`
 
 ### 4.12    `AUDIT`
 
-TODO
+Upon receipt of an `AUDIT` message, the node must look up the contract that is 
+associated with each hash-challenge pair in the payload, prepend the challenge 
+to the shard data, and caclulate the resulting hash, formatted as a compact 
+proof _(7 Retrievability Proofs)_.
+
+Parameters: `[...{ hash, challenge }]`  
+Results: `[...{ hash, proof }]` 
 
 ### 4.13    `MIRROR`
 
-TODO
+Upon receipt of a `MIRROR` message, the node must verify that it is in 
+possesion of the shard on behalf of the identity or the message originator. If 
+so, given the token-hash pair, it must attempt to upload it's copy of the shard 
+to the target to establish a mirror. The originator must have an established 
+contract with the target node and have issued a `CONSIGN` message to the target 
+in advance to provide the `MIRROR` recipient with this token.
+
+In addition to the hash and token, the sender must also include the target 
+contact data in the form of `[public_key_hash, { hostname, port, xpub, index, 
+protocol }]`.
+
+Parameters: `[hash_160_hex, token_256_hex, target_contact]`  
+Results: `[status_message_string]`
 
 ### 4.14    `RETRIEVE`
 
-TODO
+Upon receipt of a `RETRIEVE` message, the node must verify that it is in 
+possession of the shard on behalf of the identity of the originator. If so, it 
+must generate an authorization token which will be checked by the shard server 
+before accepting the transfer of the associated shard.
+
+Parameters: `[hash_160_hex]`  
+Results: `[token_256_hex]`
 
 ### 4.15    `RENEW`
 
-TODO
+Upon receipt of a `RENEW` message, the recipient farmer must extend or 
+terminate it's contract based on the new terms supplied by the renter. If the 
+renewal descriptor is valid and complete, the farmer must store the updated 
+version after signing and respond back to the originator with the version 
+containing the updated signature _(6.1 Descriptor Schema)_.
 
-### 4.16    `ALLOCATE`
+Implementations should only allow certain properties to be updated: 
+`renter_id`, `renter_hd_key`, `renter_signature`, `store_begin`, `store_end`, 
+`audit_leaves`. If the sender has attempted to modify any other parts of the 
+contract, an error should be returned.
 
-TODO
-
-### 4.17    `CLAIM`
-
-TODO
-
-### 4.18    `TRIGGER`
-
-TODO
+Parameters: `[descriptor_map]`  
+Results: `[descriptor_map]`
 
 5    Data Transfer Endpoints
 -----------------------------
@@ -522,9 +628,10 @@ Serialized as hex, our topic string becomes:
 ```
 
 The resulting hex string from the serialized opcode byte sequence should be
-used as the `topic` parameter of a `PUBLISH` RPC _(4.9 PUBLISH)_. Nodes that 
-are subscribed to the topic will receive the proposed storage contract and may 
-begin contract negotiation with you directly.
+used as the `topic` parameter of a `PUBLISH` RPC _(4.9 PUBLISH)_ and the 
+descriptor itself as the `contents` property. Nodes that are subscribed to the 
+topic will receive the proposed storage contract and may begin contract 
+negotiation with you directly.
 
 7    Retrievability Proofs
 --------------------------

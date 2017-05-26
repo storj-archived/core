@@ -450,10 +450,26 @@ Upon receipt of an `OFFER` message, nodes must validate the descriptor, then
 ensure that the referenced shard is awaiting allocation(s). If both checks 
 succeed, then the descriptor is added to the appropriate offer processing 
 stream. Once the descriptor is processed, we respond back to the originator 
-with the final copy of the contract _(6.1 Descriptor Schema)_.
+with the final copy of the contract _(6.1 Descriptor Schema)_. These messages 
+are generally sent based on information collected when subscribed to renter 
+contract publications.
 
 Parameters: `[descriptor_map]`  
 Results: `[descriptor_map]`
+
+### 4.11    `CLAIM`
+
+Upon receipt of an `CLAIM` message, nodes must validate the descriptor, then 
+ensure that there is enough available space for the shard. If both checks 
+succeed, then the descriptor is signed and returned along with a consignment 
+token so the initiating renter can immediately upload the data. This call is 
+the functional inverse of `OFFER`, as it is used for a renter to signal 
+to a farmer that it wishes to rent capcacity. These messages are generally 
+sent based on information collected when subscribed to farmer capacity 
+publications.
+
+Parameters: `[descriptor_map]`  
+Results: `[descriptor_map, token_256_hex]`
 
 ### 4.11    `CONSIGN`
 
@@ -554,38 +570,36 @@ TODO
 
 Storj defines a matrix of *criteria* and *descriptors* in the form of codes 
 representing the degree of which the criteria must be met. The resulting topic 
-code is derived from the associated contract and is used as the key for cross-
-referencing neighborhood bloom filters to determine how the publication should 
-be routed. At the time of writing, there are 4 criteria column in the topic 
-matrix:
+code is used as the key for cross-referencing neighborhood bloom filters to 
+determine how the publication should be routed. At the time of writing, there 
+are 4 criteria column in the topic matrix:
 
-* **Size:** refers to the size of the data to be stored
-* **Duration:** refers to the length of time which the data should be stored
-* **Availability:** refers to the relative uptime of required by the contract
-* **Speed:** refers to the throughput desired for retrieval of the stored data
+* Size: refers to the size of the data to be stored
+* Duration: refers to the length of time which the data should be stored
+* Availability: refers to the relative uptime of required by the contract
+* Speed: refers to the throughput desired for retrieval of the stored data
 
 At the time of writing, there are 3 descriptor opcodes representing *low*,
 *medium*, and *high* degrees of the criteria.
 
-* **Low:** `0x01`
-* **Medium:** `0x02`
-* **High:** `0x03`
+* Low: `0x01`
+* Medium: `0x02`
+* High: `0x03`
 
 > The ranges represented by these descriptors are advisory and may change based
 > on network performance and improvements to hardware over time.
 
 When publishing or subscribing to a given topic representing the degrees of
 these criteria, nodes must serialize the opcodes as the hex representation of
-the bytes in proper sequence. This sequence is defined as:
+the bytes in proper sequence. This sequence is defined as: `prefix + size + 
+duration + availability + speed`.
 
-```
-prefix + size + duration + availability + speed
-```
-
-The prefix byte is the static identifier for a contract publication. Contracts 
-may not be the only type of publication relayed in the network, so the prefix 
-acts as a namespace for a type of publication topic. The prefix for a contract 
-publication is `0x0f`.
+The prefix byte is the static identifier for a type of publication. This may 
+include both capacity announcements  _(6.4 Announcing Capacity)_ and contract 
+publications _(6.3 Renting Space)_. The prefix acts as a namespace for a type 
+of publication topic. The prefix for a contract publication is `0x0f` and the 
+prefix for a capcacity announcement is `0x0c`, followed by the topic-criteria
+sequence.
 
 To illustrate by example, we can determine the proper topic by analyzing the
 use case for a given file shard. For instance, if we want to store an asset
@@ -596,18 +610,8 @@ that is displayed on a web page we can infer the following:
 * The file needs to always be available
 * The file should be transferred quickly
 
-Using the matrix, we can determine the proper opcode sequence:
-
-```
-[0x0f, 0x01, 0x02, 0x03, 0x03]
-```
-
-Serialized as hex, our topic string becomes:
-
-```
-0f01020303
-```
-
+Using the matrix, we can determine the proper opcode sequence: `[0x0f, 0x01, 
+0x02, 0x03, 0x03]`. Serialized as hex, our topic string becomes: `0f01020303`. 
 Another example, by contrast, is data backup. Data backup is quite different
 than the previous example:
 
@@ -616,34 +620,104 @@ than the previous example:
 * The file will not be accessed often, if ever
 * The file does not need to be transferred at high speed
 
-Using the matrix, we can determine the proper opcode sequence:
+Using the matrix, we can determine the proper opcode sequence: `[0x0f, 0x03, 
+0x03, 0x01, 0x01]`. Serialized as hex, our topic string becomes: `0f03030101`.
 
-```
-[0x0f, 0x03, 0x03, 0x01, 0x01]
-```
+### 6.3    Renting Space
 
-Serialized as hex, our topic string becomes:
+TODO
 
-```
-0f03030101
-```
-
-The resulting hex string from the serialized opcode byte sequence should be
-used as the `topic` parameter of a `PUBLISH` RPC _(4.9 PUBLISH)_ and the 
-descriptor itself as the `contents` property. Nodes that are subscribed to the 
-topic will receive the proposed storage contract and may begin contract 
-negotiation with you directly.
-
-### 6.3    Announcing Capacity
+### 6.4    Announcing Capacity
 
 TODO
 
 7    Retrievability Proofs
 --------------------------
 
-TODO
+When the custodian of a data shard receives an audit _(4.12 AUDIT)_, it is 
+expected to respond with proof that it still in possession of the shard. This 
+works by computing a retrievability proof structure from a provided challenge.
+Upon receipt of a hash-challenge pair, the associated data is prepended with
+the challenge bytes and hashed:
 
-8    References
+```
+RIPEMD160( SHA256( CHALLENGE + DATA ) )
+```
+
+The result of this operation yields a value that, when hashed again, equals one 
+of the bottom leaves of the audit tree _(8 Audit Preparation)_. In addition to 
+supplying this single-hashed value as proof that the farmer is still honoring
+the terms of the contract, the farmer must also provide the uncles required to 
+rebuild the merkle tree. This proof response is specified as a series of nested 
+JSON arrays.
+
+```
+[[[[["<response>"],"<uncle>"],"<uncle>"],"<uncle>"],"<uncle>"]
+```
+
+For clarification, given a simple merkle tree:
+
+```
++-- HASH_0 (Root)
+|   +-- HASH_1
+|   |   +-- HASH_3
+|   |   +-- HASH_4
+|   +-- HASH_2
+|   |   +-- HASH_5
+|   |   +-- HASH_6 = ( RIPEMD160( SHA256( CHALLENGE_RESPONSE ) ) )
+```
+
+The resulting format of a proof for an audit matching `HASH_6` would appear as:
+
+```
+[HASH_1, [HASH_5, [CHALLENGE_RESPONSE]]]
+```
+
+The resulting format of a proof for an audit matching `HASH_3` would appear as:
+
+```
+[[[CHALLENGE_RESPONSE], HASH_5], HASH_2]
+```
+
+Upon receipt of the farmer's proof, the renter must verify that the proof is
+valid by using it to rebuild the merkle tree. If the proof is verified 
+successfully, the renter is expected to issue a payment to the 
+`payment_destination` defined in the original contract. The amount of the 
+payment should be equal to: `payment_storage_price / audit_count` in addition 
+to `payment_download_price * downloads_since_last_audit`.
+
+If the verification fails then the contract is null and no payment is required.
+Conversely, if the verification succeeds and the renter does not issue the
+payment in a timely manner, then the contract is also null and the farmer may
+decide to cease storage of the data.
+
+8    Audit Preparation
+----------------------
+
+Before a renter node published a contract or claims a capacity allocation, it 
+must pre-calculate a series of "challenges", the number of which must equal the 
+`audit_count` defined in the contract descriptor and be included in the 
+descriptor's `audit_tree`. A challenge is simply 32 random bytes encoded as 
+hexidecimal. The generated challenges must not be shared until the renter 
+wishes to issue an `AUDIT` RPC for proof-of-retrievability.
+
+An `audit_tree` contains the bottom leaves of a 
+[Merkle Tree](https://en.wikipedia.org/wiki/Merkle_tree). Each of the bottom 
+leaves of the tree must be equal to the double 
+`RIPEMD160( SHA256 ( challenge + shard ) )` encoded as hexidecimal. In order to 
+ensure that the resulting merkle tree is properly balanced, the number of 
+bottom leaves must be equal to the next power of 2 of the audit count. To 
+ensure this, the additional leaves can simply be the double 
+`RIPEMD160( SHA256 ( NULL ) )` (the same hash function for an audit, but 
+applied to an empty buffer).
+
+To audit a farmer is to request proof that it is still honoring the terms of
+the storage contract without the need to have it supply the entire shard of 
+data. To do this, the renter must supply the farmer with one of the secret 
+pre-calculated challenges _(4.12 AUDIT)_. The receiving farmer must respond 
+with a retrievability proof _(7 Retrievability Proofs)_.
+
+9    References
 ---------------
 
 * Storj Improvement Proposals (`https://github.com/storj/sips`)
@@ -654,3 +728,4 @@ TODO
 * Quasar (`https://www.microsoft.com/en-us/research/wp-content/uploads/2008/02/iptps08-quasar.pdf`)
 * FNV (`https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function`)
 * Less Hashing, Same Performance: Building a Better Bloom Filter (`http://www.eecs.harvard.edu/~michaelm/postscripts/rsa2008.pdf`)
+* Merkle Tree (`https://en.wikipedia.org/wiki/Merkle_tree`)

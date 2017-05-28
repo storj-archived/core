@@ -31,6 +31,16 @@ the Storj network. Additional optional extensions to this work are defined as
 of which have been folded into the base protocol since Version 1, such as SIP-4 
 and SIP-32.
 
+### 1.1    Differences from Version 1
+
+* All node identities are now hierarchically deterministic _(2 Identities)_
+* `FIND_TUNNEL` and `OPEN_TUNNEL` removed from protocol
+* Introduces capacity publications _(6.4 Announcing Capacity)_
+* RPC message format changed _(4.1 Structure and Authentication)_
+* New `CLAIM` messages allow direct claim of available space _(4.11 CLAIM)_
+* Clock synchronization with NTP no longer required
+* Nodes communicate exclusively using TLS
+
 2    Identities
 ----------------
 

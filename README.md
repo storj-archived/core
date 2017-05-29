@@ -41,7 +41,7 @@ node.subscribeShardDescriptor(['02010202'], (err, stream) => {
     contract.set('farmer_id', node.identity.toString('hex'));
     contract.set('farmer_hd_key', node.contact.xpub);
     contract.set('farmer_hd_index', node.contact.index);
-    contact.sign('farmer', node.spartacus.privateKey);
+    contract.sign('farmer', node.spartacus.privateKey);
     node.offerShardAllocation(renter, contract.toObject(), callback);
   });
 });
@@ -64,7 +64,7 @@ node.publishShardDescriptor(descriptor, (err, stream) => {
       (err, [transferToken]) => {
         console.info('Ready to transfer shard!');
       }
-    ;)
+    );
   });
 });
 ```

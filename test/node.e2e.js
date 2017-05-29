@@ -55,7 +55,7 @@ describe('@module storj-lib (end-to-end)', function() {
   it('should send offer for contracts received', function(done) {
     this.timeout(8000);
     async.eachOfSeries(nodes.slice(1), (n, i, next) => {
-      n.subscribeShardDescriptor(['0f01010202'], (err, descriptors) => {
+      n.subscribeShardDescriptor(['01010202'], (err, descriptors) => {
         descriptors.on('data', ([contract, contact]) => {
           contract.set('farmer_id', n.identity.toString('hex'));
           contract.set('farmer_hd_key', n.contact.xpub);

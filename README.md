@@ -27,6 +27,7 @@ const storj = require('storj-lib');
 const node = new storj.Node(options);
 
 node.listen(8443);
+node.join(['known_node_id', { /* contact data */ }]);
 ```
 
 Subscribe to contract/shard descriptors to farm data.

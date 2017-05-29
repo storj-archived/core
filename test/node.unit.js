@@ -266,7 +266,9 @@ describe('@class Node', function() {
         node,
         'quasarSubscribe',
         function(codes, handler) {
-          setImmediate(() => descriptors.forEach((d) => handler(d)));
+          setImmediate(() => descriptors.forEach((d) => {
+            handler([d, [d.farmer_id, { xpub: d.farmer_hd_key }]]);
+          }));
         }
       );
       node.subscribeShardDescriptor(['topic1', 'topic2'], (err, stream) => {

@@ -207,6 +207,8 @@ to receive, it must exchange this information with its 3 nearest neighbors
 _(4.7 SUBSCRIBE + 4.8 UPDATE)_. This allows publications to be properly 
 relayed to nodes who are most likely to be subscribed to the given topic.
 
+
+
 ### 3.3    Transport
 
 The Storj network operates entirely over HTTPS. TLS *must* be used - there is 
@@ -448,6 +450,12 @@ public key hash strings in hexidecimal representing nodes that have relayed the
 message previously, `ttl` the number of hops left for relaying the publication, 
 and `contents`, any arbitrary valid JSON data associated with the publication.
 
+> Given the relatively high cost of a single publication's propagation through 
+> the overlay, nodes should take care to implement some reasonable rate 
+> limiting for relay of publications. It is advisable for nodes to ignore the 
+> `ttl` and refuse to relay a publication if the identifier at `publishers[0]` 
+> is matched as the originator more than 100 times within a minute.
+
 Before relaying the message to others, we must add our public key hash to the 
 `publishers` list and decrement the `ttl`.
 
@@ -670,11 +678,46 @@ Using the matrix, we can determine the proper opcode sequence: `[0x0f, 0x03,
 
 ### 6.3    Renting Space
 
-TODO
+When a node wishes to solicit storage capacity for a shard, it must know which 
+nodes are both accepting contracts and have the available space. Short lived 
+nodes renting data, like nodes who join for the sole purpose of storing some
+data then leave, will likely not stick around long enough to track enough 
+capactity announcements _(6.4 Announcing Capacity)_ to build a local cache of 
+known farmers with space. For these nodes, they must publish a shard descriptor 
+and wait for offers from farmers as the message propagates the overlay 
+_(3.2 Quasar + 4.10 OFFER)_.
+
+To publish a shard descriptor, a contract must be constructed _(6.1 Contract 
+Descriptor Schema)_ and included in the `contents` value of a `PUBLISH` 
+message _(4.9 PUBLISH)_ sent to the renting node's 3 nearest neighbors to the 
+`data_hash` key in the descriptor (this helps even the distribution). The 
+descriptor must be as complete as possible, including values for all keys 
+except for any that are prefixed with `farmer_`.
+
+The `contents` property should also include the renter's contact information 
+so that farmers who wish to submit offers are not required to perform a network 
+walk to find the originator if it is not already in it's routing table. The 
+value of this property should be:
+
+```
+[{ descriptor }, [ identity, { contact } ]]
+```
+
+Once these messages have been dispatched, received, and acknowledged, the 
+sender will begin receiving offers from farmers. The payload for these offers 
+will include a completed version of the descriptor which was originally 
+published, but include values for the properties prefixed with `farmer_`. The 
+publisher, if it chooses to accept the completed contract, must sign the 
+descriptor again and respond to the offering farmer with the finalized 
+contract.
+
+Once this exchange is complete, the renting node may request consignment to 
+the node(s) with whom it is now contracted _(4.11 CONSIGN)_ and transfer the 
+shard _(5.1 Uploading)_.
 
 ### 6.4    Announcing Capacity
 
-TODO
+
 
 7    Retrievability Proofs
 --------------------------

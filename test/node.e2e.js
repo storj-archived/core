@@ -56,14 +56,12 @@ describe('@module storj-lib (end-to-end)', function() {
     this.timeout(8000);
     async.eachOfSeries(nodes.slice(1), (n, i, next) => {
       n.subscribeShardDescriptor(['0f01010202'], (err, descriptors) => {
-        descriptors.on('data', (contract) => {
+        descriptors.on('data', ([contract, contact]) => {
           contract.set('farmer_id', n.identity.toString('hex'));
           contract.set('farmer_hd_key', n.contact.xpub);
           contract.set('farmer_hd_index', n.contact.index);
           contract.sign('farmer', n.spartacus.privateKey);
-          const renterId = contract.get('renter_id');
-          const renter = n.router.getContactByNodeId(renterId);
-          n.offerShardAllocation([renterId, renter], contract.toObject(),
+          n.offerShardAllocation(contact, contract.toObject(),
                                  () => null);
         });
         next();

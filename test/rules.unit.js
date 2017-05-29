@@ -35,6 +35,8 @@ describe('@class Rules', function() {
     });
     contract.sign('renter', renterHdKey.privateKey);
     contract.sign('farmer', farmerHdKey.privateKey);
+    contract._farmerPrivateKey = farmerHdKey.privateKey;
+    contract._renterPrivateKey = renterHdKey.privateKey;
     return contract;
   }
 
@@ -791,6 +793,128 @@ describe('@class Rules', function() {
       };
       rules.renew(request, response, done);
     });
+
+  });
+
+  describe('@method claim', function() {
+
+    it('should callback error if claims are disabled', function(done) {
+      const contract = createValidContract();
+      const rules = new Rules({
+        claims: false
+      });
+      const request = {
+        params: [contract.toObject()],
+        contact: [
+          'identity',
+          { xpub: 'xpubkey' }
+        ]
+      };
+      const response = {};
+      rules.claim(request, response, (err) => {
+        expect(err.message).to.equal('Currently rejecting claims');
+        done();
+      });
+    });
+
+    it('should callback error if contract is invalid', function(done) {
+      const contract = createValidContract();
+      contract.set('data_hash', null);
+      const rules = new Rules({
+        claims: true,
+        identity: randomBytes(20),
+        contact: {
+          xpub: 'xpub',
+          index: 0
+        },
+        spartacus: {
+          privateKey: randomBytes(32)
+        }
+      });
+      const request = {
+        params: [contract.toObject()],
+        contact: [
+          'identity',
+          { xpub: 'xpubkey' }
+        ]
+      };
+      const response = {};
+      rules.claim(request, response, (err) => {
+        expect(err.message).to.equal('Invalid shard descriptor');
+        done();
+      });
+    });
+
+    it('should callback error if cannot save', function(done) {
+      const contract = createValidContract();
+      const rules = new Rules({
+        claims: true,
+        identity: randomBytes(20),
+        contact: {
+          xpub: contract.get('farmer_hd_key'),
+          index: contract.get('farmer_hd_index')
+        },
+        spartacus: {
+          privateKey: contract._farmerPrivateKey
+        },
+        contracts: {
+          put: sinon.stub().callsArgWith(2, new Error('Failed to save'))
+        }
+      });
+      const request = {
+        params: [contract.toObject()],
+        contact: [
+          'identity',
+          { xpub: 'xpubkey' }
+        ]
+      };
+      const response = {};
+      rules.claim(request, response, (err) => {
+        expect(err.message).to.equal('Failed to save');
+        done();
+      });
+    });
+
+    it('should respond with descriptor and token', function(done) {
+      const contract = createValidContract();
+      const accept = sinon.stub();
+      const rules = new Rules({
+        claims: true,
+        identity: randomBytes(20),
+        contact: {
+          xpub: contract.get('farmer_hd_key'),
+          index: contract.get('farmer_hd_index')
+        },
+        spartacus: {
+          privateKey: contract._farmerPrivateKey
+        },
+        contracts: {
+          put: sinon.stub().callsArg(2)
+        },
+        server: {
+          accept: accept
+        }
+      });
+      const request = {
+        params: [contract.toObject()],
+        contact: [
+          'identity',
+          { xpub: 'xpubkey' }
+        ]
+      };
+      const response = {
+        send: (params) => {
+          const c = Contract.from(params[0]);
+          expect(c.isValid()).to.equal(true);
+          expect(c.isComplete()).to.equal(true);
+          expect(accept.calledWithMatch(params[1], contract.get('data_hash'),
+                                        request.contact));
+          done();
+        }
+      };
+      rules.claim(request, response, done);
+    });
+
 
   });
 

@@ -571,4 +571,47 @@ describe('@class Node', function() {
 
   });
 
+  describe('@method subscribeCapacityAnnouncement', function() {
+
+    const sandbox = sinon.sandbox.create();
+
+    after(() => sandbox.restore());
+
+    it('should callback with capacity stream', function(done) {
+      const node = createNode({});
+      const codes = ['01010101'];
+      const quasarSubscribe = sandbox.stub(node, 'quasarSubscribe', (c, h) => {
+        h([4096, ['identity', { xpub: 'xpubkey' }]]);
+      });
+      node.subscribeCapacityAnnouncement(codes, (err, stream) => {
+        expect(quasarSubscribe.args[0][0][0]).to.equal('0c01010101');
+        expect(stream.read()[0]).to.equal(4096);
+        done();
+      });
+    });
+
+  });
+
+  describe('@method publishCapacityAnnouncement', function() {
+
+    const sandbox = sinon.sandbox.create();
+
+    after(() => sandbox.restore());
+
+    it('should enable claims and publish bytes available', function(done) {
+      const node = createNode({});
+      const quasarPublish = sandbox.stub(node, 'quasarPublish').callsArg(2);
+      node.publishCapacityAnnouncement('01010101', 4096, () => {
+        expect(node.claims).to.equal(true);
+        expect(quasarPublish.args[0][0]).to.equal('0c01010101');
+        expect(quasarPublish.args[0][1][0]).to.equal(4096);
+        expect(quasarPublish.args[0][1][1][0]).to.equal(
+          node.identity.toString('hex')
+        );
+        done();
+      });
+    });
+
+  });
+
 });

@@ -250,8 +250,10 @@ describe('@module storj-lib (end-to-end)', function() {
       const uploader = storj.utils.createShardUploader(
         farmer,
         storj.utils.rmd160sha256(shard).toString('hex'),
-        result[1]
+        t
       );
+      expect(c.isComplete()).to.equal(true);
+      expect(c.isValid()).to.equal(true);
       uploader.on('error', done);
       uploader.on('response', (res) => {
         let body = '';

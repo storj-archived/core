@@ -482,7 +482,7 @@ ensure that there is enough available space for the shard. If both checks
 succeed, then the descriptor is signed and returned along with a consignment 
 token so the initiating renter can immediately upload the data. This call is 
 the functional inverse of `OFFER`, as it is used for a renter to signal 
-to a farmer that it wishes to rent capcacity. These messages are generally 
+to a farmer that it wishes to rent capacity. These messages are generally 
 sent based on information collected when subscribed to farmer capacity 
 publications.
 
@@ -651,7 +651,7 @@ The prefix byte is the static identifier for a type of publication. This may
 include both capacity announcements  _(6.4 Announcing Capacity)_ and contract 
 publications _(6.3 Renting Space)_. The prefix acts as a namespace for a type 
 of publication topic. The prefix for a contract publication is `0x0f` and the 
-prefix for a capcacity announcement is `0x0c`, followed by the topic-criteria
+prefix for a capacity announcement is `0x0c`, followed by the topic-criteria
 sequence.
 
 To illustrate by example, we can determine the proper topic by analyzing the
@@ -690,9 +690,11 @@ _(3.2 Quasar + 4.10 OFFER)_.
 To publish a shard descriptor, a contract must be constructed _(6.1 Contract 
 Descriptor Schema)_ and included in the `contents` value of a `PUBLISH` 
 message _(4.9 PUBLISH)_ sent to the renting node's 3 nearest neighbors to the 
-`data_hash` key in the descriptor (this helps even the distribution). The 
+`data_hash` key in the descriptor (this helps even the distribution). When 
+publishing the descriptor, an appropriate topic code should be used _(6.2 Topic 
+Codes)_, prefixed with `0x0f` (`0f` when serialized as hexidecimal). The 
 descriptor must be as complete as possible, including values for all keys 
-except for any that are prefixed with `farmer_`.
+except for any that are prefixed with `farmer_` and `payment_destination`.
 
 The `contents` property should also include the renter's contact information 
 so that farmers who wish to submit offers are not required to perform a network 
@@ -717,7 +719,37 @@ shard _(5.1 Uploading)_.
 
 ### 6.4    Announcing Capacity
 
+When a node joins the network and wishes to make some storage capacity 
+available to others, it can subscribe to contract publication topics (using the 
+`0x0f` topic code prefix) and wait for contracts for which an offer can be 
+dispatched. However, in addition to this, a farming node can proactively inform 
+the network that it has available space. To announce capacity, a node must send 
+a `PUBLISH` message to it's 3 nearest neighbors for each topic code it is 
+willing to allow, prefixed with the capacity code `0x0c` (`0c` when serialized 
+as hexidecimal).
 
+The `contents` property should contain the number of bytes available for claim 
+along with the farmer's contact information so that renters who wish to claim 
+space are not required to perform a network walk to find the originator if it 
+is not already in it's routing table. The value of this property should be:
+
+```
+[ bytes_number, [ identity, { contact } ] ]
+```
+
+Long lived renter nodes, like those operated by a Bridge or other similar 
+directory services on the network, may subscribe to these capacity 
+announcements and maintain a backlog cache of farmers who have space available.
+This allows these renting nodes to directly claim space and transfer data to 
+the farmer without the overhead of publishing a contract descriptor and waiting 
+for offers _(4.11 CLAIM)_.
+
+Farmers who announce capacity should do so on a reasonable interval to ensure 
+that renters tracking their state have fresh information. It is reccommended 
+to publish capacity announcements once per hour and no more than once per 15 
+minutes. Nodes should take care to refuse to relay publications originating 
+from an identity who has published a capacity announcement more than 100 times 
+within the last hour.
 
 7    Retrievability Proofs
 --------------------------

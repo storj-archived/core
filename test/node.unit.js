@@ -614,4 +614,23 @@ describe('@class Node', function() {
 
   });
 
+  describe('@method claimFarmerCapacity', function() {
+
+    const sandbox = sinon.sandbox.create();
+
+    after(() => sandbox.restore());
+
+    it('should send a CLAIM RPC to the farmer', function(done) {
+      const node = createNode({});
+      const send = sandbox.stub(node, 'send').callsArg(3);
+      const peer = ['identity', { xpub: 'xpubkey' }];
+      const desc = {};
+      node.claimFarmerCapacity(peer, desc, () => {
+        expect(send.calledWithMatch('CLAIM', [desc], peer)).to.equal(true);
+        done();
+      });
+    });
+
+  });
+
 });

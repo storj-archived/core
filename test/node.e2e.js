@@ -13,6 +13,7 @@ describe('@module storj-lib (end-to-end)', function() {
   const shard = Buffer.from('i am a test shard');
   const audit = new storj.Audit(4);
   const offers = [];
+  const capacities = [];
 
   before(function(done) {
     this.timeout(12000);
@@ -207,6 +208,64 @@ describe('@module storj-lib (end-to-end)', function() {
       expect(err).to.equal(undefined);
       expect(result.get('store_end')).to.equal(now);
       done();
+    });
+  });
+
+  it('should succeed in subscribing to capacity', function(done) {
+    this.timeout(6000);
+    const renter = nodes[0];
+    const farmer = nodes[1];
+    renter.subscribeCapacityAnnouncement(['01010202'], (err, stream) => {
+      stream.once('data', (data) => {
+        capacities.push(data);
+        expect(capacities[0][0]).to.equal(shard.length);
+        done();
+      });
+    });
+    farmer.publishCapacityAnnouncement('01010202', shard.length);
+  });
+
+  it('should succeed in claiming the space', function(done) {
+    this.timeout(6000);
+    const renter = nodes[0];
+    const farmer = capacities[0][1];
+    const contract = new storj.Contract({
+      data_hash: storj.utils.rmd160sha256(shard).toString('hex'),
+      data_size: shard.length,
+      renter_hd_key: renter.contact.xpub,
+      renter_hd_index: renter.contact.index,
+      renter_id: renter.identity.toString('hex'),
+      payment_destination: 'payment address',
+      payment_amount: 0,
+      audit_count: 4,
+      audit_leaves: audit.getPublicRecord(),
+      store_begin: Date.now(),
+      store_end: Date.now() + 100000
+    });
+    contract.sign('renter', renter.spartacus.privateKey);
+    renter.claimFarmerCapacity(farmer, contract.toObject(), (err, result) => {
+      expect(err).to.equal(null);
+      const c = storj.Contract.from(result[0]);
+      const t = result[1];
+      const uploader = storj.utils.createShardUploader(
+        farmer,
+        storj.utils.rmd160sha256(shard).toString('hex'),
+        result[1]
+      );
+      uploader.on('error', done);
+      uploader.on('response', (res) => {
+        let body = '';
+        res.on('data', (data) => body += data.toString());
+        res.on('end', () => {
+          if (res.statusCode !== 200) {
+            done(new Error(body));
+          } else {
+            done();
+          }
+        });
+      });
+      uploader.write(shard);
+      uploader.end();
     });
   });
 

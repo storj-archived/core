@@ -30,45 +30,11 @@ node.listen(8443);
 node.join(['known_node_id', { /* contact data */ }]);
 ```
 
-Subscribe to contract/shard descriptors to farm data.
-
-```js
-node.subscribeShardDescriptor(['02010202'], (err, stream) => {
-  if (err) {
-    return console.error(err);
-  }
-
-  stream.on('data', ([contract, renter]) => {
-    contract.set('farmer_id', node.identity.toString('hex'));
-    contract.set('farmer_hd_key', node.contact.xpub);
-    contract.set('farmer_hd_index', node.contact.index);
-    contract.sign('farmer', node.spartacus.privateKey);
-    node.offerShardAllocation(renter, contract.toObject(), callback);
-  });
-});
-```
-
-Publish contract/shard descriptors to rent data.
-
-```js
-node.publishShardDescriptor(descriptor, (err, stream) => {
-  if (err) {
-    return console.error(err);
-  }
-
-  stream.on('data', (offer) => {
-    offer.contract.sign(node.spartacus.privateKey);
-    offer.callback(null, offer.contract);
-    node.authorizeConsignment(
-      offer.contact, 
-      offer.contract.get('data_hash'),
-      (err, [transferToken]) => {
-        console.info('Ready to transfer shard!');
-      }
-    );
-  });
-});
-```
+Consult the documentation for a complete reference of the API exposed from the 
+`Node` object. Further documentation on usage can be found by reviewing the 
+end-to-end test suite in `test/node.e2e.js`. Note that this library is a very 
+low level interface for the Storj protocol and is not intended for casual 
+integration with the Storj network.
 
 Resources
 ---------

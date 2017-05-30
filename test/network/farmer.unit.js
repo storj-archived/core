@@ -7,7 +7,6 @@ var KeyPair = require('../../lib/crypto-tools/keypair');
 var FarmerInterface = require('../../lib/network/farmer');
 var Network = require('../../lib/network');
 var kad = require('kad');
-var Contact = require('../../lib/network/contact');
 var utils = require('../../lib/utils');
 var StorageItem = require('../../lib/storage/item');
 var StorageManager = require('../../lib/storage/manager');
@@ -145,28 +144,6 @@ describe('FarmerInterface', function() {
       });
     });
 
-    it('should not send an offer if concurrency is exceeded', function(done) {
-      var farmer = new FarmerInterface({
-        keyPair: KeyPair(),
-        rpcPort: 0,
-        tunnelServerPort: 0,
-        doNotTraverseNat: true,
-        contractNegotiator: function(c, callback) {
-          callback(true);
-        },
-        logger: kad.Logger(0),
-        maxOfferConcurrency: 0,
-        storageManager: new StorageManager(new RAMStorageAdapter())
-      });
-      CLEANUP.push(farmer);
-      var _addTo = sinon.stub(farmer, '_addContractToPendingList');
-      farmer._handleContractPublication(Contract({}));
-      setImmediate(function() {
-        expect(_addTo.called).to.equal(false);
-        done();
-      });
-    });
-
     it('should add contract to pending list and negotiate', function(done) {
       var _shouldSendOffer = sinon.stub().callsArgWith(1, true);
       var _addContractToPendingList = sinon.stub();
@@ -217,51 +194,6 @@ describe('FarmerInterface', function() {
   });
 
   describe('#_negotiateContract', function() {
-
-    it('should ask network for renter if not locally known', function(done) {
-      var kp1 = KeyPair();
-      var kp2 = KeyPair();
-      var contract = new Contract({
-        renter_id: kp1.getNodeID(),
-        farmer_id: kp2.getNodeID(),
-        payment_source: kp1.getAddress(),
-        payment_destination: kp2.getAddress(),
-        data_hash: utils.rmd160('test')
-      });
-      contract.sign('renter', kp1.getPrivateKey());
-      contract.sign('farmer', kp2.getPrivateKey());
-      expect(contract.isComplete()).to.equal(true);
-      var farmer = new FarmerInterface({
-        keyPair: KeyPair(),
-        rpcPort: 0,
-        tunnelServerPort: 0,
-        doNotTraverseNat: true,
-        logger: kad.Logger(0),
-        storageManager: new StorageManager(new RAMStorageAdapter())
-      });
-      CLEANUP.push(farmer);
-      var _getContactByNodeID = sinon.stub(
-        farmer.router,
-        'getContactByNodeID'
-      ).returns(null);
-      var _findNode = sinon.stub(
-        farmer.router,
-        'findNode'
-      ).callsArgWith(2, null, [Contact({
-        address: '127.0.0.1',
-        port: 1234,
-        nodeID: kp1.getNodeID()
-      })]);
-      var _save = sinon.stub(farmer.storageManager, 'save').callsArg(1);
-      farmer._sendOfferForContract = function() {
-        expect(_findNode.called).to.equal(true);
-        _getContactByNodeID.restore();
-        _findNode.restore();
-        _save.restore();
-        done();
-      };
-      farmer._negotiateContract(contract);
-    });
 
     it('should ensure renter id is present and warn if not', function(done) {
       var farmer = new FarmerInterface({

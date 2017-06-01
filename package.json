@@ -1,7 +1,7 @@
 {
-  "name": "storj-lib",
+  "name": "storj-core",
   "version": "7.0.0",
-  "description": "implementation of the storj protocol for node.js and the browser",
+  "description": "official implementation of the storj protocol",
   "main": "index.js",
   "directories": {
     "test": "test",

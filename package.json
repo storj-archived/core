@@ -1,10 +1,11 @@
 {
-  "name": "storj-core",
+  "name": "storjd",
   "version": "7.0.0",
   "description": "official implementation of the storj protocol",
   "main": "index.js",
   "bin": {
-    "storjd": "bin/storjd.js"
+    "storjd": "bin/storjd.js",
+    "storjutil": "bin/storjutil.js"
   },
   "directories": {
     "test": "test",

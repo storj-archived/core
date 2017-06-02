@@ -23,7 +23,7 @@ program.description(`
 program
   .command('generate-key')
   .description('generate a private extended node identity key')
-  .option('-x, --extended [hex_seed]', 'generate private extended key')
+  .option('-x, --extended [hex_seed]', 'generate private extended key', true)
   .option('--convert <hex_secp256k1>', 'generate private extended key')
   .action(function(env) {
     if (env.convert) {
@@ -32,7 +32,9 @@ program
       ));
     } else if (env.extended) {
       console.info(keyutils.toHDKeyFromSeed(
-        typeof env.extended === 'string' ? parseInt(env.extended) : undefined
+        typeof env.extended === 'string'
+          ? Buffer.from(env.extended, 'hex')
+          : undefined
       ).privateExtendedKey);
     }
   });

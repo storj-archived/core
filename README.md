@@ -1,29 +1,133 @@
-Storj Core Library
-==================
+Storj Core
+==========
 
 [![Build Status](https://img.shields.io/travis/Storj/core.svg?style=flat-square)](https://travis-ci.org/Storj/core)
 [![Coverage Status](https://img.shields.io/coveralls/Storj/core.svg?style=flat-square)](https://coveralls.io/r/Storj/core)
 [![NPM](https://img.shields.io/npm/v/storj-lib.svg?style=flat-square)](https://www.npmjs.com/package/storj-lib)
 [![License](https://img.shields.io/badge/license-AGPL3.0-blue.svg?style=flat-square)](https://raw.githubusercontent.com/Storj/core/master/LICENSE)
 
-Complete implementation of the Storj Network Protocol for Node.js. 
+Complete implementation of the Storj Network Protocol and daemon.
+
+Prerequisites
+-------------
+
+Make sure you have the following prerequisites installed:
+
+* Git
+* Node.js LTS (6.9.x)
+* NPM
+* Python 2.7
+* GCC/G++/Make
+
+### Node.js + NPM
+
+#### GNU+Linux & Mac OSX
+
+```
+wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.0/install.sh | bash
+```
+
+Close your shell and open an new one. Now that you can call the `nvm` program,
+install Node.js (which comes with NPM):
+
+```
+nvm install --lts
+```
+
+#### Windows
+
+Download [Node.js LTS](https://nodejs.org/en/download/) for Windows, launch the
+installer and follow the setup instructions. Restart your PC, then test it from
+the command prompt:
+
+```
+node --version
+npm --version
+```
+
+### Build Dependencies
+
+#### GNU+Linux
+
+Debian / Ubuntu / Mint / Trisquel / and Friends
+
+```
+apt install git python build-essential
+```
+
+Red Hat / Fedora / CentOS
+
+```
+yum groupinstall 'Development Tools'
+```
+
+You might also find yourself lacking a C++11 compiler - 
+[see this](http://hiltmon.com/blog/2015/08/09/c-plus-plus-11-on-centos-6-dot-6/).
+
+#### Mac OSX
+
+```
+xcode-select --install
+```
+
+#### Windows
+
+```
+npm install --global windows-build-tools
+```
 
 Installation
 ------------
 
-From your project's directory, install `storj-lib` as a dependency.
+### Daemon + Utilities CLI
+
+This package exposes two command line programs: `storjd` and `storjutil`. To 
+install these, use the `--global` flag.
 
 ```
-npm install storj-lib --save
+npm install storjd --global --production
+```
+
+### Core Library
+
+This package exposes a module providing a complete implementation of the 
+protocol. To use it in your project, from your project's root directory, 
+install as a dependency.
+
+```
+npm install storjd --save
 ```
 
 Usage
 -----
 
-Import the `storj-lib` package and construct a node instance with options.
+### Control Interface
+
+You can run `storjd` standalone and control it from any other application over 
+its TCP control interface. See the _Resources_ section below to read up on the 
+control protocol to implement it in the language of your choice. If using 
+Node.js, you can use the client bundled in this package.
 
 ```js
-const storj = require('storj-lib');
+const storj = require('storjd');
+const controller = new storj.control.Client();
+
+controller.on('ready', () => {
+  // The control.Client instance implements the storj.Node interface!
+  controller.ping(contact, (err) => { /* handle result */ });
+});
+
+controller.connect(port);
+```
+
+### Direct Implementation
+
+Since `storjd` exposes all of the internals used to implement it, you can use 
+the same classes to directly implement your own Storj node within your project.
+Just import the `storjd` package and construct a node instance with options.
+
+```js
+const storj = require('storjd');
 const node = new storj.Node(options);
 
 node.listen(8443);
@@ -40,12 +144,13 @@ Resources
 ---------
 
 * [Storj Core Documentation](https://storj.github.io/core/)
-* [Storj Protocol Specification](https://raw.githubusercontent.com/Storj/core/master/doc/protocol.pdf)
+* [Storj Protocol Specification](https://raw.githubusercontent.com/Storj/core/master/doc/protocol.md)
+* [Storj Control Specification](https://raw.githubusercontent.com/Storj/core/master/doc/control.md)
 
 License
 -------
 
-Storj Core - Implementation of the Storj protocol for Node.js
+Storj Core - Complete implementation of the Storj Network Protocol and daemon.  
 Copyright (C) 2016  Storj Labs, Inc
 
 This program is free software: you can redistribute it and/or modify

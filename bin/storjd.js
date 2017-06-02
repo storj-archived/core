@@ -2,6 +2,7 @@
 
 'use strict';
 
+const url = require('url');
 const async = require('async');
 const program = require('commander');
 const assert = require('assert');
@@ -131,6 +132,9 @@ const node = new storj.Node({
   keyDerivationIndex: parseInt(config.ChildDerivationIndex)
 });
 
+// Intialize control server
+const control = new storj.control.Server(node);
+
 // Plugin bandwidth metering if enabled
 if (!!parseInt(config.BandwidthAccountingEnabled)) {
   node.plugin(hibernate({
@@ -168,7 +172,8 @@ if (!!parseInt(config.VerboseLoggingEnabled)) {
           `received response from ${ident.params[0]} to ${rpc.id}`
         );
       }
-    }
+    },
+    objectMode: true
   }));
   node.rpc.serializer.prepend(new Transform({
     transform: (data, enc, callback) => {
@@ -184,19 +189,21 @@ if (!!parseInt(config.VerboseLoggingEnabled)) {
           `sending response to ${recv[0]} for ${rpc.id}`
         );
       }
-    }
+    },
+    objectMode: true
   }));
 }
 
-// Bind to listening port and join the network
-node.listen(parseInt(config.ListenPort), () => {
-  logger.info(`node listening on port ${config.ListenPort}`);
+let retry = null;
+
+function join() {
   logger.info(`joining network from ${seeds.length} bootstrap nodes`);
   async.detectSeries(seeds, (contact, done) => {
     node.join(contact, (err) => done(null, !!err));
   }, (err, result) => {
     if (!result) {
-      logger.error('failed to join network');
+      logger.error('failed to join network, will retry in 1 minute');
+      retry = setTimeout(() => join(), ms('1m'));
     } else {
       logger.info(
         `connected to network via ${result[0]} ` +
@@ -204,7 +211,17 @@ node.listen(parseInt(config.ListenPort), () => {
       );
     }
   });
+}
+
+// Bind to listening port and join the network
+node.listen(parseInt(config.ListenPort), () => {
+  logger.info(`node listening on port ${config.ListenPort}`);
+  join();
 });
 
 // Establish control server and wrap node instance
-// TODO
+control.listen(parseInt(config.ControlPort), config.ControlHostname, () => {
+  logger.info(
+    `control server bound to ${config.ControlHostname}:${config.ControlPort}`
+  );
+});

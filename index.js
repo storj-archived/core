@@ -37,11 +37,14 @@ module.exports.Offers = require('./lib/offers');
 /** {@link Contract} */
 module.exports.Contract = require('./lib/contract');
 
-/** {@link module:constants} */
+/** {@link module:storjd/control} */
+module.exports.control = require('./lib/control');
+
+/** {@link module:storjd/constants} */
 module.exports.constants = require('./lib/constants');
 
-/** {@link module:utils} */
+/** {@link module:storjd/utils} */
 module.exports.utils = require('./lib/utils');
 
-/** {@link module:version} */
+/** {@link module:storjd/version} */
 module.exports.version = require('./lib/version');

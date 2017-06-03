@@ -805,7 +805,7 @@ describe('@class Rules', function() {
     it('should callback error if claims are disabled', function(done) {
       const contract = createValidContract();
       const rules = new Rules({
-        claims: false
+        claims: []
       });
       const request = {
         params: [contract.toObject()],
@@ -825,7 +825,7 @@ describe('@class Rules', function() {
       const contract = createValidContract();
       contract.set('data_hash', null);
       const rules = new Rules({
-        claims: true,
+        claims: ['*'],
         identity: randomBytes(20),
         contact: {
           xpub: 'xpub',
@@ -852,7 +852,7 @@ describe('@class Rules', function() {
     it('should callback error if cannot save', function(done) {
       const contract = createValidContract();
       const rules = new Rules({
-        claims: true,
+        claims: ['*'],
         identity: randomBytes(20),
         contact: {
           xpub: contract.get('farmer_hd_key'),
@@ -883,7 +883,7 @@ describe('@class Rules', function() {
       const contract = createValidContract();
       const accept = sinon.stub();
       const rules = new Rules({
-        claims: true,
+        claims: [contract.get('renter_hd_key')],
         identity: randomBytes(20),
         contact: {
           xpub: contract.get('farmer_hd_key'),
@@ -918,7 +918,6 @@ describe('@class Rules', function() {
       };
       rules.claim(request, response, done);
     });
-
 
   });
 

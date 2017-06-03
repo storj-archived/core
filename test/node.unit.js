@@ -602,7 +602,7 @@ describe('@class Node', function() {
       const node = createNode({});
       const quasarPublish = sandbox.stub(node, 'quasarPublish').callsArg(2);
       node.publishCapacityAnnouncement('01010101', 4096, () => {
-        expect(node.claims).to.equal(true);
+        expect(node.claims.length).to.equal(0);
         expect(quasarPublish.args[0][0]).to.equal('0c01010101');
         expect(quasarPublish.args[0][1][0]).to.equal(4096);
         expect(quasarPublish.args[0][1][1][0]).to.equal(

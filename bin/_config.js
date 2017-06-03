@@ -20,7 +20,9 @@ module.exports = {
   ShardStorageBaseDir: datadir,
   ShardStorageMaxAllocation: '0GB',
   ShardStorageMaxOpenFiles: '50',
-  AllowDirectStorageClaims: '0',
+
+  // Trusted Renter Nodes
+  AllowDirectStorageClaims: [],
 
   // Directory Storage
   DirectoryStorageBaseDir: datadir,

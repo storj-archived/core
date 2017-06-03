@@ -51,7 +51,8 @@ module.exports = function(numNodes, callback) {
         storage,
         shards,
         logger,
-        transport
+        transport,
+        claims: ['*']
       }));
     });
   }

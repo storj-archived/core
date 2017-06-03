@@ -93,9 +93,11 @@ describe('@module storj-lib (end-to-end)', function() {
         { maxOffers: 3 },
         (err, offerStream) => {
           offerStream.on('data', (offer) => {
-            offer.contract.sign('renter', renter.spartacus.privateKey);
+            let contract = storj.Contract.from(offer.contract);
+            contract.sign('renter', renter.spartacus.privateKey);
             offers.push(offer);
-            offer.callback(null, offer.contract);
+            renter.resolveContractOffer(contract.get('data_hash'), offer.id,
+                                        null, contract.toObject(), () => null);
           }).on('end', () => {
             expect(offers).to.have.lengthOf(3);
             done();
@@ -141,7 +143,7 @@ describe('@module storj-lib (end-to-end)', function() {
     const renter = nodes[0];
     const farmer = offers[0].contact;
     const challenge = audit.getPrivateRecord().challenges[0];
-    const hash = offers[0].contract.get('data_hash');
+    const hash = storj.Contract.from(offers[0].contract).get('data_hash');
     renter.auditRemoteShards(farmer, [
       { hash, challenge }
     ], (err, result) => {
@@ -200,7 +202,7 @@ describe('@module storj-lib (end-to-end)', function() {
     const now = Date.now();
     const renter = nodes[0];
     const farmer = offers[2].contact;
-    const contract = offers[2].contract;
+    const contract = storj.Contract.from(offers[2].contract);
     contract.set('store_end', now);
     contract.sign('renter', renter.spartacus.privateKey);
     const descriptor = contract.toObject();

@@ -79,7 +79,9 @@ describe('@class Rules', function() {
       const contract = createValidContract();
       const offers = new Map();
       const oStream = new OfferStream(contract);
-      oStream.once('data', ({ callback }) => callback(new Error('NOPE')));
+      oStream.once('data', ({ id }) => {
+        oStream.resolvers.get(id)(new Error('NOPE'))
+      });
       offers.set(contract.get('data_hash'), oStream);
       const rules = new Rules({ offers });
       const request = {
@@ -97,7 +99,9 @@ describe('@class Rules', function() {
       const contract = createValidContract();
       const offers = new Map();
       const oStream = new OfferStream(contract);
-      oStream.once('data', ({ contract, callback: cb }) => cb(null, contract));
+      oStream.once('data', ({ contract, id }) => {
+        oStream.resolvers.get(id)(null, contract);
+      });
       offers.set(contract.get('data_hash'), oStream);
       const rules = new Rules({ offers });
       const request = {

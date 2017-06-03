@@ -81,8 +81,10 @@ ShardStorageMaxAllocation = 0GB
 ShardStorageMaxOpenFiles = 50
 
 ; Enables renter nodes to directly claim storage capacity based on any capacity 
-; announcements you have made. If you are farming, set this value to 1.
-AllowDirectStorageClaims = 0
+; announcements you have made. If you are farming, set this value once for every 
+; trusted renter public extended key from which you will accept claims or once 
+; with a value of *
+AllowDirectStorageClaims[] = none
 
 ; Set the base directory (parent) for where the directory.db folder will be 
 ; placed. The directory.db holds key-value pairs for the distributed hash 

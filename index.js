@@ -5,12 +5,56 @@
 
 'use strict';
 
+const { spawn } = require('child_process');
+const { join } = require('path');
+
+
 /**
- * Returns a new {@link Node}
+ * Forks a child storjd process and returns the child process and a controller
+ * client for sending commands to it
  * @function
+ * @param {object|string} config - Configuration properties as object or path
+ * to a configuration file. See {@tutorial config} for details.
+ * connect to the control port
+ * @returns {object}
  */
-module.exports = function(options) {
-  return new module.exports.Node(options);
+module.exports = function(config = {}) {
+  const cport = config.ControlPort || require('./bin/_config').ControlPort;
+  const caddr = config.ControlPort || require('./bin/_config').ControlHostname;
+  const controller = new module.exports.control.Client();
+
+  let envs = {};
+  let args = [join(__dirname, './bin/storjd.js')];
+  let trys = 10;
+  let opts = { env: envs };
+
+  if (typeof config === 'string') {
+    arg = args.concat(['--config', config]);
+  } else {
+    for (let prop in config) {
+      env[`storjd_${prop}`] = config[prop];
+    }
+  }
+
+  const child = spawn(process.execPath, args, opts);
+
+  function connect() {
+    controller.once('error', (err) => {
+      controller.removeAllListeners();
+      if (trys !== 0) {
+        trys--;
+        setTimeout(connect, 1000);
+      }
+    });
+    controller.on('ready', () => controller.removeAllListeners('error'));
+    controller.connect(cport, caddr);
+  }
+
+  process.on('exit', () => child.kill());
+  child.stdout.once('data', () => setTimeout(() => connect(), 1000));
+  child.stderr.once('data', (msg) => child.emit('error', new Error(msg)));
+
+  return { child, controller };
 };
 
 /** {@link Node} */

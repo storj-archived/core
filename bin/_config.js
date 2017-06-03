@@ -1,7 +1,7 @@
 'use strict';
 
 const ini = require('ini');
-const { writeFileSync } = require('fs');
+const { existsSync, writeFileSync } = require('fs');
 const mkdirp = require('mkdirp');
 const { homedir } = require('os');
 const { join } = require('path');
@@ -54,5 +54,7 @@ module.exports = {
 
 };
 
-mkdirp.sync(datadir);
-writeFileSync(join(datadir, 'config'), ini.stringify(module.exports));
+if (!existsSync(join(datadir, 'config'))) {
+  mkdirp.sync(datadir);
+  writeFileSync(join(datadir, 'config'), ini.stringify(module.exports));
+}

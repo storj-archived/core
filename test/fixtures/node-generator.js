@@ -45,7 +45,7 @@ module.exports = function(numNodes, callback) {
         cert: keys.certificate
       });
 
-      callback(storj({
+      callback(new storj.Node({
         contact,
         contracts,
         storage,

@@ -32,7 +32,7 @@ module.exports = function(config = {}) {
     arg = args.concat(['--config', config]);
   } else {
     for (let prop in config) {
-      env[`storjd_${prop}`] = config[prop];
+      envs[`storjd_${prop}`] = config[prop];
     }
   }
 

@@ -33,7 +33,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/storj/core.git"
+    "url": "https://github.com/storj/storjd.git"
   },
   "author": "Gordon Hall <gordonh@member.fsf.org>",
   "contributors": [

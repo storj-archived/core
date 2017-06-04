@@ -24,6 +24,7 @@ const options = require('./_config');
 const { execFileSync } = require('child_process');
 const { Transform } = require('stream');
 const config = require('rc')('storjd', options);
+const boscar = require('boscar');
 
 
 program.version(`
@@ -133,7 +134,7 @@ const node = new storj.Node({
 });
 
 // Intialize control server
-const control = new storj.control.Server(node);
+const control = new boscar.Server(node);
 
 // Plugin bandwidth metering if enabled
 if (!!parseInt(config.BandwidthAccountingEnabled)) {

@@ -2,9 +2,6 @@
   "protocol": {
     "title": "Protocol Specification"
   },
-  "control": {
-    "title": "Controller Specification"
-  },
   "config": {
     "title": "Node Configuration & Setup"
   }

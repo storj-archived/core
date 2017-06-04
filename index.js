@@ -5,6 +5,7 @@
 
 'use strict';
 
+const boscar = require('boscar');
 const { spawn } = require('child_process');
 const { join } = require('path');
 
@@ -18,10 +19,12 @@ const { join } = require('path');
  * connect to the control port
  * @returns {object}
  */
+/* istanbul ignore next */
 module.exports = function(config = {}) {
+  /* eslint maxstatements [2, 18] */
   const cport = config.ControlPort || require('./bin/_config').ControlPort;
   const caddr = config.ControlPort || require('./bin/_config').ControlHostname;
-  const controller = new module.exports.control.Client();
+  const controller = new boscar.Client();
 
   let envs = {};
   let args = [join(__dirname, './bin/storjd.js')];
@@ -29,7 +32,7 @@ module.exports = function(config = {}) {
   let opts = { env: envs };
 
   if (typeof config === 'string') {
-    arg = args.concat(['--config', config]);
+    args = args.concat(['--config', config]);
   } else {
     for (let prop in config) {
       envs[`storjd_${prop}`] = config[prop];
@@ -39,7 +42,7 @@ module.exports = function(config = {}) {
   const child = spawn(process.execPath, args, opts);
 
   function connect() {
-    controller.once('error', (err) => {
+    controller.once('error', () => {
       controller.removeAllListeners();
       if (trys !== 0) {
         trys--;
@@ -80,9 +83,6 @@ module.exports.Offers = require('./lib/offers');
 
 /** {@link Contract} */
 module.exports.Contract = require('./lib/contract');
-
-/** {@link module:storjd/control} */
-module.exports.control = require('./lib/control');
 
 /** {@link module:storjd/constants} */
 module.exports.constants = require('./lib/constants');

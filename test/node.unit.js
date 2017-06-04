@@ -633,4 +633,28 @@ describe('@class Node', function() {
 
   });
 
+  describe('@method resolveContractOffer', function() {
+
+    it('should call the offer callback', function(done) {
+      const node = createNode({});
+      const offers = { resolvers: new Map() };
+      const resolver = sinon.stub();
+      offers.resolvers.set('offerid', resolver);
+      node.offers.set('hash', offers);
+      node.resolveContractOffer('hash', 'offerid', null, {}, (err) => {
+        expect(resolver.called).to.equal(true);
+        done();
+      });
+    });
+
+    it('should callback error if offer not found', function(done) {
+      const node = createNode({});
+      node.resolveContractOffer('hash', 'offerid', null, {}, (err) => {
+        expect(err.message).to.equal('Offer resolver not found');
+        done();
+      });
+    });
+
+  });
+
 });

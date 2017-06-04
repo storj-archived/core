@@ -120,6 +120,12 @@ controller.on('ready', () => {
 controller.connect(port);
 ```
 
+If you wish to control your `storjd` node from another language, simply connect 
+to the control port over a TCP socket and use the 
+[BOSCAR](https://github.com/bookchin/boscar) protocol to send RPC messages to 
+the node. The methods and argument signatures map directly to the `storjd.Node` 
+API describe in the documentation. See *Resources* below.
+
 ### Direct Implementation
 
 Since `storjd` exposes all of the internals used to implement it, you can use 
@@ -145,7 +151,6 @@ Resources
 
 * [Storj Core Documentation](https://storj.github.io/core/)
 * [Storj Protocol Specification](https://raw.githubusercontent.com/Storj/core/master/doc/protocol.md)
-* [Storj Control Specification](https://raw.githubusercontent.com/Storj/core/master/doc/control.md)
 
 License
 -------

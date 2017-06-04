@@ -109,6 +109,7 @@
     "sinon": "^1.14.1"
   },
   "optionalDependencies": {
+    "boscar": "^1.0.0",
     "bytes": "^2.5.0",
     "commander": "^2.9.0",
     "kad-hibernate": "^1.0.0",

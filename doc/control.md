@@ -1,4 +1,0 @@
-Storjd Control Interface
-========================
-
-

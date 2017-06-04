@@ -21,7 +21,7 @@ const { join } = require('path');
  */
 /* istanbul ignore next */
 module.exports = function(config = {}) {
-  /* eslint maxstatements [2, 18] */
+  /* eslint max-statements: [2, 18] */
   const cport = config.ControlPort || require('./bin/_config').ControlPort;
   const caddr = config.ControlPort || require('./bin/_config').ControlHostname;
   const controller = new boscar.Client();

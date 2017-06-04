@@ -641,7 +641,7 @@ describe('@class Node', function() {
       const resolver = sinon.stub();
       offers.resolvers.set('offerid', resolver);
       node.offers.set('hash', offers);
-      node.resolveContractOffer('hash', 'offerid', null, {}, (err) => {
+      node.resolveContractOffer('hash', 'offerid', null, {}, () => {
         expect(resolver.called).to.equal(true);
         done();
       });

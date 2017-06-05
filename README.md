@@ -6,7 +6,10 @@ storjd
 [![NPM](https://img.shields.io/npm/v/storj-lib.svg?style=flat-square)](https://www.npmjs.com/package/storj-lib)
 [![License](https://img.shields.io/badge/license-AGPL3.0-blue.svg?style=flat-square)](https://raw.githubusercontent.com/Storj/core/master/LICENSE)
 
-Complete implementation of the Storj Network Protocol and daemon.
+Complete implementation of the Storj Network Protocol Version 2. This package 
+supercedes [Storj Core (`storj-lib@6.x.x`)](https://github.com/Storj/storjd/tree/v6-backports) 
+and may be used as a daemon or as a library to control a node on the Storj 
+Network. 
 
 Prerequisites
 -------------
@@ -168,8 +171,8 @@ integration with the Storj network.
 Resources
 ---------
 
-* [Storj Core Documentation](https://storj.github.io/core/)
-* [Storj Protocol Specification](https://raw.githubusercontent.com/Storj/core/master/doc/protocol.md)
+* [Storj Documentation](https://storj.github.io/storjd/)
+* [Storj Protocol Specification](https://raw.githubusercontent.com/Storj/storjd/master/doc/protocol.md)
 
 License
 -------

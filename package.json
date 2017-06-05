@@ -1,6 +1,6 @@
 {
   "name": "storjd",
-  "version": "7.0.0",
+  "version": "7.0.0-beta1",
   "description": "official implementation of the storj protocol",
   "main": "index.js",
   "bin": {

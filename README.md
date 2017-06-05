@@ -101,6 +101,26 @@ npm install storjd --save
 Usage
 -----
 
+### Spawning Child
+
+The easiest way to get up and running with storjd is to spawn a child process 
+from your program and connect to it over the control port. This package exposes 
+a convenience method for doing this. 
+
+```js
+const storjd = require('storjd');
+const { child, controller } = storjd(config);
+
+// The `config` argument can be either a string path to config file to use or 
+// a JSON dictionary of config properties. See configuration documentaion.
+
+child.stdout.pipe(process.stdout); // Pipe log out put to stdout
+
+controller.on('ready', () => {
+  controller.invoke('ping', [contact], console.log); // Ping a contact
+});
+```
+
 ### Control Interface
 
 You can run `storjd` standalone and control it from any other application over 
@@ -113,8 +133,7 @@ const storj = require('storjd');
 const controller = new storj.control.Client();
 
 controller.on('ready', () => {
-  // The control.Client instance implements the storj.Node interface!
-  controller.ping(contact, (err) => { /* handle result */ });
+  controller.invoke('ping', [contact], (err) => { /* handle result */ });
 });
 
 controller.connect(port);

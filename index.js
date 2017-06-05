@@ -5,7 +5,6 @@
 
 'use strict';
 
-const boscar = require('boscar');
 const { spawn } = require('child_process');
 const { join } = require('path');
 
@@ -24,7 +23,7 @@ module.exports = function(config = {}) {
   /* eslint max-statements: [2, 18] */
   const cport = config.ControlPort || require('./bin/_config').ControlPort;
   const caddr = config.ControlPort || require('./bin/_config').ControlHostname;
-  const controller = new boscar.Client();
+  const controller = new module.exports.control.Client();
 
   let envs = {};
   let args = [join(__dirname, './bin/storjd.js')];
@@ -92,3 +91,6 @@ module.exports.utils = require('./lib/utils');
 
 /** {@link module:storjd/version} */
 module.exports.version = require('./lib/version');
+
+/** @see https://github.com/bookchin/boscar */
+module.exports.control = require('boscar');

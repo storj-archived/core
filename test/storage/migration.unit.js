@@ -54,6 +54,7 @@ describe('StorageMigration', function() {
     var source, target;
 
     before(function(done) {
+      this.timeout(4000);
       source = new EmbeddedStorageAdapter(_p('t5'));
       target = new EmbeddedStorageAdapter(_p('t6'));
 

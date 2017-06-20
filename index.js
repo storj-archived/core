@@ -1,110 +1,96 @@
 /**
  * @module storj
- * @license (AGPL-3.0 AND LGPL-3.0)
+ * @license AGPL-3.0
  */
 
 'use strict';
 
-require('./lib/patches')(); // NB: Apply any monkey patches
+const { spawn } = require('child_process');
+const { join } = require('path');
 
-/** {@link Network} */
-exports.Network = require('./lib/network');
 
-/** {@link Protocol} */
-exports.Protocol = require('./lib/network/protocol');
+/**
+ * Forks a child storjd process and returns the child process and a controller
+ * client for sending commands to it
+ * @function
+ * @param {object|string} config - Configuration properties as object or path
+ * to a configuration file. See {@tutorial config} for details.
+ * connect to the control port
+ * @returns {object}
+ */
+/* istanbul ignore next */
+module.exports = function(config = {}) {
+  /* eslint max-statements: [2, 18] */
+  const cport = config.ControlPort || require('./bin/_config').ControlPort;
+  const caddr = config.ControlPort || require('./bin/_config').ControlHostname;
+  const controller = new module.exports.control.Client();
 
-/** {@link Renter} */
-exports.Renter = require('./lib/network/renter');
+  let envs = {};
+  let args = [join(__dirname, './bin/storjd.js')];
+  let trys = 10;
+  let opts = { env: envs };
 
-/** {@link Farmer} */
-exports.Farmer = require('./lib/network/farmer');
+  if (typeof config === 'string') {
+    args = args.concat(['--config', config]);
+  } else {
+    for (let prop in config) {
+      envs[`storjd_${prop}`] = config[prop];
+    }
+  }
 
-/** {@link Monitor} */
-exports.Monitor = require('./lib/network/monitor');
+  const child = spawn(process.execPath, args, opts);
+
+  function connect() {
+    controller.once('error', () => {
+      controller.removeAllListeners();
+      if (trys !== 0) {
+        trys--;
+        setTimeout(connect, 1000);
+      }
+    });
+    controller.on('ready', () => controller.removeAllListeners('error'));
+    controller.connect(cport, caddr);
+  }
+
+  process.on('exit', () => child.kill());
+  child.stdout.once('data', () => setTimeout(() => connect(), 1000));
+  child.stderr.once('data', (msg) => child.emit('error', new Error(msg)));
+
+  return { child, controller };
+};
+
+/** {@link Node} */
+module.exports.Node = require('./lib/node');
+
+/** {@link Rules} */
+module.exports.Rules = require('./lib/rules');
 
 /** {@link Transport} */
-exports.Transport = require('./lib/network/transport');
+module.exports.Transport = require('./lib/transport');
 
-/** {@link ShardServer} */
-exports.ShardServer = require('./lib/network/shard-server');
+/** {@link Server} */
+module.exports.Server = require('./lib/server');
 
-/** {@link Contact} */
-exports.Contact = require('./lib/network/contact');
+/** {@link Audit} */
+module.exports.Audit = require('./lib/audit');
 
-/** {@link EncryptStream} */
-exports.EncryptStream = require('./lib/crypto-tools/encrypt-stream');
+/** {@link Proof} */
+module.exports.Proof = require('./lib/proof');
 
-/** {@link DecryptStream} */
-exports.DecryptStream = require('./lib/crypto-tools/decrypt-stream');
-
-/** {@link FileMuxer} */
-exports.FileMuxer = require('./lib/file-handling/file-muxer');
-
-/** {@link FileDemuxer} */
-exports.FileDemuxer = require('./lib/file-handling/file-demuxer');
+/** {@link Offers} */
+module.exports.Offers = require('./lib/offers');
 
 /** {@link Contract} */
-exports.Contract = require('./lib/contract');
+module.exports.Contract = require('./lib/contract');
 
-/** {@link OfferStream} */
-exports.OfferStream = require('./lib/contract/offer-stream');
+/** {@link module:storjd/constants} */
+module.exports.constants = require('./lib/constants');
 
-/** {@link OfferManager} */
-exports.OfferManager = require('./lib/contract/offer-manager');
+/** {@link module:storjd/utils} */
+module.exports.utils = require('./lib/utils');
 
-/** {@link AuditStream} */
-exports.AuditStream = require('./lib/audit-tools/audit-stream');
+/** {@link module:storjd/version} */
+module.exports.version = require('./lib/version');
 
-/** {@link ProofStream} */
-exports.ProofStream = require('./lib/audit-tools/proof-stream');
-
-/** {@link Verification} */
-exports.Verification = require('./lib/audit-tools/verification');
-
-/** {@link StorageManager} */
-exports.StorageManager = require('./lib/storage/manager');
-
-/** {@link StorageAdapter} */
-exports.StorageAdapter = require('./lib/storage/adapter');
-
-/** {@link StorageMigration} */
-exports.StorageMigration = require('./lib/storage/migration');
-
-/** {@link EmbeddedStorageAdapter} */
-exports.EmbeddedStorageAdapter = require('./lib/storage/adapters/embedded');
-
-/** {@link RAMStorageAdapter} */
-exports.RAMStorageAdapter = require('./lib/storage/adapters/ram');
-
-/** {@link StorageItem} */
-exports.StorageItem = require('./lib/storage/item');
-
-/** {@link DataCipherKeyIv} */
-exports.DataCipherKeyIv = require('./lib/crypto-tools/cipher-key-iv');
-
-/** {@link DeterministicKeyIv} */
-exports.DeterministicKeyIv = require('./lib/crypto-tools/deterministic-key-iv');
-
-/** {@link KeyPair} */
-exports.KeyPair = require('./lib/crypto-tools/keypair');
-
-/** {@link KeyRing} */
-exports.KeyRing = require('./lib/crypto-tools/keyring');
-
-/** {@link BridgeClient} */
-exports.BridgeClient = require('./lib/bridge-client');
-
-/** {@link module:storj/version} */
-exports.version = require('./lib/version');
-
-/** {@link module:storj/constants} */
-exports.constants = require('./lib/constants');
-
-/** {@link module:storj/utils} */
-exports.utils = require('./lib/utils');
-
-/** {@link module:storj/deps} */
-exports.deps = require('./lib/deps');
-
-/** {@link module:storj/sips} */
-exports.sips = require('./lib/sips');
+/** @see https://github.com/bookchin/boscar */
+module.exports.control = require('boscar');

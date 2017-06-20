@@ -1,29 +1,8 @@
 {
-  "protocol-spec": {
+  "protocol": {
     "title": "Protocol Specification"
   },
-  "data-transfer": {
-    "title": "Transferring File Shards"
-  },
-  "contract-topics": {
-    "title": "Publishing Storage Contracts"
-  },
-  "private-testnet": {
-    "title": "Running a Test Network"
-  },
-  "tunnel-connections": {
-    "title": "Tunnelling Connections"
-  },
-  "renting-data": {
-    "title": "Renting Data to the Network"
-  },
-  "command-line-interface": {
-    "title": "Using the Command Line Tools"
-  },
-  "environment-variables": {
-    "title": "Environment Variables"
-  },
-  "file-encryption": {
-    "title": "File Encryption Standards"
+  "config": {
+    "title": "Node Configuration & Setup"
   }
 }

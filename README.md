@@ -1,53 +1,189 @@
-[![Storj](https://nodei.co/npm/storj-lib.png?downloads=true)](http://storj.github.io/core)
-==========================================================================================
+storjd
+======
 
 [![Build Status](https://img.shields.io/travis/Storj/core.svg?style=flat-square)](https://travis-ci.org/Storj/core)
 [![Coverage Status](https://img.shields.io/coveralls/Storj/core.svg?style=flat-square)](https://coveralls.io/r/Storj/core)
 [![NPM](https://img.shields.io/npm/v/storj-lib.svg?style=flat-square)](https://www.npmjs.com/package/storj-lib)
 [![License](https://img.shields.io/badge/license-AGPL3.0-blue.svg?style=flat-square)](https://raw.githubusercontent.com/Storj/core/master/LICENSE)
 
-This package exposes a module that provides all of the tools needed to
-integrate with the Storj network. You must have Node.js v6.9.1, Python v2.x.x,
-and Git installed. [Complete documentation can be found here](http://storj.github.io/core).
+Complete implementation of the Storj Network Protocol Version 2. This package 
+supercedes [Storj Core (`storj-lib@6.x.x`)](https://github.com/Storj/storjd/tree/v6-backports) 
+and may be used as a daemon or as a library to control a node on the Storj 
+Network. 
+
+Prerequisites
+-------------
+
+Make sure you have the following prerequisites installed:
+
+* Git
+* Node.js LTS (6.9.x)
+* NPM
+* Python 2.7
+* GCC/G++/Make
+
+### Node.js + NPM
+
+#### GNU+Linux & Mac OSX
 
 ```
-npm install storj-lib --save
+wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.0/install.sh | bash
 ```
 
-> If you want access to the [Storj CLI](https://github.com/storj/core-cli), 
-> you must install it separately or use the [`storj`](https://github.com/storj/npm-meta) 
-> metapackage to install both the core library *and* command line interface.
+Close your shell and open an new one. Now that you can call the `nvm` program,
+install Node.js (which comes with NPM):
 
-Usage Examples
---------------
+```
+nvm install --lts
+```
 
-- [Example 1 - Creating a User](https://github.com/Storj/core/blob/master/example/1-create-user.js)
-- [Example 2 - Generating a KeyPair](https://github.com/Storj/core/blob/master/example/2-generate-keypair.js)
-- [Example 3 - Authenticating with a KeyPair](https://github.com/Storj/core/blob/master/example/3-authenticate-with-keypair.js)
-- [Example 4 - Listing Keys](https://github.com/Storj/core/blob/master/example/4a-list-keys.js)
-- [Example 4b - Add/Remove Keys](https://github.com/Storj/core/blob/master/example/4b-add-remove-keys.js)
-- [Example 5a - List Buckets](https://github.com/Storj/core/blob/master/example/5a-list-buckets.js)
-- [Example 5b - Add/Remove Bucket](https://github.com/Storj/core/blob/master/example/5b-add-remove-bucket.js)
-- [Example 6a - Upload File](https://github.com/Storj/core/blob/master/example/6a-upload-file.js)
-- [Example 6b - Download File](https://github.com/Storj/core/blob/master/example/6b-download-file.js)
-- [Example 6c - List Bucket Files](https://github.com/Storj/core/blob/master/example/6c-list-bucket-files.js)
-- [Example 6d - Delete File from Bucket](https://github.com/Storj/core/blob/master/example/6d-delete-file-from-bucket.js)
+#### Windows
+
+Download [Node.js LTS](https://nodejs.org/en/download/) for Windows, launch the
+installer and follow the setup instructions. Restart your PC, then test it from
+the command prompt:
+
+```
+node --version
+npm --version
+```
+
+### Build Dependencies
+
+#### GNU+Linux
+
+Debian / Ubuntu / Mint / Trisquel / and Friends
+
+```
+apt install git python build-essential
+```
+
+Red Hat / Fedora / CentOS
+
+```
+yum groupinstall 'Development Tools'
+```
+
+You might also find yourself lacking a C++11 compiler - 
+[see this](http://hiltmon.com/blog/2015/08/09/c-plus-plus-11-on-centos-6-dot-6/).
+
+#### Mac OSX
+
+```
+xcode-select --install
+```
+
+#### Windows
+
+```
+npm install --global windows-build-tools
+```
+
+Installation
+------------
+
+### Daemon + Utilities CLI
+
+This package exposes two command line programs: `storjd` and `storjutil`. To 
+install these, use the `--global` flag.
+
+```
+npm install storjd --global --production
+```
+
+### Core Library
+
+This package exposes a module providing a complete implementation of the 
+protocol. To use it in your project, from your project's root directory, 
+install as a dependency.
+
+```
+npm install storjd --save
+```
+
+Usage
+-----
+
+### Spawning Child
+
+The easiest way to get up and running with storjd is to spawn a child process 
+from your program and connect to it over the control port. This package exposes 
+a convenience method for doing this. 
+
+```js
+const storjd = require('storjd');
+const { child, controller } = storjd(config);
+
+// The `config` argument can be either a string path to config file to use or 
+// a JSON dictionary of config properties. See configuration documentaion.
+
+child.stdout.pipe(process.stdout); // Pipe log out put to stdout
+
+controller.on('ready', () => {
+  controller.invoke('ping', [contact], console.log); // Ping a contact
+});
+```
+
+### Control Interface
+
+You can run `storjd` standalone and control it from any other application over 
+its TCP control interface. See the _Resources_ section below to read up on the 
+control protocol to implement it in the language of your choice. If using 
+Node.js, you can use the client bundled in this package.
+
+```js
+const storj = require('storjd');
+const controller = new storj.control.Client();
+
+controller.on('ready', () => {
+  controller.invoke('ping', [contact], (err) => { /* handle result */ });
+});
+
+controller.connect(port);
+```
+
+If you wish to control your `storjd` node from another language, simply connect 
+to the control port over a TCP socket and use the 
+[BOSCAR](https://github.com/bookchin/boscar) protocol to send RPC messages to 
+the node. The methods and argument signatures map directly to the `storjd.Node` 
+API describe in the documentation. See *Resources* below.
+
+### Direct Implementation
+
+Since `storjd` exposes all of the internals used to implement it, you can use 
+the same classes to directly implement your own Storj node within your project.
+Just import the `storjd` package and construct a node instance with options.
+
+```js
+const storj = require('storjd');
+const node = new storj.Node(options);
+
+node.listen(8443);
+node.join(['known_node_id', { /* contact data */ }]);
+```
+
+Consult the documentation for a complete reference of the API exposed from the 
+`Node` object. Further documentation on usage can be found by reviewing the 
+end-to-end test suite in `test/node.e2e.js`. Note that this library is a very 
+low level interface for the Storj protocol and is not intended for casual 
+integration with the Storj network.
+
+Resources
+---------
+
+* [Storj Documentation](https://storj.github.io/storjd/)
+* [Storj Protocol Specification](https://raw.githubusercontent.com/Storj/storjd/master/doc/protocol.md)
 
 License
 -------
 
-Storj Core - Implementation of the Storj protocol for Node.js
+Storj Core - Complete implementation of the Storj Network Protocol and daemon.  
 Copyright (C) 2016  Storj Labs, Inc
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
 by the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
-
-*Certain parts of this program are licensed under the GNU Lesser General
-Public License as published by the Free Software Foundation. You can
-redistribute it and/or modify it under the terms either version 3 of the
-License, or (at your option) any later version.*
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of

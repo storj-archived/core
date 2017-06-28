@@ -618,6 +618,33 @@ describe('FarmerInterface', function() {
       });
     });
 
+    it('should reset contract count to 0 to prevent overflow', function(done) {
+      var farmer = new FarmerInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        storageManager: new StorageManager(new RAMStorageAdapter())
+      });
+      CLEANUP.push(farmer);
+      var _load = sinon.stub(farmer.storageManager, 'load').callsArgWith(1, {});
+      var _save = sinon.stub(farmer.storageManager, 'save');
+      var _verify = sinon.stub(Contract.prototype, 'verify').returns(true);
+      farmer._contractCount = Number.MAX_SAFE_INTEGER;
+      farmer._handleOfferRes({
+        result: {
+          contract: Contract({}).toObject()
+        }
+      }, new Contract(), {nodeID: 'nodeid'});
+      setImmediate(function() {
+        _load.restore();
+        _save.restore();
+        _verify.restore();
+        expect(farmer._contractCount).to.equal(0);
+        done();
+      });
+    });
   });
 
   describe('#_listenForContracts', function() {

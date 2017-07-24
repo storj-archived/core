@@ -265,10 +265,17 @@ describe('EmbeddedStorageAdapter', function() {
         null,
         7 * 1024
       );
+      var _stat = sinon.stub(store._fs, 'stat').callsArgWith(
+        0,
+        null,
+        [{sBucketStats: {size: 2 * 1024}}, {sBucketStats: {size: 3 * 1024}}]
+      );
       store._isUsingDefaultBackend = true;
-      store._size(function(err, size) {
+      store._size(function(err, shardsize, contractsize) {
         _approx.restore();
-        expect(size).to.equal(7 * 1024);
+        _stat.restore();
+        expect(shardsize).to.equal(5 * 1024);
+        expect(contractsize).to.equal(7 * 1024);
         done();
       });
     });

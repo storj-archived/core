@@ -228,40 +228,6 @@ describe('utils', function() {
 
   });
 
-  describe('#toNumberBytes', function() {
-
-    it('should convert from mebibytes', function() {
-      expect(utils.toNumberBytes('250', 'MiB')).to.equal(262144000);
-    });
-
-    it('should convert from gibibytes', function() {
-      expect(utils.toNumberBytes('500', 'GiB')).to.equal(536870912000);
-    });
-
-    it('should convert from tebibytes', function() {
-      expect(utils.toNumberBytes('2', 'TiB')).to.equal(2199023255552);
-    });
-
-    it('should convert from megabytes', function() {
-      expect(utils.toNumberBytes('250', 'MB')).to.equal(250000000);
-    });
-
-    it('should convert from gigabytes', function() {
-      expect(utils.toNumberBytes('500', 'GB')).to.equal(500000000000);
-    });
-
-    it('should convert from terabytes', function() {
-      expect(utils.toNumberBytes('2', 'TB')).to.equal(2000000000000);
-    });
-
-    it('should throw if bad unit', function() {
-      expect(function() {
-        utils.toNumberBytes('1000', 'KB');
-      }).to.throw(Error, 'Unit must be one of TB, TiB, GB, GiB, MB or MiB');
-    });
-
-  });
-
   describe('#simpleEncrypt + #simpleDecrypt', function() {
 
     it('should successfully encrypt and decrypt the data', function() {

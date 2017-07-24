@@ -131,7 +131,7 @@ describe('FarmerInterface', function() {
       var _size = sinon.stub(
         farmer.storageManager._storage,
         'size'
-      ).callsArgWith(1, null, 1000);
+      ).callsArgWith(1, null, 500, 500);
       farmer.storageManager._options.maxCapacity = 2000;
       var _addTo = sinon.stub(farmer, '_addContractToPendingList');
       //execute

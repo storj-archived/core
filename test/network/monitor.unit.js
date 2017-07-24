@@ -215,11 +215,11 @@ describe('Monitor#getDiskUtilization', function() {
     Monitor.getDiskUtilization({
       storageManager: {
         _options: { maxCapacity: 2048 },
-        _storage: { size: sinon.stub().callsArgWith(0, null, 1024) }
+        _storage: { size: sinon.stub().callsArgWith(0, null, 1024, 512) }
       }
     }, function(err, stats) {
-      expect(stats.disk.used).to.equal(1024);
-      expect(stats.disk.free).to.equal(1024);
+      expect(stats.disk.used).to.equal(1536);
+      expect(stats.disk.free).to.equal(512);
       done();
     });
   });

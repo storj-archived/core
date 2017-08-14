@@ -482,14 +482,93 @@ describe('FarmerInterface', function() {
   });
 
   describe('#_connectBridge', function() {
-    it('will add bridge contact if contact does not exist', function() {
+    const sandbox = sinon.sandbox.create();
+    afterEach(() => sandbox.restore());
 
+
+    it('will add bridge contact if contact does not exist', function(done) {
+      var farmer = new FarmerInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        storageManager: new StorageManager(new RAMStorageAdapter())
+      });
+
+      let contact = {};
+      sandbox.stub(farmer, '_bridgeRequest').callsArg(5);
+      sandbox.stub(farmer, '_addBridgeContact').callsArgWith(1, null, contact);
+      let bridge = {
+        url: 'https://api.storj.io/',
+        extendedKey: 'xpub6AHweYHAxk1EhJSBctQD1nLWPog6Sy2eTpKQLExR1hfzTyyZQWvU4EYNXv1NJN7GpLYXnDLt4PzN874g6zSjAQdFCHZN7U7nbYKYVDUzD42'
+      }
+      farmer._connectBridge(bridge, (err) => {
+        if (err) {
+          return done(err);
+        }
+        expect(farmer._bridgeRequest.callCount).to.equal(1);
+        expect(farmer._addBridgeContact.callCount).to.equal(1);
+        done();
+      });
     });
-    it('will update contact if contact exists', function() {
+    it('will update contact if contact exists', function(done) {
+      var farmer = new FarmerInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        storageManager: new StorageManager(new RAMStorageAdapter())
+      });
 
+      let contact = {
+        address: '127.0.0.1',
+        port: 10
+      };
+      sandbox.stub(farmer, '_bridgeRequest').callsArgWith(5, null, contact);
+      sandbox.stub(farmer, '_updateBridgeContact').callsArgWith(1, null);
+      let bridge = {
+        url: 'https://api.storj.io/',
+        extendedKey: 'xpub6AHweYHAxk1EhJSBctQD1nLWPog6Sy2eTpKQLExR1hfzTyyZQWvU4EYNXv1NJN7GpLYXnDLt4PzN874g6zSjAQdFCHZN7U7nbYKYVDUzD42'
+      }
+      farmer._connectBridge(bridge, (err) => {
+        if (err) {
+          return done(err);
+        }
+        expect(farmer._bridgeRequest.callCount).to.equal(1);
+        expect(farmer._updateBridgeContact.callCount).to.equal(1);
+        done();
+      });
     });
-    it('will do nothing if contact is up-to-date', function() {
+    it('will do nothing if contact is up-to-date', function(done) {
+      var farmer = new FarmerInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        storageManager: new StorageManager(new RAMStorageAdapter())
+      });
 
+      let contact = {
+        address: '127.0.0.1',
+        port: 0
+      };
+      sandbox.stub(farmer, '_bridgeRequest').callsArgWith(5, null, contact);
+      sandbox.stub(farmer, '_updateBridgeContact').callsArgWith(1, null);
+      let bridge = {
+        url: 'https://api.storj.io/',
+        extendedKey: 'xpub6AHweYHAxk1EhJSBctQD1nLWPog6Sy2eTpKQLExR1hfzTyyZQWvU4EYNXv1NJN7GpLYXnDLt4PzN874g6zSjAQdFCHZN7U7nbYKYVDUzD42'
+      }
+      farmer._connectBridge(bridge, (err) => {
+        if (err) {
+          return done(err);
+        }
+        expect(farmer._bridgeRequest.callCount).to.equal(1);
+        expect(farmer._updateBridgeContact.callCount).to.equal(0);
+        done();
+      });
     });
   });
 

@@ -574,13 +574,75 @@ describe('FarmerInterface', function() {
   });
 
   describe('#_addBridgeContact', function() {
-    it('will get and complete challenge and create contact', function() {
+    const sandbox = sinon.sandbox.create();
+    afterEach(() => sandbox.restore());
 
+    it('will get and complete challenge and create contact', function(done) {
+      var farmer = new FarmerInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        storageManager: new StorageManager(new RAMStorageAdapter())
+      });
+
+      let bridge = {
+        url: 'https://api.storj.io/',
+        extendedKey: 'xpub6AHweYHAxk1EhJSBctQD1nLWPog6Sy2eTpKQLExR1hfzTyyZQWvU4EYNXv1NJN7GpLYXnDLt4PzN874g6zSjAQdFCHZN7U7nbYKYVDUzD42'
+      }
+      let nonce = 101;
+      sandbox.stub(farmer, '_bridgeRequest').callsArg(5);
+      let data = {
+        challenge: '5980ef806b470f147b44dc05238c53458efe9dc7f5711db6ccef2e5e832431c6',
+        target: '00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+      };
+      farmer._bridgeRequest.onFirstCall().callsArgWith(5, null, data);
+      sandbox.stub(farmer, '_completeChallenge').callsArgWith(2, null, nonce);
+      farmer._addBridgeContact(bridge, (err) => {
+        if (err) {
+          return done(err);
+        }
+        expect(farmer._bridgeRequest.callCount).to.equal(2);
+        expect(farmer._completeChallenge.callCount).to.equal(1);
+        expect(farmer._bridgeRequest.args[1][3]['x-challenge-nonce']).to.equal(101);
+        done();
+      });
     });
   });
 
   describe('#_updateBridgeContact', function() {
-    it('will send patch request to update contact', function() {
+    const sandbox = sinon.sandbox.create();
+    afterEach(() => sandbox.restore());
+
+    it('will send patch request to update contact', function(done) {
+      var farmer = new FarmerInterface({
+        keyPair: KeyPair(),
+        rpcPort: 11,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        storageManager: new StorageManager(new RAMStorageAdapter())
+      });
+
+      let bridge = {
+        url: 'https://api.storj.io/',
+        extendedKey: 'xpub6AHweYHAxk1EhJSBctQD1nLWPog6Sy2eTpKQLExR1hfzTyyZQWvU4EYNXv1NJN7GpLYXnDLt4PzN874g6zSjAQdFCHZN7U7nbYKYVDUzD42'
+      }
+      sandbox.stub(farmer, '_bridgeRequest').callsArg(5);
+      let data = {
+        challenge: '5980ef806b470f147b44dc05238c53458efe9dc7f5711db6ccef2e5e832431c6',
+        target: '00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+      };
+      farmer._updateBridgeContact(bridge, (err) => {
+        if (err) {
+          return done(err);
+        }
+        expect(farmer._bridgeRequest.callCount).to.equal(1);
+        expect(farmer._bridgeRequest.args[0][4].address).to.equal('127.0.0.1');
+        expect(farmer._bridgeRequest.args[0][4].port).to.equal(11);
+        done();
+      });
     });
   });
 

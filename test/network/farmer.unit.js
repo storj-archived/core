@@ -1,17 +1,19 @@
 'use strict';
 
-var sinon = require('sinon');
-var expect = require('chai').expect;
-var Contract = require('../../lib/contract');
-var KeyPair = require('../../lib/crypto-tools/keypair');
-var FarmerInterface = require('../../lib/network/farmer');
-var Network = require('../../lib/network');
-var kad = require('kad');
-var utils = require('../../lib/utils');
-var StorageItem = require('../../lib/storage/item');
-var StorageManager = require('../../lib/storage/manager');
-var RAMStorageAdapter = require('../../lib/storage/adapters/ram');
-var CLEANUP = [];
+const sinon = require('sinon');
+const https = require('https');
+const expect = require('chai').expect;
+const EventEmitter = require('events').EventEmitter;
+const Contract = require('../../lib/contract');
+const KeyPair = require('../../lib/crypto-tools/keypair');
+const FarmerInterface = require('../../lib/network/farmer');
+const Network = require('../../lib/network');
+const kad = require('kad');
+const utils = require('../../lib/utils');
+const StorageItem = require('../../lib/storage/item');
+const StorageManager = require('../../lib/storage/manager');
+const RAMStorageAdapter = require('../../lib/storage/adapters/ram');
+const CLEANUP = [];
 
 describe('FarmerInterface', function() {
 
@@ -485,7 +487,6 @@ describe('FarmerInterface', function() {
     const sandbox = sinon.sandbox.create();
     afterEach(() => sandbox.restore());
 
-
     it('will add bridge contact if contact does not exist', function(done) {
       var farmer = new FarmerInterface({
         keyPair: KeyPair(),
@@ -608,13 +609,64 @@ describe('FarmerInterface', function() {
 
   describe('#_getSigHash', function() {
     it('will calculate the correct sighash', function() {
+      var farmer = new FarmerInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        storageManager: new StorageManager(new RAMStorageAdapter())
+      });
 
+      let url = 'https://api.storj.io';
+      let path = '/contacts?someQueryArgument=value'
+      let timestamp = 1502390208007;
+      let method = 'POST';
+      let rawbody = '{"key": "value"}';
+      let sighash = farmer._getSigHash(url, method, path, timestamp, rawbody);
+      expect(sighash.toString('hex')).to.equal('59146f00725c9c052ef5ec6acd63f3842728c9d191ac146668204de6ed4a648b');
     });
   });
 
   describe('#_bridgeRequest', function() {
-    it('will sign and send request with response', function() {
+    const sandbox = sinon.sandbox.create();
+    afterEach(() => sandbox.restore());
 
+    it('will sign and send request with response', function(done) {
+      var farmer = new FarmerInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        storageManager: new StorageManager(new RAMStorageAdapter())
+      });
+
+      let url = 'https://api.storj.io';
+      let path = '/contacts?someQueryArgument=value'
+      let timestamp = 1502390208007;
+      let method = 'POST';
+      let body = {'key': 'value'};
+      let headers = {};
+
+      let res = new EventEmitter();
+      res.setEncoding = sandbox.stub();
+
+      let req = new EventEmitter();
+      sandbox.stub(https, 'request').callsArgWith(1, res).returns(req);
+      req.write = sandbox.stub();
+      req.end = sandbox.stub();
+
+      farmer._bridgeRequest(url, method, path, headers, body, (err, data) => {
+        if (err) {
+          return done(err);
+        }
+        expect(data).to.eql({data: 'value'});
+        done();
+      });
+
+      res.emit('data', '{"data": "value"}');
+      res.emit('end');
     });
   });
 

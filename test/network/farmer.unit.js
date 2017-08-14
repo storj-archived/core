@@ -441,6 +441,82 @@ describe('FarmerInterface', function() {
 
   });
 
+  describe('#connectBridges', function() {
+    const sandbox = sinon.sandbox.create();
+    afterEach(() => sandbox.restore());
+
+    it('will connect each bridge', function() {
+      var farmer = new FarmerInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        bridges: [
+          {
+            url: 'https://api.storj.io/',
+            extendedKey: 'xpub6AHweYHAxk1EhJSBctQD1nLWPog6Sy2eTpKQLExR1hfzTyyZQWvU4EYNXv1NJN7GpLYXnDLt4PzN874g6zSjAQdFCHZN7U7nbYKYVDUzD42'
+          },
+          {
+            url: 'https://api.eu.storj.io',
+            extendedKey: 'xpub6AHweYHAxk1EhJSBctQD1nLWPog6Sy2eTpKQLExR1hfzTyyZQWvU4EYNXv1NJN7GpLYXnDLt4PzN874g6zSjAQdFCHZN7U7nbYKYVDUzD42'
+          }
+        ],
+        storageManager: new StorageManager(new RAMStorageAdapter())
+      });
+
+      sandbox.stub(farmer, '_connectBridge').callsArg(1);
+      farmer.connectBridges();
+
+      let connected = 0;
+
+      farmer.on('bridgeConnected', (bridge) => {
+        connected += 1;
+      });
+
+      farmer.on('bridgesConnected', () => {
+        expect(farmer._connectBridge.callCount).to.equal(2);
+        expect(connected).to.equal(2);
+      });
+    });
+  });
+
+  describe('#_connectBridge', function() {
+    it('will add bridge contact if contact does not exist', function() {
+
+    });
+    it('will update contact if contact exists', function() {
+
+    });
+    it('will do nothing if contact is up-to-date', function() {
+
+    });
+  });
+
+  describe('#_addBridgeContact', function() {
+    it('will get and complete challenge and create contact', function() {
+
+    });
+  });
+
+  describe('#_completeChallenge', function() {
+    it('will exec pow script and give back nonce', function() {
+
+    });
+  });
+
+  describe('#_getSigHash', function() {
+    it('will calculate the correct sighash', function() {
+
+    });
+  });
+
+  describe('#_bridgeRequest', function() {
+    it('will sign and send request with response', function() {
+
+    });
+  });
+
   describe('#_sendOfferForContract', function() {
 
     it('should log a warning if transport send fails', function(done) {

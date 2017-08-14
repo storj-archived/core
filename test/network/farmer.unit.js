@@ -578,9 +578,31 @@ describe('FarmerInterface', function() {
     });
   });
 
-  describe('#_completeChallenge', function() {
-    it('will exec pow script and give back nonce', function() {
+  describe('#_updateBridgeContact', function() {
+    it('will send patch request to update contact', function() {
+    });
+  });
 
+  describe('#_completeChallenge', function() {
+    it('will exec pow script and give back nonce', function(done) {
+      var farmer = new FarmerInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        storageManager: new StorageManager(new RAMStorageAdapter())
+      });
+
+      let challenge = '196c88c8907a7c6cd0d4a4cccf3ef82cef376a980217fd3bca83cba0957484b2';
+      let target = '0fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+      farmer._completeChallenge(challenge, target, (err, nonce) => {
+        if (err) {
+          return done(err);
+        }
+        expect(nonce).to.equal(50);
+        done();
+      });
     });
   });
 

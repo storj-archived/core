@@ -110,7 +110,7 @@
     "coveralls": "^2.11.2",
     "eslint": "^3.14.0",
     "gh-pages": "^0.9.0",
-    "ink-docstrap": "bookchin/docstrap",
+    "ink-docstrap": "bookchin/docstrap#f175ba82cd7175e851304c6df3db1d37424b7545",
     "istanbul": "^0.4.5",
     "jsdoc": "^3.4.0",
     "memory-blob-store": "^5.0.0",

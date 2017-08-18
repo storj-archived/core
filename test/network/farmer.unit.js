@@ -49,20 +49,79 @@ describe('FarmerInterface', function() {
       expect(farmer.getPaymentAddress()).to.equal(keypair.getAddress());
     });
 
-    it('should use the renterWhitelist if provided', function() {
+  });
+
+  describe('#_mapBridges', function() {
+    it('it will create a map', function() {
       var farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
         tunnelServerPort: 0,
         doNotTraverseNat: true,
         logger: kad.Logger(0),
-        renterWhitelist: ['somerenterid'],
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
-      CLEANUP.push(farmer);
-      expect(farmer._renterWhitelist[0]).to.equal('somerenterid');
+      farmer.bridges = null;
+      let extendedKey1 = 'xpub661MyMwAqRbcGY8CLbanCCP9h8a2obgAiBgFnW3ddLuJT5ykYTUvgLDnhqtabZinYpdUATM7CCijxFb4Yr6L595vzCZNieZShGaeoZzMmft';
+      let extendedKey2 = 'xpub661MyMwAqRbcEjhUPVDdfaTajUnZFozR1jwXVJtmfrNMDRmatHCeQSMCKkWi2zvgTp18dao1qbNeTn1hxJrBgypE3p4USGoqmX135GvkCHt';
+      let bridges = [{
+        url: 'api.storj.io',
+        extendedKey: extendedKey1
+      }, {
+        url: 'api.eu.storj.io',
+        extendedKey: extendedKey2
+      }];
+      farmer._mapBridges(bridges);
+      expect(farmer.bridges.has(extendedKey1)).to.equal(true);
+      expect(farmer.bridges.has(extendedKey2)).to.equal(true);
+      expect(farmer.bridges.get(extendedKey1).url).to.eql(bridges[0].url);
+      expect(farmer.bridges.get(extendedKey2).url).to.eql(bridges[1].url);
+    });
+  });
+
+  describe('#_connectBridges', function() {
+    it('it will cancel if already running', function() {
+      var farmer = new FarmerInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        storageManager: new StorageManager(new RAMStorageAdapter())
+      });
+      farmer._connectBridgesRunning = true;
+      farmer._connectBridges();
     });
 
+    it('will call connect if bridge is not connect', function(done) {
+      let extendedKey1 = 'xpub661MyMwAqRbcGY8CLbanCCP9h8a2obgAiBgFnW3ddLuJT5ykYTUvgLDnhqtabZinYpdUATM7CCijxFb4Yr6L595vzCZNieZShGaeoZzMmft';
+      let extendedKey2 = 'xpub661MyMwAqRbcEjhUPVDdfaTajUnZFozR1jwXVJtmfrNMDRmatHCeQSMCKkWi2zvgTp18dao1qbNeTn1hxJrBgypE3p4USGoqmX135GvkCHt';
+      var farmer = new FarmerInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        storageManager: new StorageManager(new RAMStorageAdapter()),
+        bridges: [{
+          url: 'api.storj.io',
+          extendedKey: extendedKey1
+        }, {
+          url: 'api.eu.storj.io',
+          extendedKey: extendedKey2
+        }]
+      });
+      farmer.bridges.get(extendedKey2).connected = true;
+      farmer._connectBridge = sinon.stub().callsArg(1);
+      farmer.on('bridgesConnected', () => {
+        expect(farmer._connectBridge.callCount).to.equal(1);
+        expect(farmer._connectBridgesRunning).to.equal(false);
+        farmer.bridges.get(extendedKey1).connected = true;
+        farmer.bridges.get(extendedKey2).connected = true;
+        done();
+      });
+      farmer._connectBridges();
+    });
   });
 
   describe('#_handleContractPublication', function() {
@@ -447,6 +506,25 @@ describe('FarmerInterface', function() {
     const sandbox = sinon.sandbox.create();
     afterEach(() => sandbox.restore());
 
+    it('will call connect bridges, and setup interval', function(done) {
+      const clock = sandbox.useFakeTimers();
+      var farmer = new FarmerInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        storageManager: new StorageManager(new RAMStorageAdapter())
+      });
+      farmer._connectBridges = sinon.stub();
+      farmer.connectBridges();
+      expect(farmer._connectBridges.callCount).to.equal(1);
+      clock.tick(FarmerInterface.CONNECT_BRIDGE_INTERVAL + 1);
+      expect(farmer._connectBridges.callCount).to.equal(2);
+      clearInterval(farmer._connectBridgesInterval);
+      done();
+    });
+
     it('will connect each bridge', function() {
       var farmer = new FarmerInterface({
         keyPair: KeyPair(),
@@ -498,7 +576,7 @@ describe('FarmerInterface', function() {
       });
 
       let contact = {};
-      sandbox.stub(farmer, '_bridgeRequest').callsArg(5);
+      sandbox.stub(farmer, 'bridgeRequest').callsArg(5);
       sandbox.stub(farmer, '_addBridgeContact').callsArgWith(1, null, contact);
       let bridge = {
         url: 'https://api.storj.io/',
@@ -508,7 +586,7 @@ describe('FarmerInterface', function() {
         if (err) {
           return done(err);
         }
-        expect(farmer._bridgeRequest.callCount).to.equal(1);
+        expect(farmer.bridgeRequest.callCount).to.equal(1);
         expect(farmer._addBridgeContact.callCount).to.equal(1);
         done();
       });
@@ -527,7 +605,7 @@ describe('FarmerInterface', function() {
         address: '127.0.0.1',
         port: 10
       };
-      sandbox.stub(farmer, '_bridgeRequest').callsArgWith(5, null, contact);
+      sandbox.stub(farmer, 'bridgeRequest').callsArgWith(5, null, contact);
       sandbox.stub(farmer, '_updateBridgeContact').callsArgWith(1, null);
       let bridge = {
         url: 'https://api.storj.io/',
@@ -537,7 +615,7 @@ describe('FarmerInterface', function() {
         if (err) {
           return done(err);
         }
-        expect(farmer._bridgeRequest.callCount).to.equal(1);
+        expect(farmer.bridgeRequest.callCount).to.equal(1);
         expect(farmer._updateBridgeContact.callCount).to.equal(1);
         done();
       });
@@ -556,7 +634,7 @@ describe('FarmerInterface', function() {
         address: '127.0.0.1',
         port: 0
       };
-      sandbox.stub(farmer, '_bridgeRequest').callsArgWith(5, null, contact);
+      sandbox.stub(farmer, 'bridgeRequest').callsArgWith(5, null, contact);
       sandbox.stub(farmer, '_updateBridgeContact').callsArgWith(1, null);
       let bridge = {
         url: 'https://api.storj.io/',
@@ -566,7 +644,7 @@ describe('FarmerInterface', function() {
         if (err) {
           return done(err);
         }
-        expect(farmer._bridgeRequest.callCount).to.equal(1);
+        expect(farmer.bridgeRequest.callCount).to.equal(1);
         expect(farmer._updateBridgeContact.callCount).to.equal(0);
         done();
       });
@@ -592,20 +670,20 @@ describe('FarmerInterface', function() {
         extendedKey: 'xpub6AHweYHAxk1EhJSBctQD1nLWPog6Sy2eTpKQLExR1hfzTyyZQWvU4EYNXv1NJN7GpLYXnDLt4PzN874g6zSjAQdFCHZN7U7nbYKYVDUzD42'
       }
       let nonce = 101;
-      sandbox.stub(farmer, '_bridgeRequest').callsArg(5);
+      sandbox.stub(farmer, 'bridgeRequest').callsArg(5);
       let data = {
         challenge: '5980ef806b470f147b44dc05238c53458efe9dc7f5711db6ccef2e5e832431c6',
         target: '00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
       };
-      farmer._bridgeRequest.onFirstCall().callsArgWith(5, null, data);
+      farmer.bridgeRequest.onFirstCall().callsArgWith(5, null, data);
       sandbox.stub(farmer, '_completeChallenge').callsArgWith(2, null, nonce);
       farmer._addBridgeContact(bridge, (err) => {
         if (err) {
           return done(err);
         }
-        expect(farmer._bridgeRequest.callCount).to.equal(2);
+        expect(farmer.bridgeRequest.callCount).to.equal(2);
         expect(farmer._completeChallenge.callCount).to.equal(1);
-        expect(farmer._bridgeRequest.args[1][3]['x-challenge-nonce']).to.equal(101);
+        expect(farmer.bridgeRequest.args[1][3]['x-challenge-nonce']).to.equal(101);
         done();
       });
     });
@@ -629,7 +707,7 @@ describe('FarmerInterface', function() {
         url: 'https://api.storj.io/',
         extendedKey: 'xpub6AHweYHAxk1EhJSBctQD1nLWPog6Sy2eTpKQLExR1hfzTyyZQWvU4EYNXv1NJN7GpLYXnDLt4PzN874g6zSjAQdFCHZN7U7nbYKYVDUzD42'
       }
-      sandbox.stub(farmer, '_bridgeRequest').callsArg(5);
+      sandbox.stub(farmer, 'bridgeRequest').callsArg(5);
       let data = {
         challenge: '5980ef806b470f147b44dc05238c53458efe9dc7f5711db6ccef2e5e832431c6',
         target: '00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
@@ -638,9 +716,9 @@ describe('FarmerInterface', function() {
         if (err) {
           return done(err);
         }
-        expect(farmer._bridgeRequest.callCount).to.equal(1);
-        expect(farmer._bridgeRequest.args[0][4].address).to.equal('127.0.0.1');
-        expect(farmer._bridgeRequest.args[0][4].port).to.equal(11);
+        expect(farmer.bridgeRequest.callCount).to.equal(1);
+        expect(farmer.bridgeRequest.args[0][4].address).to.equal('127.0.0.1');
+        expect(farmer.bridgeRequest.args[0][4].port).to.equal(11);
         done();
       });
     });
@@ -690,7 +768,7 @@ describe('FarmerInterface', function() {
     });
   });
 
-  describe('#_bridgeRequest', function() {
+  describe('#bridgeRequest', function() {
     const sandbox = sinon.sandbox.create();
     afterEach(() => sandbox.restore());
 
@@ -719,7 +797,7 @@ describe('FarmerInterface', function() {
       req.write = sandbox.stub();
       req.end = sandbox.stub();
 
-      farmer._bridgeRequest(url, method, path, headers, body, (err, data) => {
+      farmer.bridgeRequest(url, method, path, headers, body, (err, data) => {
         if (err) {
           return done(err);
         }
@@ -962,9 +1040,9 @@ describe('FarmerInterface', function() {
 
 describe('FarmerInterface#Negotiator', function() {
 
-  it('should callback false is renter is not in whitelist', function(done) {
+  it('should callback false if no bridges', function(done) {
     FarmerInterface.Negotiator.call({
-      _renterWhitelist: [utils.rmd160('someotherrenter')],
+      isBridgeConnected: sinon.stub().returns(false),
       _logger: kad.Logger(0),
       _offerBackoffLimit: 4,
       transport: {
@@ -983,7 +1061,7 @@ describe('FarmerInterface#Negotiator', function() {
 
   it('should callback false is contract has an invalid hash', function(done) {
     FarmerInterface.Negotiator.call({
-      _renterWhitelist: null,
+      isBridgeConnected: sinon.stub().returns(true),
       _logger: kad.Logger(0),
       _offerBackoffLimit: 4,
       transport: {
@@ -1002,6 +1080,7 @@ describe('FarmerInterface#Negotiator', function() {
   it('should return false if farmer has active transfers', function(done) {
     FarmerInterface.Negotiator.call({
       _logger: kad.Logger(0),
+      isBridgeConnected: sinon.stub().returns(true),
       storageManager: new StorageManager(new RAMStorageAdapter()),
       _offerBackoffLimit: 4,
       transport: {
@@ -1020,6 +1099,7 @@ describe('FarmerInterface#Negotiator', function() {
   it('should return true if farmer does not have the shard', function(done) {
     FarmerInterface.Negotiator.call({
       _logger: kad.Logger(0),
+      isBridgeConnected: sinon.stub().returns(true),
       _offerBackoffLimit: 4,
       transport: {
         shardServer: {
@@ -1038,6 +1118,7 @@ describe('FarmerInterface#Negotiator', function() {
   it('should callback true if we have shard for other renter', function(done) {
     FarmerInterface.Negotiator.call({
       _logger: kad.Logger(0),
+      isBridgeConnected: sinon.stub().returns(true),
       _offerBackoffLimit: 4,
       transport: {
         shardServer: {
@@ -1063,6 +1144,7 @@ describe('FarmerInterface#Negotiator', function() {
   it('should return true if we have a contract but no shard', function(done) {
     FarmerInterface.Negotiator.call({
       _logger: kad.Logger(0),
+      isBridgeConnected: sinon.stub().returns(true),
       storageManager: {
         load: sinon.stub().callsArgWith(1, null, {
           contracts: {
@@ -1089,6 +1171,7 @@ describe('FarmerInterface#Negotiator', function() {
   it('should return true if check pass and hd key used', function(done) {
     FarmerInterface.Negotiator.call({
       _logger: kad.Logger(0),
+      isBridgeConnected: sinon.stub().returns(true),
       _renterWhitelist: [
         'xpub6AHweYHAxk1EhJSBctQD1nLWPog6Sy2eTpKQLExR1hfzTyyZQWvU4EYNXv1NJN7' +
           'GpLYXnDLt4PzN874g6zSjAQdFCHZN7U7nbYKYVDUzD42'
@@ -1121,6 +1204,7 @@ describe('FarmerInterface#Negotiator', function() {
   it('should return false if we have a contract and shard', function(done) {
     FarmerInterface.Negotiator.call({
       _logger: kad.Logger(0),
+      isBridgeConnected: sinon.stub().returns(true),
       _offerBackoffLimit: 4,
       transport: {
         shardServer: {

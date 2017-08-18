@@ -92,29 +92,29 @@
         <pre
             class="sunlight-highlight-javascript ">'use strict';
 
-var assert = require('assert');
-var merge = require('merge');
-var async = require('async');
-var kad = require('kad');
-var HDKey = require('hdkey');
-var bitcore = require('bitcore-lib');
-var secp256k1 = require('secp256k1');
-var constants = require('../constants');
-var Message = require('bitcore-message');
-var Quasar = require('kad-quasar').Protocol;
-var utils = require('../utils');
-var KeyPair = require('../crypto-tools/keypair');
-var StorageManager = require('../storage/manager');
-var Protocol = require('./protocol');
-var Contact = require('./contact');
-var Transport = require('./transport');
-var EventEmitter = require('events').EventEmitter;
-var inherits = require('util').inherits;
-var diglet = require('diglet');
-var shuffle = require('knuth-shuffle').knuthShuffle;
-var BridgeClient = require('../bridge-client');
-var TriggerManager = require('../sips').SIP0003.TriggerManager;
-var OfferManager = require('../contract/offer-manager');
+const assert = require('assert');
+const merge = require('merge');
+const async = require('async');
+const kad = require('kad');
+const HDKey = require('hdkey');
+const bitcore = require('bitcore-lib');
+const request = require('request');
+const secp256k1 = require('secp256k1');
+const constants = require('../constants');
+const Message = require('bitcore-message');
+const Quasar = require('kad-quasar').Protocol;
+const utils = require('../utils');
+const KeyPair = require('../crypto-tools/keypair');
+const StorageManager = require('../storage/manager');
+const Protocol = require('./protocol');
+const Contact = require('./contact');
+const Transport = require('./transport');
+const EventEmitter = require('events').EventEmitter;
+const inherits = require('util').inherits;
+const diglet = require('diglet');
+const shuffle = require('knuth-shuffle').knuthShuffle;
+const TriggerManager = require('../sips').SIP0003.TriggerManager;
+const OfferManager = require('../contract/offer-manager');
 
 /**
  * Storj network interface
@@ -125,11 +125,12 @@ var OfferManager = require('../contract/offer-manager');
  * @param {Number} [options.hdIndex] - Derivation index for hdKey
  * @param {KeyPair} [options.keyPair] - Node's cryptographic identity
  * @param {StorageManager} options.storageManager - Storage manager backend
- * @param {String} options.bridgeUri - URL for bridge server seed lookup
+ * @param {String} options.bridges - An array of bridges to connect
  * @param {Object} options.logger - Logger instance
  * @param {Array} options.seedList - List of seed URIs to join
  * @param {String} options.rpcAddress - Public node IP or hostname
  * @param {Number} options.rpcPort - Listening port for RPC
+ * @param {Number} options.listenPort - Optional different listening port for RPC to bind to
  * @param {Boolean} options.doNotTraverseNat - Skip NAT traversal strategies
  * @param {Number} options.maxTunnels - Max number of tunnels to provide
  * @param {Number} options.maxConnections - Max concurrent connections
@@ -144,7 +145,6 @@ var OfferManager = require('../contract/offer-manager');
  * @property {StorageManager} storageManager
  * @property {kad.Node} node - The underlying DHT node
  * @property {TriggerManager} triggerManager
- * @property {BridgeClient} bridgeClient
  * @property {Contact} contact
  * @property {Transport} transportAdapter
  * @property {kad.Router} router - The underlying DHT router
@@ -226,7 +226,12 @@ Network.prototype._initKeyPair = function(options) {
  */
 
 Network.DEFAULTS = {
-  bridgeUri: process.env.STORJ_BRIDGE || 'https://api.storj.io',
+  bridges: [
+    {
+      url: process.env.STORJ_BRIDGE || 'https://api.storj.io',
+      extendedKey: process.env.STORJ_BRIDGE_KEY || 'xpub6AHweYHAxk1EhJSBctQD1nLWPog6Sy2eTpKQLExR1hfzTyyZQWvU4EYNXv1NJN7GpLYXnDLt4PzN874g6zSjAQdFCHZN7U7nbYKYVDUzD42'
+    }
+  ],
   seedList: [],
   joinRetry: { times: 1, interval: 5000 },
   rpcAddress: '127.0.0.1',
@@ -353,6 +358,42 @@ Network.prototype.join = function(callback) {
   );
 };
 
+Network.prototype._getContactList = function(callback) {
+
+  if (!this._options.bridges ||
+      !this._options.bridges[0] ||
+      !this._options.bridges[0].url) {
+    return callback(new Error('No bridges configured'));
+  }
+  const baseURI = this._options.bridges[0].url;
+
+  this._logger.info('resolving contacts from %s', baseURI);
+
+  function _request(done) {
+    request({
+      baseUrl: baseURI,
+      uri: '/contacts',
+      json: true,
+      qs: {connected: true},
+      method: 'GET'
+    }, function(err, res, body) {
+      if (err) {
+        return done(err);
+      }
+      if (res.statusCode >= 400) {
+        return done(new Error(body.error || body));
+      }
+      done(null, body);
+    });
+  }
+
+  async.retry({
+    times: 3,
+    interval: 5000
+  }, _request, callback);
+
+}
+
 /**
  * Iteratively attempt connection to network via supplied seeds
  * @private
@@ -389,13 +430,7 @@ Network.prototype._enterOverlay = function(onConnected) {
     return _trySeeds();
   }
 
-  if (this._options.bridgeUri === null) {
-    self._logger.warn('no bridge uri or seeds provided, not connected');
-    return onConnected(null);
-  }
-
-  this._logger.info('resolving seeds from %s', this._options.bridgeUri);
-  this.bridgeClient.getContactList({ connected: true }, function(err, seeds) {
+  this._getContactList(function(err, seeds) {
     if (err) {
       return onConnected(
         new Error('Failed to discover seeds from bridge: ' + err.message)
@@ -510,9 +545,7 @@ Network.prototype._initNetworkInterface = function() {
   EventEmitter.call(this);
 
   this.triggerManager = new TriggerManager();
-  this.bridgeClient = new BridgeClient(this._options.bridgeUri, {
-    logger: this._logger
-  });
+
   this.contact = new Contact({
     address: this._options.rpcAddress,
     port: this._options.rpcPort,
@@ -527,7 +560,7 @@ Network.prototype._initNetworkInterface = function() {
     tunnelGatewayRange: this._options.tunnelGatewayRange,
     doNotTraverseNat: this._options.doNotTraverseNat,
     storageManager: this.storageManager,
-    bridgeClient: this._bridgeClient
+    listenPort: this._options.listenPort
   });
   this.router = new kad.Router({
     transport: this.transport,
@@ -796,13 +829,7 @@ Network.prototype._setupTunnelClient = function(callback) {
   }
 
   if (!neighbors.length) {
-    if (this._options.bridgeUri === null) {
-      return callback(
-        new Error('Could not find a neighbor to query for probe')
-      );
-    }
-
-    return this.bridgeClient.getContactList({}, function(err, result) {
+    self._getContactList(function(err, result) {
       if (err) {
         return callback(new Error('Failed to get seeds for probe'));
       }
@@ -953,6 +980,7 @@ Network.prototype._establishTunnel = function(tunnels, callback) {
       self._logger.info('tunnel successfully established');
 
       tunnelWasOpened = true;
+      self._tunneled = true;
       self.contact.address = remoteAddress;
       self.contact.port = remotePort;
 

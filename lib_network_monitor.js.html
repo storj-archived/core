@@ -253,7 +253,7 @@ Monitor.getConnectedPeers = function(source, callback) {
 Monitor.getDiskUtilization = function(source, callback) {
   var stats = { free: source.storageManager._options.maxCapacity };
 
-  source.storageManager._storage.size(function(err, bytes) {
+  source.storageManager._storage.size(function(err, shardsize, contractsize) {
     if (err) {
       return callback(null, {
         disk: merge(stats, { used: 0, free: stats.free })
@@ -261,7 +261,10 @@ Monitor.getDiskUtilization = function(source, callback) {
     }
 
     callback(null, {
-      disk: merge(stats, { used: bytes, free: stats.free - bytes })
+      disk: merge(stats, {
+        used: shardsize + contractsize,
+        free: stats.free - (shardsize + contractsize) 
+      })
     });
   });
 };

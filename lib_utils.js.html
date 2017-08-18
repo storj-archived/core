@@ -135,6 +135,16 @@ module.exports.sha256 = function(input, encoding) {
 };
 
 /**
+ * Returns the SHA-256 hash of the input
+ * @param {String|Buffer} input - Data to hash
+ * @param {String} encoding - The encoding type of the data
+ * @returns {Buffer}
+ */
+module.exports.sha256b = function(input, encoding) {
+  return crypto.createHash('sha256').update(input, encoding).digest();
+};
+
+/**
  * Returns the SHA-512 hash of the input
  * @param {String|Buffer} input - Data to hash
  * @param {String} encoding - The encoding type of the data
@@ -152,6 +162,16 @@ module.exports.sha512 = function(input, encoding) {
  */
 module.exports.rmd160 = function(input, encoding) {
   return crypto.createHash('rmd160').update(input, encoding).digest('hex');
+};
+
+/**
+ * Returns the RIPEMD-160 hash of the input
+ * @param {String|Buffer} input - Data to hash
+ * @param {String} encoding - The encoding type of the data
+ * @returns {Buffer}
+ */
+module.exports.rmd160b = function(input, encoding) {
+  return crypto.createHash('rmd160').update(input, encoding).digest();
 };
 
 /**
@@ -174,6 +194,16 @@ module.exports.rmd160sha256 = function(input, encoding) {
   return module.exports.rmd160(
     Buffer(module.exports.sha256(input, encoding), 'hex')
   );
+};
+
+/**
+ * Returns the RIPEMD-160 SHA-256 hash of this input
+ * @param {String|Buffer} input - Data to hash
+ * @param {String} encoding - The encoding type of the data
+ * @returns {Buffer}
+ */
+module.exports.rmd160sha256b = function(input, encoding) {
+  return module.exports.rmd160b(module.exports.sha256b(input, encoding))
 };
 
 /**
@@ -290,40 +320,6 @@ module.exports.createEciesCipher = function(privateKey, publicKey) {
  */
 module.exports.validateLogger = function(logger) {
   return logger &amp;&amp; logger.debug &amp;&amp; logger.warn &amp;&amp; logger.info &amp;&amp; logger.error;
-};
-
-/**
- * Returns number of bytes from human readable size and unit strings
- * @param {String|Number} size - The size measurement
- * @param {String} unit - The unit of measure (MB|MiB|GB|GiB|TB|TiB)
- * @returns {Number}
- */
-module.exports.toNumberBytes = function(size, unit) {
-  /* eslint complexity: [2, 7] */
-  switch (unit.toUpperCase()) {
-    case 'MB':
-      size = Number(size) * Math.pow(1000, 2);
-      break;
-    case 'GB':
-      size = Number(size) * Math.pow(1000, 3);
-      break;
-    case 'TB':
-      size = Number(size) * Math.pow(1000, 4);
-      break;
-    case 'MIB':
-      size = Number(size) * Math.pow(1024, 2);
-      break;
-    case 'GIB':
-      size = Number(size) * Math.pow(1024, 3);
-      break;
-    case 'TIB':
-      size = Number(size) * Math.pow(1024, 4);
-      break;
-    default:
-      throw new Error('Unit must be one of TB, TiB, GB, GiB, MB or MiB');
-  }
-
-  return Number(size.toFixed());
 };
 
 /**

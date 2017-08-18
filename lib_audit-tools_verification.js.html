@@ -121,7 +121,7 @@ Verification.prototype._getChallengeResponse = function(tuple) {
   var data = tuple || this._proof;
 
   if (data.length === 1) {
-    return utils.rmd160sha256(data[0]);
+    return utils.rmd160sha256b(data[0]);
   }
 
   if (Array.isArray(data[0])) {
@@ -141,8 +141,8 @@ Verification.prototype.verify = function(root, totaldepth) {
   function _collapse(proof, leaf, depth) {
     if (depth === 0) {
       assert(proof.length === 1, 'Invalid proof structure');
-      assert(utils.rmd160sha256(proof[0]) === leaf, 'Invalid proof value');
-
+      const proofhash = utils.rmd160sha256b(proof[0]);
+      assert(Buffer.compare(proofhash, leaf) === 0, 'Invalid proof value');
       return leaf;
     }
 
@@ -160,7 +160,7 @@ Verification.prototype.verify = function(root, totaldepth) {
       hashR = proof[1];
     }
 
-    return utils.rmd160sha256(hashL + hashR);
+    return utils.rmd160sha256b(Buffer.concat([hashL, hashR]));
   }
 
   return [

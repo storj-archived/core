@@ -305,7 +305,7 @@ EmbeddedStorageAdapter.prototype._size = function(key, callback) {
           sBucketStats: { size: 0 }
         }).sBucketStats.size;
 
-        callback(null, kfsUsedSpace + contractDbSize);
+        callback(null, kfsUsedSpace, contractDbSize);
       }
 
       /* istanbul ignore if */

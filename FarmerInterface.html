@@ -410,7 +410,7 @@
 
         <tr>
             
-                <td class="name"><code>bridgeUri</code></td>
+                <td class="name"><code>bridges</code></td>
             
 
             <td class="type">
@@ -439,7 +439,7 @@
                 </td>
             
 
-            <td class="description last">URL for bridge server seed lookup</td>
+            <td class="description last">An array of bridges to connect and accept contracts</td>
         </tr>
 
     
@@ -849,44 +849,6 @@ than N transfers are active</td>
 
         <tr>
             
-                <td class="name"><code>renterWhitelist</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;String></span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">Node IDs to offer storage to</td>
-        </tr>
-
-    
-
-        <tr>
-            
                 <td class="name"><code>joinRetry</code></td>
             
 
@@ -1018,6 +980,44 @@ than N transfers are active</td>
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>maxShardSize</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">Max number of bytes to allow as contract shard size</td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -1139,30 +1139,6 @@ than N transfers are active</td>
             
                 
 <span class="param-type"><a href="TriggerManager.html">TriggerManager</a></span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>bridgeClient</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="BridgeClient.html">BridgeClient</a></span>
 
 
 
@@ -1554,6 +1530,96 @@ than N transfers are active</td>
             
 <hr>
 <dt>
+    <h4 class="name" id="connectBridges"><span class="type-signature"></span>connectBridges()</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Will connect to configured bridges to start receiving storage
+contracts from them. If the contact is already at the bridge it will
+update the contact details, otherwise it will add the contact to
+and begin the benchmarking phase.
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_network_farmer.js.html">lib/network/farmer.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
     <h4 class="name" id="getPaymentAddress"><span class="type-signature"></span>getPaymentAddress()</h4>
     
     
@@ -1653,6 +1719,167 @@ than N transfers are active</td>
 
 
         
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="handleAlloc"><span class="type-signature"></span>handleAlloc(params, callback)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Handles CLAIM messages
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>params</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Protocol.html#~handleConsignCallback">Protocol~handleConsignCallback</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="lib_network_farmer.js.html">lib/network/farmer.js</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
 
     
 </dd>

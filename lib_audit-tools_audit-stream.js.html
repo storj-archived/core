@@ -139,7 +139,8 @@ inherits(AuditStream, stream.Writable);
 AuditStream.prototype.getPublicRecord = function() {
   assert(this._finished, 'Challenge generation is not finished');
 
-  return this._tree.level(this._tree.levels() - 1);
+  return this._tree.level(this._tree.levels() - 1)
+    .map((i) => i.toString('hex'));
 };
 
 /**
@@ -152,7 +153,7 @@ AuditStream.prototype.getPrivateRecord = function() {
   return {
     root: this._tree.root(),
     depth: this._tree.levels(),
-    challenges: this._challenges
+    challenges: this._challenges.map((i) => i.toString('hex'))
   };
 };
 
@@ -165,7 +166,7 @@ AuditStream.prototype._write = function(bytes, encoding, next) {
 
   this._inputs.forEach(function(input, i) {
     if (i &lt; self._audits) {
-      input.update(bytes.toString('hex'));
+      input.update(bytes);
     }
   });
   next();
@@ -190,7 +191,7 @@ AuditStream.prototype._prepareChallenges = function() {
   }
 
   while (iterations &lt; utils.getNextPowerOfTwo(this._audits)) {
-    inputs.push(utils.rmd160sha256(''));
+    inputs.push(utils.rmd160sha256b(''));
     iterations++;
   }
 
@@ -210,9 +211,12 @@ AuditStream.prototype._generateTree = function() {
     if (i >= self._audits) {
       return input;
     } else {
-      return utils.rmd160sha256(utils.rmd160(input.digest('hex')));
+      const rmd1 = crypto.createHash('rmd160').update(input.digest()).digest();
+      const sha = crypto.createHash('sha256').update(rmd1).digest();
+      const rmd2 = crypto.createHash('rmd160').update(sha).digest();
+      return rmd2;
     }
-  }), utils.rmd160sha256);
+  }), utils.rmd160sha256b);
 };
 
 /**
@@ -221,7 +225,7 @@ AuditStream.prototype._generateTree = function() {
  * @returns {String} Hex encoded random bytes
  */
 AuditStream.prototype._generateChallenge = function() {
-  return crypto.randomBytes(constants.AUDIT_BYTES).toString('hex');
+  return crypto.randomBytes(constants.AUDIT_BYTES);
 };
 
 /**
@@ -246,10 +250,12 @@ AuditStream.fromRecords = function(challenges, tree) {
     'Challenges and tree do not match'
   );
 
+  tree = tree.map((i) => Buffer.from(i, 'hex'));
+
   var auditor = new AuditStream(challenges.length);
 
   auditor._challenges = challenges;
-  auditor._tree = new MerkleTree(tree, utils.rmd160sha256);
+  auditor._tree = new MerkleTree(tree, utils.rmd160sha256b);
   auditor._finished = true;
 
   return auditor;

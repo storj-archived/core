@@ -1148,6 +1148,14 @@ BridgeClient.prototype.createFileStream = function(bucket, file, opt, cb) {
         return done(err);
       }
 
+      // When erasure encoding is implemented, this can just
+      // become a missing shard that is recovered.
+      for (var i = 0; i &lt; pointers.length; i++) {
+        if (!pointers[i].farmer) {
+          return done(new Error('Missing shard'));
+        }
+      }
+
       skip += limit;
       done(null, pointers);
     });
@@ -1251,10 +1259,13 @@ BridgeClient.prototype.createFileSliceStream = function(options, callback) {
             return callback(err);
           }
 
-          callback(null, stream.pipe(utils.createStreamTrimmer(
-            sliceOpts.trimFront,
-            options.end - options.start
-          )));
+          let trimStream = utils.createStreamTrimmer(
+              sliceOpts.trimFront,
+              options.end - options.start
+          );
+          trimStream.encryptionKey = token.encryptionKey;
+
+          callback(null, stream.pipe(trimStream));
         });
       });
     });

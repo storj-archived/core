@@ -927,11 +927,19 @@ describe('Protocol', function() {
 
     it('should callback immediately if shard already exists', function(done) {
       var contracts = {
-        test: {}
+        test: {
+          get: function(key) {
+            if (key === 'renter_hd_key') {
+              return 'hdkey'
+            }
+          }
+        }
       };
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
+          bridges: new Map(),
+          bridgeRequest: sinon.stub(),
           storageManager: {
             load: sinon.stub().callsArgWith(1, null, {
               contracts: contracts,
@@ -948,6 +956,7 @@ describe('Protocol', function() {
           }
         }
       });
+      proto._network.bridges.set('hdkey', {});
       proto.handleMirror({
         contact: { nodeID: 'test' }
       }, function(err) {
@@ -964,13 +973,21 @@ describe('Protocol', function() {
         }
       });
       var contracts = {
-        test: {}
+        test: {
+          get: function(key) {
+            if (key === 'renter_hd_key') {
+              return 'hdkey'
+            }
+          }
+        }
       };
       var shard = new stream.Writable({ write: () => null });
       shard.destroy = sinon.stub();
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
+          bridges: new Map(),
+          bridgeRequest: sinon.stub(),
           storageManager: {
             load: sinon.stub().callsArgWith(1, null, {
               contracts: contracts,
@@ -984,12 +1001,10 @@ describe('Protocol', function() {
             address: '0.0.0.0',
             port: 1234,
             nodeID: 'nodeid'
-          },
-          bridgeClient: {
-            createExchangeReport: sinon.stub()
           }
         }
       });
+      proto._network.bridges.set('hdkey', {});
       proto.handleMirror({
         contact: { nodeID: 'test' },
         farmer: {
@@ -1025,13 +1040,21 @@ describe('Protocol', function() {
         }
       });
       var contracts = {
-        test: {}
+        test: {
+          get: function(key) {
+            if (key === 'renter_hd_key') {
+              return 'hdkey'
+            }
+          }
+        }
       };
       var shard = new stream.Writable({ write: (a, b, c) => c() });
       shard.destroy = sinon.stub();
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
+          bridges: new Map(),
+          bridgeRequest: sinon.stub(),
           storageManager: {
             load: sinon.stub().callsArgWith(1, null, {
               contracts: contracts,
@@ -1045,12 +1068,10 @@ describe('Protocol', function() {
             address: '0.0.0.0',
             port: 1234,
             nodeID: 'nodeid'
-          },
-          bridgeClient: {
-            createExchangeReport: sinon.stub()
           }
         }
       });
+      proto._network.bridges.set('hdkey', {});
       proto.handleMirror({
         contact: { nodeID: 'test' },
         farmer: {
@@ -1079,20 +1100,27 @@ describe('Protocol', function() {
           }
         }
       });
-      var createExchangeReport = sinon.stub();
       var Protocol = proxyquire('../../lib/network/protocol', {
         '../utils': {
           createShardDownloader: sinon.stub().returns(download)
         }
       });
       var contracts = {
-        test: {}
+        test: {
+          get: function(key) {
+            if (key === 'renter_hd_key') {
+              return 'hdkey'
+            }
+          }
+        }
       };
       var shard = new stream.Writable({ write: (a, b, c) => c() });
       shard.destroy = sinon.stub();
       var proto = new Protocol({
         network: {
           _logger: Logger(0),
+          bridges: new Map(),
+          bridgeRequest: sinon.stub(),
           storageManager: {
             load: sinon.stub().callsArgWith(1, null, {
               contracts: contracts,
@@ -1103,9 +1131,6 @@ describe('Protocol', function() {
               hash: 'd7d5ee7824ff93f94c3055af9382c86c68b5ca92'
             })
           },
-          bridgeClient: {
-            createExchangeReport: createExchangeReport
-          },
           contact: {
             address: '0.0.0.0',
             port: 1234,
@@ -1113,6 +1138,7 @@ describe('Protocol', function() {
           }
         }
       });
+      proto._network.bridges.set('hdkey', {});
       proto.handleMirror({
         contact: { nodeID: 'test' },
         farmer: {
@@ -1124,7 +1150,7 @@ describe('Protocol', function() {
       }, function(err) {
         expect(err).to.equal(null);
         setImmediate(() => {
-          expect(createExchangeReport.called).to.equal(true);
+          expect(proto._network.bridgeRequest.called).to.equal(true);
           done();
         });
       });

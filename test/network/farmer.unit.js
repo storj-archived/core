@@ -1,5 +1,7 @@
 'use strict';
 
+/* eslint max-len: 0 */
+
 const sinon = require('sinon');
 const https = require('https');
 const expect = require('chai').expect;
@@ -14,6 +16,13 @@ const StorageItem = require('../../lib/storage/item');
 const StorageManager = require('../../lib/storage/manager');
 const RAMStorageAdapter = require('../../lib/storage/adapters/ram');
 const CLEANUP = [];
+
+const extendedKey = 'xpub6AHweYHAxk1EhJSBctQD1nLWPog6Sy2eTpKQLExR1hfzTyyZQW' +
+      'vU4EYNXv1NJN7GpLYXnDLt4PzN874g6zSjAQdFCHZN7U7nbYKYVDUzD42';
+const extendedKey1 = 'xpub661MyMwAqRbcGY8CLbanCCP9h8a2obgAiBgFnW3ddLuJT5ykY' +
+      'TUvgLDnhqtabZinYpdUATM7CCijxFb4Yr6L595vzCZNieZShGaeoZzMmft';
+const extendedKey2 = 'xpub661MyMwAqRbcEjhUPVDdfaTajUnZFozR1jwXVJtmfrNMDRmat' +
+      'HCeQSMCKkWi2zvgTp18dao1qbNeTn1hxJrBgypE3p4USGoqmX135GvkCHt';
 
 describe('FarmerInterface', function() {
 
@@ -62,8 +71,6 @@ describe('FarmerInterface', function() {
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
       farmer.bridges = null;
-      let extendedKey1 = 'xpub661MyMwAqRbcGY8CLbanCCP9h8a2obgAiBgFnW3ddLuJT5ykYTUvgLDnhqtabZinYpdUATM7CCijxFb4Yr6L595vzCZNieZShGaeoZzMmft';
-      let extendedKey2 = 'xpub661MyMwAqRbcEjhUPVDdfaTajUnZFozR1jwXVJtmfrNMDRmatHCeQSMCKkWi2zvgTp18dao1qbNeTn1hxJrBgypE3p4USGoqmX135GvkCHt';
       let bridges = [{
         url: 'api.storj.io',
         extendedKey: extendedKey1
@@ -94,8 +101,6 @@ describe('FarmerInterface', function() {
     });
 
     it('will call connect if bridge is not connect', function(done) {
-      let extendedKey1 = 'xpub661MyMwAqRbcGY8CLbanCCP9h8a2obgAiBgFnW3ddLuJT5ykYTUvgLDnhqtabZinYpdUATM7CCijxFb4Yr6L595vzCZNieZShGaeoZzMmft';
-      let extendedKey2 = 'xpub661MyMwAqRbcEjhUPVDdfaTajUnZFozR1jwXVJtmfrNMDRmatHCeQSMCKkWi2zvgTp18dao1qbNeTn1hxJrBgypE3p4USGoqmX135GvkCHt';
       var farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
@@ -535,11 +540,11 @@ describe('FarmerInterface', function() {
         bridges: [
           {
             url: 'https://api.storj.io/',
-            extendedKey: 'xpub6AHweYHAxk1EhJSBctQD1nLWPog6Sy2eTpKQLExR1hfzTyyZQWvU4EYNXv1NJN7GpLYXnDLt4PzN874g6zSjAQdFCHZN7U7nbYKYVDUzD42'
+            extendedKey: extendedKey
           },
           {
             url: 'https://api.eu.storj.io',
-            extendedKey: 'xpub6AHweYHAxk1EhJSBctQD1nLWPog6Sy2eTpKQLExR1hfzTyyZQWvU4EYNXv1NJN7GpLYXnDLt4PzN874g6zSjAQdFCHZN7U7nbYKYVDUzD42'
+            extendedKey: extendedKey
           }
         ],
         storageManager: new StorageManager(new RAMStorageAdapter())
@@ -550,7 +555,7 @@ describe('FarmerInterface', function() {
 
       let connected = 0;
 
-      farmer.on('bridgeConnected', (bridge) => {
+      farmer.on('bridgeConnected', () => {
         connected += 1;
       });
 
@@ -580,7 +585,7 @@ describe('FarmerInterface', function() {
       sandbox.stub(farmer, '_addBridgeContact').callsArgWith(1, null, contact);
       let bridge = {
         url: 'https://api.storj.io/',
-        extendedKey: 'xpub6AHweYHAxk1EhJSBctQD1nLWPog6Sy2eTpKQLExR1hfzTyyZQWvU4EYNXv1NJN7GpLYXnDLt4PzN874g6zSjAQdFCHZN7U7nbYKYVDUzD42'
+        extendedKey: extendedKey
       }
       farmer._connectBridge(bridge, (err) => {
         if (err) {
@@ -609,7 +614,7 @@ describe('FarmerInterface', function() {
       sandbox.stub(farmer, '_updateBridgeContact').callsArgWith(1, null);
       let bridge = {
         url: 'https://api.storj.io/',
-        extendedKey: 'xpub6AHweYHAxk1EhJSBctQD1nLWPog6Sy2eTpKQLExR1hfzTyyZQWvU4EYNXv1NJN7GpLYXnDLt4PzN874g6zSjAQdFCHZN7U7nbYKYVDUzD42'
+        extendedKey: extendedKey
       }
       farmer._connectBridge(bridge, (err) => {
         if (err) {
@@ -638,7 +643,7 @@ describe('FarmerInterface', function() {
       sandbox.stub(farmer, '_updateBridgeContact').callsArgWith(1, null);
       let bridge = {
         url: 'https://api.storj.io/',
-        extendedKey: 'xpub6AHweYHAxk1EhJSBctQD1nLWPog6Sy2eTpKQLExR1hfzTyyZQWvU4EYNXv1NJN7GpLYXnDLt4PzN874g6zSjAQdFCHZN7U7nbYKYVDUzD42'
+        extendedKey: extendedKey
       }
       farmer._connectBridge(bridge, (err) => {
         if (err) {
@@ -667,7 +672,7 @@ describe('FarmerInterface', function() {
 
       let bridge = {
         url: 'https://api.storj.io/',
-        extendedKey: 'xpub6AHweYHAxk1EhJSBctQD1nLWPog6Sy2eTpKQLExR1hfzTyyZQWvU4EYNXv1NJN7GpLYXnDLt4PzN874g6zSjAQdFCHZN7U7nbYKYVDUzD42'
+        extendedKey: extendedKey
       }
       let nonce = 101;
       sandbox.stub(farmer, 'bridgeRequest').callsArg(5);
@@ -683,7 +688,8 @@ describe('FarmerInterface', function() {
         }
         expect(farmer.bridgeRequest.callCount).to.equal(2);
         expect(farmer._completeChallenge.callCount).to.equal(1);
-        expect(farmer.bridgeRequest.args[1][3]['x-challenge-nonce']).to.equal(101);
+        expect(farmer.bridgeRequest.args[1][3]['x-challenge-nonce'])
+          .to.equal(101);
         done();
       });
     });
@@ -705,13 +711,9 @@ describe('FarmerInterface', function() {
 
       let bridge = {
         url: 'https://api.storj.io/',
-        extendedKey: 'xpub6AHweYHAxk1EhJSBctQD1nLWPog6Sy2eTpKQLExR1hfzTyyZQWvU4EYNXv1NJN7GpLYXnDLt4PzN874g6zSjAQdFCHZN7U7nbYKYVDUzD42'
+        extendedKey: extendedKey
       }
       sandbox.stub(farmer, 'bridgeRequest').callsArg(5);
-      let data = {
-        challenge: '5980ef806b470f147b44dc05238c53458efe9dc7f5711db6ccef2e5e832431c6',
-        target: '00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
-      };
       farmer._updateBridgeContact(bridge, (err) => {
         if (err) {
           return done(err);
@@ -734,7 +736,6 @@ describe('FarmerInterface', function() {
         logger: kad.Logger(0),
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
-
       let challenge = '196c88c8907a7c6cd0d4a4cccf3ef82cef376a980217fd3bca83cba0957484b2';
       let target = '0fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
       farmer._completeChallenge(challenge, target, (err, nonce) => {
@@ -764,7 +765,8 @@ describe('FarmerInterface', function() {
       let method = 'POST';
       let rawbody = '{"key": "value"}';
       let sighash = farmer._getSigHash(url, method, path, timestamp, rawbody);
-      expect(sighash.toString('hex')).to.equal('59146f00725c9c052ef5ec6acd63f3842728c9d191ac146668204de6ed4a648b');
+      expect(sighash.toString('hex'))
+        .to.equal('59146f00725c9c052ef5ec6acd63f3842728c9d191ac146668204de6ed4a648b');
     });
   });
 
@@ -784,7 +786,6 @@ describe('FarmerInterface', function() {
 
       let url = 'https://api.storj.io';
       let path = '/contacts?someQueryArgument=value'
-      let timestamp = 1502390208007;
       let method = 'POST';
       let body = {'key': 'value'};
       let headers = {};

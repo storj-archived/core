@@ -581,7 +581,9 @@ describe('FarmerInterface', function() {
       });
 
       let contact = {};
-      sandbox.stub(farmer, 'bridgeRequest').callsArg(5);
+      let err = new Error();
+      err.statusCode = 404;
+      sandbox.stub(farmer, 'bridgeRequest').callsArgWith(5, err);
       sandbox.stub(farmer, '_addBridgeContact').callsArgWith(1, null, contact);
       let bridge = {
         url: 'https://api.storj.io/',

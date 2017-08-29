@@ -507,6 +507,34 @@ describe('FarmerInterface', function() {
 
   });
 
+  describe('#noSpaceLeft', function() {
+    it('will set spaceAvailable to false bridges to disconnected', function() {
+      let bridges = [{
+        url: 'api.storj.io',
+        extendedKey: extendedKey1
+      }, {
+        url: 'api.eu.storj.io',
+        extendedKey: extendedKey2
+      }];
+
+      var farmer = new FarmerInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        bridges: bridges,
+        storageManager: new StorageManager(new RAMStorageAdapter())
+      });
+
+      expect(farmer.spaceAvailable).to.equal(true);
+      farmer.noSpaceLeft();
+      expect(farmer.spaceAvailable).to.equal(false);
+      expect(farmer.bridges.get(extendedKey1).connected).to.equal(false);
+      expect(farmer.bridges.get(extendedKey2).connected).to.equal(false);
+    });
+  });
+
   describe('#connectBridges', function() {
     const sandbox = sinon.sandbox.create();
     afterEach(() => sandbox.restore());

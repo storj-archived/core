@@ -197,7 +197,10 @@ describe('ShardServer', function() {
       }
       server.farmerInterface.bridges = new Map();
       server.farmerInterface.bridges.set('hdkey', {});
-      server.accept('token', 'hash');
+      let contact = {
+        nodeID: 'nodeid'
+      };
+      server.accept('token', 'hash', contact);
       var request = httpMocks.createRequest({
         method: 'POST',
         url: '/shards/hash',
@@ -254,7 +257,10 @@ describe('ShardServer', function() {
         bridgeRequest: sinon.stub()
       }
       server.farmerInterface.bridges.set('hdkey', {});
-      server.accept('token', 'hash');
+      let contact = {
+        nodeID: 'nodeid'
+      };
+      server.accept('token', 'hash', contact);
       var request = httpMocks.createRequest({
         method: 'POST',
         url: '/shards/' + utils.rmd160sha256('hello'),
@@ -313,7 +319,10 @@ describe('ShardServer', function() {
         bridgeRequest: sinon.stub()
       }
       server.farmerInterface.bridges.set('hdkey', {});
-      server.accept('token', utils.rmd160sha256('hello'));
+      let contact = {
+        nodeID: 'nodeid'
+      };
+      server.accept('token', utils.rmd160sha256('hello'), contact);
       var request = httpMocks.createRequest({
         method: 'POST',
         url: '/shards/' + utils.rmd160sha256('hello'),
@@ -372,7 +381,10 @@ describe('ShardServer', function() {
         bridgeRequest: sinon.stub()
       }
       server.farmerInterface.bridges.set('hdkey', {});
-      server.accept('token', utils.rmd160sha256('hello'));
+      let contact = {
+        nodeID: 'nodeid'
+      };
+      server.accept('token', utils.rmd160sha256('hello'), contact);
       var request = httpMocks.createRequest({
         method: 'POST',
         url: '/shards/' + utils.rmd160sha256('hello'),
@@ -437,7 +449,10 @@ describe('ShardServer', function() {
         logger: Logger(0),
         nodeID: utils.rmd160('')
       });
-      server.accept('token', 'hash');
+      let contact = {
+        nodeID: 'nodeid'
+      };
+      server.accept('token', 'hash', contact);
       var request = httpMocks.createRequest({
         method: 'GET',
         url: '/shards/hash',
@@ -488,7 +503,10 @@ describe('ShardServer', function() {
         bridgeRequest: sinon.stub()
       }
       server.farmerInterface.bridges.set('hdkey', {});
-      server.accept('token', 'hash');
+      let contact = {
+        nodeID: 'hash'
+      };
+      server.accept('token', 'hash', contact);
       var request = httpMocks.createRequest({
         method: 'GET',
         url: '/shards/hash',
@@ -549,7 +567,10 @@ describe('ShardServer', function() {
         bridgeRequest: sinon.stub()
       }
       server.farmerInterface.bridges.set('hdkey', {});
-      server.accept('token', 'hash');
+      let contact = {
+        nodeID: 'hash'
+      };
+      server.accept('token', 'hash', contact);
       var request = httpMocks.createRequest({
         method: 'GET',
         url: '/shards/hash',

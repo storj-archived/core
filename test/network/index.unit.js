@@ -1022,9 +1022,11 @@ describe('Network (private)', function() {
       });
       CLEANUP.push(net);
       net.transport._isPublic = false;
+      net._getContactList = sinon.stub().callsArgWith(0, new Error('test'));
+      net._findTunnel = sinon.stub();
       net._setupTunnelClient(function(err) {
         expect(err.message).to.equal(
-          'Could not find a neighbor to query for probe'
+          'Failed to get seeds for probe'
         );
         done();
       });
@@ -1042,8 +1044,8 @@ describe('Network (private)', function() {
         doNotTraverseNat: true
       });
       CLEANUP.push(net);
-      var bridge = sinon.stub(net.bridgeClient, 'getContactList').callsArgWith(
-        1,
+      net._getContactList = sinon.stub().callsArgWith(
+        0,
         null,
         [
           {
@@ -1056,7 +1058,6 @@ describe('Network (private)', function() {
       var _probe = sinon.stub(net, '_requestProbe').callsArgWith(1, null, {});
       net.transport._isPublic = false;
       net._setupTunnelClient(function() {
-        bridge.restore();
         _probe.restore();
         expect(_probe.called).to.equal(true);
         done();
@@ -1075,13 +1076,12 @@ describe('Network (private)', function() {
         doNotTraverseNat: true
       });
       CLEANUP.push(net);
-      var bridge = sinon.stub(net.bridgeClient, 'getContactList').callsArgWith(
-        1,
+      net._getContactList = sinon.stub().callsArgWith(
+        0,
         new Error('Failed')
       );
       net.transport._isPublic = false;
       net._setupTunnelClient(function(err) {
-        bridge.restore();
         expect(err.message).to.equal('Failed to get seeds for probe');
         done();
       });
@@ -1495,9 +1495,9 @@ describe('Network (private)', function() {
       CLEANUP.push(net);
       sandbox.stub(net, '_setupTunnelClient').callsArg(0);
       sandbox.stub(
-        net.bridgeClient,
-        'getContactList'
-      ).callsArgWith(1, new Error('connection refused'));
+        net,
+        '_getContactList'
+      ).callsArgWith(0, new Error('connection refused'));
       net.join(function(err) {
         expect(err.message).to.equal(
           'Failed to discover seeds from bridge: connection refused'
@@ -1522,9 +1522,9 @@ describe('Network (private)', function() {
       sandbox.stub(net, '_setupTunnelClient').callsArg(0);
       sandbox.stub(net, 'connect').callsArgWith(1, null);
       sandbox.stub(
-        net.bridgeClient,
-        'getContactList'
-      ).callsArgWith(1, null, [
+        net,
+        '_getContactList'
+      ).callsArgWith(0, null, [
         {
           address: '8.8.8.8',
           port: 1234,
@@ -1550,6 +1550,10 @@ describe('Network (private)', function() {
       });
       CLEANUP.push(net);
       sandbox.stub(net, '_setupTunnelClient').callsArg(0);
+      sandbox.stub(
+        net,
+        '_getContactList'
+      ).callsArgWith(0, null, []);
       net.on('connected', function() {
         done();
       }).join(function(err) {

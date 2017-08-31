@@ -172,21 +172,35 @@ describe('ShardServer', function() {
     it('should send 304 if shard already exists', function(done) {
       var manager = Manager(RAMStorageAdapter());
       var item = StorageItem({
-        hash: 'hash',
+        test: 'hash',
         contracts: {
-          test: {
+          hash: {
             data_size: 8
-          }
+          },
+          renter_hd_key: 'hdkey'
         }
       });
       item.shard = new stream.Readable({ read: () => null });
+      let contract = {
+        get: sinon.stub().returns('hdkey')
+      }
+      item.getContract = sinon.stub().returns(contract);
       sinon.stub(manager, 'load').callsArgWith(1, null, item);
       var server = new ShardServer({
         storageManager: manager,
         logger: Logger(0),
         nodeID: utils.rmd160('')
       });
-      server.accept('token', 'hash');
+      server.farmerInterface = {
+        bridges: new Map(),
+        bridgeRequest: sinon.stub()
+      }
+      server.farmerInterface.bridges = new Map();
+      server.farmerInterface.bridges.set('hdkey', {});
+      let contact = {
+        nodeID: 'nodeid'
+      };
+      server.accept('token', 'hash', contact);
       var request = httpMocks.createRequest({
         method: 'POST',
         url: '/shards/hash',
@@ -219,6 +233,17 @@ describe('ShardServer', function() {
           }
         }
       });
+      let contract = {
+        get: function(key) {
+          if (key === 'renter_hd_key') {
+            return 'hdkey';
+          } else if (key === 'data_size') {
+            return 8;
+          }
+
+        }
+      }
+      item.getContract = sinon.stub().returns(contract);
       item.shard = new stream.Writable({ write: () => null });
       item.shard.destroy = sinon.stub();
       sinon.stub(manager, 'load').callsArgWith(1, null, item);
@@ -227,7 +252,15 @@ describe('ShardServer', function() {
         logger: Logger(0),
         nodeID: utils.rmd160('')
       });
-      server.accept('token', 'hash');
+      server.farmerInterface = {
+        bridges: new Map(),
+        bridgeRequest: sinon.stub()
+      }
+      server.farmerInterface.bridges.set('hdkey', {});
+      let contact = {
+        nodeID: 'nodeid'
+      };
+      server.accept('token', 'hash', contact);
       var request = httpMocks.createRequest({
         method: 'POST',
         url: '/shards/' + utils.rmd160sha256('hello'),
@@ -262,6 +295,17 @@ describe('ShardServer', function() {
           }
         }
       });
+      let contract = {
+        get: function(key) {
+          if (key === 'renter_hd_key') {
+            return 'hdkey';
+          } else if (key === 'data_size') {
+            return 8;
+          }
+
+        }
+      }
+      item.getContract = sinon.stub().returns(contract);
       item.shard = new stream.Writable({ write: () => null });
       item.shard.destroy = sinon.stub();
       sinon.stub(manager, 'load').callsArgWith(1, null, item);
@@ -270,7 +314,15 @@ describe('ShardServer', function() {
         logger: Logger(0),
         nodeID: utils.rmd160('')
       });
-      server.accept('token', utils.rmd160sha256('hello'));
+      server.farmerInterface = {
+        bridges: new Map(),
+        bridgeRequest: sinon.stub()
+      }
+      server.farmerInterface.bridges.set('hdkey', {});
+      let contact = {
+        nodeID: 'nodeid'
+      };
+      server.accept('token', utils.rmd160sha256('hello'), contact);
       var request = httpMocks.createRequest({
         method: 'POST',
         url: '/shards/' + utils.rmd160sha256('hello'),
@@ -305,6 +357,17 @@ describe('ShardServer', function() {
           }
         }
       });
+      let contract = {
+        get: function(key) {
+          if (key === 'renter_hd_key') {
+            return 'hdkey';
+          } else if (key === 'data_size') {
+            return 5;
+          }
+
+        }
+      }
+      item.getContract = sinon.stub().returns(contract);
       item.shard = new stream.Writable({ write: () => null });
       item.shard.destroy = sinon.stub();
       sinon.stub(manager, 'load').callsArgWith(1, null, item);
@@ -313,7 +376,15 @@ describe('ShardServer', function() {
         logger: Logger(0),
         nodeID: utils.rmd160('')
       });
-      server.accept('token', utils.rmd160sha256('hello'));
+      server.farmerInterface = {
+        bridges: new Map(),
+        bridgeRequest: sinon.stub()
+      }
+      server.farmerInterface.bridges.set('hdkey', {});
+      let contact = {
+        nodeID: 'nodeid'
+      };
+      server.accept('token', utils.rmd160sha256('hello'), contact);
       var request = httpMocks.createRequest({
         method: 'POST',
         url: '/shards/' + utils.rmd160sha256('hello'),
@@ -378,7 +449,10 @@ describe('ShardServer', function() {
         logger: Logger(0),
         nodeID: utils.rmd160('')
       });
-      server.accept('token', 'hash');
+      let contact = {
+        nodeID: 'nodeid'
+      };
+      server.accept('token', 'hash', contact);
       var request = httpMocks.createRequest({
         method: 'GET',
         url: '/shards/hash',
@@ -404,9 +478,17 @@ describe('ShardServer', function() {
     it('should handle read failure', function(done) {
       var manager = Manager(RAMStorageAdapter());
       var shard = new stream.Readable({ read: () => null });
-      sinon.stub(manager, 'load').callsArgWith(1, null, {
-        shard: shard
+      var item = StorageItem({
+        test: 'hash',
+        contracts: {
+          hash: {
+            data_size: 8
+          },
+          renter_hd_key: 'hdkey'
+        }
       });
+      item.shard = shard;
+      sinon.stub(manager, 'load').callsArgWith(1, null, item);
       var createExchangeReport = sinon.stub();
       var server = new ShardServer({
         storageManager: manager,
@@ -416,7 +498,15 @@ describe('ShardServer', function() {
           createExchangeReport: createExchangeReport
         }
       });
-      server.accept('token', 'hash');
+      server.farmerInterface = {
+        bridges: new Map(),
+        bridgeRequest: sinon.stub()
+      }
+      server.farmerInterface.bridges.set('hdkey', {});
+      let contact = {
+        nodeID: 'hash'
+      };
+      server.accept('token', 'hash', contact);
       var request = httpMocks.createRequest({
         method: 'GET',
         url: '/shards/hash',
@@ -445,19 +535,42 @@ describe('ShardServer', function() {
     it('should handle finish', function(done) {
       var manager = Manager(RAMStorageAdapter());
       var shard = new stream.Readable({ read: () => null });
-      sinon.stub(manager, 'load').callsArgWith(1, null, {
-        shard: shard
+      var item = StorageItem({
+        test: 'hash',
+        contracts: {
+          hash: {
+            data_size: 8
+          },
+          renter_hd_key: 'hdkey'
+        }
       });
-      var createExchangeReport = sinon.stub();
+      let contract = {
+        get: function(key) {
+          if (key === 'renter_hd_key') {
+            return 'hdkey';
+          } else if (key === 'data_size') {
+            return 8;
+          }
+
+        }
+      }
+      item.getContract = sinon.stub().returns(contract);
+      item.shard = shard;
+      sinon.stub(manager, 'load').callsArgWith(1, null, item);
       var server = new ShardServer({
         storageManager: manager,
         logger: Logger(0),
-        nodeID: utils.rmd160(''),
-        bridgeClient: {
-          createExchangeReport: createExchangeReport
-        }
+        nodeID: utils.rmd160('')
       });
-      server.accept('token', 'hash');
+      server.farmerInterface = {
+        bridges: new Map(),
+        bridgeRequest: sinon.stub()
+      }
+      server.farmerInterface.bridges.set('hdkey', {});
+      let contact = {
+        nodeID: 'hash'
+      };
+      server.accept('token', 'hash', contact);
       var request = httpMocks.createRequest({
         method: 'GET',
         url: '/shards/hash',
@@ -475,7 +588,7 @@ describe('ShardServer', function() {
       });
       response.on('end', function() {
         expect(response.statusCode).to.equal(200);
-        expect(createExchangeReport.called).to.equal(true);
+        expect(server.farmerInterface.bridgeRequest.called).to.equal(true);
         expect(response._getData().toString()).to.equal('hello');
         done();
       });

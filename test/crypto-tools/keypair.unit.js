@@ -3,6 +3,7 @@
 var expect = require('chai').expect;
 var KeyPair = require('../../lib/crypto-tools/keypair');
 var prvk = '4d548b387bed22aff9ca560416d7b13ecbad16f28bc41ef5acaff3019bfa5134';
+var prvk2 = '00008b387bed22aff9ca560416d7b13ecbad16f28bc41ef5acaff3019bfa5134';
 var pubk = '02ad47e0d4896cd794f5296a953f897c426b3f9a58f5203b8baace8952a291cf6b';
 
 describe('KeyPair', function() {
@@ -20,6 +21,16 @@ describe('KeyPair', function() {
     it('should use the private key supplied if provided', function() {
       var kp = KeyPair(prvk);
       expect(kp.getPrivateKey()).to.be.equal(prvk);
+    });
+
+  });
+
+  describe('#getPrivateKeyPadded', function() {
+
+    it('should use the private key supplied if provided', function() {
+      var kp = KeyPair(prvk2);
+      expect(kp.getPrivateKeyPadded()).to.be.equal(prvk2);
+      expect(kp.getPrivateKeyPadded().length).to.equal(64);
     });
 
   });

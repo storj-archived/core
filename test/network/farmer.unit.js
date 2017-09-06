@@ -528,7 +528,7 @@ describe('FarmerInterface', function() {
       });
 
       expect(farmer.spaceAvailable).to.equal(true);
-      farmer.noSpaceLeft();
+      farmer.noSpaceLeft(true);
       expect(farmer.spaceAvailable).to.equal(false);
       expect(farmer.bridges.get(extendedKey1).connected).to.equal(false);
       expect(farmer.bridges.get(extendedKey2).connected).to.equal(false);

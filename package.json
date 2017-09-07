@@ -87,7 +87,6 @@
     "levelup": "^1.3.1",
     "merge": "^1.2.0",
     "mime": "^1.3.4",
-    "mkdirp": "^0.5.1",
     "ms": "^0.7.1",
     "mtree": "^1.0.0",
     "nat-upnp": "^1.0.2",
@@ -99,7 +98,6 @@
     "readable-stream": "^2.0.6",
     "request": "^2.70.0",
     "restify": "^4.3.0",
-    "rimraf": "^2.5.3",
     "scrypt": "^6.0.3",
     "secp256k1": "^3.2.2",
     "semver": "^5.1.0",
@@ -116,10 +114,12 @@
     "istanbul": "^0.4.5",
     "jsdoc": "^3.4.0",
     "memory-blob-store": "^5.0.0",
+    "mkdirp": "^0.5.1",
     "mocha": "^2.2.4",
     "node-mocks-http": "^1.5.4",
     "noisegen": "^1.0.0",
     "proxyquire": "^1.7.3",
+    "rimraf": "^2.6.1",
     "sinon": "^1.14.1"
   }
 }

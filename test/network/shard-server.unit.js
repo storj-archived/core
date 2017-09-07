@@ -1,55 +1,98 @@
 'use strict';
 
-var proxyquire = require('proxyquire');
-var expect = require('chai').expect;
-var sinon = require('sinon');
-var RAMStorageAdapter = require('../../lib/storage/adapters/ram');
-var Manager = require('../../lib/storage/manager');
-var Logger = require('kad').Logger;
-var ShardServer = proxyquire('../../lib/network/shard-server', {
+const proxyquire = require('proxyquire');
+const crypto = require('crypto');
+const storj = require('../../');
+const expect = require('chai').expect;
+const sinon = require('sinon');
+const mkdirp = require('mkdirp');
+const rimraf = require('rimraf');
+const RAMStorageAdapter = require('../../lib/storage/adapters/ram');
+const Manager = require('../../lib/storage/manager');
+const Logger = require('kad').Logger;
+const ShardServer = proxyquire('../../lib/network/shard-server', {
   '../bridge-client': sinon.stub().returns({
     createExchangeReport: sinon.stub()
   })
 });
-var httpMocks = require('node-mocks-http');
-var utils = require('../../lib/utils');
-var stream = require('readable-stream');
-var {EventEmitter} = require('events');
-var StorageItem = require('../../lib/storage/item');
+const httpMocks = require('node-mocks-http');
+const utils = require('../../lib/utils');
+const stream = require('readable-stream');
+const {EventEmitter} = require('events');
+const StorageItem = require('../../lib/storage/item');
 
 describe('ShardServer', function() {
+  let server = null;
+  const sandbox = sinon.sandbox.create();
+  let tmpPath = '/tmp/storj-shard-server-test-' +
+      crypto.randomBytes(4).toString('hex') + '/'
+
+  beforeEach((done) => {
+    mkdirp(tmpPath, done);
+  });
+
+  afterEach((done) => {
+    sandbox.restore();
+    server._db.close(() => {
+      rimraf(tmpPath, done);
+    });
+  });
+
 
   describe('@constructor', function() {
-
     it('should create an instance without the new keyword', function() {
-      var server = ShardServer({
+      server = ShardServer({
+        storagePath: tmpPath,
         storageManager: Manager(RAMStorageAdapter()),
         logger: Logger(0),
         nodeID: utils.rmd160('')
       });
       expect(server).to.be.instanceOf(ShardServer);
     });
-
   });
 
   describe('#accept', function() {
-
-    it('should add the token/hash to the accepted list', function() {
-      var server = new ShardServer({
+    it('should add the token/hash to the accepted list', function(done) {
+      let clock = sandbox.useFakeTimers();
+      server = new ShardServer({
+        storagePath: tmpPath,
         storageManager: Manager(RAMStorageAdapter()),
         logger: Logger(0),
         nodeID: utils.rmd160('')
       });
-      server.accept('token', 'filehash');
-      expect(server._allowed.token.hash).to.equal('filehash');
-    });
+      let contact = new storj.Contact({
+        address: '127.0.0.1',
+        port: 4001
+      });
+      server.accept('token', 'filehash', contact, (err) => {
+        if (err) {
+          return done(err);
+        }
+        server._db.get('TK' + 'token', (err, data) => {
+          if (err) {
+            return done(err);
+          }
+          let parsed = JSON.parse(data);
+          expect(parsed.contact);
+          expect(parsed.expires);
+          expect(parsed.hash);
 
+          server._db.get('EX' + 2592000000, (err, data) => {
+            if (err) {
+              return done(err);
+            }
+            expect(data).to.equal('token');
+            done();
+          });
+        });
+      });
+    });
   });
 
   describe('#reject', function() {
-
     it('should remove the token/hash from the accepted list', function() {
-      var server = new ShardServer({
+      server = new ShardServer({
+        storagePath: tmpPath,
         storageManager: Manager(RAMStorageAdapter()),
         logger: Logger(0),
         nodeID: utils.rmd160('')
@@ -58,33 +101,28 @@ describe('ShardServer', function() {
       server.reject('token');
       expect(server._allowed.token).to.equal(undefined);
     });
-
   });
 
   describe('#_handleEarlySocketClose', function() {
-
     it('should decrement the active transfers count', function() {
       var ctx = { activeTransfers: 1, _log: new Logger(0) };
       ShardServer.prototype._handleEarlySocketClose.call(ctx);
       expect(ctx.activeTransfers).to.equal(0);
     });
-
   });
 
   describe('#_handleRequestError', function() {
-
     it('should decrement the active transfers count', function() {
       var ctx = { activeTransfers: 1, _log: new Logger(0) };
       ShardServer.prototype._handleRequestError.call(ctx, new Error('Failed'));
       expect(ctx.activeTransfers).to.equal(0);
     });
-
   });
 
   describe('#isAuthorized', function() {
-
     it('should return [false, error] if not authorized', function() {
-      var server = new ShardServer({
+      server = new ShardServer({
+        storagePath: tmpPath,
         storageManager: Manager(RAMStorageAdapter()),
         logger: Logger(0),
         nodeID: utils.rmd160('')
@@ -95,7 +133,8 @@ describe('ShardServer', function() {
     });
 
     it('should return [true, null] if authorized', function() {
-      var server = new ShardServer({
+      server = new ShardServer({
+        storagePath: tmpPath,
         storageManager: Manager(RAMStorageAdapter()),
         logger: Logger(0),
         nodeID: utils.rmd160('')
@@ -111,7 +150,8 @@ describe('ShardServer', function() {
   describe('#routeConsignment', function() {
 
     it('should send 401 if not authed', function(done) {
-      var server = new ShardServer({
+      server = new ShardServer({
+        storagePath: tmpPath,
         storageManager: Manager(RAMStorageAdapter()),
         logger: Logger(0),
         nodeID: utils.rmd160('')
@@ -141,7 +181,8 @@ describe('ShardServer', function() {
     it('should send 404 if cannot load item', function(done) {
       var manager = Manager(RAMStorageAdapter());
       sinon.stub(manager, 'load').callsArgWith(1, new Error('Failed'));
-      var server = new ShardServer({
+      server = new ShardServer({
+        storagePath: tmpPath,
         storageManager: manager,
         logger: Logger(0),
         nodeID: utils.rmd160('')
@@ -186,7 +227,8 @@ describe('ShardServer', function() {
       }
       item.getContract = sinon.stub().returns(contract);
       sinon.stub(manager, 'load').callsArgWith(1, null, item);
-      var server = new ShardServer({
+      server = new ShardServer({
+        storagePath: tmpPath,
         storageManager: manager,
         logger: Logger(0),
         nodeID: utils.rmd160('')
@@ -247,7 +289,7 @@ describe('ShardServer', function() {
       item.shard = new stream.Writable({ write: () => null });
       item.shard.destroy = sinon.stub();
       sinon.stub(manager, 'load').callsArgWith(1, null, item);
-      var server = new ShardServer({
+      server = new ShardServer({
         storageManager: manager,
         logger: Logger(0),
         nodeID: utils.rmd160('')
@@ -309,7 +351,7 @@ describe('ShardServer', function() {
       item.shard = new stream.Writable({ write: () => null });
       item.shard.destroy = sinon.stub();
       sinon.stub(manager, 'load').callsArgWith(1, null, item);
-      var server = new ShardServer({
+      server = new ShardServer({
         storageManager: manager,
         logger: Logger(0),
         nodeID: utils.rmd160('')
@@ -371,7 +413,7 @@ describe('ShardServer', function() {
       item.shard = new stream.Writable({ write: () => null });
       item.shard.destroy = sinon.stub();
       sinon.stub(manager, 'load').callsArgWith(1, null, item);
-      var server = new ShardServer({
+      server = new ShardServer({
         storageManager: manager,
         logger: Logger(0),
         nodeID: utils.rmd160('')
@@ -414,7 +456,8 @@ describe('ShardServer', function() {
   describe('#routeRetrieval', function() {
 
     it('should send 401 if not authed', function(done) {
-      var server = new ShardServer({
+      server = new ShardServer({
+        storagePath: tmpPath,
         storageManager: Manager(RAMStorageAdapter()),
         logger: Logger(0),
         nodeID: utils.rmd160('')
@@ -444,7 +487,8 @@ describe('ShardServer', function() {
     it('should send 404 if cannot load item', function(done) {
       var manager = Manager(RAMStorageAdapter());
       sinon.stub(manager, 'load').callsArgWith(1, new Error('Failed'));
-      var server = new ShardServer({
+      server = new ShardServer({
+        storagePath: tmpPath,
         storageManager: manager,
         logger: Logger(0),
         nodeID: utils.rmd160('')
@@ -490,7 +534,8 @@ describe('ShardServer', function() {
       item.shard = shard;
       sinon.stub(manager, 'load').callsArgWith(1, null, item);
       var createExchangeReport = sinon.stub();
-      var server = new ShardServer({
+      server = new ShardServer({
+        storagePath: tmpPath,
         storageManager: manager,
         logger: Logger(0),
         nodeID: utils.rmd160(''),
@@ -557,7 +602,8 @@ describe('ShardServer', function() {
       item.getContract = sinon.stub().returns(contract);
       item.shard = shard;
       sinon.stub(manager, 'load').callsArgWith(1, null, item);
-      var server = new ShardServer({
+      server = new ShardServer({
+        storagePath: tmpPath,
         storageManager: manager,
         logger: Logger(0),
         nodeID: utils.rmd160('')
@@ -604,7 +650,8 @@ describe('ShardServer', function() {
   describe('#_reapDeadTokens', function() {
 
     it('should reap dead tokens and leave good ones', function() {
-      var server = new ShardServer({
+      server = new ShardServer({
+        storagePath: tmpPath,
         storageManager: Manager(RAMStorageAdapter()),
         logger: Logger(0),
         nodeID: utils.rmd160('')

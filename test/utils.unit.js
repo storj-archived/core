@@ -79,6 +79,10 @@ describe('utils', function() {
 
   describe('#isCompatibleVersion', function() {
 
+    it('should not be compatible (undefined)', function() {
+      expect(utils.isCompatibleVersion(undefined)).to.equal(false);
+    });
+
     it('should be compatible (same version)', function() {
       expect(utils.isCompatibleVersion(version.protocol)).to.equal(true);
     });

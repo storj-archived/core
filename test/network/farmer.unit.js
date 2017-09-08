@@ -668,7 +668,8 @@ describe('FarmerInterface', function() {
       let contact = {
         address: '127.0.0.1',
         port: 0,
-        spaceAvailable: true
+        spaceAvailable: true,
+        protocol: '1.2.0'
       };
       sandbox.stub(farmer, 'bridgeRequest').callsArgWith(5, null, contact);
       sandbox.stub(farmer, '_updateBridgeContact').callsArgWith(1, null);

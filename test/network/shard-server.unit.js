@@ -1,5 +1,6 @@
 'use strict';
 
+const async = require('async');
 const proxyquire = require('proxyquire');
 const crypto = require('crypto');
 const storj = require('../../');
@@ -85,7 +86,7 @@ describe('ShardServer', function() {
           expect(parsed.expires);
           expect(parsed.hash);
 
-          server._db.get('EX' + 2592000000, (err, data) => {
+          server._db.get(server._encodeExpiresKey(2592000000), (err, data) => {
             if (err) {
               return done(err);
             }
@@ -120,7 +121,7 @@ describe('ShardServer', function() {
           }
           server._db.get('TK' + 'token2', (err, data) => {
             expect(err.notFound).to.equal(true);
-            server._db.get('EX' + 2592000000, (err, data) => {
+            server._db.get(server._encodeExpiresKey(2592000000), (err, data) => {
               expect(err.notFound).to.equal(true);
               done();
             });
@@ -786,27 +787,41 @@ describe('ShardServer', function() {
   });
 
   describe('#_reapDeadTokens', function() {
-
-    it('should reap dead tokens and leave good ones', function() {
+    it('should reap dead tokens and leave good ones', function(done) {
+      let clock = sandbox.useFakeTimers();
       server = new ShardServer({
         storagePath: tmpPath,
         storageManager: Manager(RAMStorageAdapter()),
         logger: Logger(0),
         nodeID: utils.rmd160('')
       });
-      server._allowed = {
-        expired: {
-          expires: Date.now() - 1000
-        },
-        notexpired: {
-          expires: Date.now() + 1000
-        }
+      clearInterval(server._reapDeadTokensInterval);
+      let contact = {
+        address: '127.0.0.1',
+        port: 4001
       };
-      server._reapDeadTokens();
-      expect(server._allowed.expired).to.equal(undefined);
-      expect(server._allowed.notexpired).to.not.equal(undefined);
+      let time = ShardServer.TOKEN_EXPIRE / 50;
+      async.timesSeries(100, (n, next) => {
+        server.accept('token' + n, 'hash' + n, contact, (err) => {
+          if (err) {
+            return next(err);
+          }
+          clock.tick(time);
+          next();
+        });
+      }, (err) => {
+        if (err) {
+          return done(err);
+        }
+        server._reapDeadTokens();
+        server.on('reapedTokens', (total) => {
+          expect(total).to.equal(51);
+          server._db.get('TK' + 'token1', (err, data) => {
+            expect(err.notFound).to.equal(true);
+            done();
+          });
+        });
+      });
     });
-
   });
-
 });

@@ -139,31 +139,87 @@ describe('ShardServer', function() {
   });
 
   describe('#isAuthorized', function() {
-    it('should return [false, error] if not authorized', function() {
+    it('should return error if not authorized (no token)', function(done) {
       server = new ShardServer({
         storagePath: tmpPath,
         storageManager: Manager(RAMStorageAdapter()),
         logger: Logger(0),
         nodeID: utils.rmd160('')
       });
-      var [allowed, error] = server.isAuthorized('sometoken');
-      expect(allowed).to.equal(false);
-      expect(error.message).to.equal('The supplied token is not accepted');
+      server.isAuthorized(null, null, (err) => {
+        expect(err.message).to.equal('You did not supply a token');
+        done();
+      });
     });
-
-    it('should return [true, null] if authorized', function() {
+    it('should give error if not authorized (no hash)', function(done) {
       server = new ShardServer({
         storagePath: tmpPath,
         storageManager: Manager(RAMStorageAdapter()),
         logger: Logger(0),
         nodeID: utils.rmd160('')
       });
-      server.accept('sometoken', 'somehash');
-      var [allowed, error] = server.isAuthorized('sometoken', 'somehash');
-      expect(allowed).to.equal(true);
-      expect(error).to.equal(null);
+      server.isAuthorized('token', null, (err) => {
+        expect(err.message).to.equal('You did not supply the data hash');
+        done();
+      });
     });
-
+    it('should give error if not authorized (not found)', function(done) {
+      server = new ShardServer({
+        storagePath: tmpPath,
+        storageManager: Manager(RAMStorageAdapter()),
+        logger: Logger(0),
+        nodeID: utils.rmd160('')
+      });
+      server.isAuthorized('token10', 'hash', (err) => {
+        expect(err.message).to.equal('The supplied token is not accepted');
+        done();
+      });
+    });
+    it('should give error if not authorized (wrong hash)', function(done) {
+      server = new ShardServer({
+        storagePath: tmpPath,
+        storageManager: Manager(RAMStorageAdapter()),
+        logger: Logger(0),
+        nodeID: utils.rmd160('')
+      });
+      let contact = new storj.Contact({
+        address: '127.0.0.1',
+        port: 4001
+      });
+      server.accept('sometoken3', 'somehash3', contact, (err) => {
+        if (err) {
+          return done(err);
+        }
+        server.isAuthorized('sometoken3', 'somehash4', (err, contact) => {
+          expect(err.message).to.equal('Token not valid for hash');
+          done();
+        });
+      });
+    });
+    it('should not give error and give contact if authorized', function(done) {
+      server = new ShardServer({
+        storagePath: tmpPath,
+        storageManager: Manager(RAMStorageAdapter()),
+        logger: Logger(0),
+        nodeID: utils.rmd160('')
+      });
+      let contact = new storj.Contact({
+        address: '127.0.0.1',
+        port: 4001
+      });
+      server.accept('sometoken2', 'somehash2', contact, (err) => {
+        if (err) {
+          return done(err);
+        }
+        server.isAuthorized('sometoken2', 'somehash2', (err, contact) => {
+          expect(err).to.equal(null);
+          expect(contact).to.be.instanceOf(storj.Contact);
+          expect(contact.address).to.equal('127.0.0.1');
+          expect(contact.port).to.equal(4001);
+          done();
+        });
+      });
+    });
   });
 
   describe('#routeConsignment', function() {

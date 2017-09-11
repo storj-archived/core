@@ -38,7 +38,6 @@ describe('ShardServer', function() {
     });
   });
 
-
   describe('@constructor', function() {
     it('should create an instance without the new keyword', function() {
       server = ShardServer({
@@ -223,7 +222,6 @@ describe('ShardServer', function() {
   });
 
   describe('#routeConsignment', function() {
-
     it('should send 401 if not authed', function(done) {
       server = new ShardServer({
         storagePath: tmpPath,
@@ -246,13 +244,13 @@ describe('ShardServer', function() {
         writableStream: stream.Writable,
         req: request
       });
+      server.isAuthorized = sinon.stub().callsArgWith(2, new Error('test'));
       response.on('end', function() {
         expect(response.statusCode).to.equal(401);
         done();
       });
       server.routeConsignment(request, response);
     });
-
     it('should send 404 if cannot load item', function(done) {
       var manager = Manager(RAMStorageAdapter());
       sinon.stub(manager, 'load').callsArgWith(1, new Error('Failed'));
@@ -262,29 +260,37 @@ describe('ShardServer', function() {
         logger: Logger(0),
         nodeID: utils.rmd160('')
       });
-      server.accept('token', 'hash');
-      var request = httpMocks.createRequest({
-        method: 'POST',
-        url: '/shards/hash',
-        params: {
-          hash: 'hash'
-        },
-        query: {
-          token: 'token'
+      let contact = {
+        address: '127.0.0.1',
+        port: 4001,
+        nodeID: utils.rmd160('')
+      };
+      server.accept('token', 'hash', contact, (err) => {
+        if (err) {
+          return done(err);
         }
+        var request = httpMocks.createRequest({
+          method: 'POST',
+          url: '/shards/hash',
+          params: {
+            hash: 'hash'
+          },
+          query: {
+            token: 'token'
+          }
+        });
+        var response = httpMocks.createResponse({
+          eventEmitter: EventEmitter,
+          writableStream: stream.Writable,
+          req: request
+        });
+        response.on('end', function() {
+          expect(response.statusCode).to.equal(404);
+          done();
+        });
+        server.routeConsignment(request, response);
       });
-      var response = httpMocks.createResponse({
-        eventEmitter: EventEmitter,
-        writableStream: stream.Writable,
-        req: request
-      });
-      response.on('end', function() {
-        expect(response.statusCode).to.equal(404);
-        done();
-      });
-      server.routeConsignment(request, response);
     });
-
     it('should send 304 if shard already exists', function(done) {
       var manager = Manager(RAMStorageAdapter());
       var item = StorageItem({
@@ -315,31 +321,36 @@ describe('ShardServer', function() {
       server.farmerInterface.bridges = new Map();
       server.farmerInterface.bridges.set('hdkey', {});
       let contact = {
-        nodeID: 'nodeid'
+        address: '127.0.0.1',
+        port: 3001,
+        nodeID: utils.rmd160('')
       };
-      server.accept('token', 'hash', contact);
-      var request = httpMocks.createRequest({
-        method: 'POST',
-        url: '/shards/hash',
-        params: {
-          hash: 'hash'
-        },
-        query: {
-          token: 'token'
+      server.accept('token', 'hash', contact, (err) => {
+        if (err) {
+          return done(err);
         }
+        var request = httpMocks.createRequest({
+          method: 'POST',
+          url: '/shards/hash',
+          params: {
+            hash: 'hash'
+          },
+          query: {
+            token: 'token'
+          }
+        });
+        var response = httpMocks.createResponse({
+          eventEmitter: EventEmitter,
+          writableStream: stream.Writable,
+          req: request
+        });
+        response.on('end', function() {
+          expect(response.statusCode).to.equal(304);
+          done();
+        });
+        server.routeConsignment(request, response);
       });
-      var response = httpMocks.createResponse({
-        eventEmitter: EventEmitter,
-        writableStream: stream.Writable,
-        req: request
-      });
-      response.on('end', function() {
-        expect(response.statusCode).to.equal(304);
-        done();
-      });
-      server.routeConsignment(request, response);
     });
-
     it('should send 400 if data size exceeds expected', function(done) {
       var manager = Manager(RAMStorageAdapter());
       var item = StorageItem({
@@ -365,6 +376,7 @@ describe('ShardServer', function() {
       item.shard.destroy = sinon.stub();
       sinon.stub(manager, 'load').callsArgWith(1, null, item);
       server = new ShardServer({
+        storagePath: tmpPath,
         storageManager: manager,
         logger: Logger(0),
         nodeID: utils.rmd160('')
@@ -375,33 +387,42 @@ describe('ShardServer', function() {
       }
       server.farmerInterface.bridges.set('hdkey', {});
       let contact = {
-        nodeID: 'nodeid'
+        address: '127.0.0.1',
+        port: 3001,
+        nodeID: utils.rmd160('')
       };
-      server.accept('token', 'hash', contact);
-      var request = httpMocks.createRequest({
-        method: 'POST',
-        url: '/shards/' + utils.rmd160sha256('hello'),
-        params: {
-          hash: 'hash'
-        },
-        query: {
-          token: 'token'
+      let token = '2083494abc01';
+      let hash = utils.rmd160sha256('hello')
+      server.accept(token, hash, contact, (err) => {
+        if (err) {
+          return done(err);
         }
+        var request = httpMocks.createRequest({
+          method: 'POST',
+          url: '/shards/' + hash,
+          params: {
+            hash: hash
+          },
+          query: {
+            token: token
+          }
+        });
+        var response = httpMocks.createResponse({
+          eventEmitter: EventEmitter,
+          writableStream: stream.Writable,
+          req: request
+        });
+        response.on('end', function() {
+          expect(response.statusCode).to.equal(400);
+          expect(item.shard.destroy.called).to.equal(true);
+          done();
+        });
+        server.routeConsignment(request, response);
+        setTimeout(() => {
+          request.emit('data', Buffer('longer than 8 bytes'));
+        }, 100);
       });
-      var response = httpMocks.createResponse({
-        eventEmitter: EventEmitter,
-        writableStream: stream.Writable,
-        req: request
-      });
-      response.on('end', function() {
-        expect(item.shard.destroy.called).to.equal(true);
-        expect(response.statusCode).to.equal(400);
-        done();
-      });
-      server.routeConsignment(request, response);
-      request.emit('data', Buffer('longer than 8 bytes'));
     });
-
     it('should send 400 if integrity check fails', function(done) {
       var manager = Manager(RAMStorageAdapter());
       var item = StorageItem({
@@ -427,6 +448,7 @@ describe('ShardServer', function() {
       item.shard.destroy = sinon.stub();
       sinon.stub(manager, 'load').callsArgWith(1, null, item);
       server = new ShardServer({
+        storagePath: tmpPath,
         storageManager: manager,
         logger: Logger(0),
         nodeID: utils.rmd160('')
@@ -437,31 +459,41 @@ describe('ShardServer', function() {
       }
       server.farmerInterface.bridges.set('hdkey', {});
       let contact = {
-        nodeID: 'nodeid'
+        address: '127.0.0.1',
+        port: 4001,
+        nodeID: utils.rmd160('')
       };
-      server.accept('token', utils.rmd160sha256('hello'), contact);
-      var request = httpMocks.createRequest({
-        method: 'POST',
-        url: '/shards/' + utils.rmd160sha256('hello'),
-        params: {
-          hash: utils.rmd160sha256('hello')
-        },
-        query: {
-          token: 'token'
+      let token = '938af7147aea';
+      let hash = utils.rmd160sha256('hello');
+      server.accept(token, hash, contact, (err) => {
+        if (err) {
+          return done(err);
         }
+        var request = httpMocks.createRequest({
+          method: 'POST',
+          url: '/shards/' + hash,
+          params: {
+            hash: hash
+          },
+          query: {
+            token: token
+          }
+        });
+        var response = httpMocks.createResponse({
+          eventEmitter: EventEmitter,
+          writableStream: stream.Writable,
+          req: request
+        });
+        response.on('end', function() {
+          expect(response.statusCode).to.equal(400);
+          done();
+        });
+        server.routeConsignment(request, response);
+        setTimeout(() => {
+          request.emit('data', Buffer('olleh'));
+          request.emit('end');
+        }, 300);
       });
-      var response = httpMocks.createResponse({
-        eventEmitter: EventEmitter,
-        writableStream: stream.Writable,
-        req: request
-      });
-      response.on('end', function() {
-        expect(response.statusCode).to.equal(400);
-        done();
-      });
-      server.routeConsignment(request, response);
-      request.emit('data', Buffer('olleh'));
-      request.emit('end');
     });
 
     it('should send 200 if success', function(done) {
@@ -489,6 +521,7 @@ describe('ShardServer', function() {
       item.shard.destroy = sinon.stub();
       sinon.stub(manager, 'load').callsArgWith(1, null, item);
       server = new ShardServer({
+        storagePath: tmpPath,
         storageManager: manager,
         logger: Logger(0),
         nodeID: utils.rmd160('')
@@ -499,37 +532,42 @@ describe('ShardServer', function() {
       }
       server.farmerInterface.bridges.set('hdkey', {});
       let contact = {
-        nodeID: 'nodeid'
+        address: '127.0.0.1',
+        port: 4001,
+        nodeID: utils.rmd160('')
       };
-      server.accept('token', utils.rmd160sha256('hello'), contact);
-      var request = httpMocks.createRequest({
-        method: 'POST',
-        url: '/shards/' + utils.rmd160sha256('hello'),
-        params: {
-          hash: utils.rmd160sha256('hello')
-        },
-        query: {
-          token: 'token'
-        }
+      let token = '15b6e35ded84';
+      let hash = utils.rmd160sha256('hello');
+      server.accept(token, hash, contact, () => {
+        var request = httpMocks.createRequest({
+          method: 'POST',
+          url: '/shards/' + hash,
+          params: {
+            hash: hash
+          },
+          query: {
+            token: token
+          }
+        });
+        var response = httpMocks.createResponse({
+          eventEmitter: EventEmitter,
+          writableStream: stream.Writable,
+          req: request
+        });
+        response.on('end', function() {
+          expect(response.statusCode).to.equal(200);
+          done();
+        });
+        server.routeConsignment(request, response);
+        setTimeout(() => {
+          request.emit('data', Buffer('hello'));
+          request.emit('end');
+        }, 300);
       });
-      var response = httpMocks.createResponse({
-        eventEmitter: EventEmitter,
-        writableStream: stream.Writable,
-        req: request
-      });
-      response.on('end', function() {
-        expect(response.statusCode).to.equal(200);
-        done();
-      });
-      server.routeConsignment(request, response);
-      request.emit('data', Buffer('hello'));
-      request.emit('end');
     });
-
   });
 
   describe('#routeRetrieval', function() {
-
     it('should send 401 if not authed', function(done) {
       server = new ShardServer({
         storagePath: tmpPath,
@@ -571,27 +609,29 @@ describe('ShardServer', function() {
       let contact = {
         nodeID: 'nodeid'
       };
-      server.accept('token', 'hash', contact);
-      var request = httpMocks.createRequest({
-        method: 'GET',
-        url: '/shards/hash',
-        params: {
-          hash: 'hash'
-        },
-        query: {
-          token: 'token'
-        }
+      server.accept('token', 'hash', contact, () => {
+        var request = httpMocks.createRequest({
+          method: 'GET',
+          url: '/shards/hash',
+          params: {
+            hash: 'hash'
+          },
+          query: {
+            token: 'token'
+          }
+        });
+        var response = httpMocks.createResponse({
+          eventEmitter: EventEmitter,
+          writableStream: stream.Writable,
+          req: request
+        });
+        response.on('end', function() {
+          expect(response.statusCode).to.equal(404);
+          done();
+        });
+        server.routeRetrieval(request, response);
       });
-      var response = httpMocks.createResponse({
-        eventEmitter: EventEmitter,
-        writableStream: stream.Writable,
-        req: request
-      });
-      response.on('end', function() {
-        expect(response.statusCode).to.equal(404);
-        done();
-      });
-      server.routeRetrieval(request, response);
+
     });
 
     it('should handle read failure', function(done) {

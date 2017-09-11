@@ -90,16 +90,35 @@ describe('ShardServer', function() {
   });
 
   describe('#reject', function() {
-    it('should remove the token/hash from the accepted list', function() {
+    it('should remove the token/hash from the accepted list', function(done) {
+      let clock = sandbox.useFakeTimers();
       server = new ShardServer({
         storagePath: tmpPath,
         storageManager: Manager(RAMStorageAdapter()),
         logger: Logger(0),
         nodeID: utils.rmd160('')
       });
-      server._allowed.token = {};
-      server.reject('token');
-      expect(server._allowed.token).to.equal(undefined);
+      let contact = new storj.Contact({
+        address: '127.0.0.1',
+        port: 4001
+      });
+      server.accept('token2', 'filehash2', contact, (err) => {
+        if (err) {
+          return done(err);
+        }
+        server.reject('token2', (err) => {
+          if (err) {
+            return done(err);
+          }
+          server._db.get('TK' + 'token2', (err, data) => {
+            expect(err.notFound).to.equal(true);
+            server._db.get('EX' + 2592000000, (err, data) => {
+              expect(err.notFound).to.equal(true);
+              done();
+            });
+          });
+        });
+      });
     });
   });
 

@@ -789,6 +789,7 @@ describe('ShardServer', function() {
 
   describe('#_reapDeadTokens', function() {
     it('should reap dead tokens and leave good ones', function(done) {
+      this.timeout(20000);
       let clock = sandbox.useFakeTimers();
       server = new ShardServer({
         storagePath: tmpPath,

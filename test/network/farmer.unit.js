@@ -4,6 +4,9 @@
 
 const sinon = require('sinon');
 const https = require('https');
+const crypto = require('crypto');
+const mkdirp = require('mkdirp');
+const rimraf = require('rimraf');
 const expect = require('chai').expect;
 const EventEmitter = require('events').EventEmitter;
 const Contract = require('../../lib/contract');
@@ -15,7 +18,6 @@ const utils = require('../../lib/utils');
 const StorageItem = require('../../lib/storage/item');
 const StorageManager = require('../../lib/storage/manager');
 const RAMStorageAdapter = require('../../lib/storage/adapters/ram');
-const CLEANUP = [];
 
 const extendedKey = 'xpub6AHweYHAxk1EhJSBctQD1nLWPog6Sy2eTpKQLExR1hfzTyyZQW' +
       'vU4EYNXv1NJN7GpLYXnDLt4PzN874g6zSjAQdFCHZN7U7nbYKYVDUzD42';
@@ -26,24 +28,45 @@ const extendedKey2 = 'xpub661MyMwAqRbcEjhUPVDdfaTajUnZFozR1jwXVJtmfrNMDRmat' +
 
 describe('FarmerInterface', function() {
 
+  let farmer = null;
+  let tmpPath = '/tmp/storj-farmer-test-' +
+      crypto.randomBytes(4).toString('hex') + '/'
+
+  beforeEach((done) => {
+    mkdirp(tmpPath, done);
+  });
+
+  afterEach((done) => {
+    if (farmer) {
+      farmer.leave((err) => {
+        if (err) {
+          return done(err);
+        }
+        rimraf(tmpPath, done);
+      });
+    } else {
+      done();
+    }
+  });
+
   describe('@constructor', function() {
 
     it('should create an instance without the new keyword', function() {
-      var farmer = FarmerInterface({
+      farmer = FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
         tunnelServerPort: 0,
         doNotTraverseNat: true,
         logger: kad.Logger(0),
+        storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
-      CLEANUP.push(farmer);
       expect(farmer).to.be.instanceOf(FarmerInterface);
     });
 
     it('should use the keypair address if non supplied', function() {
       var keypair = KeyPair();
-      var farmer = new FarmerInterface({
+      farmer = new FarmerInterface({
         keyPair: keypair,
         rpcPort: 0,
         tunnelServerPort: 0,
@@ -52,9 +75,9 @@ describe('FarmerInterface', function() {
           return false;
         },
         logger: kad.Logger(0),
+        storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
-      CLEANUP.push(farmer);
       expect(farmer.getPaymentAddress()).to.equal(keypair.getAddress());
     });
 
@@ -62,12 +85,13 @@ describe('FarmerInterface', function() {
 
   describe('#_mapBridges', function() {
     it('it will create a map', function() {
-      var farmer = new FarmerInterface({
+      farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
         tunnelServerPort: 0,
         doNotTraverseNat: true,
         logger: kad.Logger(0),
+        storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
       farmer.bridges = null;
@@ -88,12 +112,13 @@ describe('FarmerInterface', function() {
 
   describe('#_connectBridges', function() {
     it('it will cancel if already running', function() {
-      var farmer = new FarmerInterface({
+      farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
         tunnelServerPort: 0,
         doNotTraverseNat: true,
         logger: kad.Logger(0),
+        storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
       farmer._connectBridgesRunning = true;
@@ -101,12 +126,13 @@ describe('FarmerInterface', function() {
     });
 
     it('will call connect if bridge is not connect', function(done) {
-      var farmer = new FarmerInterface({
+      farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
         tunnelServerPort: 0,
         doNotTraverseNat: true,
         logger: kad.Logger(0),
+        storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter()),
         bridges: [{
           url: 'api.storj.io',
@@ -132,7 +158,7 @@ describe('FarmerInterface', function() {
   describe('#_handleContractPublication', function() {
 
     it('should not send an offer if negotiator returns false', function(done) {
-      var farmer = new FarmerInterface({
+      farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
         tunnelServerPort: 0,
@@ -141,9 +167,9 @@ describe('FarmerInterface', function() {
           callback(false);
         },
         logger: kad.Logger(0),
+        storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
-      CLEANUP.push(farmer);
       var _addTo = sinon.stub(farmer, '_addContractToPendingList');
       farmer._handleContractPublication(Contract({}));
       setImmediate(function() {
@@ -154,7 +180,7 @@ describe('FarmerInterface', function() {
     });
 
     it('should not send offer if cannot get farmer free space', function(done) {
-      var farmer = new FarmerInterface({
+      farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
         tunnelServerPort: 0,
@@ -163,9 +189,9 @@ describe('FarmerInterface', function() {
           callback(false);
         },
         logger: kad.Logger(0),
+        storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
-      CLEANUP.push(farmer);
       var _size = sinon.stub(
         farmer.storageManager._storage,
         'size'
@@ -182,7 +208,7 @@ describe('FarmerInterface', function() {
     it('should not send offer if there is ' +
       'not enough free disk space', function(done) {
       //arrange
-      var farmer = new FarmerInterface({
+      farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
         tunnelServerPort: 0,
@@ -191,9 +217,9 @@ describe('FarmerInterface', function() {
           callback(false);
         },
         logger: kad.Logger(0),
+        storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
-      CLEANUP.push(farmer);
       var _size = sinon.stub(
         farmer.storageManager._storage,
         'size'
@@ -262,17 +288,17 @@ describe('FarmerInterface', function() {
   describe('#_negotiator', function() {
 
     it('should return false with too large shardSize', function(done) {
-      var farmer = new FarmerInterface({
+      farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
         tunnelServerPort: 0,
         doNotTraverseNat: true,
         logger: kad.Logger(0),
         maxShardSize: 99 * 1024 * 1024,
+        storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter()),
         renterWhitelist: null
       });
-      CLEANUP.push(farmer);
       farmer._negotiator(Contract({
         data_hash: utils.rmd160(' some data'),
         renter_id: utils.rmd160('nodeid'),
@@ -288,15 +314,15 @@ describe('FarmerInterface', function() {
   describe('#_negotiateContract', function() {
 
     it('should ensure renter id is present and warn if not', function(done) {
-      var farmer = new FarmerInterface({
+      farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
         tunnelServerPort: 0,
         doNotTraverseNat: true,
         logger: kad.Logger(0),
+        storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
-      CLEANUP.push(farmer);
       var _warn = sinon.stub(farmer._logger, 'warn');
       farmer._negotiateContract(Contract({
         data_hash: utils.rmd160(' some data'),
@@ -310,15 +336,15 @@ describe('FarmerInterface', function() {
     });
 
     it('should remove contract from pending if save fails', function(done) {
-      var farmer = new FarmerInterface({
+      farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
         tunnelServerPort: 0,
         doNotTraverseNat: true,
         logger: kad.Logger(0),
+        storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
-      CLEANUP.push(farmer);
       var _remove = sinon.stub(farmer, '_removeContractFromPendingList');
       var _getContactByNodeID = sinon.stub(
         farmer.router,
@@ -342,15 +368,15 @@ describe('FarmerInterface', function() {
     });
 
     it('should remove contract from pending if lookup fails', function(done) {
-      var farmer = new FarmerInterface({
+      farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
         tunnelServerPort: 0,
         doNotTraverseNat: true,
         logger: kad.Logger(0),
+        storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
-      CLEANUP.push(farmer);
       var _save = sinon.stub(farmer.storageManager, 'save').callsArgWith(
         1,
         null
@@ -381,15 +407,15 @@ describe('FarmerInterface', function() {
     });
 
     it('should remove contract from pending if no renter', function(done) {
-      var farmer = new FarmerInterface({
+      farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
         tunnelServerPort: 0,
         doNotTraverseNat: true,
         logger: kad.Logger(0),
+        storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
-      CLEANUP.push(farmer);
       var _remove = sinon.stub(farmer, '_removeContractFromPendingList');
       var _getContactByNodeID = sinon.stub(
         farmer.router,
@@ -432,15 +458,15 @@ describe('FarmerInterface', function() {
       contract.sign('renter', kp1.getPrivateKey());
       contract.sign('farmer', kp2.getPrivateKey());
       expect(contract.isComplete()).to.equal(true);
-      var farmer = new FarmerInterface({
+      farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
         tunnelServerPort: 0,
         doNotTraverseNat: true,
         logger: kad.Logger(0),
+        storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
-      CLEANUP.push(farmer);
       var _getContactByNodeID = sinon.stub(
         farmer.router,
         'getContactByNodeID'
@@ -462,15 +488,15 @@ describe('FarmerInterface', function() {
   describe('#join', function() {
 
     it('should bubble error from Network#join', function(done) {
-      var farmer = new FarmerInterface({
+      farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
         tunnelServerPort: 0,
         doNotTraverseNat: true,
         logger: kad.Logger(0),
+        storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
-      CLEANUP.push(farmer);
       var _join = sinon.stub(Network.prototype, 'join').callsArgWith(
         0,
         new Error('Failed to join network')
@@ -483,15 +509,15 @@ describe('FarmerInterface', function() {
     });
 
     it('should listen for contracts before calling back', function(done) {
-      var farmer = new FarmerInterface({
+      farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
         tunnelServerPort: 0,
         doNotTraverseNat: true,
         logger: kad.Logger(0),
+        storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
-      CLEANUP.push(farmer);
       var _join = sinon.stub(Network.prototype, 'join').callsArgWith(
         0,
         null
@@ -517,13 +543,14 @@ describe('FarmerInterface', function() {
         extendedKey: extendedKey2
       }];
 
-      var farmer = new FarmerInterface({
+      farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
         tunnelServerPort: 0,
         doNotTraverseNat: true,
         logger: kad.Logger(0),
         bridges: bridges,
+        storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
 
@@ -541,12 +568,13 @@ describe('FarmerInterface', function() {
 
     it('will call connect bridges, and setup interval', function(done) {
       const clock = sandbox.useFakeTimers();
-      var farmer = new FarmerInterface({
+      farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
         tunnelServerPort: 0,
         doNotTraverseNat: true,
         logger: kad.Logger(0),
+        storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
       farmer._connectBridges = sinon.stub();
@@ -559,7 +587,7 @@ describe('FarmerInterface', function() {
     });
 
     it('will connect each bridge', function() {
-      var farmer = new FarmerInterface({
+      farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
         tunnelServerPort: 0,
@@ -575,6 +603,7 @@ describe('FarmerInterface', function() {
             extendedKey: extendedKey
           }
         ],
+        storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
 
@@ -599,12 +628,13 @@ describe('FarmerInterface', function() {
     afterEach(() => sandbox.restore());
 
     it('will add bridge contact if contact does not exist', function(done) {
-      var farmer = new FarmerInterface({
+      farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
         tunnelServerPort: 0,
         doNotTraverseNat: true,
         logger: kad.Logger(0),
+        storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
 
@@ -627,12 +657,13 @@ describe('FarmerInterface', function() {
       });
     });
     it('will update contact if contact exists', function(done) {
-      var farmer = new FarmerInterface({
+      farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
         tunnelServerPort: 0,
         doNotTraverseNat: true,
         logger: kad.Logger(0),
+        storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
 
@@ -656,12 +687,13 @@ describe('FarmerInterface', function() {
       });
     });
     it('will do nothing if contact is up-to-date', function(done) {
-      var farmer = new FarmerInterface({
+      farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
         tunnelServerPort: 0,
         doNotTraverseNat: true,
         logger: kad.Logger(0),
+        storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
 
@@ -693,12 +725,13 @@ describe('FarmerInterface', function() {
     afterEach(() => sandbox.restore());
 
     it('will get and complete challenge and create contact', function(done) {
-      var farmer = new FarmerInterface({
+      farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
         tunnelServerPort: 0,
         doNotTraverseNat: true,
         logger: kad.Logger(0),
+        storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
 
@@ -732,12 +765,13 @@ describe('FarmerInterface', function() {
     afterEach(() => sandbox.restore());
 
     it('will send patch request to update contact', function(done) {
-      var farmer = new FarmerInterface({
+      farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 11,
         tunnelServerPort: 0,
         doNotTraverseNat: true,
         logger: kad.Logger(0),
+        storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
 
@@ -760,12 +794,13 @@ describe('FarmerInterface', function() {
 
   describe('#_completeChallenge', function() {
     it('will exec pow script and give back nonce', function(done) {
-      var farmer = new FarmerInterface({
+      farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
         tunnelServerPort: 0,
         doNotTraverseNat: true,
         logger: kad.Logger(0),
+        storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
       let challenge = '196c88c8907a7c6cd0d4a4cccf3ef82cef376a980217fd3bca83cba0957484b2';
@@ -782,12 +817,13 @@ describe('FarmerInterface', function() {
 
   describe('#_getSigHash', function() {
     it('will calculate the correct sighash', function() {
-      var farmer = new FarmerInterface({
+      farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
         tunnelServerPort: 0,
         doNotTraverseNat: true,
         logger: kad.Logger(0),
+        storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
 
@@ -807,12 +843,13 @@ describe('FarmerInterface', function() {
     afterEach(() => sandbox.restore());
 
     it('will sign and send request with response', function(done) {
-      var farmer = new FarmerInterface({
+      farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
         tunnelServerPort: 0,
         doNotTraverseNat: true,
         logger: kad.Logger(0),
+        storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
 
@@ -846,15 +883,15 @@ describe('FarmerInterface', function() {
   describe('#_sendOfferForContract', function() {
 
     it('should log a warning if transport send fails', function(done) {
-      var farmer = new FarmerInterface({
+      farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
         tunnelServerPort: 0,
         doNotTraverseNat: true,
         logger: kad.Logger(0),
+        storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
-      CLEANUP.push(farmer);
       var _send = sinon.stub(farmer.transport, 'send').callsArgWith(
         2,
         new Error('Failed to send offer')
@@ -873,15 +910,15 @@ describe('FarmerInterface', function() {
     });
 
     it('should log default error if none provided', function(done) {
-      var farmer = new FarmerInterface({
+      farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
         tunnelServerPort: 0,
         doNotTraverseNat: true,
         logger: kad.Logger(0),
+        storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
-      CLEANUP.push(farmer);
       var _send = sinon.stub(farmer.transport, 'send').callsArgWith(
         2,
         null,
@@ -901,15 +938,15 @@ describe('FarmerInterface', function() {
     });
 
     it('should call #_handleOfferRes if all good', function(done) {
-      var farmer = new FarmerInterface({
+      farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
         tunnelServerPort: 0,
         doNotTraverseNat: true,
         logger: kad.Logger(0),
+        storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
-      CLEANUP.push(farmer);
       var _send = sinon.stub(farmer.transport, 'send').callsArgWith(
         2,
         null,
@@ -948,15 +985,15 @@ describe('FarmerInterface', function() {
   describe('#_handleOfferRes', function() {
 
     it('should stop and log error if invalid contract', function(done) {
-      var farmer = new FarmerInterface({
+      farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
         tunnelServerPort: 0,
         doNotTraverseNat: true,
         logger: kad.Logger(0),
+        storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
-      CLEANUP.push(farmer);
       var _warn = sinon.stub(farmer._logger, 'warn');
       farmer._handleOfferRes({ result: { contract: { version: '12'} } });
       setImmediate(function() {
@@ -969,15 +1006,15 @@ describe('FarmerInterface', function() {
     });
 
     it('should stop and log error if signature invalid', function(done) {
-      var farmer = new FarmerInterface({
+      farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
         tunnelServerPort: 0,
         doNotTraverseNat: true,
         logger: kad.Logger(0),
+        storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
-      CLEANUP.push(farmer);
       var _warn = sinon.stub(farmer._logger, 'warn');
       farmer._handleOfferRes({
         result: {
@@ -994,15 +1031,15 @@ describe('FarmerInterface', function() {
     });
 
     it('should create a new item if cannot load existing', function(done) {
-      var farmer = new FarmerInterface({
+      farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
         tunnelServerPort: 0,
         doNotTraverseNat: true,
         logger: kad.Logger(0),
+        storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
-      CLEANUP.push(farmer);
       var _load = sinon.stub(farmer.storageManager, 'load').callsArgWith(1, {});
       var _save = sinon.stub(farmer.storageManager, 'save');
       var _verify = sinon.stub(Contract.prototype, 'verify').returns(true);
@@ -1021,15 +1058,15 @@ describe('FarmerInterface', function() {
     });
 
     it('should reset contract count to 0 to prevent overflow', function(done) {
-      var farmer = new FarmerInterface({
+      farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
         tunnelServerPort: 0,
         doNotTraverseNat: true,
         logger: kad.Logger(0),
+        storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
-      CLEANUP.push(farmer);
       var _load = sinon.stub(farmer.storageManager, 'load').callsArgWith(1, {});
       var _save = sinon.stub(farmer.storageManager, 'save');
       var _verify = sinon.stub(Contract.prototype, 'verify').returns(true);
@@ -1061,13 +1098,6 @@ describe('FarmerInterface', function() {
 
   });
 
-  after(function() {
-    CLEANUP.forEach(function(farmer) {
-      if (farmer.node) {
-        farmer.leave();
-      }
-    });
-  });
 
 });
 

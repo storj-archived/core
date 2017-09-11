@@ -29,7 +29,6 @@ var seed = 'a0c42a9c3ac6abf2ba6a9946ae83af18f51bf1c9fa7dacc4c92513cc4d' +
 
 var masterKey = HDKey.fromMasterSeed(new Buffer(seed, 'hex'));
 var hdKey = masterKey.derive('m/3000\'/0\'');
-var nodeHdKey = hdKey.deriveChild(10);
 
 describe('ShardServer', function() {
   let server = null;
@@ -43,7 +42,7 @@ describe('ShardServer', function() {
 
   afterEach((done) => {
     sandbox.restore();
-    server._db.close(() => {
+    server.close(() => {
       rimraf(tmpPath, done);
     });
   });
@@ -63,6 +62,7 @@ describe('ShardServer', function() {
   describe('#accept', function() {
     it('should add the token/hash to the accepted list', function(done) {
       let clock = sandbox.useFakeTimers();
+      clock.tick(0);
       server = new ShardServer({
         storagePath: tmpPath,
         storageManager: Manager(RAMStorageAdapter()),
@@ -102,6 +102,7 @@ describe('ShardServer', function() {
   describe('#reject', function() {
     it('should remove the token/hash from the accepted list', function(done) {
       let clock = sandbox.useFakeTimers();
+      clock.tick(0);
       server = new ShardServer({
         storagePath: tmpPath,
         storageManager: Manager(RAMStorageAdapter()),
@@ -120,9 +121,9 @@ describe('ShardServer', function() {
           if (err) {
             return done(err);
           }
-          server._db.get('TK' + 'token2', (err, data) => {
+          server._db.get('TK' + 'token2', (err) => {
             expect(err.notFound).to.equal(true);
-            server._db.get(server._encodeExpiresKey(2592000000), (err, data) => {
+            server._db.get(server._encodeExpiresKey(2592000000), (err) => {
               expect(err.notFound).to.equal(true);
               done();
             });
@@ -200,7 +201,7 @@ describe('ShardServer', function() {
         if (err) {
           return done(err);
         }
-        server.isAuthorized('sometoken3', 'somehash4', (err, contact) => {
+        server.isAuthorized('sometoken3', 'somehash4', (err) => {
           expect(err.message).to.equal('Token not valid for hash');
           done();
         });
@@ -647,7 +648,6 @@ describe('ShardServer', function() {
     it('should handle read failure', function(done) {
       const manager = Manager(RAMStorageAdapter());
       const shard = new stream.Readable({ read: () => null });
-      let nodeID = utils.rmd160('');
       let itemData = {
         test: 'hash',
         contracts: {
@@ -817,7 +817,7 @@ describe('ShardServer', function() {
         server._reapDeadTokens();
         server.on('reapedTokens', (total) => {
           expect(total).to.equal(51);
-          server._db.get('TK' + 'token1', (err, data) => {
+          server._db.get('TK' + 'token1', (err) => {
             expect(err.notFound).to.equal(true);
             done();
           });

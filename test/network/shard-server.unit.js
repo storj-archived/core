@@ -788,8 +788,8 @@ describe('ShardServer', function() {
   });
 
   describe('#_reapDeadTokens', function() {
+    this.timeout(0);
     it('should reap dead tokens and leave good ones', function(done) {
-      this.timeout(20000);
       let clock = sandbox.useFakeTimers();
       server = new ShardServer({
         storagePath: tmpPath,
@@ -802,8 +802,8 @@ describe('ShardServer', function() {
         address: '127.0.0.1',
         port: 4001
       };
-      let time = ShardServer.TOKEN_EXPIRE / 50;
-      async.timesSeries(100, (n, next) => {
+      let time = ShardServer.TOKEN_EXPIRE / 12;
+      async.timesSeries(25, (n, next) => {
         server.accept('token' + n, 'hash' + n, contact, (err) => {
           if (err) {
             return next(err);
@@ -817,7 +817,7 @@ describe('ShardServer', function() {
         }
         server._reapDeadTokens();
         server.on('reapedTokens', (total) => {
-          expect(total).to.equal(51);
+          expect(total).to.equal(14);
           server._db.get('TK' + 'token1', (err) => {
             expect(err.notFound).to.equal(true);
             done();

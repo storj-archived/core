@@ -86,7 +86,8 @@ describe('ShardServer', function() {
           expect(parsed.expires);
           expect(parsed.hash);
 
-          server._db.get(server._encodeExpiresKey(2592000000), (err, data) => {
+          let key = server._encodeExpiresKey(ShardServer.TOKEN_EXPIRE);
+          server._db.get(key, (err, data) => {
             if (err) {
               return done(err);
             }

@@ -1290,7 +1290,7 @@ describe('FarmerInterface#Negotiator', function() {
 
   it('will return false if disk does not have any space available', function(done) {
     let info = {
-      available: 256000
+      available: 512000
     };
     let noSpaceLeft = sinon.stub();
     sandbox.stub(diskusage, 'check').callsArgWith(1, null, info);
@@ -1321,6 +1321,7 @@ describe('FarmerInterface#Negotiator', function() {
       }
     }, new Contract({
       data_hash: utils.rmd160(''),
+      data_size: 256000,
       renter_id: '5ebef6c9f0cabf23c3565941e76fb6e5320143d3',
       renter_hd_key: 'xpub6AHweYHAxk1EhJSBctQD1nLWPog6Sy2eTpKQLExR1hfzTyyZQ' +
         'WvU4EYNXv1NJN7GpLYXnDLt4PzN874g6zSjAQdFCHZN7U7nbYKYVDUzD42'

@@ -19,7 +19,7 @@ var proxyquire = require('proxyquire');
 describe('FileDemuxer', function() {
 
   before(function(done) {
-    this.timeout(6000);
+    this.timeout(20000);
 
     if (utils.existsSync(TMP_DIR)) {
       rimraf.sync(TMP_DIR);

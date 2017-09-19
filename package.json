@@ -72,6 +72,7 @@
     "bitcore-mnemonic": "=1.1.1",
     "concat-stream": "^1.6.0",
     "diglet": "^1.0.6",
+    "diskusage": "^0.2.3",
     "du": "^0.1.0",
     "fs-blob-store": "^5.2.1",
     "hdkey": "^0.7.1",

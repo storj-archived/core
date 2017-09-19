@@ -8,6 +8,7 @@ const crypto = require('crypto');
 const mkdirp = require('mkdirp');
 const rimraf = require('rimraf');
 const expect = require('chai').expect;
+const diskusage = require('diskusage');
 const EventEmitter = require('events').EventEmitter;
 const Contract = require('../../lib/contract');
 const KeyPair = require('../../lib/crypto-tools/keypair');
@@ -1102,9 +1103,14 @@ describe('FarmerInterface', function() {
 });
 
 describe('FarmerInterface#Negotiator', function() {
+  const sandbox = sinon.sandbox.create();
+  afterEach(() => sandbox.restore());
 
   it('should callback false if no bridges', function(done) {
     FarmerInterface.Negotiator.call({
+      _options: {
+        storagePath: '/tmp'
+      },
       isBridgeConnected: sinon.stub().returns(false),
       _logger: kad.Logger(0),
       _offerBackoffLimit: 4,
@@ -1124,6 +1130,9 @@ describe('FarmerInterface#Negotiator', function() {
 
   it('should callback false is contract has an invalid hash', function(done) {
     FarmerInterface.Negotiator.call({
+      _options: {
+        storagePath: '/tmp'
+      },
       isBridgeConnected: sinon.stub().returns(true),
       _logger: kad.Logger(0),
       _offerBackoffLimit: 4,
@@ -1142,6 +1151,9 @@ describe('FarmerInterface#Negotiator', function() {
 
   it('should return false if farmer has active transfers', function(done) {
     FarmerInterface.Negotiator.call({
+      _options: {
+        storagePath: '/tmp'
+      },
       _logger: kad.Logger(0),
       isBridgeConnected: sinon.stub().returns(true),
       storageManager: new StorageManager(new RAMStorageAdapter()),
@@ -1161,6 +1173,9 @@ describe('FarmerInterface#Negotiator', function() {
 
   it('should return true if farmer does not have the shard', function(done) {
     FarmerInterface.Negotiator.call({
+      _options: {
+        storagePath: '/tmp'
+      },
       _logger: kad.Logger(0),
       isBridgeConnected: sinon.stub().returns(true),
       _offerBackoffLimit: 4,
@@ -1180,6 +1195,9 @@ describe('FarmerInterface#Negotiator', function() {
 
   it('should callback true if we have shard for other renter', function(done) {
     FarmerInterface.Negotiator.call({
+      _options: {
+        storagePath: '/tmp'
+      },
       _logger: kad.Logger(0),
       isBridgeConnected: sinon.stub().returns(true),
       _offerBackoffLimit: 4,
@@ -1206,6 +1224,9 @@ describe('FarmerInterface#Negotiator', function() {
 
   it('should return true if we have a contract but no shard', function(done) {
     FarmerInterface.Negotiator.call({
+      _options: {
+        storagePath: '/tmp'
+      },
       _logger: kad.Logger(0),
       isBridgeConnected: sinon.stub().returns(true),
       storageManager: {
@@ -1233,6 +1254,9 @@ describe('FarmerInterface#Negotiator', function() {
 
   it('should return true if check pass and hd key used', function(done) {
     FarmerInterface.Negotiator.call({
+      _options: {
+        storagePath: '/tmp'
+      },
       _logger: kad.Logger(0),
       isBridgeConnected: sinon.stub().returns(true),
       _renterWhitelist: [
@@ -1266,6 +1290,9 @@ describe('FarmerInterface#Negotiator', function() {
 
   it('should return false if we have a contract and shard', function(done) {
     FarmerInterface.Negotiator.call({
+      _options: {
+        storagePath: '/tmp'
+      },
       _logger: kad.Logger(0),
       isBridgeConnected: sinon.stub().returns(true),
       _offerBackoffLimit: 4,
@@ -1286,6 +1313,51 @@ describe('FarmerInterface#Negotiator', function() {
       data_hash: utils.rmd160(''),
       renter_id: '5ebef6c9f0cabf23c3565941e76fb6e5320143d3'
     }), function(result) {
+      expect(result).to.equal(false);
+      done();
+    });
+  });
+
+  it('will return false if disk does not have any space available', function(done) {
+    let info = {
+      available: 512000
+    };
+    let noSpaceLeft = sinon.stub();
+    sandbox.stub(diskusage, 'check').callsArgWith(1, null, info);
+    FarmerInterface.Negotiator.call({
+      _options: {
+        storagePath: '/tmp'
+      },
+      _logger: kad.Logger(0),
+      isBridgeConnected: sinon.stub().returns(true),
+      _renterWhitelist: [
+        'xpub6AHweYHAxk1EhJSBctQD1nLWPog6Sy2eTpKQLExR1hfzTyyZQWvU4EYNXv1NJN7' +
+          'GpLYXnDLt4PzN874g6zSjAQdFCHZN7U7nbYKYVDUzD42'
+      ],
+      storageManager: {
+        load: sinon.stub().callsArgWith(1, null, {
+          contracts: {
+            '5ebef6c9f0cabf23c3565941e76fb6e5320143d3': {}
+          },
+          shard: { write: sinon.stub() }
+        })
+      },
+      noSpaceLeft: noSpaceLeft,
+      _offerBackoffLimit: 4,
+      transport: {
+        shardServer: {
+          activeTransfers: 0
+        }
+      }
+    }, new Contract({
+      data_hash: utils.rmd160(''),
+      data_size: 256000,
+      renter_id: '5ebef6c9f0cabf23c3565941e76fb6e5320143d3',
+      renter_hd_key: 'xpub6AHweYHAxk1EhJSBctQD1nLWPog6Sy2eTpKQLExR1hfzTyyZQ' +
+        'WvU4EYNXv1NJN7GpLYXnDLt4PzN874g6zSjAQdFCHZN7U7nbYKYVDUzD42'
+    }), function(result) {
+      expect(noSpaceLeft.callCount).to.equal(1);
+      expect(noSpaceLeft.args[0][0]).to.equal(true);
       expect(result).to.equal(false);
       done();
     });

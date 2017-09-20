@@ -2,7 +2,7 @@
 
 var sinon = require('sinon');
 var expect = require('chai').expect;
-var ExchangeReport = require('../../lib/bridge-client/exchange-report');
+var ExchangeReport = require('../lib/exchange-report');
 
 describe('Exchange Report', function() {
   var sandbox = sinon.sandbox.create();

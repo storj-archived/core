@@ -31,18 +31,6 @@ exports.ShardServer = require('./lib/network/shard-server');
 /** {@link Contact} */
 exports.Contact = require('./lib/network/contact');
 
-/** {@link EncryptStream} */
-exports.EncryptStream = require('./lib/crypto-tools/encrypt-stream');
-
-/** {@link DecryptStream} */
-exports.DecryptStream = require('./lib/crypto-tools/decrypt-stream');
-
-/** {@link FileMuxer} */
-exports.FileMuxer = require('./lib/file-handling/file-muxer');
-
-/** {@link FileDemuxer} */
-exports.FileDemuxer = require('./lib/file-handling/file-demuxer');
-
 /** {@link Contract} */
 exports.Contract = require('./lib/contract');
 
@@ -79,20 +67,8 @@ exports.RAMStorageAdapter = require('./lib/storage/adapters/ram');
 /** {@link StorageItem} */
 exports.StorageItem = require('./lib/storage/item');
 
-/** {@link DataCipherKeyIv} */
-exports.DataCipherKeyIv = require('./lib/crypto-tools/cipher-key-iv');
-
-/** {@link DeterministicKeyIv} */
-exports.DeterministicKeyIv = require('./lib/crypto-tools/deterministic-key-iv');
-
 /** {@link KeyPair} */
 exports.KeyPair = require('./lib/crypto-tools/keypair');
-
-/** {@link KeyRing} */
-exports.KeyRing = require('./lib/crypto-tools/keyring');
-
-/** {@link BridgeClient} */
-exports.BridgeClient = require('./lib/bridge-client');
 
 /** {@link module:storj/version} */
 exports.version = require('./lib/version');

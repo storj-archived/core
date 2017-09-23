@@ -171,13 +171,11 @@ describe('FarmerInterface', function() {
         storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
-      var _addTo = sinon.stub(farmer, '_addContractToPendingList');
+      var _sendOffer = sinon.stub(farmer, '_sendOfferForContract');
       farmer._handleContractPublication(Contract({}));
-      setImmediate(function() {
-        _addTo.restore();
-        expect(_addTo.called).to.equal(false);
-        done();
-      });
+      _sendOffer.restore();
+      expect(_sendOffer.called).to.equal(false);
+      done();
     });
 
     it('should not send offer if cannot get farmer free space', function(done) {
@@ -197,13 +195,12 @@ describe('FarmerInterface', function() {
         farmer.storageManager._storage,
         'size'
       ).callsArgWith(1, new Error('Cannot get farmer disk space'));
-      var _addTo = sinon.stub(farmer, '_addContractToPendingList');
+      var _sendOffer = sinon.stub(farmer, '_sendOfferForContract');
       farmer._handleContractPublication(Contract({}));
       _size.restore();
-      setImmediate(function() {
-        expect(_addTo.called).to.equal(false);
-        done();
-      });
+      _sendOffer.restore();
+      expect(_sendOffer.called).to.equal(false);
+      done();
     });
 
     it('should not send offer if there is ' +
@@ -226,62 +223,26 @@ describe('FarmerInterface', function() {
         'size'
       ).callsArgWith(1, null, 500, 500);
       farmer.storageManager._options.maxCapacity = 2000;
-      var _addTo = sinon.stub(farmer, '_addContractToPendingList');
+      var _sendOffer = sinon.stub(farmer, '_sendOfferForContract');
       //execute
       farmer._handleContractPublication(Contract({}));
       //assert
       _size.restore();
-      setImmediate(function() {
-        expect(_addTo.called).to.equal(false);
-        done();
-      });
+      _sendOffer.restore();
+      expect(_sendOffer.called).to.equal(false);
+      done();
     });
 
-    it('should add contract to pending list and negotiate', function(done) {
+    it('should negotiate', function(done) {
       var _shouldSendOffer = sinon.stub().callsArgWith(1, true);
-      var _addContractToPendingList = sinon.stub();
       var _negotiateContract = sinon.stub();
       FarmerInterface.prototype._handleContractPublication.call({
         _logger: { debug: sinon.stub() },
         _shouldSendOffer: _shouldSendOffer,
-        _addContractToPendingList: _addContractToPendingList,
         _negotiateContract: _negotiateContract
       }, { data_hash: utils.rmd160('') });
-      setImmediate(function() {
-        expect(_addContractToPendingList.called).to.equal(true);
-        expect(_negotiateContract.called).to.equal(true);
-        done();
-      });
-    });
-
-  });
-
-  describe('#_removeContractFromPendingList', function() {
-
-    it('should remove the contract from the pending list', function() {
-      var _pendingList = ['testtest'];
-      FarmerInterface.prototype._removeContractFromPendingList.call({
-        _pendingOffers: _pendingList
-      }, {
-        get: sinon.stub().returns('test')
-      });
-      expect(_pendingList).to.have.lengthOf(0);
-    });
-
-  });
-
-  describe('#_addContractToPendingList', function() {
-
-    it('should not add duplicates to the list', function() {
-      var ctx = { _pendingOffers: [] };
-      var _test = FarmerInterface.prototype._addContractToPendingList.bind(ctx);
-      var fakeContract = {
-        get: sinon.stub().returns('test')
-      };
-      _test(fakeContract);
-      expect(ctx._pendingOffers).to.have.lengthOf(1);
-      _test(fakeContract);
-      expect(ctx._pendingOffers).to.have.lengthOf(1);
+      expect(_negotiateContract.called).to.equal(true);
+      done();
     });
 
   });
@@ -329,14 +290,12 @@ describe('FarmerInterface', function() {
         data_hash: utils.rmd160(' some data'),
         renter_id: null
       }));
-      setImmediate(function() {
-        _warn.restore();
-        expect(_warn.called).to.equal(true);
-        done();
-      });
+      _warn.restore();
+      expect(_warn.called).to.equal(true);
+      done();
     });
 
-    it('should remove contract from pending if save fails', function(done) {
+    it('should not send offer if save fails', function(done) {
       farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
@@ -346,7 +305,7 @@ describe('FarmerInterface', function() {
         storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
-      var _remove = sinon.stub(farmer, '_removeContractFromPendingList');
+      var _sendOffer = sinon.stub(farmer, '_sendOfferForContract');
       var _getContactByNodeID = sinon.stub(
         farmer.router,
         'getContactByNodeID'
@@ -359,16 +318,14 @@ describe('FarmerInterface', function() {
         data_hash: utils.rmd160(' some data'),
         renter_id: utils.rmd160('nodeid')
       }));
-      setImmediate(function() {
-        _getContactByNodeID.restore();
-        _save.restore();
-        _remove.restore();
-        expect(_remove.called).to.equal(true);
-        done();
-      });
+      _getContactByNodeID.restore();
+      _save.restore();
+      _sendOffer.restore();
+      expect(_sendOffer.called).to.equal(false);
+      done();
     });
 
-    it('should remove contract from pending if lookup fails', function(done) {
+    it('should not send offer if lookup fails', function(done) {
       farmer = new FarmerInterface({
         keyPair: KeyPair(),
         rpcPort: 0,
@@ -382,7 +339,7 @@ describe('FarmerInterface', function() {
         1,
         null
       );
-      var _remove = sinon.stub(farmer, '_removeContractFromPendingList');
+      var _sendOffer = sinon.stub(farmer, '_sendOfferForContract');
       var _getContactByNodeID = sinon.stub(
         farmer.router,
         'getContactByNodeID'
@@ -395,55 +352,12 @@ describe('FarmerInterface', function() {
         data_hash: utils.rmd160('some data'),
         renter_id: utils.rmd160('nodeid')
       }));
-      setImmediate(function() {
-        setImmediate(function() {
-          _save.restore();
-          _getContactByNodeID.restore();
-          _remove.restore();
-          _findNode.restore();
-          expect(_remove.called).to.equal(true);
-          done();
-        });
-      });
-    });
-
-    it('should remove contract from pending if no renter', function(done) {
-      farmer = new FarmerInterface({
-        keyPair: KeyPair(),
-        rpcPort: 0,
-        tunnelServerPort: 0,
-        doNotTraverseNat: true,
-        logger: kad.Logger(0),
-        storagePath: tmpPath,
-        storageManager: new StorageManager(new RAMStorageAdapter())
-      });
-      var _remove = sinon.stub(farmer, '_removeContractFromPendingList');
-      var _getContactByNodeID = sinon.stub(
-        farmer.router,
-        'getContactByNodeID'
-      ).returns(null);
-      var _findNode = sinon.stub(farmer.router, 'findNode').callsArgWith(
-        2,
-        null,
-        []
-      );
-      farmer._negotiateContract(Contract({
-        data_hash: utils.rmd160('some data'),
-        renter_id: utils.rmd160('nodeid')
-      }));
-      setImmediate(function() {
-        setImmediate(function() {
-          setImmediate(function() {
-            setImmediate(function() {
-              _getContactByNodeID.restore();
-              _findNode.restore();
-              _remove.restore();
-              expect(_remove.called).to.equal(true);
-              done();
-            });
-          });
-        });
-      });
+      _save.restore();
+      _getContactByNodeID.restore();
+      _sendOffer.restore();
+      _findNode.restore();
+      expect(_sendOffer.called).to.equal(true);
+      done();
     });
 
     it('should send offer directly to renter if locally known', function(done) {
@@ -475,10 +389,10 @@ describe('FarmerInterface', function() {
       var _findNode = sinon.stub(farmer.router, 'findNode');
       var _save = sinon.stub(farmer.storageManager, 'save').callsArg(1);
       farmer._sendOfferForContract = function() {
-        expect(_findNode.called).to.equal(false);
         _getContactByNodeID.restore();
         _findNode.restore();
         _save.restore();
+        expect(_findNode.called).to.equal(false);
         done();
       };
       farmer._negotiateContract(contract);
@@ -902,12 +816,10 @@ describe('FarmerInterface', function() {
         toObject: sinon.stub(),
         get: sinon.stub()
       });
-      setImmediate(function() {
-        _send.restore();
-        _warn.restore();
-        expect(_warn.calledWith('Failed to send offer')).to.equal(true);
-        done();
-      });
+      _send.restore();
+      _warn.restore();
+      expect(_warn.calledWith('Failed to send offer')).to.equal(true);
+      done();
     });
 
     it('should log default error if none provided', function(done) {
@@ -930,12 +842,10 @@ describe('FarmerInterface', function() {
         toObject: sinon.stub(),
         get: sinon.stub()
       });
-      setImmediate(function() {
-        _send.restore();
-        _warn.restore();
-        expect(_warn.calledWith('Renter refused to sign')).to.equal(true);
-        done();
-      });
+      _send.restore();
+      _warn.restore();
+      expect(_warn.calledWith('Renter refused to sign')).to.equal(true);
+      done();
     });
 
     it('should call #_handleOfferRes if all good', function(done) {
@@ -958,11 +868,9 @@ describe('FarmerInterface', function() {
         toObject: sinon.stub(),
         get: sinon.stub()
       });
-      setImmediate(function() {
-        _send.restore();
-        expect(_handleOfferRes.called).to.equal(true);
-        done();
-      });
+      _send.restore();
+      expect(_handleOfferRes.called).to.equal(true);
+      done();
     });
 
   });
@@ -975,10 +883,8 @@ describe('FarmerInterface', function() {
         _logger: { debug: sinon.stub() },
         _shouldSendOffer: _shouldSendOffer
       }, { version: '12' });
-      setImmediate(function() {
-        expect(_shouldSendOffer.called).to.equal(false);
-        done();
-      });
+      expect(_shouldSendOffer.called).to.equal(false);
+      done();
     });
 
   });
@@ -997,13 +903,11 @@ describe('FarmerInterface', function() {
       });
       var _warn = sinon.stub(farmer._logger, 'warn');
       farmer._handleOfferRes({ result: { contract: { version: '12'} } });
-      setImmediate(function() {
-        _warn.restore();
-        expect(
-          _warn.calledWith('renter responded with invalid contract')
-        ).to.equal(true);
-        done();
-      });
+      _warn.restore();
+      expect(
+        _warn.calledWith('renter responded with invalid contract')
+      ).to.equal(true);
+      done();
     });
 
     it('should stop and log error if signature invalid', function(done) {
@@ -1022,13 +926,11 @@ describe('FarmerInterface', function() {
           contract: Contract({}).toObject()
         }
       }, new Contract());
-      setImmediate(function() {
-        _warn.restore();
-        expect(
-          _warn.calledWith('renter signature is invalid')
-        ).to.equal(true);
-        done();
-      });
+      _warn.restore();
+      expect(
+        _warn.calledWith('renter signature is invalid')
+      ).to.equal(true);
+      done();
     });
 
     it('should create a new item if cannot load existing', function(done) {
@@ -1049,13 +951,11 @@ describe('FarmerInterface', function() {
           contract: Contract({}).toObject()
         }
       }, new Contract(), {nodeID: 'nodeid'});
-      setImmediate(function() {
-        _load.restore();
-        _save.restore();
-        _verify.restore();
-        expect(_save.args[0][0]).to.be.instanceOf(StorageItem);
-        done();
-      });
+      _load.restore();
+      _save.restore();
+      _verify.restore();
+      expect(_save.args[0][0]).to.be.instanceOf(StorageItem);
+      done();
     });
 
     it('should reset contract count to 0 to prevent overflow', function(done) {
@@ -1077,13 +977,11 @@ describe('FarmerInterface', function() {
           contract: Contract({}).toObject()
         }
       }, new Contract(), {nodeID: 'nodeid'});
-      setImmediate(function() {
-        _load.restore();
-        _save.restore();
-        _verify.restore();
-        expect(farmer._contractCount).to.equal(0);
-        done();
-      });
+      _load.restore();
+      _save.restore();
+      _verify.restore();
+      expect(farmer._contractCount).to.equal(0);
+      done();
     });
   });
 

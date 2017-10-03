@@ -328,7 +328,10 @@ describe('ShardServer', function() {
       });
       server.farmerInterface = {
         bridges: new Map(),
-        bridgeRequest: sinon.stub()
+        bridgeRequest: sinon.stub(),
+        _options: {
+          storagePath: '/tmp'
+        }
       }
       server.farmerInterface.bridges = new Map();
       server.farmerInterface.bridges.set('hdkey', {});
@@ -395,7 +398,10 @@ describe('ShardServer', function() {
       });
       server.farmerInterface = {
         bridges: new Map(),
-        bridgeRequest: sinon.stub()
+        bridgeRequest: sinon.stub(),
+        _options: {
+          storagePath: '/tmp'
+        }
       }
       server.farmerInterface.bridges.set('hdkey', {});
       let contact = {
@@ -467,7 +473,10 @@ describe('ShardServer', function() {
       });
       server.farmerInterface = {
         bridges: new Map(),
-        bridgeRequest: sinon.stub()
+        bridgeRequest: sinon.stub(),
+        _options: {
+          storagePath: '/tmp'
+        }
       }
       server.farmerInterface.bridges.set('hdkey', {});
       let contact = {
@@ -540,7 +549,10 @@ describe('ShardServer', function() {
       });
       server.farmerInterface = {
         bridges: new Map(),
-        bridgeRequest: sinon.stub()
+        bridgeRequest: sinon.stub(),
+        _options: {
+          storagePath: '/tmp'
+        }
       }
       server.farmerInterface.bridges.set('hdkey', {});
       let contact = {
@@ -672,7 +684,10 @@ describe('ShardServer', function() {
       });
       server.farmerInterface = {
         bridges: new Map(),
-        bridgeRequest: sinon.stub()
+        bridgeRequest: sinon.stub(),
+        _options: {
+          storagePath: '/tmp'
+        }
       }
       server.farmerInterface.bridges.set(hdKey.publicExtendedKey, {});
       let contact = {
@@ -745,7 +760,10 @@ describe('ShardServer', function() {
       });
       server.farmerInterface = {
         bridges: new Map(),
-        bridgeRequest: sinon.stub()
+        bridgeRequest: sinon.stub(),
+        _options: {
+          storagePath: '/tmp'
+        }
       }
       server.farmerInterface.bridges.set('hdkey', {});
       let contact = {

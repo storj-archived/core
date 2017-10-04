@@ -6,6 +6,7 @@ const crypto = require('crypto');
 const storj = require('../../');
 const expect = require('chai').expect;
 const sinon = require('sinon');
+const diskusage = require('diskusage');
 const HDKey = require('hdkey');
 const mkdirp = require('mkdirp');
 const rimraf = require('rimraf');
@@ -234,6 +235,9 @@ describe('ShardServer', function() {
   });
 
   describe('#routeConsignment', function() {
+    const sandbox = sinon.sandbox.create();
+    afterEach(() => sandbox.restore());
+
     it('should send 401 if not authed', function(done) {
       server = new ShardServer({
         storagePath: tmpPath,
@@ -303,6 +307,77 @@ describe('ShardServer', function() {
         server.routeConsignment(request, response);
       });
     });
+    it('should send 503 if disk is full', function(done) {
+      var manager = Manager(RAMStorageAdapter());
+      var item = StorageItem({
+        test: 'hash',
+        contracts: {
+          hash: {
+            data_size: 8
+          },
+          renter_hd_key: 'hdkey'
+        }
+      });
+      let contract = {
+        get: function(key) {
+          if (key === 'renter_hd_key') {
+            return 'hdkey';
+          } else if (key === 'data_size') {
+            return 100;
+          }
+        }
+      }
+      item.getContract = sinon.stub().returns(contract);
+      sandbox.stub(manager, 'load').callsArgWith(1, null, item);
+      sandbox.stub(diskusage, 'check').callsArgWith(1, null, { available: 0 });
+      server = new ShardServer({
+        storagePath: tmpPath,
+        storageManager: manager,
+        logger: Logger(0),
+        nodeID: utils.rmd160('')
+      });
+      server.farmerInterface = {
+        bridges: new Map(),
+        bridgeRequest: sinon.stub(),
+        _options: {
+          storagePath: '/tmp'
+        }
+      }
+      server.farmerInterface.bridges = new Map();
+      server.farmerInterface.bridges.set('hdkey', {});
+      let contact = {
+        address: '127.0.0.1',
+        port: 3001,
+        nodeID: utils.rmd160('')
+      };
+      server.accept('token', 'hash', contact, (err) => {
+        if (err) {
+          return done(err);
+        }
+        var request = httpMocks.createRequest({
+          method: 'POST',
+          url: '/shards/hash',
+          params: {
+            hash: 'hash'
+          },
+          query: {
+            token: 'token'
+          }
+        });
+        var response = httpMocks.createResponse({
+          eventEmitter: EventEmitter,
+          writableStream: stream.Writable,
+          req: request
+        });
+        response.on('end', function() {
+          expect(response.statusCode).to.equal(503);
+          const data = response._getData();
+          expect(data).to.eql({result: 'No space left'});
+          done();
+        });
+        server.routeConsignment(request, response);
+      });
+    });
     it('should send 304 if shard already exists', function(done) {
       var manager = Manager(RAMStorageAdapter());
       var item = StorageItem({
@@ -316,7 +391,13 @@ describe('ShardServer', function() {
       });
       item.shard = new stream.Readable({ read: () => null });
       let contract = {
-        get: sinon.stub().returns('hdkey')
+        get: function(key) {
+          if (key === 'renter_hd_key') {
+            return 'hdkey';
+          } else if (key === 'data_size') {
+            return 100;
+          }
+        }
       }
       item.getContract = sinon.stub().returns(contract);
       sinon.stub(manager, 'load').callsArgWith(1, null, item);

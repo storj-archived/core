@@ -877,6 +877,7 @@ describe('Protocol', function() {
 
     it('should error if it fails to load', function(done) {
       var proto = new Protocol({
+        storagePath: '/tmp',
         network: {
           _logger: Logger(0),
           storageManager: {
@@ -900,6 +901,7 @@ describe('Protocol', function() {
     it('should error if no contract found', function(done) {
       var contracts = {};
       var proto = new Protocol({
+        storagePath: '/tmp',
         network: {
           _logger: Logger(0),
           storageManager: {
@@ -936,6 +938,7 @@ describe('Protocol', function() {
         }
       };
       var proto = new Protocol({
+        storagePath: '/tmp',
         network: {
           _logger: Logger(0),
           bridges: new Map(),
@@ -984,6 +987,7 @@ describe('Protocol', function() {
       var shard = new stream.Writable({ write: () => null });
       shard.destroy = sinon.stub();
       var proto = new Protocol({
+        storagePath: '/tmp',
         network: {
           _logger: Logger(0),
           bridges: new Map(),
@@ -1051,6 +1055,7 @@ describe('Protocol', function() {
       var shard = new stream.Writable({ write: (a, b, c) => c() });
       shard.destroy = sinon.stub();
       var proto = new Protocol({
+        storagePath: '/tmp',
         network: {
           _logger: Logger(0),
           bridges: new Map(),
@@ -1117,6 +1122,7 @@ describe('Protocol', function() {
       var shard = new stream.Writable({ write: (a, b, c) => c() });
       shard.destroy = sinon.stub();
       var proto = new Protocol({
+        storagePath: '/tmp',
         network: {
           _logger: Logger(0),
           bridges: new Map(),

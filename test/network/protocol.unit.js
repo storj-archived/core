@@ -1,18 +1,19 @@
 'use strict';
 
-var proxyquire = require('proxyquire');
-var sinon = require('sinon');
-var expect = require('chai').expect;
-var Protocol = require('../../lib/network/protocol');
-var Logger = require('kad').Logger;
-var KeyPair = require('../../lib/crypto-tools/keypair');
-var stream = require('readable-stream');
-var constants = require('../../lib/constants');
-var StorageItem = require('../../lib/storage/item');
-var utils = require('../../lib/utils');
-var TriggerManager = require('../../lib/sips/0003').TriggerManager;
-var EventEmitter = require('events').EventEmitter;
-var Contract = require('../../lib/contract');
+const proxyquire = require('proxyquire');
+const sinon = require('sinon');
+const expect = require('chai').expect;
+const Protocol = require('../../lib/network/protocol');
+const Logger = require('kad').Logger;
+const KeyPair = require('../../lib/crypto-tools/keypair');
+const stream = require('readable-stream');
+const diskusage = require('diskusage');
+const constants = require('../../lib/constants');
+const StorageItem = require('../../lib/storage/item');
+const utils = require('../../lib/utils');
+const TriggerManager = require('../../lib/sips/0003').TriggerManager;
+const EventEmitter = require('events').EventEmitter;
+const Contract = require('../../lib/contract');
 
 describe('Protocol', function() {
 
@@ -868,6 +869,8 @@ describe('Protocol', function() {
   });
 
   describe('#handleMirror', function() {
+    const sandbox = sinon.sandbox.create();
+    afterEach(() => sandbox.restore());
 
     var Protocol = proxyquire('../../lib/network/protocol', {
       '../bridge-client': sinon.stub().returns({
@@ -877,6 +880,7 @@ describe('Protocol', function() {
 
     it('should error if it fails to load', function(done) {
       var proto = new Protocol({
+        storagePath: '/tmp',
         network: {
           _logger: Logger(0),
           storageManager: {
@@ -900,6 +904,7 @@ describe('Protocol', function() {
     it('should error if no contract found', function(done) {
       var contracts = {};
       var proto = new Protocol({
+        storagePath: '/tmp',
         network: {
           _logger: Logger(0),
           storageManager: {
@@ -931,11 +936,14 @@ describe('Protocol', function() {
           get: function(key) {
             if (key === 'renter_hd_key') {
               return 'hdkey'
+            } else if (key === 'data_size') {
+              return 100
             }
           }
         }
       };
       var proto = new Protocol({
+        storagePath: '/tmp',
         network: {
           _logger: Logger(0),
           bridges: new Map(),
@@ -965,6 +973,53 @@ describe('Protocol', function() {
       });
     });
 
+    it('should reject if disk is full', function(done) {
+      var contracts = {
+        test: {
+          get: function(key) {
+            if (key === 'renter_hd_key') {
+              return 'hdkey'
+            } else if (key === 'data_size') {
+              return 100
+            }
+          }
+        }
+      };
+      var shard = new stream.Writable({ write: () => null });
+      shard.destroy = sinon.stub();
+      sandbox.stub(diskusage, 'check').callsArgWith(1, null, {available: 0});
+      var proto = new Protocol({
+        storagePath: '/tmp',
+        network: {
+          _logger: Logger(0),
+          bridges: new Map(),
+          bridgeRequest: sinon.stub(),
+          storageManager: {
+            load: sinon.stub().callsArgWith(1, null, {
+              contracts: contracts,
+              shard: shard,
+              getContract: function(contact) {
+                return contracts[contact.nodeID];
+              }
+            })
+          },
+          contact: {
+            address: '0.0.0.0',
+            port: 1234,
+            nodeID: 'nodeid'
+          }
+        }
+      });
+      proto._network.bridges.set('hdkey', {});
+      proto.handleMirror({
+        contact: { nodeID: 'test' }
+      }, function(err) {
+        expect(err).to.be.instanceOf(Error);
+        expect(err.message).to.equal('No space left');
+        done();
+      });
+    });
+
     it('should start downloading shard and destroy on failure', function(done) {
       var download = new stream.Readable({ read: () => null });
       var Protocol = proxyquire('../../lib/network/protocol', {
@@ -977,6 +1032,8 @@ describe('Protocol', function() {
           get: function(key) {
             if (key === 'renter_hd_key') {
               return 'hdkey'
+            } else if (key === 'data_size') {
+              return 100
             }
           }
         }
@@ -984,6 +1041,7 @@ describe('Protocol', function() {
       var shard = new stream.Writable({ write: () => null });
       shard.destroy = sinon.stub();
       var proto = new Protocol({
+        storagePath: '/tmp',
         network: {
           _logger: Logger(0),
           bridges: new Map(),
@@ -1044,6 +1102,8 @@ describe('Protocol', function() {
           get: function(key) {
             if (key === 'renter_hd_key') {
               return 'hdkey'
+            } else if (key === 'data_size') {
+              return 100
             }
           }
         }
@@ -1051,6 +1111,7 @@ describe('Protocol', function() {
       var shard = new stream.Writable({ write: (a, b, c) => c() });
       shard.destroy = sinon.stub();
       var proto = new Protocol({
+        storagePath: '/tmp',
         network: {
           _logger: Logger(0),
           bridges: new Map(),
@@ -1110,6 +1171,8 @@ describe('Protocol', function() {
           get: function(key) {
             if (key === 'renter_hd_key') {
               return 'hdkey'
+            } else if (key === 'data_size') {
+              return 100
             }
           }
         }
@@ -1117,6 +1180,7 @@ describe('Protocol', function() {
       var shard = new stream.Writable({ write: (a, b, c) => c() });
       shard.destroy = sinon.stub();
       var proto = new Protocol({
+        storagePath: '/tmp',
         network: {
           _logger: Logger(0),
           bridges: new Map(),

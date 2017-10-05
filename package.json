@@ -72,7 +72,7 @@
     "bitcore-mnemonic": "=1.1.1",
     "concat-stream": "^1.6.0",
     "diglet": "^1.0.6",
-    "diskusage": "github:braydonf/node-diskusage#d2e2bd6a77bb84df7263f73885730b0e45faccbc",
+    "diskusage": "github:jduncanator/node-diskusage#86e6012e65dd8e9144033013dd235386d3703310",
     "du": "^0.1.0",
     "fs-blob-store": "^5.2.1",
     "hdkey": "^0.7.1",

@@ -958,31 +958,6 @@ describe('FarmerInterface', function() {
       done();
     });
 
-    it('should reset contract count to 0 to prevent overflow', function(done) {
-      farmer = new FarmerInterface({
-        keyPair: KeyPair(),
-        rpcPort: 0,
-        tunnelServerPort: 0,
-        doNotTraverseNat: true,
-        logger: kad.Logger(0),
-        storagePath: tmpPath,
-        storageManager: new StorageManager(new RAMStorageAdapter())
-      });
-      var _load = sinon.stub(farmer.storageManager, 'load').callsArgWith(1, {});
-      var _save = sinon.stub(farmer.storageManager, 'save');
-      var _verify = sinon.stub(Contract.prototype, 'verify').returns(true);
-      farmer._contractCount = Number.MAX_SAFE_INTEGER;
-      farmer._handleOfferRes({
-        result: {
-          contract: Contract({}).toObject()
-        }
-      }, new Contract(), {nodeID: 'nodeid'});
-      _load.restore();
-      _save.restore();
-      _verify.restore();
-      expect(farmer._contractCount).to.equal(0);
-      done();
-    });
   });
 
   describe('#_listenForContracts', function() {
@@ -997,6 +972,42 @@ describe('FarmerInterface', function() {
 
   });
 
+  describe('#handleAlloc', function() {
+
+    it('should reset contract count to 0 to prevent overflow', function(done) {
+      farmer = new FarmerInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        storagePath: tmpPath,
+        storageManager: new StorageManager(new RAMStorageAdapter())
+      });
+      var _shouldSendOffer = sinon.stub(farmer, '_shouldSendOffer')
+        .callsArgWith(1, true);
+      var _save = sinon.stub(farmer.storageManager, 'save')
+        .callsArgWith(1, null);
+      farmer._contractCount = Number.MAX_SAFE_INTEGER;
+      farmer.handleAlloc({
+        contract: Contract({
+          renter_id: utils.rmd160('nodeid'),
+          data_hash: utils.rmd160('')
+        }).toObject(),
+        contact: {
+          address: '127.0.0.1',
+          port: 4001,
+          nodeID: utils.rmd160('')
+        }
+      }, () => {
+        _shouldSendOffer.restore();
+        _save.restore();
+        expect(farmer._contractCount).to.equal(0);
+        done();
+      });
+    });
+
+  });
 
 });
 

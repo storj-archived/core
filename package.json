@@ -1,6 +1,6 @@
 {
   "name": "storj-lib",
-  "version": "8.2.1",
+  "version": "8.3.0",
   "description": "implementation of the storj protocol for node.js and the browser",
   "main": "index.js",
   "directories": {

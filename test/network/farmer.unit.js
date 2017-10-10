@@ -973,6 +973,8 @@ describe('FarmerInterface', function() {
   });
 
   describe('#handleAlloc', function() {
+    const sandbox = sinon.sandbox.create();
+    afterEach(() => sandbox.restore());
 
     it('should reset contract count to 0 to prevent overflow', function(done) {
       farmer = new FarmerInterface({
@@ -984,10 +986,8 @@ describe('FarmerInterface', function() {
         storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
-      var _shouldSendOffer = sinon.stub(farmer, '_shouldSendOffer')
-        .callsArgWith(1, true);
-      var _save = sinon.stub(farmer.storageManager, 'save')
-        .callsArgWith(1, null);
+      sandbox.stub(farmer, '_shouldSendOffer').callsArgWith(1, true);
+      sandbox.stub(farmer.storageManager, 'save').callsArgWith(1, null);
       farmer._contractCount = Number.MAX_SAFE_INTEGER;
       farmer.handleAlloc({
         contract: Contract({
@@ -999,9 +999,10 @@ describe('FarmerInterface', function() {
           port: 4001,
           nodeID: utils.rmd160('')
         }
-      }, () => {
-        _shouldSendOffer.restore();
-        _save.restore();
+      }, (err) => {
+        if (err) {
+          return done(err);
+        }
         expect(farmer._contractCount).to.equal(0);
         done();
       });

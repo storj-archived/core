@@ -92,7 +92,7 @@ describe('ShardServer', function() {
             if (err) {
               return done(err);
             }
-            expect(data).to.equal('token');
+            expect(data.toString()).to.equal('token');
             done();
           });
         });

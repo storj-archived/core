@@ -1,6 +1,6 @@
 {
   "name": "storj-lib",
-  "version": "8.4.0",
+  "version": "8.4.1",
   "description": "implementation of the storj protocol for node.js and the browser",
   "main": "index.js",
   "directories": {
@@ -99,6 +99,7 @@
     "readable-stream": "^2.0.6",
     "request": "^2.83.0",
     "restify": "^6.2.3",
+    "restify-clients": "^1.5.2",
     "rimraf": "^2.6.2",
     "scrypt": "^6.0.3",
     "secp256k1": "^3.3.0",

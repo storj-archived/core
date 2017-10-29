@@ -10,7 +10,7 @@ storj-bridge@0.6.5 /home/gordon/Code/storj-bridge
 Replace the values below using the output from `node --version`.
 
 ```
-v4.2.3
+v8.x.x
 ```
 
 ### Expected Behavior

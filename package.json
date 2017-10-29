@@ -62,7 +62,7 @@
   ],
   "license": "(AGPL-3.0 AND LGPL-3.0)",
   "engines": {
-    "node": "^6.9.1"
+    "node": "^8.8.1"
   },
   "dependencies": {
     "async": "^2.5.0",

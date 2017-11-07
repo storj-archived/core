@@ -1021,7 +1021,7 @@ describe('FarmerInterface#Negotiator', function() {
       },
       isBridgeConnected: sinon.stub().returns(false),
       _logger: kad.Logger(0),
-      _offerBackoffLimit: 4,
+      _allocBackoffLimit: 4,
       transport: {
         shardServer: {
           activeTransfers: 0
@@ -1043,7 +1043,7 @@ describe('FarmerInterface#Negotiator', function() {
       },
       isBridgeConnected: sinon.stub().returns(true),
       _logger: kad.Logger(0),
-      _offerBackoffLimit: 4,
+      _allocBackoffLimit: 4,
       transport: {
         shardServer: {
           activeTransfers: 0
@@ -1065,7 +1065,7 @@ describe('FarmerInterface#Negotiator', function() {
       _logger: kad.Logger(0),
       isBridgeConnected: sinon.stub().returns(true),
       storageManager: new StorageManager(new RAMStorageAdapter()),
-      _offerBackoffLimit: 4,
+      _allocBackoffLimit: 4,
       transport: {
         shardServer: {
           activeTransfers: 4
@@ -1086,7 +1086,7 @@ describe('FarmerInterface#Negotiator', function() {
       },
       _logger: kad.Logger(0),
       isBridgeConnected: sinon.stub().returns(true),
-      _offerBackoffLimit: 4,
+      _allocBackoffLimit: 4,
       transport: {
         shardServer: {
           activeTransfers: 0
@@ -1108,7 +1108,7 @@ describe('FarmerInterface#Negotiator', function() {
       },
       _logger: kad.Logger(0),
       isBridgeConnected: sinon.stub().returns(true),
-      _offerBackoffLimit: 4,
+      _allocBackoffLimit: 4,
       transport: {
         shardServer: {
           activeTransfers: 0
@@ -1145,7 +1145,7 @@ describe('FarmerInterface#Negotiator', function() {
           shard: { write: sinon.stub() }
         })
       },
-      _offerBackoffLimit: 4,
+      _allocBackoffLimit: 4,
       transport: {
         shardServer: {
           activeTransfers: 0
@@ -1179,7 +1179,7 @@ describe('FarmerInterface#Negotiator', function() {
           shard: { write: sinon.stub() }
         })
       },
-      _offerBackoffLimit: 4,
+      _allocBackoffLimit: 4,
       transport: {
         shardServer: {
           activeTransfers: 0
@@ -1203,7 +1203,7 @@ describe('FarmerInterface#Negotiator', function() {
       },
       _logger: kad.Logger(0),
       isBridgeConnected: sinon.stub().returns(true),
-      _offerBackoffLimit: 4,
+      _allocBackoffLimit: 4,
       transport: {
         shardServer: {
           activeTransfers: 0
@@ -1251,7 +1251,7 @@ describe('FarmerInterface#Negotiator', function() {
         })
       },
       noSpaceLeft: noSpaceLeft,
-      _offerBackoffLimit: 4,
+      _allocBackoffLimit: 4,
       transport: {
         shardServer: {
           activeTransfers: 0

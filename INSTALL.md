@@ -1,6 +1,6 @@
 ### Prerequisites
 
-* Node.js LTS (v4.x.x)
+* Node.js LTS (v8.x.x)
 * Python 2.7
 * Git 2.x.x
 
@@ -24,7 +24,7 @@ source ~/.zshrc
 Now that you can call the `nvm` program, install Node.js (which comes with NPM):
 
 ```
-nvm install 4.4.4
+nvm install --lts
 ```
 
 > You'll also need to make sure you have a C++ compiler installed before

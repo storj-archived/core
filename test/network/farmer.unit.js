@@ -486,6 +486,86 @@ describe('FarmerInterface', function() {
 
   });
 
+  describe('#_runSpaceCheck', function() {
+    const sandbox = sinon.sandbox.create();
+    afterEach(() => sandbox.restore());
+
+    it('will log with error message', function() {
+      const check = sandbox.stub(diskusage, 'check')
+            .callsArgWith(1, new Error('test'));
+
+      const logger = kad.Logger(0);
+      const warn = sandbox.stub(logger, 'warn');
+
+      farmer = new FarmerInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: logger,
+        storagePath: tmpPath,
+        storageManager: new StorageManager(new RAMStorageAdapter())
+      });
+      sandbox.stub(farmer, 'noSpaceLeft');
+
+      farmer._runSpaceCheck();
+      expect(farmer.noSpaceLeft.callCount).to.equal(0);
+      expect(check.callCount).to.equal(1);
+      expect(warn.callCount).to.equal(2);
+      expect(warn.args[1][1]).to.equal('test');
+    });
+
+    it('will call noSpaceLeft with true', function() {
+      const info = {
+        available: 100
+      };
+      const check = sandbox.stub(diskusage, 'check')
+            .callsArgWith(1, null, info);
+
+      farmer = new FarmerInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        storagePath: tmpPath,
+        storageManager: new StorageManager(new RAMStorageAdapter())
+      });
+
+      sandbox.stub(farmer, 'noSpaceLeft');
+
+      farmer._runSpaceCheck();
+      expect(check.callCount).to.equal(1);
+      expect(farmer.noSpaceLeft.callCount).to.equal(1);
+      expect(farmer.noSpaceLeft.args[0][0]).to.equal(true);
+    });
+
+    it('will call noSpaceLeft with false', function() {
+      const info = {
+        available: 1000 * 1024 * 1024
+      };
+      const check = sandbox.stub(diskusage, 'check')
+            .callsArgWith(1, null, info);
+
+      farmer = new FarmerInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        storagePath: tmpPath,
+        storageManager: new StorageManager(new RAMStorageAdapter())
+      });
+
+      sandbox.stub(farmer, 'noSpaceLeft');
+
+      farmer._runSpaceCheck();
+      expect(check.callCount).to.equal(1);
+      expect(farmer.noSpaceLeft.callCount).to.equal(1);
+      expect(farmer.noSpaceLeft.args[0][0]).to.equal(false);
+    });
+  });
+
   describe('#noSpaceLeft', function() {
     it('will set spaceAvailable to false bridges to disconnected', function() {
       let bridges = [{

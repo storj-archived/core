@@ -82,6 +82,23 @@ describe('FarmerInterface', function() {
       expect(farmer.getPaymentAddress()).to.equal(keypair.getAddress());
     });
 
+    it('should use 4GB as default max shard size', function() {
+      var keypair = KeyPair();
+      farmer = new FarmerInterface({
+        keyPair: keypair,
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        contractNegotiator: function() {
+          return false;
+        },
+        logger: kad.Logger(0),
+        storagePath: tmpPath,
+        storageManager: new StorageManager(new RAMStorageAdapter())
+      });
+      expect(farmer._maxShardSize).to.equal(4294967296);
+    });
+
   });
 
   describe('#_mapBridges', function() {
@@ -265,6 +282,27 @@ describe('FarmerInterface', function() {
         data_hash: utils.rmd160(' some data'),
         renter_id: utils.rmd160('nodeid'),
         data_size: 100 * 1024 * 1024
+      }), function(result) {
+        expect(result).to.equal(false);
+        done();
+      });
+    });
+
+    it('should return false with shard > 4GiB (default)', function(done) {
+      farmer = new FarmerInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        storagePath: tmpPath,
+        storageManager: new StorageManager(new RAMStorageAdapter()),
+        renterWhitelist: null
+      });
+      farmer._negotiator(Contract({
+        data_hash: utils.rmd160(' some data'),
+        renter_id: utils.rmd160('nodeid'),
+        data_size: 4294967296 + 1,
       }), function(result) {
         expect(result).to.equal(false);
         done();

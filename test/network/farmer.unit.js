@@ -1382,6 +1382,8 @@ describe('FarmerInterface#Negotiator', function() {
       renter_hd_key: 'xpub6AHweYHAxk1EhJSBctQD1nLWPog6Sy2eTpKQLExR1hfzTyyZQ' +
         'WvU4EYNXv1NJN7GpLYXnDLt4PzN874g6zSjAQdFCHZN7U7nbYKYVDUzD42'
     }), function(result) {
+      expect(noSpaceLeft.callCount).to.equal(1);
+      expect(noSpaceLeft.args[0][0]).to.equal(true);
       expect(result).to.equal(false);
       done();
     });

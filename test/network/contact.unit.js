@@ -74,6 +74,22 @@ describe('Network/Contact', function() {
       expect(contact.hdIndex).to.equal(undefined);
     });
 
+    it('should have responseTime and reputation if supplied', function() {
+      var contact = Contact({
+        address: '127.0.0.1',
+        port: 1337,
+        nodeID: '1261d3f171c23169c893a21be1f03bacafad26d7',
+        responseTime: 600,
+        reputation: 4600
+      });
+      expect(contact.responseTime).to.equal(600);
+      expect(contact.reputation).to.equal(4600);
+
+      var contact2json = JSON.parse(JSON.stringify(contact));
+      expect(contact2json.responseTime).to.equal(600);
+      expect(contact2json.reputation).to.equal(4600);
+    });
+
   });
 
 });

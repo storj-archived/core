@@ -82,6 +82,23 @@ describe('FarmerInterface', function() {
       expect(farmer.getPaymentAddress()).to.equal(keypair.getAddress());
     });
 
+    it('should use 4GB as default max shard size', function() {
+      var keypair = KeyPair();
+      farmer = new FarmerInterface({
+        keyPair: keypair,
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        contractNegotiator: function() {
+          return false;
+        },
+        logger: kad.Logger(0),
+        storagePath: tmpPath,
+        storageManager: new StorageManager(new RAMStorageAdapter())
+      });
+      expect(farmer._maxShardSize).to.equal(4294967296);
+    });
+
   });
 
   describe('#_mapBridges', function() {
@@ -271,6 +288,27 @@ describe('FarmerInterface', function() {
       });
     });
 
+    it('should return false with shard > 4GiB (default)', function(done) {
+      farmer = new FarmerInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        storagePath: tmpPath,
+        storageManager: new StorageManager(new RAMStorageAdapter()),
+        renterWhitelist: null
+      });
+      farmer._negotiator(Contract({
+        data_hash: utils.rmd160(' some data'),
+        renter_id: utils.rmd160('nodeid'),
+        data_size: 4294967296 + 1,
+      }), function(result) {
+        expect(result).to.equal(false);
+        done();
+      });
+    });
+
   });
 
   describe('#_negotiateContract', function() {
@@ -446,6 +484,86 @@ describe('FarmerInterface', function() {
       });
     });
 
+  });
+
+  describe('#_runSpaceCheck', function() {
+    const sandbox = sinon.sandbox.create();
+    afterEach(() => sandbox.restore());
+
+    it('will log with error message', function() {
+      const check = sandbox.stub(diskusage, 'check')
+            .callsArgWith(1, new Error('test'));
+
+      const logger = kad.Logger(0);
+      const warn = sandbox.stub(logger, 'warn');
+
+      farmer = new FarmerInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: logger,
+        storagePath: tmpPath,
+        storageManager: new StorageManager(new RAMStorageAdapter())
+      });
+      sandbox.stub(farmer, 'noSpaceLeft');
+
+      farmer._runSpaceCheck();
+      expect(farmer.noSpaceLeft.callCount).to.equal(0);
+      expect(check.callCount).to.equal(1);
+      expect(warn.callCount).to.equal(2);
+      expect(warn.args[1][1]).to.equal('test');
+    });
+
+    it('will call noSpaceLeft with true', function() {
+      const info = {
+        available: 100
+      };
+      const check = sandbox.stub(diskusage, 'check')
+            .callsArgWith(1, null, info);
+
+      farmer = new FarmerInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        storagePath: tmpPath,
+        storageManager: new StorageManager(new RAMStorageAdapter())
+      });
+
+      sandbox.stub(farmer, 'noSpaceLeft');
+
+      farmer._runSpaceCheck();
+      expect(check.callCount).to.equal(1);
+      expect(farmer.noSpaceLeft.callCount).to.equal(1);
+      expect(farmer.noSpaceLeft.args[0][0]).to.equal(true);
+    });
+
+    it('will call noSpaceLeft with false', function() {
+      const info = {
+        available: 1000 * 1024 * 1024
+      };
+      const check = sandbox.stub(diskusage, 'check')
+            .callsArgWith(1, null, info);
+
+      farmer = new FarmerInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        storagePath: tmpPath,
+        storageManager: new StorageManager(new RAMStorageAdapter())
+      });
+
+      sandbox.stub(farmer, 'noSpaceLeft');
+
+      farmer._runSpaceCheck();
+      expect(check.callCount).to.equal(1);
+      expect(farmer.noSpaceLeft.callCount).to.equal(1);
+      expect(farmer.noSpaceLeft.args[0][0]).to.equal(false);
+    });
   });
 
   describe('#noSpaceLeft', function() {
@@ -1264,6 +1382,8 @@ describe('FarmerInterface#Negotiator', function() {
       renter_hd_key: 'xpub6AHweYHAxk1EhJSBctQD1nLWPog6Sy2eTpKQLExR1hfzTyyZQ' +
         'WvU4EYNXv1NJN7GpLYXnDLt4PzN874g6zSjAQdFCHZN7U7nbYKYVDUzD42'
     }), function(result) {
+      expect(noSpaceLeft.callCount).to.equal(1);
+      expect(noSpaceLeft.args[0][0]).to.equal(true);
       expect(result).to.equal(false);
       done();
     });

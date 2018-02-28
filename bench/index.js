@@ -109,6 +109,13 @@ function verifyContact(deferred) {
   });
 }
 
+function signMessage(deferred) {
+  net._signMessage(message, function(err){
+    assert.equal(err, null);
+    deferred.resolve();
+  });
+}
+
 suite.add('new hd contract', newHDContract, {maxTime: maxTime});
 suite.add('new contract', newContract, {maxTime: maxTime});
 suite.add('verify message with hd contact', verifyHDContact, {
@@ -116,6 +123,10 @@ suite.add('verify message with hd contact', verifyHDContact, {
   defer: true
 });
 suite.add('verify message with contact', verifyContact, {
+  maxTime: maxTime,
+  defer: true
+});
+suite.add('sign message', signMessage, {
   maxTime: maxTime,
   defer: true
 });

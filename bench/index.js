@@ -68,7 +68,7 @@ contract1.set('renter_hd_index', 12);
 contract1.sign('renter', renterPrivateKey);
 
 var contact1 = storj.Contact({
-  hdKey: hdKey.privateExtendedKey,
+  hdKey: hdKey.publicExtendedKey,
   hdIndex: 12,
   address: '10.0.0.0',
   port: 1337,

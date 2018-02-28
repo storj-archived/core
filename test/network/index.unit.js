@@ -762,6 +762,10 @@ describe('Network (private)', function() {
   });
 
   describe('#_signMessage', function() {
+    var sandbox = sinon.sandbox.create();
+    afterEach(function() {
+      sandbox.restore();
+    });
 
     it('should throw an error if there is an issue with sign', function(done) {
       var msg = {
@@ -769,19 +773,12 @@ describe('Network (private)', function() {
         id: '123456',
         params: {}
       };
-      var StubbedKeyPair = proxyquire('../../lib/crypto-tools/keypair', {
-        'bitcore-message': function() {
-          return {
-            sign: sinon.stub().throws(
-              new Error('Point does not lie on the curve')
-            )
-          };
-        }
-      });
+      var error = new Error('Something about points and curves...');
+      sandbox.stub(secp256k1, 'sign').throws(error);
       Network.prototype._signMessage.call({
-        keyPair: StubbedKeyPair()
+        keyPair: KeyPair()
       }, msg, function(err) {
-        expect(err.message).to.equal('Point does not lie on the curve');
+        expect(err.message).to.equal('Something about points and curves...');
         done();
       });
     });

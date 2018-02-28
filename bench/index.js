@@ -68,7 +68,7 @@ contract1.set('renter_hd_index', 12);
 contract1.sign('renter', renterPrivateKey);
 
 var contact1 = storj.Contact({
-  hdKey: hdKey.privateExtendedKey,
+  hdKey: hdKey.publicExtendedKey,
   hdIndex: 12,
   address: '10.0.0.0',
   port: 1337,
@@ -109,6 +109,13 @@ function verifyContact(deferred) {
   });
 }
 
+function signMessage(deferred) {
+  net._signMessage(message, function(err){
+    assert.equal(err, null);
+    deferred.resolve();
+  });
+}
+
 suite.add('new hd contract', newHDContract, {maxTime: maxTime});
 suite.add('new contract', newContract, {maxTime: maxTime});
 suite.add('verify message with hd contact', verifyHDContact, {
@@ -116,6 +123,10 @@ suite.add('verify message with hd contact', verifyHDContact, {
   defer: true
 });
 suite.add('verify message with contact', verifyContact, {
+  maxTime: maxTime,
+  defer: true
+});
+suite.add('sign message', signMessage, {
   maxTime: maxTime,
   defer: true
 });

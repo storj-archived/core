@@ -597,7 +597,7 @@ describe('Protocol', function() {
       proto.handleConsign({
         contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' }
       }, function(err) {
-        expect(err.message).to.equal('Failed');
+        expect(err.message).to.equal('Contract not found or not authorized');
         done();
       });
     });
@@ -614,7 +614,7 @@ describe('Protocol', function() {
       proto.handleConsign({
         contact: { nodeID: 'adc83b19e793491b1c6ea0fd8b46cd9f32e592fc' }
       }, function(err) {
-        expect(err.message).to.equal('Consignment is not authorized');
+        expect(err.message).to.equal('Contract not found or not authorized');
         done();
       });
     });
@@ -759,7 +759,7 @@ describe('Protocol', function() {
         data_hash: utils.rmd160(''),
         contact: { nodeID: 'nodeid' }
       }, function(err) {
-        expect(err.message).to.equal('Failed');
+        expect(err.message).to.equal('Contract not found or not authorized');
         done();
       });
     });
@@ -799,7 +799,7 @@ describe('Protocol', function() {
         contact: {}
       }, function(err) {
         expect(err).to.be.instanceOf(Error);
-        expect(err.message).to.equal('Retrieval is not authorized');
+        expect(err.message).to.equal('Contract not found or not authorized');
       });
     });
 
@@ -896,7 +896,7 @@ describe('Protocol', function() {
       proto.handleMirror({
         contact: { address: '0.0.0.0', port: 4321, nodeID: 'nodeid' }
       }, function(err) {
-        expect(err.message).to.equal('Failed');
+        expect(err.message).to.equal('Contract not found or not authorized');
         done();
       });
     });
@@ -925,7 +925,7 @@ describe('Protocol', function() {
       proto.handleMirror({
         contact: { nodeID: 'test' }
       }, function(err) {
-        expect(err.message).to.equal('No contract found for shard');
+        expect(err.message).to.equal('Contract not found or not authorized');
         done();
       });
     });
@@ -1774,7 +1774,7 @@ describe('Protocol', function() {
         renter_signature: contract.signExternal(renterKp.getPrivateKey()),
         contract: contract.toObject()
       }, function(err) {
-        expect(err.message).to.equal('Not found');
+        expect(err.message).to.equal('Contract not found or not authorized');
         done();
       });
     });
@@ -1808,7 +1808,7 @@ describe('Protocol', function() {
         renter_signature: oldContract.signExternal(renterKp.getPrivateKey()),
         contract: oldContract.toObject()
       }, function(err) {
-        expect(err.message).to.equal('No contract found for renter_id');
+        expect(err.message).to.equal('Contract not found or not authorized');
         done();
       });
     });

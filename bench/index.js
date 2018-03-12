@@ -116,6 +116,16 @@ function signMessage(deferred) {
   });
 }
 
+function signContract(deferred) {
+  contract1.sign('renter', renterPrivateKey);
+  deferred.resolve();
+}
+
+function verifyContract(deferred) {
+  contract1.verify('renter', renterID);
+  deferred.resolve();
+}
+
 suite.add('new hd contract', newHDContract, {maxTime: maxTime});
 suite.add('new contract', newContract, {maxTime: maxTime});
 suite.add('verify message with hd contact', verifyHDContact, {
@@ -127,6 +137,14 @@ suite.add('verify message with contact', verifyContact, {
   defer: true
 });
 suite.add('sign message', signMessage, {
+  maxTime: maxTime,
+  defer: true
+});
+suite.add('sign contract', signContract, {
+  maxTime: maxTime,
+  defer: true
+});
+suite.add('verify contract', verifyContract, {
   maxTime: maxTime,
   defer: true
 });

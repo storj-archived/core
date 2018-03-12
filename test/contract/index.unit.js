@@ -259,7 +259,8 @@ describe('Contract (private)', function() {
 
     it('should return true if fields are not null', function() {
       var kp1 = KeyPair();
-      var kp2 = KeyPair();
+      var kp2 = KeyPair(
+        '00008b387bed22aff9ca560416d7b13ecbad16f28bc41ef5acaff3019bfa5134');
       var contract = new Contract({
         renter_id: kp1.getNodeID(),
         farmer_id: kp2.getNodeID(),

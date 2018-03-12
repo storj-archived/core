@@ -188,8 +188,12 @@ describe('FarmerInterface', function() {
         storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
+      var _verify = sinon.stub(Contract.prototype, 'verify').returns(true);
       var _sendOffer = sinon.stub(farmer, '_sendOfferForContract');
+      //execute
       farmer._handleContractPublication(Contract({}));
+      //assert
+      _verify.restore();
       _sendOffer.restore();
       expect(_sendOffer.called).to.equal(false);
       done();
@@ -212,8 +216,12 @@ describe('FarmerInterface', function() {
         farmer.storageManager._storage,
         'size'
       ).callsArgWith(1, new Error('Cannot get farmer disk space'));
+      var _verify = sinon.stub(Contract.prototype, 'verify').returns(true);
       var _sendOffer = sinon.stub(farmer, '_sendOfferForContract');
+      //execute
       farmer._handleContractPublication(Contract({}));
+      //assert
+      _verify.restore();
       _size.restore();
       _sendOffer.restore();
       expect(_sendOffer.called).to.equal(false);
@@ -240,24 +248,55 @@ describe('FarmerInterface', function() {
         'size'
       ).callsArgWith(1, null, 500, 500);
       farmer.storageManager._options.maxCapacity = 2000;
+      var _verify = sinon.stub(Contract.prototype, 'verify').returns(true);
       var _sendOffer = sinon.stub(farmer, '_sendOfferForContract');
       //execute
       farmer._handleContractPublication(Contract({}));
       //assert
+      _verify.restore();
       _size.restore();
       _sendOffer.restore();
       expect(_sendOffer.called).to.equal(false);
       done();
     });
 
+    it('should not send offer if ' +
+      'contract signature is invalid', function(done) {
+      //arrange
+      farmer = new FarmerInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        contractNegotiator: function(contract, callback) {
+          callback(false);
+        },
+        logger: kad.Logger(0),
+        storagePath: tmpPath,
+        storageManager: new StorageManager(new RAMStorageAdapter())
+      });
+      var _verify = sinon.stub(Contract.prototype, 'verify').returns(false);
+      var _sendOffer = sinon.stub(farmer, '_sendOfferForContract');
+      //execute
+      farmer._handleContractPublication(Contract({}));
+      //assert
+      _verify.restore();
+      _sendOffer.restore();
+      expect(_sendOffer.called).to.equal(false);
+      done();
+    });
+
     it('should negotiate', function(done) {
+      var _verify = sinon.stub(Contract.prototype, 'verify').returns(true);
       var _shouldSendOffer = sinon.stub().callsArgWith(1, true);
       var _negotiateContract = sinon.stub();
+
       FarmerInterface.prototype._handleContractPublication.call({
         _logger: { debug: sinon.stub() },
         _shouldSendOffer: _shouldSendOffer,
         _negotiateContract: _negotiateContract
       }, { data_hash: utils.rmd160('') });
+      _verify.restore();
       expect(_negotiateContract.called).to.equal(true);
       done();
     });
@@ -1101,9 +1140,12 @@ describe('FarmerInterface', function() {
         storagePath: tmpPath,
         storageManager: new StorageManager(new RAMStorageAdapter())
       });
-      sinon.stub(farmer, '_shouldSendOffer').callsArgWith(1, true);
-      sinon.stub(farmer.storageManager, 'save').callsArgWith(1, null);
-      sinon.stub(farmer.transport.shardServer, 'accept');
+      var _verify = sinon.stub(Contract.prototype, 'verify').returns(true);
+      var _shouldSendOffer =
+        sinon.stub(farmer, '_shouldSendOffer').callsArgWith(1, true);
+      var _save =
+        sinon.stub(farmer.storageManager, 'save').callsArgWith(1, null);
+      var _accept = sinon.stub(farmer.transport.shardServer, 'accept');
       farmer._contractCount = Number.MAX_SAFE_INTEGER;
       farmer.handleAlloc({
         contract: Contract({
@@ -1116,10 +1158,200 @@ describe('FarmerInterface', function() {
           nodeID: utils.rmd160('')
         }
       }, (err) => {
+        _verify.restore();
+        _shouldSendOffer.restore();
+        _save.restore();
+        _accept.restore();
         if (err) {
           return done(err);
         }
         expect(farmer._contractCount).to.equal(0);
+        done();
+      });
+    });
+
+    it('should bubble error invalid contract', function(done) {
+      farmer = new FarmerInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        storagePath: tmpPath,
+        storageManager: new StorageManager(new RAMStorageAdapter())
+      });
+      farmer.handleAlloc({
+        contract: { version: '12' },
+        contact: {
+          address: '127.0.0.1',
+          port: 4001,
+          nodeID: utils.rmd160('')
+        }
+      }, (err) => {
+        expect(err.message).to.equal('Invalid contract');
+        done();
+      });
+    });
+
+    it('should bubble error invalid contract signature', function(done) {
+      farmer = new FarmerInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        storagePath: tmpPath,
+        storageManager: new StorageManager(new RAMStorageAdapter())
+      });
+      var _verify = sinon.stub(Contract.prototype, 'verify').returns(false);
+      farmer.handleAlloc({
+        contract: Contract({
+          renter_id: utils.rmd160('nodeid'),
+          data_hash: utils.rmd160('')
+        }).toObject(),
+        contact: {
+          address: '127.0.0.1',
+          port: 4001,
+          nodeID: utils.rmd160('')
+        }
+      }, (err) => {
+        _verify.restore();
+        expect(err.message).to.equal('Invalid contract signature');
+        done();
+      });
+    });
+
+    it('should bubble error not accepting contracts', function(done) {
+      farmer = new FarmerInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        storagePath: tmpPath,
+        storageManager: new StorageManager(new RAMStorageAdapter())
+      });
+      var _verify = sinon.stub(Contract.prototype, 'verify').returns(true);
+      var _shouldSendOffer =
+        sinon.stub(farmer, '_shouldSendOffer').callsArgWith(1, false);
+      farmer.handleAlloc({
+        contract: Contract({
+          renter_id: utils.rmd160('nodeid'),
+          data_hash: utils.rmd160('')
+        }).toObject(),
+        contact: {
+          address: '127.0.0.1',
+          port: 4001,
+          nodeID: utils.rmd160('')
+        }
+      }, (err) => {
+        _verify.restore();
+        _shouldSendOffer.restore();
+        expect(err.message).to.equal('Not accepting contracts');
+        done();
+      });
+    });
+
+    it('should bubble error invalid renter id', function(done) {
+      farmer = new FarmerInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        storagePath: tmpPath,
+        storageManager: new StorageManager(new RAMStorageAdapter())
+      });
+      var _verify = sinon.stub(Contract.prototype, 'verify').returns(true);
+      var _shouldSendOffer =
+        sinon.stub(farmer, '_shouldSendOffer').callsArgWith(1, true);
+      farmer.handleAlloc({
+        contract: Contract({
+          data_hash: utils.rmd160('')
+        }).toObject(),
+        contact: {
+          address: '127.0.0.1',
+          port: 4001,
+          nodeID: utils.rmd160('')
+        }
+      }, (err) => {
+        _verify.restore();
+        _shouldSendOffer.restore();
+        expect(err.message).to.equal('Invalid renter id');
+        done();
+      });
+    });
+
+    it('should bubble error saving contract', function(done) {
+      farmer = new FarmerInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        storagePath: tmpPath,
+        storageManager: new StorageManager(new RAMStorageAdapter())
+      });
+      var _verify = sinon.stub(Contract.prototype, 'verify').returns(true);
+      var _shouldSendOffer =
+        sinon.stub(farmer, '_shouldSendOffer').callsArgWith(1, true);
+      var _save = sinon.stub(farmer.storageManager, 'save').callsArgWith(
+        1,
+        new Error('Save failed')
+      );
+      farmer.handleAlloc({
+        contract: Contract({
+          renter_id: utils.rmd160('nodeid'),
+          data_hash: utils.rmd160('')
+        }).toObject(),
+        contact: {
+          address: '127.0.0.1',
+          port: 4001,
+          nodeID: utils.rmd160('')
+        }
+      }, (err) => {
+        _verify.restore();
+        _shouldSendOffer.restore();
+        _save.restore();
+        expect(err.message).to.equal('Error saving contract');
+        done();
+      });
+    });
+
+    it('should callback token and contract', function(done) {
+      farmer = new FarmerInterface({
+        keyPair: KeyPair(),
+        rpcPort: 0,
+        tunnelServerPort: 0,
+        doNotTraverseNat: true,
+        logger: kad.Logger(0),
+        storagePath: tmpPath,
+        storageManager: new StorageManager(new RAMStorageAdapter())
+      });
+      var _verify = sinon.stub(Contract.prototype, 'verify').returns(true);
+      var _shouldSendOffer =
+        sinon.stub(farmer, '_shouldSendOffer').callsArgWith(1, true);
+      var _save = 
+        sinon.stub(farmer.storageManager, 'save').callsArgWith(1, null);
+      var _accept = sinon.stub(farmer.transport.shardServer, 'accept');
+      farmer.handleAlloc({
+        contract: Contract({
+          renter_id: utils.rmd160('nodeid'),
+          data_hash: utils.rmd160('')
+        }).toObject(),
+        contact: {
+          address: '127.0.0.1',
+          port: 4001,
+          nodeID: utils.rmd160('')
+        }
+      }, (err, result) => {
+        _verify.restore();
+        _shouldSendOffer.restore();
+        _save.restore();
+        _accept.restore();
+        expect(err).to.equal(null);
+        expect(typeof result.token).to.equal('string');
+        expect(typeof result.contract).to.equal('object');
         done();
       });
     });

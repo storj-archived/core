@@ -1,8 +1,7 @@
 Contributing
 ============
 
-Want to contribute, but not sure where to start? Check out our [issue
-board](http://waffle.io/storj/core)!
+Want to contribute, but not sure where to start? Read on!
 
 This document outlines general patterns and conventions for contributing
 to the project. For in-depth documentation on StorjCORE, [read the
@@ -37,7 +36,7 @@ guides & documentation does.
 - Make 1x pull requests to get into the contributors list and website
 - Make 2x pull requests, we will send you a packet of stickers
 - Make 5x pull requests, and we will send you a t-shirt and more stickers
-- Make 10x pull requests, and you get a job interview with James + other swag
+- Make 10x pull requests, and you get a job interview + other swag
 
 If we miss a milestones (probably because we are working hard), just let
 us know so we can get you your swag.

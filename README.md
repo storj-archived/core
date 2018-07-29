@@ -1,3 +1,5 @@
+_**Notice**: Development on this repo is deprecated as we continue our v3 rearchitecture. Please see https://github.com/storj/storj for ongoing v3 development._
+
 [![Storj](https://nodei.co/npm/storj-lib.png?downloads=true)](http://storj.github.io/core)
 ==========================================================================================
 
